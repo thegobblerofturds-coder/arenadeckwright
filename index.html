@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#17110b">
+  <meta name="description" content="Create colourful Magic Arena deck names entirely in your browser.">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'none'; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'">
+  <title>Arena Decklist Colourifier</title>
+  <link rel="stylesheet" href="site.css">
+</head>
+<body>
+  <main>
+    <header class="hero">
+      <p class="eyebrow">A tiny digital toy for Magic Arena</p>
+      <h1>Arena Decklist<br><span>Colourifier</span></h1>
+      <p class="intro">Give your deck name a smooth two-colour gradient while staying inside Arena's 64-character limit.</p>
+      <div class="trust-line" aria-label="Privacy information">
+        <strong>Private by design</strong>
+        <span>Runs entirely in your browser</span>
+        <span>No uploads</span>
+        <span>No tracking</span>
+      </div>
+    </header>
+
+    <section class="editions" aria-labelledby="choose-heading">
+      <div class="section-heading">
+        <p>Choose your instrument</p>
+        <h2 id="choose-heading">Same magic. Two questionable machines.</h2>
+      </div>
+
+      <article class="edition arcane-edition">
+        <div class="edition-art">
+          <img src="arcane/arcane-workshop.webp" alt="The Gobbler wielding four arms amid swirling cosmic magic">
+        </div>
+        <div class="edition-copy">
+          <span class="edition-number">Edition I</span>
+          <h3>Arcane Card</h3>
+          <p>A weathered paper-card interface for serious deck sorcery and extremely unserious flavour text.</p>
+          <a class="launch arcane-launch" href="arcane/">Open Arcane edition <span aria-hidden="true">→</span></a>
+        </div>
+      </article>
+
+      <article class="edition metal-edition">
+        <div class="edition-art metal-panel" aria-hidden="true">
+          <div class="screws"><i></i><i></i><i></i><i></i></div>
+          <div class="lcd"><small>ARENA LINK READY</small><strong>&lt;#F48&gt;GOBBLER</strong><span>█████ 5 STOPS</span></div>
+          <div class="keys"><i></i><i></i><i></i><i></i></div>
+        </div>
+        <div class="edition-copy">
+          <span class="edition-number">Edition II</span>
+          <h3>Metal Tool</h3>
+          <p>A battered handheld encoder with payphone buttons, bright green readouts and homemade hardware energy.</p>
+          <a class="launch metal-launch" href="metal/">Open Metal edition <span aria-hidden="true">→</span></a>
+        </div>
+      </article>
+    </section>
+
+    <section class="privacy">
+      <div>
+        <p class="eyebrow">Nothing leaves the table</p>
+        <h2>Your deck name stays on your device.</h2>
+      </div>
+      <p>Both editions perform every calculation locally. They do not contact a server, load advertising, create accounts or collect analytics. Recent colours and preferences may be remembered only by your own browser.</p>
+    </section>
+  </main>
+
+  <footer>
+    <span>Digital Toy — Arena Decklist Colourifier</span>
+    <span>Unofficial fan-made utility</span>
+  </footer>
+</body>
+</html>
