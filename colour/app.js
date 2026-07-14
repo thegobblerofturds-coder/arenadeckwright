@@ -90,7 +90,7 @@
   const mobileAdvancedQuery = window.matchMedia('(max-width: 680px)');
 
   let formatting = {bold: false, italic: false, underline: false, strike: false};
-  let activePresetGroup = 'special';
+  let activePresetGroup = 'guilds';
   let activePalette = RAINBOW.slice();
   let segments = Logic.distributePalette(DEFAULT_NAME, activePalette, LIMIT).segments;
   let selectedIndex = 0;

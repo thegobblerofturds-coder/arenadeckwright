@@ -33,7 +33,6 @@
       </div>
       <div class="tool-stage">
         <article class="arena-side input-side">
-          <p class="stage-label"><span>01</span> Deck name</p>
           <div class="deck-box deck-box-input" role="img" aria-label="A worried goblin deck box before colourification"></div>
           <div class="oval-frame input-frame">
             <div id="inputCallout" class="input-callout" aria-hidden="true"><span></span></div>
@@ -41,6 +40,7 @@
             <input id="deckName" type="text" value="YOUR DECKLIST HERE" autocomplete="off" spellcheck="false">
             <span class="pencil" aria-hidden="true">&#9998;</span>
           </div>
+          <p class="stage-label field-stage-label"><span>01</span> Deck name</p>
         </article>
 
         <div class="colour-console" aria-label="Choose the gradient colours">
@@ -72,7 +72,6 @@
         </div>
 
         <article class="arena-side output-side">
-          <p class="stage-label"><span>03</span> Click to Copy</p>
           <div class="deck-box deck-box-output" role="img" aria-label="A delighted wizard deck box after colourification"></div>
           <div class="copy-wrap">
             <div class="oval-frame output-frame">
@@ -83,6 +82,7 @@
             </div>
             <span id="copiedBurst" class="copied-burst" role="status" aria-live="polite">Copied!</span>
           </div>
+          <p class="stage-label field-stage-label"><span>03</span> Click to Copy</p>
           <div class="quick-stats">
             <strong id="rawCount">0 / 64 char</strong>
             <div id="gradientPips" class="gradient-pips" role="img" aria-label="No colour stages"></div>
@@ -101,6 +101,7 @@
           <h2>Advanced colour workshop</h2>
           <span>Manual controls only. Nothing here rewrites your work unless you change it.</span>
         </header>
+        <p id="toolFeedback" class="tool-feedback advanced-feedback" aria-live="polite"></p>
 
         <div class="advanced-grid">
           <details class="advanced-tool tool-presets" data-mobile-default="true" open>
@@ -160,7 +161,6 @@
                 </div>
 
                 <p class="technical-note">Each non-empty colour channel adds one six-character &lt;#RGB&gt; Arena tag.</p>
-                <p id="toolFeedback" class="tool-feedback" aria-live="polite"></p>
               </section>
 
               <section class="workshop-card recent-card">
