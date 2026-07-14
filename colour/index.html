@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en-CA">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f1ece6">
+  <meta name="description" content="TurdGobbler's Deck Name Colourifier creates colourful Magic Arena deck names entirely in your browser.">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'">
+  <title>TurdGobbler's Deck Name Colourifier</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="site-home" href="../">&larr; Home</a>
+
+  <main class="page-shell">
+    <header class="hook">
+      <p>TurdGobbler&rsquo;s Deck Name Colourifier</p>
+      <h1>Did you know you can colour Arena decklist names?</h1>
+      <span>Version 3 &middot; Made with love</span>
+    </header>
+
+    <section class="colourifier" aria-label="Arena deck name colourifier">
+      <div id="techActivation" class="tech-activation" aria-hidden="true">
+        <i style="--x:5%;--height:76%;--tilt:-7deg;--delay:0ms"></i>
+        <i style="--x:15%;--height:57%;--tilt:5deg;--delay:90ms"></i>
+        <i style="--x:27%;--height:84%;--tilt:-4deg;--delay:35ms"></i>
+        <i style="--x:39%;--height:64%;--tilt:8deg;--delay:125ms"></i>
+        <i style="--x:50%;--height:92%;--tilt:-2deg;--delay:0ms"></i>
+        <i style="--x:61%;--height:67%;--tilt:-8deg;--delay:105ms"></i>
+        <i style="--x:73%;--height:82%;--tilt:4deg;--delay:45ms"></i>
+        <i style="--x:85%;--height:60%;--tilt:-5deg;--delay:140ms"></i>
+        <i style="--x:95%;--height:73%;--tilt:7deg;--delay:70ms"></i>
+      </div>
+      <div class="tool-stage">
+        <article class="arena-side input-side">
+          <p class="stage-label"><span>01</span> Deck name</p>
+          <div class="deck-box deck-box-input" role="img" aria-label="A worried goblin deck box before colourification"></div>
+          <div class="oval-frame input-frame">
+            <label class="visually-hidden" for="deckName">Deck name</label>
+            <input id="deckName" type="text" value="YOUR DECKLIST HERE" autocomplete="off" spellcheck="false">
+            <span class="pencil" aria-hidden="true">&#9998;</span>
+          </div>
+        </article>
+
+        <div class="colour-console" aria-label="Choose the gradient colours">
+          <p class="stage-label"><span>02</span> Select your colours</p>
+
+          <div class="colour-widget" id="fromWidget">
+            <button id="fromTrigger" class="colour-orb" type="button" aria-expanded="false" aria-controls="fromPopover">
+              <span>Start</span>
+            </button>
+            <div id="fromPopover" class="colour-popover" hidden>
+              <strong>Starting colour</strong>
+              <label>Pick colour<input id="gradientFrom" type="color" value="#FF304F"></label>
+              <label>Hex code<input id="colorFromValue" type="text" value="#FF304F" maxlength="7" inputmode="text" autocomplete="off" spellcheck="false"></label>
+            </div>
+          </div>
+
+          <span class="gradient-arrow" aria-hidden="true"></span>
+
+          <div class="colour-widget" id="toWidget">
+            <button id="toTrigger" class="colour-orb" type="button" aria-expanded="false" aria-controls="toPopover">
+              <span>Finish</span>
+            </button>
+            <div id="toPopover" class="colour-popover" hidden>
+              <strong>Ending colour</strong>
+              <label>Pick colour<input id="gradientTo" type="color" value="#B641FF"></label>
+              <label>Hex code<input id="colorToValue" type="text" value="#B641FF" maxlength="7" inputmode="text" autocomplete="off" spellcheck="false"></label>
+            </div>
+          </div>
+        </div>
+
+        <article class="arena-side output-side">
+          <p class="stage-label"><span>03</span> Copy to Arena</p>
+          <div class="deck-box deck-box-output" role="img" aria-label="A delighted wizard deck box after colourification"></div>
+          <div class="copy-wrap">
+            <div class="oval-frame output-frame">
+              <button id="copyButton" class="copy-output" type="button" aria-label="Copy the coloured Arena deck name">
+                <span id="preview" class="preview" aria-hidden="true"></span>
+                <small>Click to copy</small>
+              </button>
+            </div>
+            <span id="copiedBurst" class="copied-burst" role="status" aria-live="polite">Copied!</span>
+          </div>
+          <div class="quick-stats">
+            <strong id="rawCount">0 / 64 char</strong>
+            <div id="gradientPips" class="gradient-pips" role="img" aria-label="No colour stages"></div>
+          </div>
+        </article>
+      </div>
+
+      <div class="secret-launch">
+        <span class="advanced-hint" aria-hidden="true">(click here &rarr;)</span>
+        <button id="advancedToggle" class="secret-button" type="button" aria-expanded="false" aria-controls="advancedPanel" aria-label="Open advanced colour controls"><span>+</span></button>
+      </div>
+
+      <section id="advancedPanel" class="advanced-panel" hidden>
+        <header class="advanced-heading">
+          <p>Hidden passage unlocked</p>
+          <h2>Advanced colour workshop</h2>
+          <span>Manual controls only. Nothing here rewrites your work unless you change it.</span>
+        </header>
+
+        <div class="advanced-grid">
+          <section class="workshop-card channel-workshop">
+            <div class="workshop-head">
+              <div>
+                <span>Manual controls</span>
+                <h3>Colour channels</h3>
+              </div>
+              <div class="advanced-actions">
+                <button id="undoButton" class="neon-key" type="button">Undo</button>
+                <button id="redoButton" class="neon-key" type="button">Redo</button>
+                <button id="addSegment" class="neon-key" type="button">+ Colour</button>
+              </div>
+            </div>
+
+            <div class="split-editor">
+              <div class="mini-head">
+                <strong>Colour boundaries</strong>
+                <span>Drag a marker or use its arrow keys</span>
+              </div>
+              <div id="splitScroller" class="split-scroller">
+                <div id="splitTrack" class="split-track"></div>
+              </div>
+              <p id="splitEmpty" class="split-empty">Add another colour to create a movable boundary.</p>
+            </div>
+
+            <div id="segments" class="segments"></div>
+            <p class="technical-note">Each non-empty colour channel adds one six-character &lt;#RGB&gt; Arena tag.</p>
+            <p id="toolFeedback" class="tool-feedback" aria-live="polite"></p>
+          </section>
+
+          <aside class="advanced-side">
+            <section class="workshop-card preset-card">
+              <div class="mini-head"><strong>Colour presets</strong><span>Changes colours only</span></div>
+              <p class="preset-note">Three palettes and all ten two-colour guilds. Your words stay exactly where they are.</p>
+              <div id="colourPresets" class="colour-presets"></div>
+            </section>
+
+            <section class="workshop-card">
+              <div class="mini-head"><strong>Recent colours</strong><span>Select a channel first</span></div>
+              <div id="recentColors" class="recent-colours"></div>
+            </section>
+
+            <section class="workshop-card">
+              <div class="mini-head"><strong>Raw Arena code</strong><span>Copied by the big oval above</span></div>
+              <textarea id="rawOutput" readonly spellcheck="false" aria-label="Raw Arena deck name"></textarea>
+              <div class="stats">
+                <div><span>Visible</span><strong id="visibleCount">0</strong></div>
+                <div><span>Tags</span><strong id="tagCount">0</strong></div>
+                <div><span>Remain</span><strong id="remainingCount">64</strong></div>
+              </div>
+            </section>
+
+            <section class="workshop-card project-actions">
+              <button id="saveProject" class="neon-key" type="button">Export project</button>
+              <label class="neon-key file-key">Import project<input id="loadProject" type="file" accept="application/json,.json"></label>
+            </section>
+          </aside>
+        </div>
+      </section>
+    </section>
+
+    <footer class="privacy-line">
+      <strong>Nothing leaves your browser.</strong>
+      <span>No account, uploads, advertising or tracking.</span>
+    </footer>
+  </main>
+
+  <template id="segmentTemplate">
+    <div class="segment-row">
+      <span class="channel-number" aria-hidden="true"></span>
+      <input class="color-picker" type="color" aria-label="Channel colour">
+      <input class="hex-input" type="text" maxlength="7" aria-label="Hex colour" spellcheck="false">
+      <input class="text-input" type="text" aria-label="Channel text" placeholder="Channel text">
+      <button class="move-button move-up" type="button" aria-label="Move channel up">Up</button>
+      <button class="move-button move-down" type="button" aria-label="Move channel down">Down</button>
+      <button class="remove-button" type="button" aria-label="Remove channel">Remove</button>
+    </div>
+  </template>
+
+  <script src="arena-logic.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
