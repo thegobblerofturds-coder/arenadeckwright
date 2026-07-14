@@ -18,6 +18,18 @@
   const arenaColor = (value) => '#' + arenaHex(value).split('').map((digit) => digit + digit).join('');
   const nonEmpty = (segments) => segments.filter((segment) => segment.text.length > 0);
   const rawName = (segments) => nonEmpty(segments).map((segment) => `<#${arenaHex(segment.color)}>${segment.text}`).join('');
+  function formatPrefix(formatting = {}) {
+    return [
+      formatting.bold && '<b>',
+      formatting.italic && '<i>',
+      formatting.underline && '<u>',
+      formatting.strike && '<s>'
+    ].filter(Boolean).join('');
+  }
+  function formattedRawName(segments, formatting = {}) {
+    const content = rawName(segments);
+    return content ? formatPrefix(formatting) + content : '';
+  }
 
   function boundaryPositions(segments) {
     let position = 0;
@@ -128,6 +140,8 @@
     arenaColor,
     nonEmpty,
     rawName,
+    formatPrefix,
+    formattedRawName,
     boundaryPositions,
     moveBoundary,
     mergeAdjacent,

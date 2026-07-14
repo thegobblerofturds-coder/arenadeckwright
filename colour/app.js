@@ -49,6 +49,10 @@
     splitEmpty: $('splitEmpty'),
     recentColors: $('recentColors'),
     colourPresets: $('colourPresets'),
+    formatBold: $('formatBold'),
+    formatItalic: $('formatItalic'),
+    formatUnderline: $('formatUnderline'),
+    formatStrike: $('formatStrike'),
     rawOutput: $('rawOutput'),
     visibleCount: $('visibleCount'),
     tagCount: $('tagCount'),
@@ -66,6 +70,7 @@
     toPopover: $('toPopover')
   };
 
+  let formatting = {bold: false, italic: false, underline: false, strike: false};
   let activePalette = RAINBOW.slice();
   let segments = Logic.distributePalette(DEFAULT_NAME, activePalette, LIMIT).segments;
   let selectedIndex = 0;
@@ -82,10 +87,13 @@
   const arenaHex = Logic.arenaHex;
   const fullName = () => segments.map((segment) => segment.text).join('');
   const visibleSegments = () => Logic.nonEmpty(segments);
-  const rawName = () => Logic.rawName(segments);
+  const formatPrefix = () => Logic.formatPrefix(formatting);
+  const contentLimit = () => LIMIT - formatPrefix().length;
+  const rawName = () => Logic.formattedRawName(segments, formatting);
   const snapshot = () => JSON.stringify({
     segments,
     palette: activePalette,
+    formatting,
     from: els.gradientFrom.value.toUpperCase(),
     to: els.gradientTo.value.toUpperCase()
   });
@@ -96,6 +104,14 @@
     if (!Array.isArray(saved)) {
       if (Array.isArray(saved.palette) && saved.palette.some(validHex)) activePalette = saved.palette.filter(validHex).map((colour) => colour.toUpperCase());
       else if (segments.length) activePalette = segments.map((segment) => segment.color.toUpperCase());
+      if (saved.formatting && typeof saved.formatting === 'object') {
+        formatting = {
+          bold: Boolean(saved.formatting.bold),
+          italic: Boolean(saved.formatting.italic),
+          underline: Boolean(saved.formatting.underline),
+          strike: Boolean(saved.formatting.strike)
+        };
+      }
       if (validHex(saved.from)) els.gradientFrom.value = saved.from.toUpperCase();
       if (validHex(saved.to)) els.gradientTo.value = saved.to.toUpperCase();
     }
@@ -165,7 +181,7 @@
       selectedIndex = 0;
       return;
     }
-    const result = Logic.distributePalette(name, palette, LIMIT);
+    const result = Logic.distributePalette(name, palette, contentLimit());
     segments = result.error === 'too-long'
       ? [{color: palette[Math.floor(palette.length / 2)] || '#18C8FF', text: name}]
       : result.segments;
@@ -193,12 +209,29 @@
 
   function render() {
     syncEndpointControls();
+    syncFormattingControls();
     renderSegments();
     renderSplitEditor();
     renderRecentColors();
     renderColourPresets();
     updateOutput();
     updateHistoryButtons();
+  }
+
+  function syncFormattingControls() {
+    els.formatBold.setAttribute('aria-pressed', String(formatting.bold));
+    els.formatItalic.setAttribute('aria-pressed', String(formatting.italic));
+    els.formatUnderline.setAttribute('aria-pressed', String(formatting.underline));
+    els.formatStrike.setAttribute('aria-pressed', String(formatting.strike));
+  }
+
+  function toggleFormatting(style) {
+    const before = snapshot();
+    const name = fullName();
+    formatting[style] = !formatting[style];
+    distributeName(name, activePalette);
+    remember(before);
+    render();
   }
 
   function renderSegments() {
@@ -335,6 +368,12 @@
       const span = document.createElement('span');
       span.textContent = segment.text;
       span.style.color = arenaColor(segment.color);
+      span.style.fontWeight = formatting.bold ? '1000' : '700';
+      span.style.fontStyle = formatting.italic ? 'italic' : 'normal';
+      span.style.textDecorationLine = [
+        formatting.underline && 'underline',
+        formatting.strike && 'line-through'
+      ].filter(Boolean).join(' ') || 'none';
       els.preview.appendChild(span);
     });
 
@@ -346,9 +385,13 @@
     els.rawCount.textContent = `${rawLength} / ${LIMIT} char`;
     els.rawCount.parentElement.classList.toggle('over', rawLength > LIMIT);
     els.visibleCount.textContent = visible;
-    els.tagCount.textContent = stages.length;
+    els.tagCount.textContent = stages.length + formatPrefix().length / 3;
     els.remainingCount.textContent = LIMIT - rawLength;
     els.copyButton.disabled = visible === 0;
+    els.copyButton.classList.toggle('over-limit', rawLength > LIMIT);
+    els.copyButton.setAttribute('aria-label', rawLength > LIMIT
+      ? 'Copy the coloured Arena deck name; warning: it exceeds 64 characters'
+      : 'Copy the coloured Arena deck name');
 
     els.gradientPips.innerHTML = '';
     stages.forEach((segment, index) => {
@@ -570,12 +613,13 @@
     }
   }
 
-  function playCopyFeedback(message = 'Copied!') {
+  function playCopyFeedback(message = 'Copied!', error = false) {
     clearTimeout(copyFeedbackTimer);
     els.copyButton.classList.remove('copy-confirmed');
     els.copiedBurst.classList.remove('show');
+    els.copiedBurst.classList.toggle('error', error);
     els.copiedBurst.replaceChildren();
-    const colours = visibleSegments().map((segment) => arenaColor(segment.color));
+    const colours = error ? ['#FF304F'] : visibleSegments().map((segment) => arenaColor(segment.color));
     Array.from(message).forEach((character, index, letters) => {
       const letter = document.createElement('span');
       const colourIndex = colours.length < 2 ? 0 : Math.round(index * (colours.length - 1) / Math.max(1, letters.length - 1));
@@ -631,9 +675,12 @@
   });
 
   els.copyButton.addEventListener('click', async () => {
-    if (!rawName()) return;
-    const copied = await writeClipboard(rawName());
-    playCopyFeedback(copied ? 'Copied!' : 'Copy blocked');
+    const raw = rawName();
+    if (!raw) return;
+    const copied = await writeClipboard(raw);
+    if (!copied) playCopyFeedback('COPY BLOCKED', true);
+    else if (raw.length > LIMIT) playCopyFeedback('TOO MANY LETTERS!', true);
+    else playCopyFeedback('COPIED!');
   });
 
   els.advancedToggle.addEventListener('click', () => {
@@ -660,12 +707,17 @@
   });
   els.undoButton.addEventListener('click', undo);
   els.redoButton.addEventListener('click', redo);
+  els.formatBold.addEventListener('click', () => toggleFormatting('bold'));
+  els.formatItalic.addEventListener('click', () => toggleFormatting('italic'));
+  els.formatUnderline.addEventListener('click', () => toggleFormatting('underline'));
+  els.formatStrike.addEventListener('click', () => toggleFormatting('strike'));
 
   $('saveProject').addEventListener('click', () => {
     const blob = new Blob([JSON.stringify({
       version: 3,
       tool: "TurdGobbler's Deck Name Colourifier",
       colours: {from: els.gradientFrom.value.toUpperCase(), to: els.gradientTo.value.toUpperCase()},
+      formatting: {...formatting},
       segments
     }, null, 2)], {type: 'application/json'});
     const anchor = document.createElement('a');
@@ -685,6 +737,13 @@
         const colours = data.colours || data.colors;
         if (validHex(colours?.from)) els.gradientFrom.value = colours.from.toUpperCase();
         if (validHex(colours?.to)) els.gradientTo.value = colours.to.toUpperCase();
+        const importedFormatting = data.formatting || {};
+        formatting = {
+          bold: Boolean(importedFormatting.bold),
+          italic: Boolean(importedFormatting.italic),
+          underline: Boolean(importedFormatting.underline),
+          strike: Boolean(importedFormatting.strike)
+        };
         selectedIndex = 0;
       });
       flash('Project imported.');
