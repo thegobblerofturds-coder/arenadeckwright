@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f1ece6">
   <meta name="description" content="TurdGobbler's Deck Name Colourifier creates colourful Magic Arena deck names entirely in your browser.">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; font-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'">
   <title>TurdGobbler's Deck Name Colourifier</title>
   <link rel="stylesheet" href="styles.css">
 </head>
@@ -72,7 +72,7 @@
         </div>
 
         <article class="arena-side output-side">
-          <p class="stage-label"><span>03</span> Copy to Arena</p>
+          <p class="stage-label"><span>03</span> Click to Copy</p>
           <div class="deck-box deck-box-output" role="img" aria-label="A delighted wizard deck box after colourification"></div>
           <div class="copy-wrap">
             <div class="oval-frame output-frame">
@@ -103,73 +103,92 @@
         </header>
 
         <div class="advanced-grid">
-          <section class="workshop-card channel-workshop">
-            <div class="workshop-head">
-              <div>
-                <span>Manual controls</span>
-                <h3>Colour channels</h3>
-              </div>
-              <div class="advanced-actions">
-                <button id="undoButton" class="neon-key" type="button">Undo</button>
-                <button id="redoButton" class="neon-key" type="button">Redo</button>
-                <button id="addSegment" class="neon-key" type="button">+ Colour</button>
-              </div>
+          <details class="advanced-tool tool-presets" data-mobile-default="true" open>
+            <summary><span class="tool-number">01</span><span><strong>Colour presets</strong><small>Fast combinations</small></span><b aria-hidden="true"></b></summary>
+            <div class="advanced-tool-body">
+              <section class="workshop-card preset-card">
+                <div class="mini-head"><strong>Colour presets</strong><span>Changes colours only</span></div>
+                <p class="preset-note">Special palettes, all ten guilds, and all ten three-colour families. Your words stay exactly where they are.</p>
+                <div id="colourPresets" class="colour-presets"></div>
+              </section>
             </div>
+          </details>
 
-            <div class="split-editor">
-              <div class="mini-head">
-                <strong>Colour boundaries</strong>
-                <span>Drag a marker or use its arrow keys</span>
-              </div>
-              <div id="splitScroller" class="split-scroller">
-                <div id="splitTrack" class="split-track"></div>
-              </div>
-              <p id="splitEmpty" class="split-empty">Add another colour to create a movable boundary.</p>
+          <details class="advanced-tool tool-formatting" open>
+            <summary><span class="tool-number">02</span><span><strong>Text style</strong><small>Bold, italic & more</small></span><b aria-hidden="true"></b></summary>
+            <div class="advanced-tool-body">
+              <section class="workshop-card formatting-card">
+                <div class="mini-head"><strong>Global text style</strong><span>Applies to the whole name</span></div>
+                <div class="format-controls" role="group" aria-label="Global deck-name formatting">
+                  <button id="formatBold" class="format-button" type="button" aria-pressed="false"><b>B</b><span>Bold</span></button>
+                  <button id="formatItalic" class="format-button" type="button" aria-pressed="false"><i>I</i><span>Italic</span></button>
+                  <button id="formatUnderline" class="format-button" type="button" aria-pressed="false"><u>U</u><span>Underline</span></button>
+                  <button id="formatStrike" class="format-button" type="button" aria-pressed="false"><s>S</s><span>Strike</span></button>
+                </div>
+                <p class="format-note">Global formatting changes the entire name. Each active style uses one three-character Arena tag.</p>
+              </section>
             </div>
+          </details>
 
-            <div id="segments" class="segments"></div>
-            <p class="technical-note">Each non-empty colour channel adds one six-character &lt;#RGB&gt; Arena tag.</p>
-            <p id="toolFeedback" class="tool-feedback" aria-live="polite"></p>
-          </section>
+          <details class="advanced-tool tool-fine" open>
+            <summary><span class="tool-number">03</span><span><strong>Fine-tune colours</strong><small>Manual channels</small></span><b aria-hidden="true"></b></summary>
+            <div class="advanced-tool-body">
+              <section class="workshop-card channel-workshop">
+                <div class="workshop-head">
+                  <div>
+                    <span>Manual controls</span>
+                    <h3>Colour channels</h3>
+                  </div>
+                  <div class="advanced-actions">
+                    <button id="undoButton" class="neon-key" type="button">Undo</button>
+                    <button id="redoButton" class="neon-key" type="button">Redo</button>
+                    <button id="addSegment" class="neon-key" type="button">+ Colour</button>
+                  </div>
+                </div>
 
-          <aside class="advanced-side">
-            <section class="workshop-card formatting-card">
-              <div class="mini-head"><strong>Global text style</strong><span>Applies to the whole name</span></div>
-              <div class="format-controls" role="group" aria-label="Global deck-name formatting">
-                <button id="formatBold" class="format-button" type="button" aria-pressed="false"><b>B</b><span>Bold</span></button>
-                <button id="formatItalic" class="format-button" type="button" aria-pressed="false"><i>I</i><span>Italic</span></button>
-                <button id="formatUnderline" class="format-button" type="button" aria-pressed="false"><u>U</u><span>Underline</span></button>
-                <button id="formatStrike" class="format-button" type="button" aria-pressed="false"><s>S</s><span>Strike</span></button>
-              </div>
-              <p class="format-note">Global formatting changes the entire name. Each active style uses one three-character Arena tag.</p>
-            </section>
+                <div id="segments" class="segments"></div>
 
-            <section class="workshop-card preset-card">
-              <div class="mini-head"><strong>Colour presets</strong><span>Changes colours only</span></div>
-              <p class="preset-note">Special palettes, all ten guilds, and all ten three-colour families. Your words stay exactly where they are.</p>
-              <div id="colourPresets" class="colour-presets"></div>
-            </section>
+                <div class="split-editor">
+                  <div class="mini-head">
+                    <strong>Colour boundaries</strong>
+                    <span>Swipe sideways, then drag a marker</span>
+                  </div>
+                  <div id="splitScroller" class="split-scroller">
+                    <div id="splitTrack" class="split-track"></div>
+                  </div>
+                  <p id="splitEmpty" class="split-empty">Add another colour to create a movable boundary.</p>
+                </div>
 
-            <section class="workshop-card">
-              <div class="mini-head"><strong>Recent colours</strong><span>Select a channel first</span></div>
-              <div id="recentColors" class="recent-colours"></div>
-            </section>
+                <p class="technical-note">Each non-empty colour channel adds one six-character &lt;#RGB&gt; Arena tag.</p>
+                <p id="toolFeedback" class="tool-feedback" aria-live="polite"></p>
+              </section>
 
-            <section class="workshop-card">
-              <div class="mini-head"><strong>Raw Arena code</strong><span>Copied by the big oval above</span></div>
-              <textarea id="rawOutput" readonly spellcheck="false" aria-label="Raw Arena deck name"></textarea>
-              <div class="stats">
-                <div><span>Visible</span><strong id="visibleCount">0</strong></div>
-                <div><span>Tags</span><strong id="tagCount">0</strong></div>
-                <div><span>Remain</span><strong id="remainingCount">64</strong></div>
-              </div>
-            </section>
+              <section class="workshop-card recent-card">
+                <div class="mini-head"><strong>Recent colours</strong><span>Select a channel first</span></div>
+                <div id="recentColors" class="recent-colours"></div>
+              </section>
+            </div>
+          </details>
 
-            <section class="workshop-card project-actions">
-              <button id="saveProject" class="neon-key" type="button">Export project</button>
-              <label class="neon-key file-key">Import project<input id="loadProject" type="file" accept="application/json,.json"></label>
-            </section>
-          </aside>
+          <details class="advanced-tool tool-code" open>
+            <summary><span class="tool-number">04</span><span><strong>Code & projects</strong><small>Inspect, save or load</small></span><b aria-hidden="true"></b></summary>
+            <div class="advanced-tool-body">
+              <section class="workshop-card raw-card">
+                <div class="mini-head"><strong>Raw Arena code</strong><span>Copied by the big oval above</span></div>
+                <textarea id="rawOutput" readonly spellcheck="false" aria-label="Raw Arena deck name"></textarea>
+                <div class="stats">
+                  <div><span>Visible</span><strong id="visibleCount">0</strong></div>
+                  <div><span>Tags</span><strong id="tagCount">0</strong></div>
+                  <div><span>Remain</span><strong id="remainingCount">64</strong></div>
+                </div>
+              </section>
+
+              <section class="workshop-card project-actions">
+                <button id="saveProject" class="neon-key" type="button">Export project</button>
+                <label class="neon-key file-key">Import project<input id="loadProject" type="file" accept="application/json,.json"></label>
+              </section>
+            </div>
+          </details>
         </div>
       </section>
     </section>

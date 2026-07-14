@@ -13,9 +13,9 @@
     green: '#39A96B'
   };
   const PRESET_GROUPS = [
-    {id: 'special', name: 'Special palettes', detail: 'Rainbow & skies', defaultOpen: true},
-    {id: 'guilds', name: 'Two-colour guilds', detail: 'All 10 guilds'},
-    {id: 'tricolour', name: 'Three-colour families', detail: 'All 10 combinations'}
+    {id: 'special', tab: 'Special', name: 'Special palettes'},
+    {id: 'guilds', tab: '2 Colour', name: 'Two-colour guilds'},
+    {id: 'tricolour', tab: '3 Colour', name: 'Three-colour families'}
   ];
   const COLOUR_PRESETS = [
     {group: 'special', name: 'Rainbow', colours: RAINBOW},
@@ -86,8 +86,11 @@
     fromPopover: $('fromPopover'),
     toPopover: $('toPopover')
   };
+  const advancedTools = Array.from(document.querySelectorAll('.advanced-tool'));
+  const mobileAdvancedQuery = window.matchMedia('(max-width: 680px)');
 
   let formatting = {bold: false, italic: false, underline: false, strike: false};
+  let activePresetGroup = 'special';
   let activePalette = RAINBOW.slice();
   let segments = Logic.distributePalette(DEFAULT_NAME, activePalette, LIMIT).segments;
   let selectedIndex = 0;
@@ -355,71 +358,86 @@
   }
 
   function renderColourPresets() {
-    const openGroups = new Set(Array.from(els.colourPresets.querySelectorAll('details[open]')).map((group) => group.dataset.presetGroup));
-    const firstRender = els.colourPresets.children.length === 0;
     els.colourPresets.innerHTML = '';
     const activeSignature = paletteSignature(activePalette);
-    PRESET_GROUPS.forEach((group) => {
-      const presets = COLOUR_PRESETS.filter((preset) => preset.group === group.id);
-      const drawer = document.createElement('details');
-      const summary = document.createElement('summary');
-      const summaryCopy = document.createElement('span');
-      const summaryName = document.createElement('strong');
-      const summaryDetail = document.createElement('small');
-      const count = document.createElement('b');
-      const body = document.createElement('div');
-      drawer.className = 'preset-group';
-      drawer.dataset.presetGroup = group.id;
-      drawer.open = openGroups.has(group.id) || (firstRender && group.defaultOpen);
-      summaryName.textContent = group.name;
-      summaryDetail.textContent = group.detail;
-      count.textContent = presets.length;
-      count.setAttribute('aria-label', `${presets.length} presets`);
-      summaryCopy.append(summaryName, summaryDetail);
-      summary.append(summaryCopy, count);
-      body.className = 'preset-group-body';
-
-      const families = [...new Set(presets.map((preset) => preset.family || ''))];
-      families.forEach((family) => {
-        const familySection = document.createElement('section');
-        const grid = document.createElement('div');
-        familySection.className = 'preset-family';
-        grid.className = 'preset-grid';
-        if (family) {
-          const heading = document.createElement('h4');
-          heading.textContent = family;
-          familySection.appendChild(heading);
-        }
-        presets.filter((preset) => (preset.family || '') === family).forEach((preset) => {
-          const palette = paletteForPreset(preset);
-          const button = document.createElement('button');
-          const name = document.createElement('strong');
-          const detail = document.createElement('span');
-          button.type = 'button';
-          button.className = 'preset-button';
-          button.style.setProperty('--preset-gradient', gradientCss(palette));
-          button.classList.toggle('selected', paletteSignature(palette) === activeSignature);
-          button.setAttribute('aria-label', `Apply ${preset.name} colour preset without changing the deck name`);
-          name.textContent = preset.name;
-          detail.textContent = preset.detail || `${palette.length} colours`;
-          button.append(name, detail);
-          button.addEventListener('click', () => {
-            const before = snapshot();
-            activePalette = palette.slice();
-            distributeName(fullName(), activePalette);
-            selectedIndex = 0;
-            remember(before);
-            render();
-            flash(`${preset.name} colours applied. Your deck name was not changed.`);
-          });
-          grid.appendChild(button);
-        });
-        familySection.appendChild(grid);
-        body.appendChild(familySection);
+    const tabs = document.createElement('div');
+    const group = PRESET_GROUPS.find((candidate) => candidate.id === activePresetGroup) || PRESET_GROUPS[0];
+    const presets = COLOUR_PRESETS.filter((preset) => preset.group === group.id);
+    const panel = document.createElement('div');
+    tabs.className = 'preset-tabs';
+    tabs.setAttribute('role', 'tablist');
+    tabs.setAttribute('aria-label', 'Colour preset families');
+    PRESET_GROUPS.forEach((candidate, index) => {
+      const button = document.createElement('button');
+      const count = COLOUR_PRESETS.filter((preset) => preset.group === candidate.id).length;
+      button.id = `presetTab${candidate.id}`;
+      button.type = 'button';
+      button.className = 'preset-tab';
+      button.setAttribute('role', 'tab');
+      button.setAttribute('aria-controls', 'presetPanel');
+      button.setAttribute('aria-selected', String(candidate.id === group.id));
+      button.tabIndex = candidate.id === group.id ? 0 : -1;
+      button.innerHTML = `<span>${candidate.tab}</span><b>${count}</b>`;
+      button.addEventListener('click', () => {
+        activePresetGroup = candidate.id;
+        renderColourPresets();
       });
-      drawer.append(summary, body);
-      els.colourPresets.appendChild(drawer);
+      button.addEventListener('keydown', (event) => {
+        if (!['ArrowLeft', 'ArrowRight'].includes(event.key)) return;
+        event.preventDefault();
+        const direction = event.key === 'ArrowRight' ? 1 : -1;
+        const next = PRESET_GROUPS[(index + direction + PRESET_GROUPS.length) % PRESET_GROUPS.length];
+        activePresetGroup = next.id;
+        renderColourPresets();
+        document.getElementById(`presetTab${next.id}`)?.focus();
+      });
+      tabs.appendChild(button);
     });
+
+    panel.id = 'presetPanel';
+    panel.className = 'preset-panel';
+    panel.setAttribute('role', 'tabpanel');
+    panel.setAttribute('aria-labelledby', `presetTab${group.id}`);
+    const families = [...new Set(presets.map((preset) => preset.family || ''))];
+    families.forEach((family) => {
+      const familySection = document.createElement('section');
+      const grid = document.createElement('div');
+      familySection.className = 'preset-family';
+      grid.className = 'preset-grid';
+      if (family) {
+        const heading = document.createElement('h4');
+        heading.textContent = family;
+        familySection.appendChild(heading);
+      }
+      presets.filter((preset) => (preset.family || '') === family).forEach((preset) => {
+        const palette = paletteForPreset(preset);
+        const button = document.createElement('button');
+        const name = document.createElement('strong');
+        const detail = document.createElement('span');
+        button.type = 'button';
+        button.className = 'preset-button';
+        button.title = `${preset.name}: ${preset.detail || `${palette.length} colours`}`;
+        button.style.setProperty('--preset-gradient', gradientCss(palette));
+        button.classList.toggle('selected', paletteSignature(palette) === activeSignature);
+        button.setAttribute('aria-label', `Apply ${preset.name} colour preset without changing the deck name`);
+        name.textContent = preset.name;
+        detail.textContent = preset.detail || `${palette.length} colours`;
+        button.append(name, detail);
+        button.addEventListener('click', () => {
+          const before = snapshot();
+          activePalette = palette.slice();
+          distributeName(fullName(), activePalette);
+          selectedIndex = 0;
+          remember(before);
+          render();
+          flash(`${preset.name} colours applied. Your deck name was not changed.`);
+        });
+        grid.appendChild(button);
+      });
+      familySection.appendChild(grid);
+      panel.appendChild(familySection);
+    });
+    els.colourPresets.append(tabs, panel);
   }
 
   function gradientCss(colors) {
@@ -436,7 +454,7 @@
       const span = document.createElement('span');
       span.textContent = segment.text;
       span.style.color = arenaColor(segment.color);
-      span.style.fontWeight = formatting.bold ? '1000' : '700';
+      span.style.fontWeight = formatting.bold ? '900' : '700';
       span.style.fontStyle = formatting.italic ? 'italic' : 'normal';
       span.style.textDecorationLine = [
         formatting.underline && 'underline',
@@ -708,6 +726,27 @@
     els.feedback.style.color = error ? '#ff8793' : '#6ce9ff';
     feedbackTimer = setTimeout(() => { els.feedback.textContent = ''; }, 3000);
   }
+
+  function syncAdvancedToolLayout() {
+    if (mobileAdvancedQuery.matches) {
+      const preferred = advancedTools.find((tool) => tool.dataset.mobileDefault === 'true') || advancedTools[0];
+      advancedTools.forEach((tool) => { tool.open = tool === preferred; });
+    } else {
+      advancedTools.forEach((tool) => { tool.open = true; });
+    }
+  }
+
+  advancedTools.forEach((tool) => {
+    tool.addEventListener('toggle', () => {
+      if (!mobileAdvancedQuery.matches || !tool.open) return;
+      advancedTools.forEach((other) => {
+        if (other !== tool) other.open = false;
+      });
+    });
+  });
+  if (typeof mobileAdvancedQuery.addEventListener === 'function') mobileAdvancedQuery.addEventListener('change', syncAdvancedToolLayout);
+  else mobileAdvancedQuery.addListener(syncAdvancedToolLayout);
+  syncAdvancedToolLayout();
 
   els.deckName.addEventListener('focus', () => beginEdit(els.deckName));
   els.deckName.addEventListener('input', () => {
