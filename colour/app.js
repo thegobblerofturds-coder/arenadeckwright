@@ -32,6 +32,7 @@
 
   const els = {
     deckName: $('deckName'),
+    inputCallout: $('inputCallout'),
     preview: $('preview'),
     copyButton: $('copyButton'),
     copiedBurst: $('copiedBurst'),
@@ -612,6 +613,10 @@
   document.addEventListener('click', (event) => {
     if (!$('fromWidget').contains(event.target) && !$('toWidget').contains(event.target)) closeColourPopovers();
   });
+  document.addEventListener('pointerdown', () => {
+    els.inputCallout.classList.add('dismissed');
+    setTimeout(() => { els.inputCallout.hidden = true; }, 240);
+  }, {once: true, capture: true});
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') closeColourPopovers();
     const modifier = event.ctrlKey || event.metaKey;
