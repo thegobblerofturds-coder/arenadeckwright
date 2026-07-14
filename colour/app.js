@@ -12,20 +12,37 @@
     red: '#E34832',
     green: '#39A96B'
   };
+  const PRESET_GROUPS = [
+    {id: 'special', name: 'Special palettes', detail: 'Rainbow & skies', defaultOpen: true},
+    {id: 'guilds', name: 'Two-colour guilds', detail: 'All 10 guilds'},
+    {id: 'tricolour', name: 'Three-colour families', detail: 'All 10 combinations'}
+  ];
   const COLOUR_PRESETS = [
-    {name: 'Rainbow', colours: RAINBOW},
-    {name: 'Sunset', colours: ['#542E91', '#D83468', '#F45B32', '#FF9F1C', '#FFE66D']},
-    {name: 'Sunrise', colours: ['#34306E', '#7251B5', '#E56B8A', '#FFAA5A', '#FFF1A8']},
-    {name: 'Azorius', detail: 'White + Blue', colours: [MANA.white, MANA.blue], smooth: true},
-    {name: 'Dimir', detail: 'Blue + Black', colours: [MANA.blue, MANA.black], smooth: true},
-    {name: 'Rakdos', detail: 'Black + Red', colours: [MANA.black, MANA.red], smooth: true},
-    {name: 'Gruul', detail: 'Red + Green', colours: [MANA.red, MANA.green], smooth: true},
-    {name: 'Selesnya', detail: 'Green + White', colours: [MANA.green, MANA.white], smooth: true},
-    {name: 'Orzhov', detail: 'White + Black', colours: [MANA.white, MANA.black], smooth: true},
-    {name: 'Izzet', detail: 'Blue + Red', colours: [MANA.blue, MANA.red], smooth: true},
-    {name: 'Golgari', detail: 'Black + Green', colours: [MANA.black, MANA.green], smooth: true},
-    {name: 'Boros', detail: 'Red + White', colours: [MANA.red, MANA.white], smooth: true},
-    {name: 'Simic', detail: 'Green + Blue', colours: [MANA.green, MANA.blue], smooth: true}
+    {group: 'special', name: 'Rainbow', colours: RAINBOW},
+    {group: 'special', name: 'Sunset', colours: ['#542E91', '#D83468', '#F45B32', '#FF9F1C', '#FFE66D']},
+    {group: 'special', name: 'Sunrise', colours: ['#34306E', '#7251B5', '#E56B8A', '#FFAA5A', '#FFF1A8']},
+
+    {group: 'guilds', family: 'Allied guilds', name: 'Azorius', detail: 'White + Blue', colours: [MANA.white, MANA.blue], smooth: true},
+    {group: 'guilds', family: 'Allied guilds', name: 'Dimir', detail: 'Blue + Black', colours: [MANA.blue, MANA.black], smooth: true},
+    {group: 'guilds', family: 'Allied guilds', name: 'Rakdos', detail: 'Black + Red', colours: [MANA.black, MANA.red], smooth: true},
+    {group: 'guilds', family: 'Allied guilds', name: 'Gruul', detail: 'Red + Green', colours: [MANA.red, MANA.green], smooth: true},
+    {group: 'guilds', family: 'Allied guilds', name: 'Selesnya', detail: 'Green + White', colours: [MANA.green, MANA.white], smooth: true},
+    {group: 'guilds', family: 'Enemy guilds', name: 'Orzhov', detail: 'White + Black', colours: [MANA.white, MANA.black], smooth: true},
+    {group: 'guilds', family: 'Enemy guilds', name: 'Izzet', detail: 'Blue + Red', colours: [MANA.blue, MANA.red], smooth: true},
+    {group: 'guilds', family: 'Enemy guilds', name: 'Golgari', detail: 'Black + Green', colours: [MANA.black, MANA.green], smooth: true},
+    {group: 'guilds', family: 'Enemy guilds', name: 'Boros', detail: 'Red + White', colours: [MANA.red, MANA.white], smooth: true},
+    {group: 'guilds', family: 'Enemy guilds', name: 'Simic', detail: 'Green + Blue', colours: [MANA.green, MANA.blue], smooth: true},
+
+    {group: 'tricolour', family: 'Shards of Alara', name: 'Bant', detail: 'Green + White + Blue', colours: [MANA.green, MANA.white, MANA.blue], smooth: true},
+    {group: 'tricolour', family: 'Shards of Alara', name: 'Esper', detail: 'White + Blue + Black', colours: [MANA.white, MANA.blue, MANA.black], smooth: true},
+    {group: 'tricolour', family: 'Shards of Alara', name: 'Grixis', detail: 'Blue + Black + Red', colours: [MANA.blue, MANA.black, MANA.red], smooth: true},
+    {group: 'tricolour', family: 'Shards of Alara', name: 'Jund', detail: 'Black + Red + Green', colours: [MANA.black, MANA.red, MANA.green], smooth: true},
+    {group: 'tricolour', family: 'Shards of Alara', name: 'Naya', detail: 'Red + Green + White', colours: [MANA.red, MANA.green, MANA.white], smooth: true},
+    {group: 'tricolour', family: 'Tarkir wedges', name: 'Abzan', detail: 'White + Black + Green', colours: [MANA.white, MANA.black, MANA.green], smooth: true},
+    {group: 'tricolour', family: 'Tarkir wedges', name: 'Jeskai', detail: 'Blue + Red + White', colours: [MANA.blue, MANA.red, MANA.white], smooth: true},
+    {group: 'tricolour', family: 'Tarkir wedges', name: 'Sultai', detail: 'Black + Green + Blue', colours: [MANA.black, MANA.green, MANA.blue], smooth: true},
+    {group: 'tricolour', family: 'Tarkir wedges', name: 'Mardu', detail: 'Red + White + Black', colours: [MANA.red, MANA.white, MANA.black], smooth: true},
+    {group: 'tricolour', family: 'Tarkir wedges', name: 'Temur', detail: 'Green + Blue + Red', colours: [MANA.green, MANA.blue, MANA.red], smooth: true}
   ];
   const $ = (id) => document.getElementById(id);
   const Logic = window.ArenaLogic;
@@ -317,8 +334,20 @@
     return Logic.buildSafeGradient('1234567', from, to, LIMIT).segments.map((segment) => segment.color.toUpperCase());
   }
 
+  function makeSmoothMultiPalette(colours) {
+    if (colours.length < 2) return colours.slice();
+    const longPalette = [];
+    colours.slice(0, -1).forEach((colour, index) => {
+      const leg = makeSmoothPalette(colour, colours[index + 1]);
+      if (index) leg.shift();
+      longPalette.push(...leg);
+    });
+    if (longPalette.length <= 7) return longPalette;
+    return Array.from({length: 7}, (_, index) => longPalette[Math.round(index * (longPalette.length - 1) / 6)]);
+  }
+
   function paletteForPreset(preset) {
-    return preset.smooth ? makeSmoothPalette(preset.colours[0], preset.colours[1]) : preset.colours.slice();
+    return preset.smooth ? makeSmoothMultiPalette(preset.colours) : preset.colours.slice();
   }
 
   function paletteSignature(palette) {
@@ -326,31 +355,70 @@
   }
 
   function renderColourPresets() {
+    const openGroups = new Set(Array.from(els.colourPresets.querySelectorAll('details[open]')).map((group) => group.dataset.presetGroup));
+    const firstRender = els.colourPresets.children.length === 0;
     els.colourPresets.innerHTML = '';
     const activeSignature = paletteSignature(activePalette);
-    COLOUR_PRESETS.forEach((preset) => {
-      const palette = paletteForPreset(preset);
-      const button = document.createElement('button');
-      const name = document.createElement('strong');
-      const detail = document.createElement('span');
-      button.type = 'button';
-      button.className = 'preset-button';
-      button.style.setProperty('--preset-gradient', gradientCss(palette));
-      button.classList.toggle('selected', paletteSignature(palette) === activeSignature);
-      button.setAttribute('aria-label', `Apply ${preset.name} colour preset without changing the deck name`);
-      name.textContent = preset.name;
-      detail.textContent = preset.detail || `${palette.length} colours`;
-      button.append(name, detail);
-      button.addEventListener('click', () => {
-        const before = snapshot();
-        activePalette = palette.slice();
-        distributeName(fullName(), activePalette);
-        selectedIndex = 0;
-        remember(before);
-        render();
-        flash(`${preset.name} colours applied. Your deck name was not changed.`);
+    PRESET_GROUPS.forEach((group) => {
+      const presets = COLOUR_PRESETS.filter((preset) => preset.group === group.id);
+      const drawer = document.createElement('details');
+      const summary = document.createElement('summary');
+      const summaryCopy = document.createElement('span');
+      const summaryName = document.createElement('strong');
+      const summaryDetail = document.createElement('small');
+      const count = document.createElement('b');
+      const body = document.createElement('div');
+      drawer.className = 'preset-group';
+      drawer.dataset.presetGroup = group.id;
+      drawer.open = openGroups.has(group.id) || (firstRender && group.defaultOpen);
+      summaryName.textContent = group.name;
+      summaryDetail.textContent = group.detail;
+      count.textContent = presets.length;
+      count.setAttribute('aria-label', `${presets.length} presets`);
+      summaryCopy.append(summaryName, summaryDetail);
+      summary.append(summaryCopy, count);
+      body.className = 'preset-group-body';
+
+      const families = [...new Set(presets.map((preset) => preset.family || ''))];
+      families.forEach((family) => {
+        const familySection = document.createElement('section');
+        const grid = document.createElement('div');
+        familySection.className = 'preset-family';
+        grid.className = 'preset-grid';
+        if (family) {
+          const heading = document.createElement('h4');
+          heading.textContent = family;
+          familySection.appendChild(heading);
+        }
+        presets.filter((preset) => (preset.family || '') === family).forEach((preset) => {
+          const palette = paletteForPreset(preset);
+          const button = document.createElement('button');
+          const name = document.createElement('strong');
+          const detail = document.createElement('span');
+          button.type = 'button';
+          button.className = 'preset-button';
+          button.style.setProperty('--preset-gradient', gradientCss(palette));
+          button.classList.toggle('selected', paletteSignature(palette) === activeSignature);
+          button.setAttribute('aria-label', `Apply ${preset.name} colour preset without changing the deck name`);
+          name.textContent = preset.name;
+          detail.textContent = preset.detail || `${palette.length} colours`;
+          button.append(name, detail);
+          button.addEventListener('click', () => {
+            const before = snapshot();
+            activePalette = palette.slice();
+            distributeName(fullName(), activePalette);
+            selectedIndex = 0;
+            remember(before);
+            render();
+            flash(`${preset.name} colours applied. Your deck name was not changed.`);
+          });
+          grid.appendChild(button);
+        });
+        familySection.appendChild(grid);
+        body.appendChild(familySection);
       });
-      els.colourPresets.appendChild(button);
+      drawer.append(summary, body);
+      els.colourPresets.appendChild(drawer);
     });
   }
 

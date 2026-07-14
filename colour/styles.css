@@ -138,7 +138,22 @@ body{margin:0;min-height:100vh;color:var(--ink);font-family:Inter,Arial,Helvetic
 .format-button[aria-pressed="true"]{border-color:#72edff;color:#fff;background:linear-gradient(#24647e,#133344);box-shadow:0 3px 0 #061016,0 0 0 2px #37d9ff inset,0 0 14px #2ccfff77}
 .format-button[aria-pressed="true"] span{color:#a7f3ff}
 .format-note{margin:10px 0 0;color:#89a0ae;font-size:9px;line-height:1.45}
-.colour-presets{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:12px}
+.colour-presets{display:grid;gap:8px;margin-top:12px}
+.preset-group{overflow:hidden;border:1px solid #35566a;border-radius:8px;background:#0c171e;box-shadow:0 2px 0 #061016}
+.preset-group>summary{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:9px;align-items:center;min-height:48px;padding:9px 12px;color:#dff8ff;background:linear-gradient(135deg,#1b3443,#101d26);cursor:pointer;list-style:none}
+.preset-group>summary::-webkit-details-marker{display:none}
+.preset-group>summary::after{content:"+";color:#50ddf6;font:900 18px/1 ui-monospace,Consolas,monospace;text-shadow:0 0 9px #32d8ff}
+.preset-group>summary span,.preset-group>summary strong,.preset-group>summary small{display:block;min-width:0}
+.preset-group>summary strong{font-size:10px;text-transform:uppercase}
+.preset-group>summary small{margin-top:4px;overflow:hidden;color:#839eae;font-size:7px;text-overflow:ellipsis;text-transform:uppercase;white-space:nowrap}
+.preset-group>summary b{display:grid;place-items:center;width:26px;height:26px;border:1px solid #3f7189;border-radius:50%;color:#a8f3ff;background:#09151c;box-shadow:0 0 9px #2ad8ff44;font:900 9px/1 ui-monospace,Consolas,monospace}
+.preset-group>summary:hover{filter:brightness(1.15)}
+.preset-group[open]>summary{border-bottom:1px solid #2a495b;box-shadow:0 0 14px #20cfff22 inset}
+.preset-group[open]>summary::after{content:"−"}
+.preset-group-body{padding:9px}
+.preset-family+.preset-family{margin-top:12px;padding-top:10px;border-top:1px solid #274454}
+.preset-family h4{margin:0 0 7px;color:#66dff5;font:900 8px/1 ui-monospace,Consolas,monospace;letter-spacing:.08em;text-transform:uppercase}
+.preset-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
 .preset-button{position:relative;min-width:0;min-height:48px;padding:13px 7px 7px;overflow:hidden;border:1px solid #385a70;border-radius:7px;color:#e7faff;background:#101c24;box-shadow:0 2px 0 #071016;cursor:pointer;text-align:left}
 .preset-button::before{content:"";position:absolute;inset:0 0 auto;height:8px;background:var(--preset-gradient);box-shadow:0 0 11px #4edfff99}
 .preset-button strong,.preset-button span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
