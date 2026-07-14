@@ -53,6 +53,7 @@
     preview: $('preview'),
     copyButton: $('copyButton'),
     copiedBurst: $('copiedBurst'),
+    copyDetail: $('copyDetail'),
     colourifier: document.querySelector('.colourifier'),
     techActivation: $('techActivation'),
     rawCount: $('rawCount'),
@@ -99,7 +100,9 @@
   let activeDrag = null;
   let feedbackTimer = null;
   let copyFeedbackTimer = null;
+  let copyDetailTimer = null;
   let activationTimer = null;
+  let defaultNameUntouched = true;
   let recentColors = loadRecentColors();
 
   const validHex = Logic.validHex;
@@ -699,11 +702,15 @@
     }
   }
 
-  function playCopyFeedback(message = 'Copied!', error = false) {
+  function playCopyFeedback(message = 'Copied!', error = false, detail = '') {
     clearTimeout(copyFeedbackTimer);
+    clearTimeout(copyDetailTimer);
     els.copyButton.classList.remove('copy-confirmed');
     els.copiedBurst.classList.remove('show');
     els.copiedBurst.classList.toggle('error', error);
+    els.copyDetail.classList.remove('show');
+    els.copyDetail.classList.toggle('error', error);
+    els.copyDetail.textContent = detail;
     els.copiedBurst.replaceChildren();
     const colours = error ? ['#FF304F'] : visibleSegments().map((segment) => arenaColor(segment.color));
     Array.from(message).forEach((character, index, letters) => {
@@ -716,8 +723,13 @@
     void els.copiedBurst.offsetWidth;
     els.copyButton.classList.add('copy-confirmed');
     els.copiedBurst.classList.add('show');
+    if (detail) {
+      void els.copyDetail.offsetWidth;
+      els.copyDetail.classList.add('show');
+    }
     setTimeout(() => els.copyButton.classList.remove('copy-confirmed'), 230);
     copyFeedbackTimer = setTimeout(() => els.copiedBurst.classList.remove('show'), 950);
+    copyDetailTimer = setTimeout(() => els.copyDetail.classList.remove('show'), 2800);
   }
 
   function flash(message, error = false) {
@@ -748,8 +760,23 @@
   else mobileAdvancedQuery.addListener(syncAdvancedToolLayout);
   syncAdvancedToolLayout();
 
-  els.deckName.addEventListener('focus', () => beginEdit(els.deckName));
+  function selectDefaultName() {
+    if (!defaultNameUntouched || els.deckName.value !== DEFAULT_NAME) return false;
+    els.deckName.select();
+    return true;
+  }
+
+  els.deckName.addEventListener('focus', () => {
+    beginEdit(els.deckName);
+    requestAnimationFrame(selectDefaultName);
+  });
+  els.deckName.addEventListener('pointerup', (event) => {
+    if (!defaultNameUntouched || els.deckName.value !== DEFAULT_NAME) return;
+    event.preventDefault();
+    selectDefaultName();
+  });
   els.deckName.addEventListener('input', () => {
+    defaultNameUntouched = false;
     const caret = els.deckName.selectionStart;
     distributeName(els.deckName.value, activePalette);
     render();
@@ -785,9 +812,9 @@
     const raw = rawName();
     if (!raw) return;
     const copied = await writeClipboard(raw);
-    if (!copied) playCopyFeedback('COPY BLOCKED', true);
-    else if (raw.length > LIMIT) playCopyFeedback('TOO MANY LETTERS!', true);
-    else playCopyFeedback('COPIED!');
+    if (!copied) playCopyFeedback('COPY BLOCKED', true, 'The browser blocked clipboard access.');
+    else if (raw.length > LIMIT) playCopyFeedback('TOO MANY LETTERS!', true, 'Copied, but it is over Arena’s 64-character limit.');
+    else playCopyFeedback('COPIED!', false, 'Copied! Paste it into Arena’s deck-name field.');
   });
 
   els.advancedToggle.addEventListener('click', () => {

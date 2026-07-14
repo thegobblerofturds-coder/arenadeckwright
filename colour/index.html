@@ -14,8 +14,9 @@
 
   <main class="page-shell">
     <header class="hook">
-      <p>TurdGobbler&rsquo;s Deck Name Colourifier</p>
+      <p class="hook-badge">TurdGobbler&rsquo;s Deck Name Colourifier</p>
       <h1>Did you know you can colour Arena decklist names?</h1>
+      <p class="quick-guide">Type a deck name, choose two colours, then select the rainbow result to copy it.</p>
       <span>Version 3 &middot; Made with love</span>
     </header>
 
@@ -40,11 +41,11 @@
             <input id="deckName" type="text" value="YOUR DECKLIST HERE" autocomplete="off" spellcheck="false">
             <span class="pencil" aria-hidden="true">&#9998;</span>
           </div>
-          <p class="stage-label field-stage-label"><span>01</span> Deck name</p>
+          <p class="stage-label field-stage-label"><span class="step-number">01</span><span class="step-copy">Type Your Deck Name &uarr;</span></p>
         </article>
 
         <div class="colour-console" aria-label="Choose the gradient colours">
-          <p class="stage-label"><span>02</span> Select your colours</p>
+          <p class="stage-label"><span class="step-number">02</span><span class="step-copy">Pick Two Colours</span></p>
 
           <div class="colour-widget" id="fromWidget">
             <button id="fromTrigger" class="colour-orb" type="button" aria-expanded="false" aria-controls="fromPopover">
@@ -77,12 +78,13 @@
             <div class="oval-frame output-frame">
               <button id="copyButton" class="copy-output" type="button" aria-label="Copy the coloured Arena deck name">
                 <span id="preview" class="preview" aria-hidden="true"></span>
-                <small>Click to copy</small>
+                <small><span class="desktop-copy">Click to copy</span><span class="mobile-copy">Tap to copy</span></small>
               </button>
             </div>
-            <span id="copiedBurst" class="copied-burst" role="status" aria-live="polite">Copied!</span>
+            <span id="copiedBurst" class="copied-burst" aria-hidden="true">Copied!</span>
           </div>
-          <p class="stage-label field-stage-label"><span>03</span> Click to Copy</p>
+          <p class="stage-label field-stage-label" aria-label="Step 3: select the result above to copy it"><span class="step-number">03</span><span class="step-copy desktop-copy">Click the Result Above &uarr;</span><span class="step-copy mobile-copy">Tap the Result Above &uarr;</span></p>
+          <p id="copyDetail" class="copy-detail" role="status" aria-live="polite"></p>
           <div class="quick-stats">
             <strong id="rawCount">0 / 64 char</strong>
             <div id="gradientPips" class="gradient-pips" role="img" aria-label="No colour stages"></div>
@@ -91,7 +93,7 @@
       </div>
 
       <div class="secret-launch">
-        <span class="advanced-hint" aria-hidden="true">(click here &rarr;)</span>
+        <span class="advanced-hint" aria-hidden="true">(optional controls &rarr;)</span>
         <button id="advancedToggle" class="secret-button" type="button" aria-expanded="false" aria-controls="advancedPanel" aria-label="Open advanced colour controls"><span>+</span></button>
       </div>
 
