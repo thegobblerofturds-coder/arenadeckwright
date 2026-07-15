@@ -4,6 +4,7 @@
   const Logic = window.DeckwrightV4Logic;
   const DEFAULT_NAME = 'YOUR DECK NAME';
   const ORDER = 'WUBRG';
+  const MAX_CUSTOM_STOPS = 7;
   const MANA = {
     W: {name: 'White', colour: '#F4E7C4'},
     U: {name: 'Blue', colour: '#2684FF'},
@@ -44,24 +45,27 @@
     copyStatus: $('copyStatus'),
     rawCount: $('rawCount'),
     gradientPips: $('gradientPips'),
-    identityName: $('identityName'),
-    identityCodes: $('identityCodes'),
+    identityPanel: $('identityPanel'),
     manaWheel: $('manaWheel'),
+    presetContext: $('presetContext'),
+    selectionSummary: $('selectionSummary'),
     presetRail: $('presetRail'),
-    customStart: $('customStart'),
-    customEnd: $('customEnd'),
-    customStartValue: $('customStartValue'),
-    customEndValue: $('customEndValue'),
+    advancedToggle: $('advancedToggle'),
+    advancedToggleLabel: $('advancedToggleLabel'),
+    advancedPanel: $('advancedPanel'),
+    customPickers: $('customPickers'),
+    addCustomColour: $('addCustomColour'),
     customState: $('customState')
   };
 
-  let targetCount = 2;
   let selectedCodes = ['U', 'R'];
+  let customColours = [MANA.U.colour, MANA.R.colour];
   let customActive = false;
   let defaultNameUntouched = true;
   let formatting = {bold: false, italic: false, underline: false, strike: false};
   let currentBuild = null;
   let feedbackTimer = null;
+  let advancedOpen = false;
 
   function setKey(codes) {
     return [...codes].sort((a, b) => ORDER.indexOf(a) - ORDER.indexOf(b)).join('');
@@ -72,14 +76,9 @@
     return PRESETS.find((preset) => preset.codes.length === selectedCodes.length && setKey(preset.codes) === key) || null;
   }
 
-  function activeCodes() {
-    const preset = activePreset();
-    return preset ? preset.codes : selectedCodes;
-  }
-
   function activeColours() {
-    if (customActive) return [els.customStart.value.toUpperCase(), els.customEnd.value.toUpperCase()];
-    return activeCodes().map((code) => MANA[code].colour);
+    if (customActive) return customColours.slice();
+    return (selectedCodes.length ? selectedCodes : ['W']).map((code) => MANA[code].colour);
   }
 
   function gradientCss(colours) {
@@ -93,7 +92,8 @@
       const span = document.createElement('span');
       span.textContent = segment.text;
       span.style.color = Logic.arenaColour(segment.colour);
-      span.style.fontWeight = formatting.bold ? '900' : '850';
+      span.style.fontFamily = 'Arial, Helvetica, sans-serif';
+      span.style.fontWeight = formatting.bold ? '900' : '650';
       span.style.fontStyle = formatting.italic ? 'italic' : 'normal';
       span.style.textDecoration = [
         formatting.underline && 'underline',
@@ -119,23 +119,47 @@
     renderPips(currentBuild.segments);
     els.rawCount.textContent = `${currentBuild.rawLength} / ${Logic.LIMIT}`;
     const invalid = currentBuild.unsupported.length > 0;
-    els.inputState.textContent = invalid ? 'UNSUPPORTED CHARACTER' : (customActive ? 'CUSTOM ACTIVE' : 'ASCII READY');
+    els.inputState.textContent = invalid ? 'UNSUPPORTED CHARACTER' : (customActive ? `${customColours.length} CUSTOM STOPS` : 'ASCII READY');
     els.inputState.classList.toggle('error', invalid);
   }
 
-  function renderIdentity() {
+  function renderPresetRail() {
+    const matches = Logic.matchingPresets(PRESETS, selectedCodes);
+    els.presetContext.textContent = `${matches.length} MATCHING ${matches.length === 1 ? 'PRESET' : 'PRESETS'}`;
+    els.selectionSummary.textContent = selectedCodes.join(' + ');
+    els.presetRail.replaceChildren();
+    matches.forEach((preset) => {
+        const button = document.createElement('button');
+        const name = document.createElement('strong');
+        const codes = document.createElement('span');
+        const colours = preset.codes.map((code) => MANA[code].colour);
+        button.type = 'button';
+        button.className = 'preset-button';
+        button.dataset.name = preset.name;
+        button.style.setProperty('--preset', gradientCss(colours));
+        button.setAttribute('aria-label', `Use ${preset.name}, ${preset.codes.map((code) => MANA[code].name).join(', ')}`);
+        name.textContent = preset.name;
+        codes.textContent = preset.codes.join(' / ');
+        button.append(name, codes);
+        button.addEventListener('click', () => {
+          selectedCodes = preset.codes.slice();
+          customActive = false;
+          renderAll();
+        });
+        els.presetRail.appendChild(button);
+      });
+  }
+
+  function renderSelection() {
     const preset = activePreset();
-    const missing = targetCount - selectedCodes.length;
-    els.identityName.textContent = customActive ? 'Custom' : (preset?.name || (missing > 0 ? `Select ${missing} more` : 'Custom identity'));
-    els.identityCodes.textContent = selectedCodes.length ? selectedCodes.join(' / ') : '—';
-    els.customState.textContent = customActive ? 'ACTIVE' : 'INACTIVE';
-    document.querySelectorAll('.mode-button').forEach((button) => {
-      const selected = Number(button.dataset.count) === targetCount;
-      button.classList.toggle('selected', selected);
-      button.setAttribute('aria-pressed', String(selected));
-    });
+    els.customState.textContent = customActive ? `${customColours.length} STOPS` : 'INACTIVE';
+    els.addCustomColour.disabled = customColours.length >= MAX_CUSTOM_STOPS;
     els.manaWheel.querySelectorAll('.mana-button').forEach((button) => {
-      button.setAttribute('aria-pressed', String(selectedCodes.includes(button.dataset.code)));
+      const code = button.dataset.code;
+      const selected = selectedCodes.includes(code);
+      button.setAttribute('aria-pressed', String(selected));
+      button.disabled = selectedCodes.length >= 3 && !selected;
+      button.setAttribute('aria-label', `${MANA[code].name}${selected ? ', selected' : ''}`);
     });
     els.presetRail.querySelectorAll('.preset-button').forEach((button) => {
       button.classList.toggle('selected', !customActive && preset?.name === button.dataset.name);
@@ -143,7 +167,8 @@
   }
 
   function renderAll() {
-    renderIdentity();
+    renderPresetRail();
+    renderSelection();
     renderOutput();
   }
 
@@ -162,56 +187,86 @@
     });
   }
 
-  function buildPresetRail() {
-    els.presetRail.replaceChildren();
-    PRESETS.filter((preset) => preset.codes.length === targetCount).forEach((preset) => {
-      const button = document.createElement('button');
-      const name = document.createElement('strong');
-      const codes = document.createElement('span');
-      const colours = preset.codes.map((code) => MANA[code].colour);
-      button.type = 'button';
-      button.className = 'preset-button';
-      button.dataset.name = preset.name;
-      button.style.setProperty('--preset', gradientCss(colours));
-      button.setAttribute('aria-label', `Use ${preset.name}, ${preset.codes.join(' ')}`);
-      name.textContent = preset.name;
-      codes.textContent = preset.codes.join(' / ');
-      button.append(name, codes);
-      button.addEventListener('click', () => {
-        selectedCodes = preset.codes.slice();
-        customActive = false;
-        renderAll();
-      });
-      els.presetRail.appendChild(button);
-    });
-  }
-
   function selectMana(code) {
     customActive = false;
     const existing = selectedCodes.indexOf(code);
     if (existing >= 0) {
-      if (selectedCodes.length > 1) selectedCodes.splice(existing, 1);
-    } else if (selectedCodes.length < targetCount) {
+      selectedCodes.splice(existing, 1);
+      if (!selectedCodes.length) selectedCodes = ['W'];
+    } else if (selectedCodes.length < 3) {
       selectedCodes.push(code);
-    } else {
-      selectedCodes = [...selectedCodes.slice(1), code];
     }
     renderAll();
   }
 
-  function changeMode(count) {
-    if (count === targetCount) return;
-    targetCount = count;
-    selectedCodes = count === 2 ? ['U', 'R'] : ['U', 'R', 'W'];
-    customActive = false;
-    buildPresetRail();
-    renderAll();
+  function renderView() {
+    els.identityPanel.hidden = advancedOpen;
+    els.advancedPanel.hidden = !advancedOpen;
+    els.advancedToggle.classList.toggle('active', advancedOpen);
+    els.advancedToggle.setAttribute('aria-expanded', String(advancedOpen));
+    els.advancedToggleLabel.textContent = advancedOpen ? 'BACK TO PRESETS' : 'ADVANCED';
+    els.advancedToggle.querySelector('b').textContent = advancedOpen ? '\u2190' : '+';
   }
 
-  function activateCustom() {
+  function toggleAdvanced() {
+    advancedOpen = !advancedOpen;
+    renderView();
+  }
+
+  function customStopLabel(index) {
+    if (index === 0) return 'START';
+    if (index === customColours.length - 1) return 'END';
+    return `STOP ${String(index + 1).padStart(2, '0')}`;
+  }
+
+  function renderCustomPickers() {
+    els.customPickers.replaceChildren();
+    customColours.forEach((colour, index) => {
+      const item = document.createElement('div');
+      const label = document.createElement('label');
+      const title = document.createElement('span');
+      const picker = document.createElement('input');
+      const value = document.createElement('b');
+      item.className = 'custom-picker';
+      title.textContent = customStopLabel(index);
+      picker.type = 'color';
+      picker.value = colour;
+      picker.setAttribute('aria-label', `${customStopLabel(index)} custom colour`);
+      value.textContent = colour.toUpperCase();
+      picker.addEventListener('input', () => {
+        customColours[index] = picker.value.toUpperCase();
+        value.textContent = customColours[index];
+        customActive = true;
+        renderSelection();
+        renderOutput();
+      });
+      label.append(title, picker, value);
+      item.appendChild(label);
+      if (customColours.length > 2) {
+        const remove = document.createElement('button');
+        remove.type = 'button';
+        remove.className = 'remove-custom-colour';
+        remove.textContent = 'X';
+        remove.setAttribute('aria-label', `Remove ${customStopLabel(index)} custom colour`);
+        remove.addEventListener('click', () => {
+          customColours.splice(index, 1);
+          customActive = true;
+          renderCustomPickers();
+          renderAll();
+        });
+        item.appendChild(remove);
+      }
+      els.customPickers.appendChild(item);
+    });
+  }
+
+  function addCustomStop() {
+    if (customColours.length >= MAX_CUSTOM_STOPS) return;
+    const insertAt = Math.max(1, customColours.length - 1);
+    const neighbours = Logic.smoothPalette([customColours[insertAt - 1], customColours[insertAt]], 3);
+    customColours.splice(insertAt, 0, neighbours[1]);
     customActive = true;
-    els.customStartValue.textContent = els.customStart.value.toUpperCase();
-    els.customEndValue.textContent = els.customEnd.value.toUpperCase();
+    renderCustomPickers();
     renderAll();
   }
 
@@ -284,15 +339,12 @@
     }
     const copied = await writeClipboard(currentBuild.raw);
     if (!copied) playFeedback('COPY BLOCKED', true);
-    else if (currentBuild.rawLength > Logic.LIMIT) playFeedback('OVER 64 — COPIED', true);
+    else if (currentBuild.rawLength > Logic.LIMIT) playFeedback('OVER 64 - COPIED', true);
     else playFeedback('PASTE INTO ARENA!');
   }
 
   buildManaWheel();
-  buildPresetRail();
-  document.querySelectorAll('.mode-button').forEach((button) => {
-    button.addEventListener('click', () => changeMode(Number(button.dataset.count)));
-  });
+  renderCustomPickers();
   document.querySelectorAll('.format-grid button').forEach((button) => {
     button.addEventListener('click', () => {
       const key = button.dataset.format;
@@ -301,8 +353,8 @@
       renderOutput();
     });
   });
-  els.customStart.addEventListener('input', activateCustom);
-  els.customEnd.addEventListener('input', activateCustom);
+  els.advancedToggle.addEventListener('click', toggleAdvanced);
+  els.addCustomColour.addEventListener('click', addCustomStop);
   els.deckName.addEventListener('focus', () => requestAnimationFrame(selectDefaultName));
   els.deckName.addEventListener('pointerup', (event) => {
     if (!defaultNameUntouched || els.deckName.value !== DEFAULT_NAME) return;
@@ -316,4 +368,5 @@
   els.deckName.addEventListener('paste', normalisePastedText);
   els.copyButton.addEventListener('click', copyResult);
   renderAll();
+  renderView();
 })();

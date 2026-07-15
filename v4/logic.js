@@ -98,6 +98,11 @@
     })));
   }
 
+  function matchingPresets(presets, requiredCodes) {
+    const required = Array.from(new Set(requiredCodes));
+    return presets.filter((preset) => Array.isArray(preset.codes) && required.every((code) => preset.codes.includes(code)));
+  }
+
   function build(name, colours, formatting = {}, limit = LIMIT) {
     const palette = smoothPalette(colours, 7);
     const result = distribute(name, palette, formatting, limit);
@@ -122,6 +127,7 @@
     distribute,
     serialize,
     unsupportedCharacters,
+    matchingPresets,
     build
   };
 });

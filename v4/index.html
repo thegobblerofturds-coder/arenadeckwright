@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#030705">
   <meta name="description" content="A fast, offline Arena deck-name colourifier for two- and three-colour identities.">
-  <title>TurdGobbler's Deck Name Colourifier — V4</title>
+  <title>TurdGobbler's Deck Name Colourifier &mdash; V4</title>
   <link rel="stylesheet" href="styles.css">
   <script src="logic.js" defer></script>
   <script src="app.js" defer></script>
@@ -40,24 +40,18 @@
         <span id="gradientPips" class="gradient-pips" aria-label="Gradient stages"></span>
       </div>
 
-      <section class="identity-panel" aria-labelledby="identityHeading">
-        <div class="identity-head">
-          <div>
-            <p class="micro-label">COLOUR IDENTITY</p>
-            <h2 id="identityHeading"><span id="identityName">Izzet</span><small id="identityCodes">U / R</small></h2>
-          </div>
-          <div class="mode-switch" role="group" aria-label="Number of identity colours">
-            <button class="mode-button selected" type="button" data-count="2" aria-pressed="true">2</button>
-            <button class="mode-button" type="button" data-count="3" aria-pressed="false">3</button>
-          </div>
-        </div>
-
+      <section id="identityPanel" class="identity-panel" aria-label="Mana colour presets">
         <div id="manaWheel" class="mana-wheel" role="group" aria-label="Choose mana colours"></div>
-        <div id="presetRail" class="preset-rail" aria-label="Colour identity presets"></div>
+        <div class="preset-context"><span id="presetContext">MATCHING PRESETS</span><small id="selectionSummary">U + R</small></div>
+        <div id="presetRail" class="preset-rail" aria-label="Matching colour presets"></div>
       </section>
 
-      <details id="advancedPanel" class="advanced-panel">
-        <summary><span>ADVANCED</span><b aria-hidden="true"></b></summary>
+      <button id="advancedToggle" class="advanced-toggle" type="button" aria-expanded="false" aria-controls="identityPanel advancedPanel">
+        <span id="advancedToggleLabel">ADVANCED</span><b aria-hidden="true">+</b>
+      </button>
+
+      <section id="advancedPanel" class="advanced-panel" aria-label="Advanced colour and style controls" hidden>
+        <div class="advanced-title"><span>ADVANCED CONTROLS</span><small>CHANGES STAY ACTIVE</small></div>
         <div class="advanced-body">
           <section class="custom-colours" aria-labelledby="customHeading">
             <div class="advanced-head">
@@ -65,12 +59,12 @@
                 <p class="micro-label">MANUAL OVERRIDE</p>
                 <h3 id="customHeading">CUSTOM COLOURS</h3>
               </div>
-              <span id="customState">INACTIVE</span>
+              <div class="custom-tools">
+                <span id="customState">INACTIVE</span>
+                <button id="addCustomColour" class="add-custom-colour" type="button" aria-label="Add another custom gradient colour"><b aria-hidden="true">+</b><small>STOP</small></button>
+              </div>
             </div>
-            <div class="custom-pickers">
-              <label><span>START</span><input id="customStart" type="color" value="#2684FF"><b id="customStartValue">#2684FF</b></label>
-              <label><span>END</span><input id="customEnd" type="color" value="#E34832"><b id="customEndValue">#E34832</b></label>
-            </div>
+            <div id="customPickers" class="custom-pickers"></div>
           </section>
 
           <section class="formatting" aria-labelledby="formatHeading">
@@ -89,7 +83,7 @@
             </div>
           </section>
         </div>
-      </details>
+      </section>
     </section>
 
     <footer><span>LOCAL // NOTHING UPLOADED</span><span>ARENA RAW MAX: 64</span></footer>
