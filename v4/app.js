@@ -8,7 +8,7 @@
   const MANA = {
     W: {name: 'White', colour: '#F4E7C4'},
     U: {name: 'Blue', colour: '#2684FF'},
-    B: {name: 'Black', colour: '#6B4777'},
+    B: {name: 'Black', colour: '#25262A'},
     R: {name: 'Red', colour: '#E34832'},
     G: {name: 'Green', colour: '#39A96B'}
   };
@@ -51,7 +51,6 @@
     selectionSummary: $('selectionSummary'),
     presetRail: $('presetRail'),
     advancedToggle: $('advancedToggle'),
-    advancedToggleLabel: $('advancedToggleLabel'),
     advancedPanel: $('advancedPanel'),
     customPickers: $('customPickers'),
     addCustomColour: $('addCustomColour'),
@@ -78,7 +77,7 @@
 
   function activeColours() {
     if (customActive) return customColours.slice();
-    return (selectedCodes.length ? selectedCodes : ['W']).map((code) => MANA[code].colour);
+    return selectedCodes.length ? selectedCodes.map((code) => MANA[code].colour) : ['#747A76'];
   }
 
   function gradientCss(colours) {
@@ -114,16 +113,30 @@
   }
 
   function renderOutput() {
+    const ready = customActive || selectedCodes.length > 0;
     currentBuild = Logic.build(els.deckName.value, activeColours(), formatting, Logic.LIMIT);
     renderPreview(currentBuild.segments);
-    renderPips(currentBuild.segments);
-    els.rawCount.textContent = `${currentBuild.rawLength} / ${Logic.LIMIT}`;
+    renderPips(ready ? currentBuild.segments : []);
+    els.rawCount.textContent = ready ? `${currentBuild.rawLength} / ${Logic.LIMIT}` : `-- / ${Logic.LIMIT}`;
     const invalid = currentBuild.unsupported.length > 0;
-    els.inputState.textContent = invalid ? 'UNSUPPORTED CHARACTER' : (customActive ? `${customColours.length} CUSTOM STOPS` : 'ASCII READY');
+    els.copyButton.disabled = !ready;
+    els.inputState.textContent = invalid
+      ? 'UNSUPPORTED CHARACTER'
+      : (!ready ? 'SELECT A COLOUR' : (customActive ? `${customColours.length} CUSTOM STOPS` : 'ASCII READY'));
     els.inputState.classList.toggle('error', invalid);
   }
 
   function renderPresetRail() {
+    if (!selectedCodes.length) {
+      els.presetContext.textContent = 'PRESETS OFFLINE';
+      els.selectionSummary.textContent = 'SELECT A COLOUR';
+      els.presetRail.replaceChildren();
+      const empty = document.createElement('div');
+      empty.className = 'preset-empty';
+      empty.textContent = 'CHOOSE W / U / B / R / G TO LOAD MATCHES';
+      els.presetRail.appendChild(empty);
+      return;
+    }
     const matches = Logic.matchingPresets(PRESETS, selectedCodes);
     els.presetContext.textContent = `${matches.length} MATCHING ${matches.length === 1 ? 'PRESET' : 'PRESETS'}`;
     els.selectionSummary.textContent = selectedCodes.join(' + ');
@@ -192,7 +205,6 @@
     const existing = selectedCodes.indexOf(code);
     if (existing >= 0) {
       selectedCodes.splice(existing, 1);
-      if (!selectedCodes.length) selectedCodes = ['W'];
     } else if (selectedCodes.length < 3) {
       selectedCodes.push(code);
     }
@@ -204,8 +216,7 @@
     els.advancedPanel.hidden = !advancedOpen;
     els.advancedToggle.classList.toggle('active', advancedOpen);
     els.advancedToggle.setAttribute('aria-expanded', String(advancedOpen));
-    els.advancedToggleLabel.textContent = advancedOpen ? 'BACK TO PRESETS' : 'ADVANCED';
-    els.advancedToggle.querySelector('b').textContent = advancedOpen ? '\u2190' : '+';
+    els.advancedToggle.setAttribute('aria-checked', String(advancedOpen));
   }
 
   function toggleAdvanced() {

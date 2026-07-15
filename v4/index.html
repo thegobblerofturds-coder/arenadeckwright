@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#030705">
   <meta name="description" content="A fast, offline Arena deck-name colourifier for two- and three-colour identities.">
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="manifest" href="site.webmanifest">
   <title>TurdGobbler's Deck Name Colourifier &mdash; V4</title>
   <link rel="stylesheet" href="styles.css">
   <script src="logic.js" defer></script>
@@ -29,7 +33,7 @@
 
       <button id="copyButton" class="copy-button" type="button" aria-describedby="copyHint copyStatus">
         <span id="outputPreview" class="output-preview" aria-hidden="true"></span>
-        <span id="copyHint" class="copy-hint"><span class="desktop-copy">CLICK</span><span class="mobile-copy">TAP</span> TO COPY</span>
+        <span id="copyHint" class="copy-hint"><span class="ready-copy"><span class="desktop-copy">CLICK</span><span class="mobile-copy">TAP</span> TO COPY</span><span class="empty-copy">SELECT A COLOUR</span></span>
         <span id="copyBurst" class="copy-burst" aria-hidden="true"></span>
       </button>
       <p id="copyStatus" class="sr-only" role="status" aria-live="polite"></p>
@@ -40,15 +44,15 @@
         <span id="gradientPips" class="gradient-pips" aria-label="Gradient stages"></span>
       </div>
 
+      <button id="advancedToggle" class="advanced-toggle" type="button" role="switch" aria-checked="false" aria-expanded="false" aria-controls="identityPanel advancedPanel">
+        <span>ADVANCED</span><i class="toggle-track" aria-hidden="true"><b></b></i>
+      </button>
+
       <section id="identityPanel" class="identity-panel" aria-label="Mana colour presets">
         <div id="manaWheel" class="mana-wheel" role="group" aria-label="Choose mana colours"></div>
         <div class="preset-context"><span id="presetContext">MATCHING PRESETS</span><small id="selectionSummary">U + R</small></div>
         <div id="presetRail" class="preset-rail" aria-label="Matching colour presets"></div>
       </section>
-
-      <button id="advancedToggle" class="advanced-toggle" type="button" aria-expanded="false" aria-controls="identityPanel advancedPanel">
-        <span id="advancedToggleLabel">ADVANCED</span><b aria-hidden="true">+</b>
-      </button>
 
       <section id="advancedPanel" class="advanced-panel" aria-label="Advanced colour and style controls" hidden>
         <div class="advanced-title"><span>ADVANCED CONTROLS</span><small>CHANGES STAY ACTIVE</small></div>
