@@ -12,7 +12,6 @@
   let frame = 0;
 
   layer.id = 'cheugSwarm';
-  layer.setAttribute('aria-hidden', 'true');
   document.body.appendChild(layer);
 
   function randomBetween(minimum, maximum) {
@@ -46,6 +45,7 @@
     };
     element.className = 'cheug-arrow';
     element.textContent = '➤';
+    element.setAttribute('aria-hidden', 'true');
     element.style.setProperty('--arrow-size', `${size}px`);
     layer.appendChild(element);
     arrows.push(arrow);
@@ -55,6 +55,58 @@
     target.x = Math.max(0, Math.min(window.innerWidth, x));
     target.y = Math.max(0, Math.min(window.innerHeight, y));
     lastPointerAt = performance.now();
+  }
+
+  function versionFourTarget() {
+    return {
+      x: window.innerWidth - Math.max(72, Math.min(145, window.innerWidth * .13)),
+      y: window.innerHeight - Math.max(88, Math.min(155, window.innerHeight * .17))
+    };
+  }
+
+  function spawnRouteTeaser() {
+    const point = versionFourTarget();
+    const teaser = document.createElement('span');
+    const x = randomBetween(12, Math.max(24, window.innerWidth * .72));
+    const y = randomBetween(20, Math.max(40, window.innerHeight - 92));
+    const direction = Math.atan2(point.y - y, point.x - x) * 180 / Math.PI;
+    teaser.className = 'cheug-route-teaser';
+    teaser.textContent = '➤';
+    teaser.setAttribute('aria-hidden', 'true');
+    teaser.style.left = `${x}px`;
+    teaser.style.top = `${y}px`;
+    teaser.style.setProperty('--teaser-size', `${randomBetween(compact ? 38 : 48, compact ? 76 : 108)}px`);
+    teaser.style.transform = `rotate(${direction}deg)`;
+    layer.appendChild(teaser);
+  }
+
+  function beginEscapeTease() {
+    let created = 0;
+    spawnRouteTeaser();
+    created += 1;
+    const teaserCascade = window.setInterval(() => {
+      spawnRouteTeaser();
+      created += 1;
+      if (created >= 16) window.clearInterval(teaserCascade);
+    }, 190);
+  }
+
+  function spawnVersionFourEscape() {
+    const pair = document.createElement('div');
+    const guide = document.createElement('span');
+    const link = document.createElement('a');
+    pair.className = 'cheug-route-pair';
+    guide.className = 'cheug-route-guide';
+    guide.textContent = '➤';
+    guide.setAttribute('aria-hidden', 'true');
+    link.className = 'cheug-version-link';
+    link.href = '../version4/';
+    link.textContent = '➤';
+    link.title = 'Escape to Version 4';
+    link.setAttribute('aria-label', 'Escape to Version 4');
+    pair.append(guide, link);
+    layer.appendChild(pair);
+    window.requestAnimationFrame(() => pair.classList.add('show'));
   }
 
   window.addEventListener('pointermove', (event) => aimAt(event.clientX, event.clientY), {passive: true});
@@ -97,6 +149,9 @@
     }, reducedMotion ? 100 : 52);
     frame = window.requestAnimationFrame(animate);
   }, 1000);
+
+  window.setTimeout(beginEscapeTease, 2200);
+  window.setTimeout(spawnVersionFourEscape, 5200);
 
   window.addEventListener('pagehide', () => window.cancelAnimationFrame(frame), {once: true});
 })();
