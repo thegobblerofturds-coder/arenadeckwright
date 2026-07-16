@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en-CA">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#09050d">
+  <meta name="description" content="A perfectly normal Arena deck-name colourifier.">
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="manifest" href="site.webmanifest">
+  <title>TurdGobbler's Deck Name Colourifier &mdash; Cheugs</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="logic.js" defer></script>
+  <script src="app.js" defer></script>
+  <script src="cheugs.js" defer></script>
+</head>
+<body>
+  <main class="app-shell">
+    <header class="masthead">
+      <h1><span class="brand-owner">TURDGOBBLER'S</span><span class="brand-title">DECK NAME COLOURIFIER</span><span class="version-mark" aria-label="Version 4">V4</span></h1>
+    </header>
+
+    <section class="console" aria-label="Deck Name Colourifier">
+      <div class="field-head">
+        <label for="deckName">DECK NAME</label>
+        <span id="inputState">ASCII READY</span>
+      </div>
+      <input id="deckName" class="deck-input" type="text" value="YOUR DECK NAME" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-describedby="inputState">
+
+      <button id="copyButton" class="copy-button" type="button" aria-describedby="copyHint copyStatus">
+        <span id="outputPreview" class="output-preview" aria-hidden="true"></span>
+        <span id="copyHint" class="copy-hint"><span class="desktop-copy">CLICK</span><span class="mobile-copy">TAP</span> TO COPY</span>
+        <span class="paste-hint">PASTE INTO ARENA</span>
+        <span id="copyBurst" class="copy-burst" aria-hidden="true"></span>
+      </button>
+      <p id="copyStatus" class="sr-only" role="status" aria-live="polite"></p>
+
+      <div class="telemetry" aria-label="Arena raw character use and gradient stages">
+        <span id="rawCount" class="raw-count">0 / 64</span>
+        <span class="telemetry-rule" aria-hidden="true"></span>
+        <span id="gradientPips" class="gradient-pips" aria-label="Gradient stages"></span>
+      </div>
+
+      <section class="gradient-panel" aria-label="Gradient editor">
+        <div class="gradient-toolbar">
+          <div class="gradient-actions" aria-label="Gradient order controls">
+            <button id="rotateGradient" type="button" title="Move the first colour to the end"><b aria-hidden="true">&#8635;</b><span>ROTATE</span></button>
+            <button id="flipGradient" type="button" title="Reverse the colour order"><b aria-hidden="true">&#8644;</b><span>FLIP</span></button>
+          </div>
+          <div class="format-pad" role="group" aria-label="Global text styling">
+            <button type="button" data-format="bold" aria-label="Bold" aria-pressed="false"><b>B</b></button>
+            <button type="button" data-format="italic" aria-label="Italic" aria-pressed="false"><i>I</i></button>
+            <button type="button" data-format="underline" aria-label="Underline" aria-pressed="false"><u>U</u></button>
+            <button type="button" data-format="strike" aria-label="Strikethrough" aria-pressed="false"><s>S</s></button>
+          </div>
+        </div>
+        <div id="gradientBar" class="gradient-bar" aria-hidden="true"><span>YOUR GRADIENT</span></div>
+        <div id="colourStops" class="colour-stops" aria-label="Editable gradient colours"></div>
+      </section>
+
+      <section class="shortcuts-panel" aria-label="Colour shortcuts">
+        <div class="shortcut-block">
+          <div class="shortcut-head">
+            <div><p class="micro-label">ONE TAP</p><h2>PALETTES</h2></div>
+            <small>LOADS EDITABLE COLOURS</small>
+          </div>
+          <div id="generalPalettes" class="general-palettes"></div>
+        </div>
+
+        <div class="shortcut-divider" aria-hidden="true"></div>
+
+        <div class="shortcut-block mtg-shortcuts">
+          <div class="shortcut-head">
+            <div><p class="micro-label">PRESET FINDER</p><h2>MTG SHORTCUTS</h2></div>
+            <small>PIPS FILTER ONLY</small>
+          </div>
+          <div id="manaWheel" class="mana-wheel" role="group" aria-label="Filter presets by mana colours"></div>
+          <div class="preset-context"><span id="presetContext">PRESETS OFFLINE</span><small id="selectionSummary">SELECT PIPS</small></div>
+          <div id="presetRail" class="preset-rail" aria-label="Matching MTG colour presets"></div>
+        </div>
+      </section>
+
+    </section>
+
+    <footer><span>LOCAL // NOTHING UPLOADED</span><span>ARENA RAW MAX: 64</span></footer>
+  </main>
+</body>
+</html>
