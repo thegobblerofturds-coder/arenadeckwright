@@ -1,8 +1,8 @@
-TURDGOBBLER'S DECK NAME COLOURIFIER — VERSION 4
+TURDGOBBLER'S DECK NAME COLOURIFIER — CHEUGS ARCHIVE
 
 Open index.html in a modern browser. No install, internet connection, or account is required.
 
-Version 4 is the compact expert build:
+Cheugs is the archived prank build:
 - live Arena-ready deck-name gradients
 - an always-visible two-to-seven-stop custom gradient editor
 - rotate and flip controls for colour order

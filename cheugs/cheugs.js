@@ -100,10 +100,10 @@
     guide.textContent = '➤';
     guide.setAttribute('aria-hidden', 'true');
     link.className = 'cheug-version-link';
-    link.href = '../version4/';
+    link.href = '../colour/';
     link.textContent = '➤';
-    link.title = 'Escape to Version 4';
-    link.setAttribute('aria-label', 'Escape to Version 4');
+    link.title = 'Escape to the current Colourifier';
+    link.setAttribute('aria-label', 'Escape to the current Colourifier');
     pair.append(guide, link);
     layer.appendChild(pair);
     window.requestAnimationFrame(() => pair.classList.add('show'));

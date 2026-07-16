@@ -72,7 +72,7 @@ body::before{
   box-shadow:2px 2px 0 #171310;
   font-size:11px;
 }
-.v4-quick{
+.quick-launch{
   display:flex;
   align-items:center;
   gap:12px;
@@ -86,25 +86,25 @@ body::before{
   text-decoration:none;
   transition:transform .12s,border-color .12s,box-shadow .12s;
 }
-.v4-quick span,.v4-quick small{display:block}
-.v4-quick span{
+.quick-launch span,.quick-launch small{display:block}
+.quick-launch span{
   font:800 10px/1 ui-monospace,SFMono-Regular,Consolas,monospace;
   letter-spacing:.07em;
   text-transform:uppercase;
 }
-.v4-quick small{
+.quick-launch small{
   margin-bottom:4px;
   color:#699379;
   font-size:7px;
   letter-spacing:.12em;
 }
-.v4-quick>b{color:var(--matrix);font-size:16px}
-.v4-quick:hover{
+.quick-launch>b{color:var(--matrix);font-size:16px}
+.quick-launch:hover{
   border-color:var(--matrix);
   box-shadow:0 3px 0 #1b1a18,0 0 20px #32ff793d;
   transform:translateY(-1px);
 }
-.v4-quick:active{box-shadow:none;transform:translateY(2px)}
+.quick-launch:active{box-shadow:none;transform:translateY(2px)}
 
 main{width:min(1380px,calc(100% - 32px));margin:auto}
 .eyebrow{
@@ -231,7 +231,7 @@ main{width:min(1380px,calc(100% - 32px));margin:auto}
 }
 .trust-line strong{border-color:#477a55;color:#17361e;background:#a9f3b7}
 
-.v3-showcase{
+.current-showcase{
   position:relative;
   display:block;
   padding:15px;
@@ -244,8 +244,31 @@ main{width:min(1380px,calc(100% - 32px));margin:auto}
   transform:rotate(1deg);
   transition:transform .22s,filter .22s;
 }
-.v3-showcase:hover{filter:brightness(1.04);transform:rotate(0deg) translateY(-7px)}
-.v3-showcase img{display:block;width:100%;aspect-ratio:1.72/1;object-fit:cover;border-radius:16px}
+.current-showcase:hover{filter:brightness(1.04);transform:rotate(0deg) translateY(-7px)}
+.console-preview{
+  position:relative;
+  display:grid;
+  align-content:center;
+  min-height:420px;
+  padding:clamp(26px,5vw,58px);
+  overflow:hidden;
+  border:1px solid #667780;
+  border-radius:18px;
+  background:
+    repeating-linear-gradient(180deg,#ffffff04 0 1px,transparent 1px 5px),
+    radial-gradient(circle at 10% 40%,#168fdc24,transparent 34%),
+    radial-gradient(circle at 92% 68%,#ff3bd51c,transparent 35%),
+    linear-gradient(145deg,#111920,#030507 68%);
+  box-shadow:0 0 0 3px #020304,0 0 0 4px #34414a,0 16px 38px #000c inset,-14px 0 34px #168fdc24,14px 0 34px #ff3bd51d;
+}
+.console-preview::before{content:"";position:absolute;left:9%;right:9%;top:0;height:2px;background:linear-gradient(90deg,transparent,#38adff,#fff,#ff3bd5,transparent);box-shadow:0 0 13px #38adff,0 0 13px #ff3bd5}
+.preview-label{margin:0 4px 8px;color:#a8bdc7;font:900 8px/1 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.18em}
+.preview-input{display:flex;align-items:center;min-height:56px;padding:0 17px;border:1px solid #81949e;border-radius:10px;color:#bdefff;background:repeating-linear-gradient(90deg,#ffffff05 0 1px,transparent 1px 4px),#0a171d;box-shadow:0 5px 13px #000a inset,0 0 15px #38adff22;font:900 clamp(14px,2.1vw,22px)/1 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.04em;text-shadow:0 0 8px #38adff88}
+.preview-output{display:grid;place-items:center;min-height:124px;margin-top:15px;padding:20px;border:1px solid #8e9ba4;border-radius:14px;background:radial-gradient(circle at 12% 50%,#2684ff24,transparent 34%),radial-gradient(circle at 88% 50%,#e3483224,transparent 34%),linear-gradient(180deg,#101920,#04070a 68%);box-shadow:0 4px 0 #111820,0 8px 24px #000d,0 0 0 3px #010203,0 0 0 4px #3d4851}
+.preview-output strong{color:#fff;background:linear-gradient(90deg,#29a9ff,#825fff,#ff3bd5,#ff6a39);background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:clamp(21px,4vw,37px);letter-spacing:-.04em}
+.preview-output small{margin-top:12px;color:#b9d0da;font:900 7px/1 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.22em}
+.preview-gradient{height:28px;margin:28px 13px 0;border:2px solid #d7e1e6;border-radius:999px;background:linear-gradient(90deg,#2684ff,#7b5cff,#ff3bd5,#e34832);box-shadow:0 0 0 3px #080b0e,-8px 0 18px #2684ff70,8px 0 18px #e3483270}
+.preview-controls{display:flex;justify-content:center;gap:10px;margin-top:24px}.preview-controls i{display:block;width:33px;height:33px;border:1px solid #60717b;border-radius:8px;background:linear-gradient(#182229,#070b0e);box-shadow:0 2px 0 #010203,0 1px #fff2 inset}.preview-controls i:nth-child(3){border-radius:50%;box-shadow:0 2px 0 #010203,0 0 14px #38adff55}.preview-controls i:nth-child(4){border-color:#9d6c93;box-shadow:0 2px 0 #010203,0 0 14px #ff3bd544}
 .version-flag{
   position:absolute;
   z-index:3;
@@ -326,6 +349,7 @@ main{width:min(1380px,calc(100% - 32px));margin:auto}
   box-shadow:0 0 12px #58ff5a77;
   text-shadow:0 0 6px #6aff71;
 }
+.box-art-thumb{background:url("box-art/version3-art.webp") center/cover}
 .arcane-thumb{background:url("arcane/arcane-workshop.webp") center 34%/cover}
 .legacy-copy{min-width:0}
 .legacy-copy>*{display:block}
@@ -363,7 +387,7 @@ footer{
   text-transform:uppercase;
 }
 
-.brand:focus-visible,.v4-quick:focus-visible,.v3-showcase:focus-visible,.launch:focus-visible,.legacy-tile:focus-visible{
+.brand:focus-visible,.quick-launch:focus-visible,.current-showcase:focus-visible,.launch:focus-visible,.legacy-tile:focus-visible{
   outline:3px solid var(--cyan);
   outline-offset:4px;
 }
@@ -372,7 +396,7 @@ footer{
   .hero{grid-template-columns:1fr;min-height:0;padding-top:62px;text-align:center}
   .hero h1,.hook,.intro{margin-left:auto;margin-right:auto}
   .hero-actions,.trust-line,.eyebrow{justify-content:center}
-  .v3-showcase{width:min(850px,100%);margin:auto}
+  .current-showcase{width:min(850px,100%);margin:auto}
   .legacy-grid{justify-content:center}
 }
 
@@ -384,8 +408,8 @@ footer{
   .hero h1 .product{font-size:clamp(43px,13vw,67px);line-height:.88;letter-spacing:-.07em}
   .hero h1 em{margin:5px auto 0}
   .hook{margin-top:25px}
-  .v3-showcase{padding:8px;border-radius:18px}
-  .v3-showcase img{border-radius:10px}
+  .current-showcase{padding:8px;border-radius:18px}
+  .console-preview{min-height:390px;border-radius:10px}
   .version-flag{top:-21px;left:4px}
   .showcase-action{right:18px;bottom:18px;padding:10px 13px}
   .legacy-heading{display:block;text-align:center}
@@ -397,7 +421,7 @@ footer{
 
 @media(max-width:400px){
   .brand span{display:none}
-  .v4-quick{min-height:38px;padding:5px 9px 5px 11px}
+  .quick-launch{min-height:38px;padding:5px 9px 5px 11px}
   .hero h1 .product{font-size:44px}
   .hook{font-size:19px}
   .launch{width:100%}

@@ -5,8 +5,10 @@ A fan-made, browser-based utility for creating colourful Magic Arena deck names 
 ## Site structure
 
 - `/` is the landing page.
-- `/colour/` is Version 3 and the primary Deck Name Colourifier.
-- `/arcane/` and `/metal/` preserve the previous editions.
+- `/colour/` is the current Version 5 Deck Name Colourifier.
+- `/box-art/` preserves Version 3 under its archive name, **Box Art**.
+- `/arcane/` and `/metal/` preserve the other official archived editions.
+- `/version4/` redirects old links to the current `/colour/` release.
 
 The `/colour/` folder is what makes `https://turdgobbler.com/colour/` work. No backend or server-side code is required.
 
@@ -18,6 +20,6 @@ The project uses ordinary HTML, CSS and JavaScript with no external packages or 
 
 ## Publishing with GitHub Pages
 
-Upload the contents of this folder to the root of the GitHub Pages repository, preserving the `colour`, `arcane`, and `metal` folders. The repository root must contain `index.html`, `site.css`, and `.nojekyll`.
+Upload the contents of this folder to the root of the GitHub Pages repository, preserving the `colour`, `box-art`, `arcane`, `metal`, and `version4` folders. The repository root must contain `index.html`, `site.css`, and `.nojekyll`.
 
 This is an unofficial fan-made utility and is not affiliated with Wizards of the Coast.
