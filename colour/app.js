@@ -1039,6 +1039,8 @@
   }
 
   function renderSavedPalettes() {
+    const previousStrip = els.savedPalettes.querySelector('.palette-strip.compact');
+    const previousScrollLeft = previousStrip ? previousStrip.scrollLeft : 0;
     els.savedPalettes.replaceChildren();
     const currentSignature = stopSignature();
     const favouriteIndex = favourites.findIndex((entry) => stopSignature(entry.stops) === currentSignature);
@@ -1083,6 +1085,11 @@
       });
       group.append(heading, strip);
       els.savedPalettes.appendChild(group);
+      requestAnimationFrame(() => {
+        if (!strip.isConnected) return;
+        const maximumScroll = Math.max(0, strip.scrollWidth - strip.clientWidth);
+        strip.scrollLeft = Math.min(previousScrollLeft, maximumScroll);
+      });
     }
   }
 
