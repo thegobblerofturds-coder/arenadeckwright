@@ -1075,18 +1075,50 @@
     });
   }
 
-  function renameFavourite(index) {
+  function renameFavourite(index, wrap, rename) {
     const entry = favourites[index];
     if (!entry) return;
     const slot = savedSlotNumber(entry, index);
-    const requested = window.prompt(`NAME SLOT ${slot} — LEAVE BLANK TO RESET`, entry.name);
-    if (requested === null) return;
-    entry.slot = slot;
-    entry.name = requested.trim().replace(/\s+/g, ' ').slice(0, 28) || `SLOT ${String(slot).padStart(2, '0')}`;
-    persist();
-    renderSavedPalettes();
-    pulseSavedSlot(slot);
-    haptic([8, 6, 10]);
+    const existing = wrap.querySelector('.rename-saved-input');
+    if (existing) {
+      entry.slot = slot;
+      entry.name = existing.value.trim().replace(/\s+/g, ' ').slice(0, 28)
+        || `SLOT ${String(slot).padStart(2, '0')}`;
+      persist();
+      renderSavedPalettes();
+      pulseSavedSlot(slot);
+      haptic([8, 6, 10]);
+      return;
+    }
+
+    const input = document.createElement('input');
+    input.className = 'rename-saved-input';
+    input.type = 'text';
+    input.value = entry.name;
+    input.maxLength = 28;
+    input.autocomplete = 'off';
+    input.spellcheck = false;
+    input.setAttribute('aria-label', `Name saved palette slot ${slot}`);
+    wrap.classList.add('renaming');
+    rename.classList.add('confirming');
+    rename.textContent = '✓';
+    rename.setAttribute('aria-label', `Confirm name for saved palette slot ${slot}`);
+    input.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        rename.click();
+      } else if (event.key === 'Escape') {
+        event.preventDefault();
+        renderSavedPalettes();
+        haptic(3);
+      }
+    });
+    wrap.appendChild(input);
+    requestAnimationFrame(() => {
+      input.focus({preventScroll: true});
+      input.select();
+    });
+    haptic(5);
   }
 
   function renderSavedPalettes() {
@@ -1120,7 +1152,7 @@
         rename.className = 'rename-saved';
         rename.textContent = '✎';
         rename.setAttribute('aria-label', `Rename saved palette ${entry.name}, slot ${slot}`);
-        rename.addEventListener('click', () => renameFavourite(index));
+        rename.addEventListener('click', () => renameFavourite(index, wrap, rename));
         remove.type = 'button';
         remove.className = 'remove-saved';
         remove.textContent = '\u00D7';

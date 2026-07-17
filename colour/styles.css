@@ -807,6 +807,10 @@ footer{padding-top:11px;opacity:.7}
 .saved-palette>.palette-button{padding-right:76px}
 .rename-saved{position:absolute;z-index:3;right:39px;top:8px;width:30px;height:30px;padding:0;border:1px solid #5886a0;border-radius:8px;color:#e7f8ff;background:linear-gradient(#234252,#0c1c25);box-shadow:0 1px #fff2 inset,0 2px 0 #030a0e,0 0 9px #43c6ff35;cursor:pointer;font:900 16px/1 Arial,sans-serif}
 .rename-saved::before{content:"";position:absolute;inset:-6px}.rename-saved:hover{border-color:#bcecff;color:#fff;background:linear-gradient(#315c70,#102b38);box-shadow:0 1px #fff3 inset,0 2px 0 #030a0e,0 0 13px #43c6ff7a}.rename-saved:active{translate:0 2px;box-shadow:0 0 10px #43c6ff55 inset}
+.rename-saved.confirming{border-color:#83f1c0;color:#06130e;background:linear-gradient(#dffff0,#69d6a4);box-shadow:0 1px #fff8 inset,0 2px 0 #082419,0 0 14px #4bffc07a}
+.rename-saved-input{position:absolute;z-index:4;left:7px;right:74px;top:7px;height:32px;min-width:0;padding:0 9px;border:1px solid #8edfff;border-radius:8px;color:#effbff;background:#071119f2;box-shadow:0 0 0 2px #02070a,0 0 13px #43c6ff55,0 3px 8px #000 inset;outline:0;font:800 10px/1 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.04em}
+.rename-saved-input:focus{border-color:#fff;box-shadow:0 0 0 2px #02070a,0 0 0 4px #52cfff80,0 0 17px #43c6ff75,0 3px 8px #000 inset}
+.saved-palette.renaming>.palette-button{pointer-events:none}
 .saved-palette.slot-spark{animation:saved-slot-spark .68s cubic-bezier(.18,.82,.22,1)}
 @keyframes saved-slot-spark{0%{filter:brightness(1);transform:none}35%{filter:brightness(1.7);transform:translateY(-3px) scale(1.025)}70%{filter:brightness(1.12);transform:translateY(1px) scale(.995)}100%{filter:brightness(1);transform:none}}
 
