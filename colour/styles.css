@@ -684,11 +684,12 @@ body.tube-dragging{overscroll-behavior:none;touch-action:none;user-select:none}
 .stage-warning{display:none;margin:6px 8px 1px;padding:7px 9px;border:1px solid #9a7a4666;border-radius:8px;color:#ffd995;background:linear-gradient(90deg,#2a1c0dcc,#16100bd9);box-shadow:0 0 14px #ff9e2f25 inset;font:900 6.5px/1.25 var(--font-mono);letter-spacing:.09em;text-align:center}
 .stage-warning.visible{display:block}.stage-warning.over{border-color:#ff667288;color:#ffd4d8;background:linear-gradient(90deg,#3b0c14e8,#1b090de8);box-shadow:0 0 17px #ff405f35 inset,0 0 13px #ff405f20}
 
-/* The rightward wash belongs to the last colour bubble, never the empty tube edge. */
+/* Three curved signals carry the last colour's wash along the remaining tube. */
 .bar-stop-markers::after{display:none}
-.marker-flow-arrow{position:absolute;z-index:7;left:calc(50% + 12px);top:50%;display:block;width:25px;height:16px;pointer-events:none;transform:translateY(-50%)}
-.marker-flow-arrow::before{content:"";position:absolute;inset:3px 0;background:linear-gradient(90deg,transparent,#fff 58%,var(--stop-colour));clip-path:polygon(0 28%,68% 28%,68% 0,100% 50%,68% 100%,68% 72%,0 72%);filter:drop-shadow(0 0 4px #fff) drop-shadow(0 0 8px var(--stop-colour));animation:marker-flow-pulse 1.25s cubic-bezier(.24,.72,.22,1) infinite}
-@keyframes marker-flow-pulse{0%,42%,100%{opacity:.12;transform:translateX(-8px) scaleX(.55)}62%{opacity:1;transform:translateX(0) scaleX(1.08)}82%{opacity:.24;transform:translateX(7px) scaleX(.68)}}
+.marker-flow-brackets{position:absolute;z-index:7;left:calc(50% + 13px);top:50%;display:grid;width:var(--flow-width);min-width:0;height:22px;grid-template-columns:repeat(3,1fr);place-items:center;overflow:hidden;pointer-events:none;transform:translateY(-50%)}
+.marker-flow-brackets b{display:block;width:10px;height:17px;border:2px solid transparent;border-right-color:color-mix(in srgb,var(--stop-colour) 78%,#fff);border-radius:0 9px 9px 0;filter:drop-shadow(0 0 3px color-mix(in srgb,var(--stop-colour) 72%,#fff)) drop-shadow(0 0 8px var(--stop-colour));opacity:.12;animation:marker-bracket-cascade 1.45s cubic-bezier(.24,.72,.22,1) infinite}
+.marker-flow-brackets b:nth-child(2){animation-delay:.16s}.marker-flow-brackets b:nth-child(3){animation-delay:.32s}
+@keyframes marker-bracket-cascade{0%,36%,100%{opacity:.08;transform:translateX(-7px) scale(.72)}58%{opacity:1;transform:translateX(0) scale(1.08)}78%{opacity:.3;transform:translateX(6px) scale(.86)}}
 
 @media(max-width:390px){
   .copy-style-row{grid-template-columns:minmax(0,1fr) 44px;gap:6px}
@@ -701,7 +702,7 @@ body.tube-dragging{overscroll-behavior:none;touch-action:none;user-select:none}
 }
 
 @media(prefers-reduced-motion:reduce){
-  .marker-flow-arrow::before{animation:none!important;opacity:.82;transform:translateX(1px)!important}
+  .marker-flow-brackets b{animation:none!important;opacity:.76;transform:none!important}
 }
 
 /* VERSION 6 — FINAL PRISMATIC PASS

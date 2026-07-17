@@ -6,6 +6,7 @@
   const STORAGE_KEY = 'turdgobbler-deckwright-v6';
   const MAX_STOPS = 7;
   const MAX_FAVOURITES = 10;
+  const MIN_BUBBLE_GAP_PX = 60;
   const TUBE_INSET = 14;
   const ANCHOR_SWAP_ZONE = .04;
   const MANA_ORDER = ['W', 'U', 'B', 'R', 'G'];
@@ -110,8 +111,16 @@
     }));
   }
 
+  function tubeCollisionGap(count = gradientStops.length) {
+    if (count < 2) return 0;
+    const bounds = els.gradientBar.getBoundingClientRect();
+    const trackWidth = Math.max(1, bounds.width - TUBE_INSET * 2);
+    return Math.min(MIN_BUBBLE_GAP_PX / trackWidth, 1 / (count - 1));
+  }
+
   function normalisePalette(stops) {
-    return Logic.normaliseGradientStops(stops).slice(0, MAX_STOPS);
+    const source = Logic.normaliseGradientStops(stops).slice(0, MAX_STOPS);
+    return Logic.separateGradientStops(source, tubeCollisionGap(source.length));
   }
 
   function haptic(duration = 6) {
@@ -446,7 +455,14 @@
     if (requested <= ANCHOR_SWAP_ZONE) {
       gradientStops[0].position = originalPosition;
       moving.position = 0;
-    } else moving.position = Math.max(.015, Math.min(1, requested));
+    } else {
+      moving.position = Logic.collisionPosition(
+        gradientStops,
+        index,
+        requested,
+        tubeCollisionGap()
+      );
+    }
     gradientStops.sort((left, right) => left.position - right.position);
     selectedStop = gradientStops.indexOf(moving);
     manaSelection = [];
@@ -474,7 +490,7 @@
     if (gradientStops.length <= 1 || index < 0 || index >= gradientStops.length) return;
     const [removed] = gradientStops.splice(index, 1);
     secondStopMemory = {colour: removed.colour, position: 1};
-    gradientStops = Logic.normaliseGradientStops(gradientStops).slice(0, MAX_STOPS);
+    gradientStops = normalisePalette(gradientStops);
     selectedStop = Math.min(index, gradientStops.length - 1);
     manaSelection = [];
     closeStopEditor();
@@ -484,9 +500,16 @@
   }
 
   function setDraggedStopPosition(index, clientX, clientY, marker, dragState) {
-    const position = tubePositionFromClientX(clientX);
+    const requested = tubePositionFromClientX(clientX);
+    const position = Logic.collisionPosition(
+      gradientStops,
+      index,
+      requested,
+      tubeCollisionGap()
+    );
     gradientStops[index].position = position;
-    dragState.requested = position;
+    dragState.requested = requested;
+    dragState.resolved = position;
     marker.style.left = `${position * 100}%`;
     marker.style.top = `${clientY - els.gradientBar.getBoundingClientRect().top}px`;
     marker.setAttribute('aria-valuenow', String(Math.round(position * 100)));
@@ -495,7 +518,7 @@
       dragState.order = order;
       haptic(4);
     }
-    const swapReady = position <= ANCHOR_SWAP_ZONE;
+    const swapReady = requested <= ANCHOR_SWAP_ZONE;
     if (swapReady !== dragState.swapReady) {
       dragState.swapReady = swapReady;
       els.gradientBar.classList.toggle('anchor-swap-ready', swapReady);
@@ -536,14 +559,18 @@
       markerLabel.textContent = String(index + 1);
       marker.appendChild(markerLabel);
       if (index === gradientStops.length - 1) {
-        const flowArrow = document.createElement('i');
-        flowArrow.className = 'marker-flow-arrow';
-        flowArrow.setAttribute('aria-hidden', 'true');
-        marker.appendChild(flowArrow);
+        const flowBrackets = document.createElement('i');
+        const trackWidth = Math.max(1, els.gradientBar.getBoundingClientRect().width - TUBE_INSET * 2);
+        const flowWidth = Math.max(0, (1 - stop.position) * trackWidth - 18);
+        flowBrackets.className = 'marker-flow-brackets';
+        flowBrackets.style.setProperty('--flow-width', `${flowWidth}px`);
+        flowBrackets.setAttribute('aria-hidden', 'true');
+        for (let bracket = 0; bracket < 3; bracket += 1) flowBrackets.appendChild(document.createElement('b'));
+        marker.appendChild(flowBrackets);
       }
       marker.setAttribute('role', 'slider');
       marker.setAttribute('aria-label', movable
-        ? `Gradient colour ${index + 1}. Drag to position or reorder.`
+        ? `Gradient colour ${index + 1}. Drag to position or reorder. Colours keep a visible gap.`
         : 'Gradient colour 1, fixed at the beginning. Activate to edit.');
       marker.dataset.baseLabel = marker.getAttribute('aria-label');
       marker.setAttribute('aria-valuemin', '0');
@@ -566,7 +593,7 @@
         const startX = event.clientX;
         const startY = event.clientY;
         let dragging = false;
-        const dragState = {originalPosition: stop.position, requested: stop.position, order: index, overDelete: false, swapReady: false};
+        const dragState = {originalPosition: stop.position, requested: stop.position, resolved: stop.position, order: index, overDelete: false, swapReady: false};
         try { marker.setPointerCapture(event.pointerId); } catch (_) {}
         const move = (moveEvent) => {
           if (moveEvent.pointerId !== event.pointerId) return;
@@ -604,7 +631,7 @@
             return;
           }
           placeTubeStop(index, dragState.requested, dragState.originalPosition);
-          gradientStops = Logic.normaliseGradientStops(gradientStops).slice(0, MAX_STOPS);
+          gradientStops = normalisePalette(gradientStops);
           persist();
           renderAll();
           haptic([7, 10]);

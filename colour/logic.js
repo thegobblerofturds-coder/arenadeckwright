@@ -72,6 +72,66 @@
     return source;
   }
 
+  function gradientStopGap(count, requestedGap) {
+    if (count < 2) return 0;
+    const parsed = Number(requestedGap);
+    const gap = Number.isFinite(parsed) ? Math.max(0, parsed) : 0;
+    return Math.min(gap, 1 / (count - 1));
+  }
+
+  function separateGradientStops(stops, minimumGap = 0) {
+    const source = normaliseGradientStops(stops);
+    if (source.length < 2) return source;
+    const gap = gradientStopGap(source.length, minimumGap);
+    if (!gap) return source;
+    source[0].position = 0;
+    for (let index = 1; index < source.length; index += 1) {
+      source[index].position = Math.max(source[index].position, source[index - 1].position + gap);
+    }
+    if (source[source.length - 1].position > 1) {
+      source[source.length - 1].position = 1;
+      for (let index = source.length - 2; index > 0; index -= 1) {
+        source[index].position = Math.min(source[index].position, source[index + 1].position - gap);
+      }
+    }
+    source[0].position = 0;
+    return source;
+  }
+
+  function collisionPosition(stops, movingIndex, requestedPosition, minimumGap = 0) {
+    const source = Array.isArray(stops) ? stops : [];
+    const requested = Math.max(0, Math.min(1, Number(requestedPosition) || 0));
+    if (movingIndex < 0 || movingIndex >= source.length || source.length < 2) return requested;
+    const gap = gradientStopGap(source.length, minimumGap);
+    if (!gap) return requested;
+    const occupied = source
+      .map((stop, index) => ({index, position: Math.max(0, Math.min(1, Number(stop?.position) || 0))}))
+      .filter((stop) => stop.index !== movingIndex)
+      .map((stop) => stop.position)
+      .sort((left, right) => left - right);
+    const intervals = [];
+    let intervalStart = 0;
+    occupied.forEach((position) => {
+      const intervalEnd = position - gap;
+      if (intervalEnd >= intervalStart) intervals.push([intervalStart, intervalEnd]);
+      intervalStart = Math.max(intervalStart, position + gap);
+    });
+    if (intervalStart <= 1) intervals.push([intervalStart, 1]);
+    if (!intervals.length) return requested;
+    const current = Math.max(0, Math.min(1, Number(source[movingIndex]?.position) || 0));
+    const direction = requested >= current ? 1 : -1;
+    return intervals.reduce((best, interval) => {
+      const candidate = Math.max(interval[0], Math.min(interval[1], requested));
+      const distance = Math.abs(candidate - requested);
+      if (distance < best.distance - 1e-9) return {position: candidate, distance};
+      if (Math.abs(distance - best.distance) <= 1e-9) {
+        if (direction > 0 && candidate > best.position) return {position: candidate, distance};
+        if (direction < 0 && candidate < best.position) return {position: candidate, distance};
+      }
+      return best;
+    }, {position: requested, distance: Infinity}).position;
+  }
+
   function colourAtPosition(stops, position) {
     const source = normaliseGradientStops(stops);
     const point = Math.max(0, Math.min(1, Number(position) || 0));
@@ -211,6 +271,8 @@
     formatPrefix,
     smoothPalette,
     normaliseGradientStops,
+    separateGradientStops,
+    collisionPosition,
     colourAtPosition,
     sampleGradientStops,
     isWhiteish,

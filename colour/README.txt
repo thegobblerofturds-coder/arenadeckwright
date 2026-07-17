@@ -12,14 +12,14 @@ Version 6 is the dark prism-glass edition. It keeps the complete command deck in
 - a compact full colour wheel with its full preview panel, a top-mounted Confirm control, and direct three- or six-digit hex entry
 - an illuminated circle-to-delete rail with one-colour minimum protection
 - spherical glass colour bubbles with generous invisible mobile touch targets
-- freely position and reorder colours by dragging their bubbles through one another in the gradient tube
+- freely position and reorder colours while a collision gap keeps every gradient bubble visible and easy to grab
 - an explicit illuminated SWAP state when a bubble trades colours with Colour 1 at the tube's beginning
 - staged colour editing: Confirm applies a colour while closing the editor cancels it
 - repeated spaces preserved faithfully in the live finished-name preview
 - tapping the tube edits Colour 1, while a dedicated illuminated + launches each new draggable bubble into the tube
 - a spring-loaded launch animation that visibly connects the + control to the new bubble
 - a pressable numbered Colour 1 cap whenever multiple colours are present; empty tube space becomes non-interactive in that state
-- a bright right-travelling bleed indicator attached directly to the final colour bubble, with a static reduced-motion fallback
+- three colour-tinted curved signals cascade from the final bubble to show its colour washing through the remaining tube
 - Arena-budget feedback that dims colour stops a long name cannot afford and explains why
 - a shorter, cooler copy display with the four global style controls moved directly beside it
 - a final stripped-back prismatic finish with matched control heights, quieter secondary chrome, and a single consistent tactile language
@@ -28,7 +28,7 @@ Version 6 is the dark prism-glass edition. It keeps the complete command deck in
 - dormant mono, guild, three-colour, generic four-colour, and five-colour presets revealed by the selected mana pips
 - a labelled, full-size palette-library control beside the style pad
 - a single open/close palette toggle with no redundant tray controls
-- built-in palettes plus ten persistent local save slots
+- built-in palettes plus ten persistent local save slots; older overlapping layouts are separated automatically when restored
 - locally remembered gradient and formatting choices; deck names are never stored
 - global bold, italic, underline, and strikethrough controls
 - clearly differentiated normal and bold preview weights
