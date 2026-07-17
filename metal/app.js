@@ -8,6 +8,7 @@
   const MAX_FAVOURITES = 10;
   // Arena currently ignores <b>. Change only this flag to true if support returns.
   const ARENA_BOLD_SUPPORTED = false;
+  const START_PRISMATIC_BY_DEFAULT = true;
   const TUBE_INSET = 14;
   const ANCHOR_SWAP_ZONE = .04;
   const MANA_ORDER = ['W', 'U', 'B', 'R', 'G'];
@@ -311,7 +312,7 @@
     try {
       const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
       if (Array.isArray(stored.gradientStops)) gradientStops = normalisePalette(stored.gradientStops);
-      if (stored.viewMode === 'prismatic' || stored.viewMode === 'v6') viewMode = stored.viewMode;
+      if (!START_PRISMATIC_BY_DEFAULT && (stored.viewMode === 'prismatic' || stored.viewMode === 'v6')) viewMode = stored.viewMode;
       if (stored.formatting && typeof stored.formatting === 'object') {
         Object.keys(formatting).forEach((key) => { formatting[key] = Boolean(stored.formatting[key]); });
       }
@@ -320,10 +321,14 @@
         secondStopMemory = {colour: stored.secondStopMemory.colour.toUpperCase(), position: 1};
       }
       if (Array.isArray(stored.favourites)) {
-        favourites = stored.favourites.filter(validSavedPalette).slice(0, MAX_FAVOURITES).map((entry, index) => ({
-          name: `SLOT ${String(index + 1).padStart(2, '0')}`,
-          stops: saveableStops(entry.stops)
-        }));
+        favourites = stored.favourites.filter(validSavedPalette).slice(0, MAX_FAVOURITES).map((entry, index) => {
+          const slot = savedSlotNumber(entry, index);
+          return {
+            slot,
+            name: entry.name.trim().slice(0, 28) || `SLOT ${String(slot).padStart(2, '0')}`,
+            stops: saveableStops(entry.stops)
+          };
+        });
       }
     } catch (_) {}
     selectedStop = Math.min(selectedStop, gradientStops.length - 1);
@@ -870,6 +875,21 @@
       selectedStop = 0;
       manaSelection = [];
     }, {name});
+    animatePaletteBubbles();
+  }
+
+  function animatePaletteBubbles() {
+    const markers = Array.from(els.barStopMarkers.querySelectorAll('.bar-marker'));
+    markers.forEach((marker, index) => {
+      marker.style.setProperty('--palette-delay', `${index * 55}ms`);
+      marker.style.setProperty('--launch-x', `${52 + index * 5}px`);
+      marker.classList.add('palette-arrival');
+    });
+    setTimeout(() => markers.forEach((marker) => {
+      marker.classList.remove('palette-arrival');
+      marker.style.removeProperty('--palette-delay');
+      marker.style.removeProperty('--launch-x');
+    }), 1250);
   }
 
   function paletteButton(entry, className = '') {
@@ -914,6 +934,36 @@
     els.paletteTray.hidden = !paletteTrayOpen;
   }
 
+  function savedSlotNumber(entry, index) {
+    const storedSlot = Number(entry && entry.slot);
+    if (Number.isInteger(storedSlot) && storedSlot >= 1 && storedSlot <= MAX_FAVOURITES) return storedSlot;
+    const legacySlot = Number(((entry && entry.name || '').match(/SLOT\s+(\d+)/i) || [])[1]);
+    return Number.isInteger(legacySlot) && legacySlot >= 1 && legacySlot <= MAX_FAVOURITES ? legacySlot : index + 1;
+  }
+
+  function pulseSavedSlot(slot) {
+    requestAnimationFrame(() => {
+      const wrap = els.savedPalettes.querySelector(`[data-saved-slot="${slot}"]`);
+      if (!wrap) return;
+      wrap.classList.add('slot-spark');
+      setTimeout(() => wrap.classList.remove('slot-spark'), 720);
+    });
+  }
+
+  function renameFavourite(index) {
+    const entry = favourites[index];
+    if (!entry) return;
+    const slot = savedSlotNumber(entry, index);
+    const requested = window.prompt(`NAME SLOT ${slot} — LEAVE BLANK TO RESET`, entry.name);
+    if (requested === null) return;
+    entry.slot = slot;
+    entry.name = requested.trim().replace(/\s+/g, ' ').slice(0, 28) || `SLOT ${String(slot).padStart(2, '0')}`;
+    persist();
+    renderSavedPalettes();
+    pulseSavedSlot(slot);
+    haptic([8, 6, 10]);
+  }
+
   function renderSavedPalettes() {
     els.savedPalettes.replaceChildren();
     const currentSignature = stopSignature();
@@ -936,17 +986,25 @@
       strip.className = 'palette-strip compact';
       favourites.forEach((entry, index) => {
         const wrap = document.createElement('div');
+        const rename = document.createElement('button');
         const remove = document.createElement('button');
+        const slot = savedSlotNumber(entry, index);
         wrap.className = 'saved-palette';
+        wrap.dataset.savedSlot = String(slot);
+        rename.type = 'button';
+        rename.className = 'rename-saved';
+        rename.textContent = '✎';
+        rename.setAttribute('aria-label', `Rename saved palette ${entry.name}, slot ${slot}`);
+        rename.addEventListener('click', () => renameFavourite(index));
         remove.type = 'button';
         remove.className = 'remove-saved';
-        remove.textContent = '×';
+        remove.textContent = '\u00D7';
         remove.setAttribute('aria-label', `Remove saved palette ${entry.name}`);
         remove.addEventListener('click', () => {
           favourites.splice(index, 1);
           persist(); renderSavedPalettes(); haptic(5);
         });
-        wrap.append(paletteButton(entry), remove);
+        wrap.append(paletteButton(entry), rename, remove);
         strip.appendChild(wrap);
       });
       group.append(heading, strip);
@@ -957,14 +1015,18 @@
   function toggleFavourite() {
     const signature = stopSignature();
     const index = favourites.findIndex((entry) => stopSignature(entry.stops) === signature);
+    let addedSlot = null;
     if (index >= 0) favourites.splice(index, 1);
     else if (favourites.length < MAX_FAVOURITES) {
-      const occupied = new Set(favourites.map((entry) => Number((entry.name.match(/SLOT\s+(\d+)/) || [])[1])));
+      const occupied = new Set(favourites.map((entry, entryIndex) => savedSlotNumber(entry, entryIndex)));
       const slot = Array.from({length: MAX_FAVOURITES}, (_, index) => index + 1)
         .find((candidate) => !occupied.has(candidate)) || favourites.length + 1;
-      favourites.push({name: `SLOT ${String(slot).padStart(2, '0')}`, stops: saveableStops()});
+      favourites.push({slot, name: `SLOT ${String(slot).padStart(2, '0')}`, stops: saveableStops()});
+      addedSlot = slot;
     }
-    persist(); renderSavedPalettes(); haptic(8);
+    persist(); renderSavedPalettes();
+    if (addedSlot) pulseSavedSlot(addedSlot);
+    haptic(8);
   }
 
   function renderFormatting() {
