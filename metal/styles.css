@@ -32,14 +32,9 @@
 
 /* Arena stopped rendering <b>. Keep the dormant fourth control restorable via ARENA_BOLD_SUPPORTED. */
 .format-pad button[hidden]{display:none}
-.copy-style-row[data-bold-supported="false"]{grid-template-columns:minmax(0,1fr) 109px}
-.copy-format-pad[data-bold-supported="false"]{grid-template-columns:repeat(3,31px);grid-template-rows:31px;width:109px;height:43px;gap:4px;padding:5px}
-.copy-format-pad[data-bold-supported="false"] button{width:31px;height:31px}
-@media(max-width:390px){
-  .copy-style-row[data-bold-supported="false"]{grid-template-columns:minmax(0,1fr) 94px}
-  .copy-format-pad[data-bold-supported="false"]{grid-template-columns:repeat(3,26px);grid-template-rows:26px;width:94px;height:38px;gap:3px;padding:4px}
-  .copy-format-pad[data-bold-supported="false"] button{width:26px;height:26px}
-}
+.copy-style-row[data-bold-supported="false"]{grid-template-columns:minmax(0,1fr) 38px}
+.copy-format-pad[data-bold-supported="false"]{grid-template-columns:26px;grid-template-rows:repeat(3,26px);width:38px;height:94px;gap:3px;padding:4px}
+.copy-format-pad[data-bold-supported="false"] button{width:26px;height:26px}
 
 *{box-sizing:border-box}
 [hidden]{display:none!important}
