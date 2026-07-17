@@ -8,7 +8,7 @@
   const MAX_FAVOURITES = 10;
   // Arena currently ignores <b>. Change only this flag to true if support returns.
   const ARENA_BOLD_SUPPORTED = false;
-  const START_PRISMATIC_BY_DEFAULT = true;
+  const START_PRISMATIC_BY_DEFAULT = false;
   const MIN_BUBBLE_GAP_PX = 38;
   const ANCHOR_BUBBLE_GAP_PX = 58;
   const TUBE_INSET = 14;
@@ -61,7 +61,7 @@
     deleteZone: $('deleteZone'), stopEditorBackdrop: $('stopEditorBackdrop'), stopEditor: $('stopEditor'),
     stopEditorTitle: $('stopEditorTitle'), stopEditorClose: $('stopEditorClose'),
     stopEditorWheel: $('stopEditorWheel'), stopEditorWheelCursor: $('stopEditorWheelCursor'),
-    stopEditorPreview: $('stopEditorPreview'), stopEditorPreviewHex: $('stopEditorPreviewHex'),
+    stopEditorPreview: $('stopEditorPreview'),
     stopEditorHex: $('stopEditorHex'), stopEditorConfirm: $('stopEditorConfirm')
   };
 
@@ -78,7 +78,7 @@
   let secondStopMemory = {colour: MANA.R.colour, position: 1};
   let stopEditorOpen = false;
   let editorDraftColour = null;
-  let viewMode = 'prismatic';
+  let viewMode = 'v6';
 
   function clone(value) {
     return JSON.parse(JSON.stringify(value));
@@ -156,8 +156,8 @@
     els.consoleSurface.classList.toggle('prismatic-mode', prismatic);
     els.viewModeToggle.setAttribute('aria-pressed', String(prismatic));
     els.viewModeToggle.setAttribute('aria-label', prismatic
-      ? 'Switch to the original Version 6 name and copy controls'
-      : 'Switch to Prismatic Glass name and copy controls');
+      ? 'Switch to the Version 6 name and copy controls'
+      : 'Switch to the alternate name and copy controls');
     if (!prismatic) closePrismaticNameEditor();
   }
 
@@ -268,7 +268,6 @@
     els.stopEditorTitle.textContent = String(selectedStop + 1);
     els.stopEditor.style.setProperty('--editor-colour', colour);
     els.stopEditorPreview.style.setProperty('--preview-colour', colour);
-    els.stopEditorPreviewHex.textContent = colour;
     positionWheelCursor(colour);
     if (document.activeElement !== els.stopEditorHex) els.stopEditorHex.value = colour;
     els.stopEditorHex.classList.remove('error');
@@ -279,7 +278,6 @@
     editorDraftColour = colour;
     els.stopEditor.style.setProperty('--editor-colour', colour);
     els.stopEditorPreview.style.setProperty('--preview-colour', colour);
-    els.stopEditorPreviewHex.textContent = colour;
     positionWheelCursor(colour);
     if (syncHex) els.stopEditorHex.value = colour;
   }
@@ -333,7 +331,7 @@
     try {
       const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
       if (Array.isArray(stored.gradientStops)) gradientStops = normalisePalette(stored.gradientStops);
-      if (!START_PRISMATIC_BY_DEFAULT && (stored.viewMode === 'prismatic' || stored.viewMode === 'v6')) viewMode = stored.viewMode;
+      viewMode = START_PRISMATIC_BY_DEFAULT ? 'prismatic' : 'v6';
       if (stored.formatting && typeof stored.formatting === 'object') {
         Object.keys(formatting).forEach((key) => { formatting[key] = Boolean(stored.formatting[key]); });
       }

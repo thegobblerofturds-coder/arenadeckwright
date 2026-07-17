@@ -369,7 +369,7 @@ body::before{z-index:0;opacity:.3;background:repeating-linear-gradient(180deg,tr
 body::after{z-index:0;inset:0;width:auto;height:auto;opacity:.55;background:linear-gradient(118deg,transparent 0 42%,#ffffff06 43%,transparent 44% 70%,#ffffff04 71%,transparent 72%),linear-gradient(#77cfff0b 1px,transparent 1px),linear-gradient(90deg,#ff5bd30a 1px,transparent 1px);background-size:auto,44px 44px,44px 44px;transform:none;-webkit-mask-image:linear-gradient(to bottom,transparent,#000 35%,#000);mask-image:linear-gradient(to bottom,transparent,#000 35%,#000)}
 
 .masthead{border-color:#5d687166}
-.masthead::after{content:"PRISMATIC GLASS";color:#8495a0;font-family:var(--font-ui)}
+.masthead::after{content:"ALT VIEW";color:#8495a0;font-family:var(--font-ui)}
 .masthead h1{color:#f7fbff;text-shadow:0 1px #000,0 0 20px color-mix(in srgb,var(--user-glow-mid) 32%,transparent)}
 .masthead h1 span{color:#9eb3bf}
 .masthead>b{border-color:#85949d;color:#f7fbff;background:linear-gradient(145deg,#29333b99,#080b0eee);box-shadow:0 3px 0 #090b0d,0 8px 18px #0008,0 1px #fff3 inset,0 0 15px color-mix(in srgb,var(--user-glow-mid) 24%,transparent)}
@@ -506,9 +506,8 @@ body.tube-dragging{overscroll-behavior:none;touch-action:none;user-select:none}
 .stop-editor-controls{display:grid;grid-template-columns:112px minmax(0,1fr);gap:12px;margin-top:14px}
 .stop-editor-picker,.stop-editor-hex{display:grid;gap:8px;color:#8da2ad;font:900 7px/1 var(--font-ui);letter-spacing:.13em}
 .stop-editor-side{display:grid;grid-template-rows:46px minmax(0,1fr);gap:9px;min-width:0}
-.stop-editor-preview{display:grid;grid-template-columns:48px minmax(0,1fr);align-items:center;min-width:0;height:46px;padding:4px;border:1px solid #71858f;border-radius:12px;background:repeating-linear-gradient(180deg,#ffffff05 0 1px,transparent 1px 5px),#08141a;box-shadow:0 4px 10px #0008 inset,0 0 15px color-mix(in srgb,var(--preview-colour) 38%,transparent)}
-.stop-editor-preview>i{display:block;width:38px;height:36px;border:2px solid #fff;border-radius:8px;background:var(--preview-colour);box-shadow:0 0 0 2px #080c10,0 0 13px var(--preview-colour)}
-.stop-editor-preview>span{display:grid;gap:4px;min-width:0;padding-left:8px}.stop-editor-preview small{color:#70858f;font:900 6px/1 var(--font-ui);letter-spacing:.14em}.stop-editor-preview b{overflow:hidden;color:#e9f9ff;font:900 clamp(10px,3.4vw,14px)/1 ui-monospace,SFMono-Regular,Consolas,monospace;text-overflow:ellipsis;white-space:nowrap}
+.stop-editor-preview{display:grid;place-items:center;width:46px;height:46px;padding:4px;border:1px solid #71858f;border-radius:12px;background:repeating-linear-gradient(180deg,#ffffff05 0 1px,transparent 1px 5px),#08141a;box-shadow:0 4px 10px #0008 inset,0 0 15px color-mix(in srgb,var(--preview-colour) 38%,transparent)}
+.stop-editor-preview>i{display:block;width:36px;height:36px;border:2px solid #fff;border-radius:8px;background:var(--preview-colour);box-shadow:0 0 0 2px #080c10,0 0 13px var(--preview-colour)}
 .stop-editor-picker input{width:100%;height:68px;padding:5px;overflow:hidden;border:1px solid #b5c7d0;border-radius:15px;background:#071017;box-shadow:0 0 0 3px #06090c,0 0 20px color-mix(in srgb,var(--editor-colour) 55%,transparent);appearance:none}
 .stop-editor-picker input::-webkit-color-swatch-wrapper{padding:0}.stop-editor-picker input::-webkit-color-swatch{border:0;border-radius:10px}
 .stop-editor-hex input{min-width:0;width:100%;height:54px;padding:0 13px;border:1px solid #71858f;border-radius:13px;outline:0;color:#dff7ff;background:repeating-linear-gradient(180deg,#ffffff05 0 1px,transparent 1px 5px),#08141a;box-shadow:0 5px 12px #0009 inset,0 0 16px color-mix(in srgb,var(--editor-colour) 25%,transparent);font:950 clamp(17px,5.4vw,23px)/1 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.02em;text-transform:uppercase}
@@ -575,7 +574,7 @@ body.tube-dragging{overscroll-behavior:none;touch-action:none;user-select:none}
   .colour-wheel-shell,#stopEditorWheel{width:104px;height:104px}
 }
 
-/* Reversible V6 / Prismatic Glass name-and-copy experiment. */
+/* Reversible V6 / alternate name-and-copy view. */
 .view-mode-switcher{display:flex;justify-content:flex-end;height:14px;margin:0 4px 3px}
 .view-mode-toggle{display:flex;align-items:center;gap:6px;height:14px;padding:0;border:0;color:#b8d0db;background:transparent;opacity:.24;cursor:pointer;font:850 5.5px/1 var(--font-mono);letter-spacing:.12em;transition:opacity .18s}
 .view-mode-toggle:hover,.view-mode-toggle:focus-visible{opacity:.82;outline:0}
@@ -817,3 +816,9 @@ footer{padding-top:11px;opacity:.7}
 /* Applying any palette sends its bubbles into the tube in a quick staggered cascade. */
 .bar-marker.palette-arrival span{animation:bubble-launch .82s cubic-bezier(.16,.84,.22,1) var(--palette-delay,0ms) both}
 @media(prefers-reduced-motion:reduce){.bar-marker.palette-arrival span,.saved-palette.slot-spark{animation:none}}
+
+/* Saved cards remain readable; the third card starts the horizontal rail instead of compressing all of them. */
+.palette-strip.compact{grid-auto-columns:minmax(150px,1fr)}
+
+/* The colour editor lives outside the glass stacking contexts and always covers the preset station. */
+.stop-editor-backdrop{isolation:isolate}

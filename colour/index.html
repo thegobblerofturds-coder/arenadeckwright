@@ -10,15 +10,15 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="manifest" href="site.webmanifest">
   <title>TurdGobbler's Deck Name Colourifier &mdash; Version 6</title>
-  <link rel="stylesheet" href="styles.css?v=6.5.1">
+  <link rel="stylesheet" href="styles.css?v=6.6.0">
   <script src="logic.js?v=6.4.0" defer></script>
-  <script src="app.js?v=6.5.1" defer></script>
+  <script src="app.js?v=6.6.0" defer></script>
 </head>
 <body>
   <main class="app-shell">
     <div class="view-mode-switcher">
-      <button id="viewModeToggle" class="view-mode-toggle" type="button" aria-pressed="true" aria-label="Switch to the original Version 6 name and copy controls">
-        <span>V6</span><i aria-hidden="true"><b></b></i><span>PRISMATIC GLASS</span>
+      <button id="viewModeToggle" class="view-mode-toggle" type="button" aria-pressed="false" aria-label="Switch to the alternate name and copy controls">
+        <span>V6</span><i aria-hidden="true"><b></b></i><span>ALT VIEW</span>
       </button>
     </div>
     <header class="masthead">
@@ -26,7 +26,7 @@
       <b>V6</b>
     </header>
 
-    <section id="consoleSurface" class="console prismatic-mode" aria-label="Version 6 Deck Name Colourifier">
+    <section id="consoleSurface" class="console" aria-label="Version 6 Deck Name Colourifier">
       <div class="classic-name-entry">
         <div class="field-head">
           <label for="deckName">DECK NAME</label>
@@ -94,36 +94,6 @@
           <div id="builtInPalettes" class="palette-strip" aria-label="Built-in palettes"></div>
           <div id="savedPalettes" class="saved-palettes"></div>
         </div>
-        <div id="stopEditorBackdrop" class="stop-editor-backdrop" hidden>
-          <section id="stopEditor" class="stop-editor" role="dialog" aria-modal="true" aria-labelledby="stopEditorTitle" tabindex="-1">
-            <header>
-              <span><small>EDIT COLOUR</small><b id="stopEditorTitle">1</b></span>
-              <div class="stop-editor-header-actions">
-                <button id="stopEditorConfirm" class="stop-editor-confirm" type="button"><span>CONFIRM</span></button>
-                <button id="stopEditorClose" class="stop-editor-close" type="button" aria-label="Close colour editor">&times;</button>
-              </div>
-            </header>
-            <div class="stop-editor-controls">
-              <div class="stop-editor-picker">
-                <span class="colour-wheel-shell">
-                  <canvas id="stopEditorWheel" width="240" height="240" role="img" aria-label="Full colour wheel. Drag to choose a colour."></canvas>
-                  <i id="stopEditorWheelCursor" aria-hidden="true"></i>
-                </span>
-                <span>SELECT COLOUR</span>
-              </div>
-              <div class="stop-editor-side">
-                <div id="stopEditorPreview" class="stop-editor-preview" aria-label="Selected colour preview">
-                  <i aria-hidden="true"></i>
-                  <span><small>PREVIEW</small><b id="stopEditorPreviewHex">#FFFFFF</b></span>
-                </div>
-                <label class="stop-editor-hex">
-                  <span>HEX CODE</span>
-                  <input id="stopEditorHex" type="text" value="#FFFFFF" maxlength="7" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Hex code for selected colour">
-                </label>
-              </div>
-            </div>
-          </section>
-        </div>
       </section>
 
       <section class="colour-dock mtg-station" aria-label="MTG preset finder">
@@ -145,9 +115,39 @@
       </section>
     </section>
 
+    <div id="stopEditorBackdrop" class="stop-editor-backdrop" hidden>
+      <section id="stopEditor" class="stop-editor" role="dialog" aria-modal="true" aria-labelledby="stopEditorTitle" tabindex="-1">
+        <header>
+          <span><small>EDIT COLOUR</small><b id="stopEditorTitle">1</b></span>
+          <div class="stop-editor-header-actions">
+            <button id="stopEditorConfirm" class="stop-editor-confirm" type="button"><span>CONFIRM</span></button>
+            <button id="stopEditorClose" class="stop-editor-close" type="button" aria-label="Close colour editor">&times;</button>
+          </div>
+        </header>
+        <div class="stop-editor-controls">
+          <div class="stop-editor-picker">
+            <span class="colour-wheel-shell">
+              <canvas id="stopEditorWheel" width="240" height="240" role="img" aria-label="Full colour wheel. Drag to choose a colour."></canvas>
+              <i id="stopEditorWheelCursor" aria-hidden="true"></i>
+            </span>
+            <span>SELECT COLOUR</span>
+          </div>
+          <div class="stop-editor-side">
+            <div id="stopEditorPreview" class="stop-editor-preview" aria-label="Selected colour preview">
+              <i aria-hidden="true"></i>
+            </div>
+            <label class="stop-editor-hex">
+              <span>HEX CODE</span>
+              <input id="stopEditorHex" type="text" value="#FFFFFF" maxlength="7" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Hex code for selected colour">
+            </label>
+          </div>
+        </div>
+      </section>
+    </div>
+
     <div id="prismaticNameBackdrop" class="prismatic-name-backdrop" hidden>
       <section class="prismatic-name-sheet" role="dialog" aria-modal="true" aria-labelledby="prismaticNameTitle">
-        <header><span><small>PRISMATIC GLASS</small><b id="prismaticNameTitle">DECK NAME</b></span><button id="prismaticNameClose" type="button" aria-label="Close deck name editor">&times;</button></header>
+        <header><span><small>ALT VIEW</small><b id="prismaticNameTitle">DECK NAME</b></span><button id="prismaticNameClose" type="button" aria-label="Close deck name editor">&times;</button></header>
         <label><span>TYPE OR PASTE</span><input id="prismaticDeckName" type="text" value="YOUR DECK NAME" autocomplete="off" autocapitalize="characters" spellcheck="false"></label>
         <button id="prismaticNameDone" class="prismatic-name-done" type="button">DONE</button>
       </section>
