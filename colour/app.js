@@ -6,6 +6,8 @@
   const STORAGE_KEY = 'turdgobbler-deckwright-v6';
   const MAX_STOPS = 7;
   const MAX_FAVOURITES = 10;
+  // Arena currently ignores <b>. Change only this flag to true if support returns.
+  const ARENA_BOLD_SUPPORTED = false;
   const MIN_BUBBLE_GAP_PX = 38;
   const ANCHOR_BUBBLE_GAP_PX = 58;
   const TUBE_INSET = 14;
@@ -1010,12 +1012,23 @@
   }
 
   function renderFormatting() {
+    if (!ARENA_BOLD_SUPPORTED) formatting.bold = false;
     document.querySelectorAll('.format-pad button').forEach((button) => {
       button.setAttribute('aria-pressed', String(formatting[button.dataset.format]));
     });
   }
 
+  function configureOptionalFormats() {
+    const boldButton = document.querySelector('[data-format="bold"]');
+    if (!boldButton) return;
+    boldButton.hidden = !ARENA_BOLD_SUPPORTED;
+    boldButton.closest('.copy-format-pad').dataset.boldSupported = String(ARENA_BOLD_SUPPORTED);
+    boldButton.closest('.copy-style-row').dataset.boldSupported = String(ARENA_BOLD_SUPPORTED);
+    if (!ARENA_BOLD_SUPPORTED) formatting.bold = false;
+  }
+
   function renderAll() {
+    if (!ARENA_BOLD_SUPPORTED) formatting.bold = false;
     renderOutput();
     renderGradientEditor();
     renderManaComposer();
@@ -1125,6 +1138,7 @@
 
   drawColourWheel();
   restorePreferences();
+  configureOptionalFormats();
   renderViewMode();
   renderBuiltIns();
   renderAll();

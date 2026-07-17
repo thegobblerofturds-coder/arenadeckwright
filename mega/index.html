@@ -10,11 +10,11 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="manifest" href="site.webmanifest">
   <title>TurdGobbler's Deck Name Colourifier &mdash; MEGA</title>
-  <link rel="stylesheet" href="styles.css?v=mega-1.0.0">
+  <link rel="stylesheet" href="styles.css?v=mega-1.0.1">
   <link rel="stylesheet" href="metal.css?v=mega-1.0.0">
   <link rel="stylesheet" href="mega.css?v=mega-1.0.0">
   <script src="logic.js?v=mega-1.0.0" defer></script>
-  <script src="app.js?v=mega-1.0.0" defer></script>
+  <script src="app.js?v=mega-1.0.1" defer></script>
 </head>
 <body>
   <main class="app-shell mega-shell">
@@ -44,7 +44,7 @@
 
         <div class="name-copy-bridge"><span id="rawCount" class="raw-count">0 / 64</span></div>
 
-        <div class="copy-style-row">
+        <div class="copy-style-row" data-bold-supported="false">
           <div class="copy-cluster">
             <button id="prismaticEdit" class="prismatic-action prismatic-edit" type="button" aria-label="Edit deck name"><b aria-hidden="true">✎</b><span>NAME</span></button>
             <button id="copyButton" class="copy-button" type="button" aria-label="Copy coloured deck name" aria-describedby="copyHint copyStatus">
@@ -55,8 +55,8 @@
               <span class="prismatic-action prismatic-copy copy-affordance" aria-hidden="true"><b>▣</b><span>COPY</span></span>
             </button>
           </div>
-          <div class="format-pad copy-format-pad" role="group" aria-label="Global text styling">
-            <button type="button" data-format="bold" aria-label="Bold" aria-pressed="false"><b>B</b></button>
+          <div class="format-pad copy-format-pad" role="group" aria-label="Global text styling" data-bold-supported="false">
+            <button type="button" data-format="bold" aria-label="Bold" aria-pressed="false" hidden><b>B</b></button>
             <button type="button" data-format="italic" aria-label="Italic" aria-pressed="false"><i>I</i></button>
             <button type="button" data-format="underline" aria-label="Underline" aria-pressed="false"><u>U</u></button>
             <button type="button" data-format="strike" aria-label="Strikethrough" aria-pressed="false"><s>S</s></button>
