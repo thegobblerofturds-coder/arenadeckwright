@@ -40,13 +40,13 @@
     deckName: $('deckName'), inputState: $('inputState'), outputPreview: $('outputPreview'),
     copyButton: $('copyButton'), copyBurst: $('copyBurst'), copyStatus: $('copyStatus'),
     copyHintMessage: $('copyHintMessage'),
-    prismaticEdit: $('prismaticEdit'), prismaticCopy: $('prismaticCopy'),
+    prismaticEdit: $('prismaticEdit'),
     prismaticNameBackdrop: $('prismaticNameBackdrop'), prismaticDeckName: $('prismaticDeckName'),
     prismaticNameClose: $('prismaticNameClose'), prismaticNameDone: $('prismaticNameDone'),
     rawCount: $('rawCount'), gradientPips: $('gradientPips'), undoButton: $('undoButton'),
     rotateGradient: $('rotateGradient'), flipGradient: $('flipGradient'), gradientBar: $('gradientBar'),
     tubeAddButton: $('tubeAddButton'), tubeHint: $('tubeHint'), stageWarning: $('stageWarning'),
-    barStopMarkers: $('barStopMarkers'), stopRail: $('stopRail'), quickPalettes: $('quickPalettes'),
+    barStopMarkers: $('barStopMarkers'), quickPalettes: $('quickPalettes'),
     paletteTray: $('paletteTray'),
     manaComposer: $('manaComposer'), identityName: $('identityName'), manaOrder: $('manaOrder'),
     clearMana: $('clearMana'), builtInPalettes: $('builtInPalettes'), savedPalettes: $('savedPalettes'),
@@ -70,8 +70,6 @@
   let feedbackTimer = null;
   let defaultNameUntouched = true;
   let secondStopMemory = {colour: MANA.R.colour, position: 1};
-  let stopDrag = null;
-  let pickedStop = null;
   let stopEditorOpen = false;
   let editorDraftColour = null;
   let viewMode = 'prismatic';
@@ -149,7 +147,6 @@
 
   function pulseSelectedMarker(index = selectedStop) {
     els.barStopMarkers.querySelectorAll('.bar-marker').forEach((marker) => marker.classList.toggle('selected', marker.dataset.stopIndex === String(index)));
-    els.stopRail.querySelectorAll('.stop-chip').forEach((chip) => chip.classList.toggle('selected', chip.dataset.stopIndex === String(index)));
     const marker = els.barStopMarkers.querySelector(`[data-stop-index="${index}"]`);
     if (!marker) return;
     marker.classList.remove('selection-pulse');
@@ -326,7 +323,6 @@
 
   function commitMutation(mutator, options = {}) {
     checkpoint();
-    pickedStop = null;
     mutator();
     gradientStops = normalisePalette(gradientStops);
     selectedStop = Math.max(0, Math.min(selectedStop, gradientStops.length - 1));
@@ -338,7 +334,6 @@
   function undo() {
     const previous = history.pop();
     if (!previous) return;
-    pickedStop = null;
     gradientStops = normalisePalette(previous.gradientStops);
     formatting = {...formatting, ...previous.formatting};
     selectedStop = Math.min(previous.selectedStop, gradientStops.length - 1);
@@ -394,11 +389,12 @@
       marker.setAttribute('aria-label', dormant ? `${baseLabel} Currently dimmed because the name leaves no Arena code space for this stop.` : baseLabel);
     });
     const over = currentBuild.rawLength > Logic.LIMIT;
-    const available = Math.max(1, Math.min(gradientStops.length, currentBuild.maxStops || 1));
+    const total = gradientStops.length;
+    const available = Math.max(1, Math.min(total, currentBuild.maxStops || 1));
     els.stageWarning.textContent = over
-      ? 'TOO MANY CHARACTERS · ARENA MAY REJECT THIS NAME'
-      : available < gradientStops.length
-        ? `LONG NAME · ARENA HAS ROOM FOR ${available} OF ${gradientStops.length} COLOUR STOPS`
+      ? `OVER 64 · ${available} OF ${total} COLOURS FIT`
+      : available < total
+        ? `${total} COLOURS · ${available} FIT`
         : '';
     els.stageWarning.classList.toggle('visible', Boolean(els.stageWarning.textContent));
     els.stageWarning.classList.toggle('over', over);
@@ -630,343 +626,6 @@
       els.barStopMarkers.appendChild(marker);
     });
     updateStageAvailability();
-  }
-
-  function moveStop(index, direction) {
-    const destination = index + direction;
-    if (destination < 0 || destination >= gradientStops.length) return;
-    reorderStop(index, destination);
-  }
-
-  function reorderStop(index, destination) {
-    if (index === destination || index < 0 || destination < 0 || index >= gradientStops.length || destination >= gradientStops.length) return;
-    commitMutation(() => {
-      const payloads = gradientStops.map((stop) => stop.colour);
-      const [moved] = payloads.splice(index, 1);
-      payloads.splice(destination, 0, moved);
-      gradientStops = gradientStops.map((stop, stopIndex) => ({...stop, colour: payloads[stopIndex]}));
-      selectedStop = destination;
-      manaSelection = [];
-    }, {haptic: [10, 18, 12]});
-  }
-
-  function removeStop(index) {
-    if (gradientStops.length <= 1) return;
-    commitMutation(() => {
-      const [removed] = gradientStops.splice(index, 1);
-      secondStopMemory = {colour: removed.colour, position: 1};
-      selectedStop = Math.min(index, gradientStops.length - 1);
-      manaSelection = [];
-    }, {haptic: [18, 28, 20]});
-  }
-
-  function clearStopDropIndicators() {
-    els.stopRail.querySelectorAll('.stop-chip').forEach((chip) => chip.classList.remove('drop-before', 'drop-after'));
-  }
-
-  function setStopDropTarget(clientX) {
-    if (!stopDrag?.active || stopDrag.overDelete) return;
-    const cards = Array.from(els.stopRail.querySelectorAll('.stop-chip')).filter((card) => card !== stopDrag.origin);
-    clearStopDropIndicators();
-    let destination = cards.findIndex((card) => clientX < card.getBoundingClientRect().left + card.getBoundingClientRect().width / 2);
-    if (destination < 0) destination = cards.length;
-    stopDrag.destination = destination;
-    if (destination < cards.length) cards[destination].classList.add('drop-before');
-    else cards[cards.length - 1]?.classList.add('drop-after');
-  }
-
-  function setStopAutoScroll(clientX) {
-    if (!stopDrag?.active) return;
-    const bounds = els.stopRail.getBoundingClientRect();
-    const edge = Math.min(54, bounds.width * .16);
-    const direction = clientX < bounds.left + edge ? -1 : clientX > bounds.right - edge ? 1 : 0;
-    if (direction === stopDrag.scrollDirection) return;
-    if (stopDrag.scrollTimer) clearInterval(stopDrag.scrollTimer);
-    stopDrag.scrollDirection = direction;
-    stopDrag.scrollTimer = null;
-    if (!direction) return;
-    stopDrag.scrollTimer = setInterval(() => {
-      if (!stopDrag?.active) return;
-      els.stopRail.scrollLeft += direction * 9;
-      setStopDropTarget(stopDrag.lastX);
-    }, 16);
-  }
-
-  function updateStopDrag(clientX, clientY) {
-    if (!stopDrag?.active) return;
-    stopDrag.lastX = clientX;
-    stopDrag.lastY = clientY;
-    stopDrag.ghost.style.left = `${clientX - stopDrag.offsetX}px`;
-    stopDrag.ghost.style.top = `${clientY - stopDrag.offsetY - stopDrag.liftY}px`;
-    const deleteBounds = els.deleteZone.getBoundingClientRect();
-    const insideDelete = clientX >= deleteBounds.left && clientX <= deleteBounds.right && clientY >= deleteBounds.top - 8 && clientY <= deleteBounds.bottom + 8;
-    const canDelete = gradientStops.length > 1;
-    const overDelete = insideDelete && canDelete;
-    if (overDelete !== stopDrag.overDelete) {
-      stopDrag.overDelete = overDelete;
-      els.deleteZone.classList.toggle('drag-over', overDelete);
-      stopDrag.ghost.classList.toggle('delete-ready', overDelete);
-      if (overDelete) haptic([12, 18, 12]);
-    }
-    els.deleteZone.classList.toggle('delete-blocked', insideDelete && !canDelete);
-    if (overDelete) clearStopDropIndicators();
-    else setStopDropTarget(clientX);
-    setStopAutoScroll(overDelete ? (els.stopRail.getBoundingClientRect().left + els.stopRail.getBoundingClientRect().right) / 2 : clientX);
-  }
-
-  function startStopDrag(event, item, handle, index, gesture) {
-    if (stopDrag) return;
-    const bounds = item.getBoundingClientRect();
-    const ghost = item.cloneNode(true);
-    ghost.classList.remove('selected', 'drop-before', 'drop-after');
-    ghost.classList.add('stop-drag-ghost');
-    ghost.style.width = `${bounds.width}px`;
-    ghost.setAttribute('aria-hidden', 'true');
-    document.body.appendChild(ghost);
-    item.classList.add('drag-origin');
-    handle.dataset.dragged = 'true';
-    pickedStop = null;
-    item.classList.remove('picked-up');
-    document.body.classList.add('stop-dragging');
-    els.deleteZone.classList.add('drag-active');
-    els.deleteZone.classList.remove('tap-ready');
-    els.deleteZone.classList.toggle('disabled', gradientStops.length <= 1);
-    els.deleteZone.setAttribute('aria-disabled', String(gradientStops.length <= 1));
-    els.deleteZone.querySelector('span').textContent = gradientStops.length <= 1 ? 'ONE COLOUR MINIMUM' : 'DRAG HERE TO DELETE';
-    selectedStop = index;
-    pulseSelectedMarker(index);
-    stopDrag = {
-      active: true,
-      pointerId: event.pointerId,
-      sourceIndex: index,
-      destination: index,
-      origin: item,
-      handle,
-      ghost,
-      offsetX: gesture.lastX - bounds.left,
-      offsetY: gesture.lastY - bounds.top,
-      liftY: event.pointerType === 'touch' ? Math.min(58, bounds.height * .4) : 0,
-      lastX: gesture.lastX,
-      lastY: gesture.lastY,
-      overDelete: false,
-      scrollDirection: 0,
-      scrollTimer: null
-    };
-    updateStopDrag(gesture.lastX, gesture.lastY);
-    haptic(10);
-  }
-
-  function finishStopDrag(cancelled = false) {
-    const drag = stopDrag;
-    if (!drag) return;
-    if (drag.scrollTimer) clearInterval(drag.scrollTimer);
-    clearStopDropIndicators();
-    drag.ghost.remove();
-    drag.origin.classList.remove('drag-origin');
-    document.body.classList.remove('stop-dragging');
-    els.deleteZone.classList.remove('drag-active', 'drag-over', 'delete-blocked', 'disabled');
-    const canDelete = gradientStops.length > 1;
-    els.deleteZone.classList.toggle('disabled', !canDelete);
-    els.deleteZone.tabIndex = -1;
-    els.deleteZone.setAttribute('aria-disabled', String(!canDelete));
-    els.deleteZone.setAttribute('aria-label', 'Drag a gradient stop here to delete it');
-    els.deleteZone.querySelector('span').textContent = canDelete ? 'DRAG HERE TO DELETE' : 'ONE COLOUR MINIMUM';
-    stopDrag = null;
-    setTimeout(() => { delete drag.handle.dataset.dragged; }, 0);
-    if (cancelled) return;
-    if (drag.overDelete && gradientStops.length > 1) removeStop(drag.sourceIndex);
-    else if (drag.destination !== drag.sourceIndex) reorderStop(drag.sourceIndex, drag.destination);
-    else haptic(3);
-  }
-
-  function togglePickedStop(index) {
-    pickedStop = pickedStop === index ? null : index;
-    selectedStop = index;
-    renderGradientEditor();
-    pulseSelectedMarker(index);
-    haptic(pickedStop === null ? 4 : [7, 10]);
-  }
-
-  function attachStopDrag(handle, item, index) {
-    handle.addEventListener('pointerdown', (event) => {
-      if (event.button !== 0 || stopDrag) return;
-      event.preventDefault();
-      event.stopPropagation();
-      const gesture = {pointerId: event.pointerId, startX: event.clientX, startY: event.clientY, lastX: event.clientX, lastY: event.clientY, active: false};
-      try { handle.setPointerCapture(event.pointerId); } catch (_) {}
-      const cleanup = () => {
-        handle.removeEventListener('pointermove', move);
-        handle.removeEventListener('pointerup', end);
-        handle.removeEventListener('pointercancel', cancel);
-        try { if (handle.hasPointerCapture(event.pointerId)) handle.releasePointerCapture(event.pointerId); } catch (_) {}
-      };
-      const activate = (activeEvent) => {
-        if (gesture.active) return;
-        gesture.active = true;
-        startStopDrag(activeEvent, item, handle, index, gesture);
-      };
-      const move = (moveEvent) => {
-        if (moveEvent.pointerId !== gesture.pointerId) return;
-        gesture.lastX = moveEvent.clientX;
-        gesture.lastY = moveEvent.clientY;
-        const distance = Math.hypot(moveEvent.clientX - gesture.startX, moveEvent.clientY - gesture.startY);
-        if (!gesture.active && distance > 3) activate(moveEvent);
-        if (!gesture.active) return;
-        moveEvent.preventDefault();
-        updateStopDrag(moveEvent.clientX, moveEvent.clientY);
-      };
-      const end = (endEvent) => {
-        if (endEvent.pointerId !== gesture.pointerId) return;
-        cleanup();
-        if (gesture.active) finishStopDrag(false);
-        else togglePickedStop(index);
-      };
-      const cancel = (cancelEvent) => {
-        if (cancelEvent.pointerId !== gesture.pointerId) return;
-        cleanup();
-        if (gesture.active) finishStopDrag(true);
-      };
-      handle.addEventListener('pointermove', move, {passive: false});
-      handle.addEventListener('pointerup', end);
-      handle.addEventListener('pointercancel', cancel);
-    });
-  }
-
-  function renderStopRail() {
-    els.stopRail.replaceChildren();
-    gradientStops.forEach((stop, index) => {
-      const item = document.createElement('div');
-      const head = document.createElement('button');
-      const grip = document.createElement('button');
-      const picker = document.createElement('input');
-      const hex = document.createElement('input');
-      const controls = document.createElement('div');
-      item.className = 'stop-chip';
-      item.classList.toggle('selected', index === selectedStop);
-      item.classList.toggle('picked-up', pickedStop === index);
-      item.classList.toggle('pick-target', pickedStop !== null && pickedStop !== index);
-      item.dataset.stopIndex = String(index);
-      item.style.setProperty('--chip-colour', stop.colour);
-      head.type = 'button';
-      head.className = 'stop-head';
-      head.innerHTML = `<small>STOP ${String(index + 1).padStart(2, '0')}</small>`;
-      head.setAttribute('aria-label', `Gradient stop ${index + 1}. Use Alt plus arrow keys to move, or Delete to remove.`);
-      head.title = 'Select stop · Alt + ←/→ to move · Delete to remove';
-      head.addEventListener('click', () => {
-        selectedStop = index; renderGradientEditor(); pulseSelectedMarker(index); haptic(3);
-      });
-      head.addEventListener('keydown', (event) => {
-        if (event.altKey && ['ArrowLeft', 'ArrowRight'].includes(event.key)) {
-          event.preventDefault();
-          moveStop(index, event.key === 'ArrowLeft' ? -1 : 1);
-          return;
-        }
-        if (['Delete', 'Backspace'].includes(event.key) && gradientStops.length > 1) {
-          event.preventDefault();
-          removeStop(index);
-        }
-      });
-      grip.type = 'button';
-      grip.className = 'stop-grip';
-      grip.innerHTML = '<i aria-hidden="true"></i>';
-      grip.setAttribute('aria-label', `${pickedStop === index ? 'Put down' : 'Pick up'} gradient stop ${index + 1}. Drag to reorder, or tap once and then tap a destination.`);
-      grip.setAttribute('aria-pressed', String(pickedStop === index));
-      grip.title = 'Drag to reorder · Tap to pick up';
-      attachStopDrag(grip, item, index);
-      grip.addEventListener('click', (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        if (event.detail !== 0 || grip.dataset.dragged === 'true') return;
-        togglePickedStop(index);
-      });
-      item.addEventListener('click', (event) => {
-        if (pickedStop === null || event.target.closest('.stop-grip')) return;
-        event.preventDefault();
-        event.stopPropagation();
-        const source = pickedStop;
-        pickedStop = null;
-        if (source === index) {
-          renderGradientEditor();
-          haptic(4);
-        } else reorderStop(source, index);
-      }, true);
-      picker.type = 'color';
-      picker.value = stop.colour;
-      picker.setAttribute('aria-label', `Colour for gradient stop ${index + 1}`);
-      picker.addEventListener('click', () => { selectedStop = index; pulseSelectedMarker(index); });
-      picker.addEventListener('change', () => commitMutation(() => {
-        gradientStops[index].colour = picker.value.toUpperCase();
-        selectedStop = index;
-        manaSelection = [];
-      }));
-      hex.type = 'text';
-      hex.className = 'stop-hex';
-      hex.value = stop.colour;
-      hex.maxLength = 7;
-      hex.autocapitalize = 'characters';
-      hex.autocomplete = 'off';
-      hex.spellcheck = false;
-      hex.setAttribute('aria-label', `Hex code for gradient stop ${index + 1}`);
-      hex.addEventListener('focus', () => {
-        selectedStop = index;
-        els.stopRail.querySelectorAll('.stop-chip').forEach((chip) => chip.classList.remove('selected'));
-        item.classList.add('selected');
-        els.barStopMarkers.querySelectorAll('.bar-marker').forEach((marker) => marker.classList.toggle('selected', marker.dataset.stopIndex === String(index)));
-        pulseSelectedMarker(index);
-        hex.select();
-      });
-      const applyStopHex = () => {
-        const colour = normaliseHex(hex.value);
-        if (!colour) {
-          hex.classList.add('error');
-          hex.setAttribute('aria-invalid', 'true');
-          hex.select();
-          haptic(18);
-          return;
-        }
-        hex.classList.remove('error');
-        hex.removeAttribute('aria-invalid');
-        if (colour === stop.colour) {
-          hex.value = colour;
-          return;
-        }
-        commitMutation(() => {
-          gradientStops[index].colour = colour;
-          selectedStop = index;
-          manaSelection = [];
-        });
-      };
-      hex.addEventListener('input', () => {
-        hex.value = hex.value.toUpperCase();
-        hex.classList.remove('error');
-        hex.removeAttribute('aria-invalid');
-      });
-      hex.addEventListener('change', applyStopHex);
-      hex.addEventListener('keydown', (event) => {
-        if (event.key !== 'Enter') return;
-        event.preventDefault();
-        applyStopHex();
-      });
-      controls.className = 'stop-controls';
-      item.append(head, grip, picker, hex, controls);
-      els.stopRail.appendChild(item);
-    });
-    const add = document.createElement('button');
-    add.type = 'button';
-    add.className = 'add-stop';
-    add.disabled = gradientStops.length >= MAX_STOPS;
-    add.innerHTML = `<b>+</b><span>${add.disabled ? 'MAX' : 'STOP'}</span>`;
-    add.setAttribute('aria-label', add.disabled ? 'Maximum of seven stops reached' : 'Add a colour stop in the largest gap');
-    add.addEventListener('click', () => addStopAt(largestGapPosition()));
-    els.stopRail.appendChild(add);
-    const canDelete = gradientStops.length > 1;
-    const tapReady = pickedStop !== null && canDelete;
-    els.deleteZone.classList.toggle('disabled', !canDelete);
-    els.deleteZone.classList.toggle('tap-ready', tapReady);
-    els.deleteZone.tabIndex = tapReady ? 0 : -1;
-    els.deleteZone.setAttribute('aria-disabled', String(!canDelete));
-    els.deleteZone.setAttribute('aria-label', tapReady ? `Delete gradient stop ${pickedStop + 1}` : 'Drag a gradient stop here to delete it');
-    els.deleteZone.querySelector('span').textContent = !canDelete ? 'ONE COLOUR MINIMUM' : tapReady ? 'TAP TO DELETE' : 'DRAG HERE TO DELETE';
   }
 
   function renderGradientEditor() {
@@ -1505,12 +1164,6 @@
     confirmEditorColour();
   });
   els.stopEditorConfirm.addEventListener('click', confirmEditorColour);
-  els.deleteZone.addEventListener('click', () => {
-    if (pickedStop === null || gradientStops.length <= 1) return;
-    const source = pickedStop;
-    pickedStop = null;
-    removeStop(source);
-  });
   document.querySelectorAll('.format-pad button').forEach((button) => button.addEventListener('click', () => {
     commitMutation(() => { formatting[button.dataset.format] = !formatting[button.dataset.format]; });
   }));
@@ -1543,24 +1196,17 @@
     haptic([7, 9]);
   });
   els.prismaticEdit.addEventListener('click', openPrismaticNameEditor);
-  els.prismaticCopy.addEventListener('click', copyResult);
   els.prismaticNameClose.addEventListener('click', closePrismaticNameEditor);
   els.prismaticNameDone.addEventListener('click', closePrismaticNameEditor);
   els.prismaticNameBackdrop.addEventListener('pointerdown', (event) => {
     if (event.target === els.prismaticNameBackdrop) closePrismaticNameEditor();
   });
   els.copyButton.addEventListener('click', copyResult);
-  document.addEventListener('click', (event) => {
-    if (pickedStop === null || event.target.closest('.stop-chip, #deleteZone')) return;
-    pickedStop = null;
-    renderGradientEditor();
-  });
   document.addEventListener('keydown', (event) => {
     const isTextField = event.target instanceof HTMLInputElement && ['text', 'search'].includes(event.target.type);
     if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') { event.preventDefault(); copyResult(); return; }
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'z' && !isTextField) { event.preventDefault(); undo(); }
     if (event.key === 'Escape' && !els.prismaticNameBackdrop.hidden) { closePrismaticNameEditor(); return; }
     if (event.key === 'Escape' && stopEditorOpen) { closeStopEditor(); return; }
-    if (event.key === 'Escape' && pickedStop !== null) { pickedStop = null; renderGradientEditor(); haptic(3); }
   });
 })();
