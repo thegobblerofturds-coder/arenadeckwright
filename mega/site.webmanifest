@@ -1,0 +1,11 @@
+{
+  "name": "TurdGobbler's Deck Name Colourifier MEGA",
+  "short_name": "Colourifier MEGA",
+  "icons": [
+    {"src": "favicon-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "favicon-512.png", "sizes": "512x512", "type": "image/png"}
+  ],
+  "theme_color": "#171a14",
+  "background_color": "#0b0d09",
+  "display": "standalone"
+}

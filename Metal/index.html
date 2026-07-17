@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en-CA">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#171a17">
+  <meta name="description" content="The complete Arena deck-name colourifier rebuilt as a battered 1990s metal handheld.">
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="manifest" href="site.webmanifest">
+  <title>TurdGobbler's Deck Name Colourifier &mdash; Metal Version 2</title>
+  <link rel="stylesheet" href="styles.css?v=6.2.0">
+  <link rel="stylesheet" href="metal.css?v=2.0.0">
+  <script src="logic.js?v=6.2.0" defer></script>
+  <script src="app.js?v=6.2.0" defer></script>
+</head>
+<body>
+  <main class="app-shell">
+    <div class="view-mode-switcher">
+      <button id="viewModeToggle" class="view-mode-toggle" type="button" aria-pressed="true" aria-label="Switch to the classic metal name and copy controls">
+        <span>METAL</span><i aria-hidden="true"><b></b></i><span>PRISMATIC LCD</span>
+      </button>
+    </div>
+    <header class="masthead">
+      <h1><span>TURDGOBBLER'S</span> DECK NAME COLOURIFIER</h1>
+      <b>V2 // METAL</b>
+    </header>
+
+    <section id="consoleSurface" class="console prismatic-mode" aria-label="Version 6 Deck Name Colourifier">
+      <div class="classic-name-entry">
+        <div class="field-head">
+          <label for="deckName">DECK NAME</label>
+          <span class="top-gradient-status"><span id="inputState"></span><span id="gradientPips" class="gradient-pips" aria-label="Gradient stages"></span></span>
+        </div>
+        <input id="deckName" class="deck-input" type="text" value="YOUR DECK NAME" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-describedby="inputState">
+      </div>
+
+      <div class="name-copy-bridge"><span id="rawCount" class="raw-count">0 / 64</span></div>
+
+      <div class="copy-style-row">
+        <div class="copy-cluster">
+          <button id="prismaticEdit" class="prismatic-action prismatic-edit" type="button" aria-label="Edit deck name">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 16.8V20h3.2L18.7 8.5l-3.2-3.2L4 16.8Zm16.8-10.4a.9.9 0 0 0 0-1.3l-1.9-1.9a.9.9 0 0 0-1.3 0l-1.5 1.5 3.2 3.2 1.5-1.5Z"/></svg>
+            <span>NAME</span>
+          </button>
+          <button id="copyButton" class="copy-button" type="button" aria-label="Copy coloured deck name" aria-describedby="copyHint copyStatus">
+            <span id="outputPreview" class="output-preview" aria-hidden="true"></span>
+            <span id="copyHint" class="copy-hint"><span class="copy-hint-default"><span class="desktop-copy">CLICK</span><span class="mobile-copy">TAP</span> TO COPY</span><span id="copyHintMessage" class="copy-hint-message" aria-hidden="true"></span></span>
+            <span class="paste-hint">PASTE INTO ARENA</span>
+            <span id="copyBurst" class="copy-burst" aria-hidden="true"></span>
+            <span class="prismatic-action prismatic-copy copy-affordance" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M8 7V4.8C8 3.8 8.8 3 9.8 3h8.4c1 0 1.8.8 1.8 1.8v8.4c0 1-.8 1.8-1.8 1.8H16v2.2c0 1-.8 1.8-1.8 1.8H5.8c-1 0-1.8-.8-1.8-1.8V8.8C4 7.8 4.8 7 5.8 7H8Zm2 0h4.2c1 0 1.8.8 1.8 1.8V13h2V5h-8v2Zm4 2H6v8h8V9Z"/></svg>
+              <span>COPY</span>
+            </span>
+          </button>
+        </div>
+        <div class="format-pad copy-format-pad" role="group" aria-label="Global text styling">
+          <button type="button" data-format="bold" aria-label="Bold" aria-pressed="false"><b>B</b></button>
+          <button type="button" data-format="italic" aria-label="Italic" aria-pressed="false"><i>I</i></button>
+          <button type="button" data-format="underline" aria-label="Underline" aria-pressed="false"><u>U</u></button>
+          <button type="button" data-format="strike" aria-label="Strikethrough" aria-pressed="false"><s>S</s></button>
+        </div>
+      </div>
+      <p id="copyStatus" class="sr-only" role="status" aria-live="polite"></p>
+
+      <section class="workbench" aria-label="Gradient workbench">
+        <div class="gradient-label" aria-hidden="true"><span>YOUR GRADIENT</span></div>
+        <div class="gradient-tube-row">
+          <div id="gradientBar" class="gradient-bar" role="button" tabindex="0" aria-label="Gradient tube. Touch an open area to edit Colour 1.">
+            <span id="barStopMarkers" class="bar-stop-markers"></span>
+          </div>
+          <button id="tubeAddButton" class="tube-add-button" type="button" aria-label="Add a draggable colour bubble" title="Add a draggable colour bubble"><span aria-hidden="true">+</span></button>
+        </div>
+        <div id="tubeHint" class="tube-hint" aria-hidden="true">TOUCH TUBE TO EDIT COLOUR 1 &middot; + ADDS A BUBBLE</div>
+        <div id="stageWarning" class="stage-warning" role="status" aria-live="polite"></div>
+        <button id="deleteZone" class="delete-zone" type="button" tabindex="-1" aria-disabled="true"><span>DRAG A CIRCLE HERE TO DELETE</span></button>
+
+        <div class="tool-row">
+          <button id="undoButton" class="tool-button undo-button" type="button" title="Undo the last colour or style change" disabled><b aria-hidden="true">&#8630;</b><span>UNDO</span></button>
+          <div class="order-tools" aria-label="Gradient order controls">
+            <button id="rotateGradient" class="tool-button" type="button" title="Move the first colour to the end"><b aria-hidden="true">&#8635;</b><span>ROTATE</span></button>
+            <button id="flipGradient" class="tool-button" type="button" title="Reverse the colour order"><b aria-hidden="true">&#8644;</b><span>FLIP</span></button>
+          </div>
+          <div id="quickPalettes" class="quick-palette-pad" role="group" aria-label="Palette library"></div>
+        </div>
+
+        <div id="paletteTray" class="palette-tray" hidden>
+          <div class="palette-toolbar">
+            <span><small>PALETTE LIBRARY</small><b>COLOURS ONLY</b></span>
+            <div class="palette-toolbar-actions">
+              <button id="favouriteCurrent" type="button" aria-pressed="false"><b aria-hidden="true">&#9734;</b> SAVE CURRENT</button>
+            </div>
+          </div>
+          <div id="builtInPalettes" class="palette-strip" aria-label="Built-in palettes"></div>
+          <div id="savedPalettes" class="saved-palettes"></div>
+        </div>
+        <div id="stopEditorBackdrop" class="stop-editor-backdrop" hidden>
+          <section id="stopEditor" class="stop-editor" role="dialog" aria-modal="true" aria-labelledby="stopEditorTitle" tabindex="-1">
+            <header>
+              <span><small>EDIT COLOUR</small><b id="stopEditorTitle">1</b></span>
+              <div class="stop-editor-header-actions">
+                <button id="stopEditorConfirm" class="stop-editor-confirm" type="button"><span>CONFIRM</span></button>
+                <button id="stopEditorClose" class="stop-editor-close" type="button" aria-label="Close colour editor">&times;</button>
+              </div>
+            </header>
+            <div class="stop-editor-controls">
+              <div class="stop-editor-picker">
+                <span class="colour-wheel-shell">
+                  <canvas id="stopEditorWheel" width="240" height="240" role="img" aria-label="Full colour wheel. Drag to choose a colour."></canvas>
+                  <i id="stopEditorWheelCursor" aria-hidden="true"></i>
+                </span>
+                <span>SELECT COLOUR</span>
+              </div>
+              <div class="stop-editor-side">
+                <div id="stopEditorPreview" class="stop-editor-preview" aria-label="Selected colour preview">
+                  <i aria-hidden="true"></i>
+                  <span><small>PREVIEW</small><b id="stopEditorPreviewHex">#FFFFFF</b></span>
+                </div>
+                <label class="stop-editor-hex">
+                  <span>HEX CODE</span>
+                  <input id="stopEditorHex" type="text" value="#FFFFFF" maxlength="7" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Hex code for selected colour">
+                </label>
+              </div>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section class="colour-dock mtg-station" aria-label="MTG preset finder">
+        <div class="mtg-station-head">
+          <span><small>PRESET FINDER</small><b>MTG SHORTCUTS</b></span>
+          <small>PIPS FILTER RESULTS</small>
+        </div>
+        <div id="manaComposer" class="mana-composer" role="group" aria-label="Choose up to five MTG colours in gradient order"></div>
+        <div class="identity-readout">
+          <span><small>IDENTITY</small><b id="identityName">CHOOSE COLOURS</b></span>
+          <span><small>ORDER</small><b id="manaOrder">&mdash;</b></span>
+          <button id="clearMana" type="button" disabled>CLEAR</button>
+        </div>
+        <div class="preset-context">
+          <span id="presetContext">PRESETS OFFLINE</span>
+          <small id="selectionSummary">SELECT PIPS</small>
+        </div>
+        <div id="presetRail" class="preset-rail" aria-label="Matching MTG colour presets"></div>
+      </section>
+    </section>
+
+    <div id="prismaticNameBackdrop" class="prismatic-name-backdrop" hidden>
+      <section class="prismatic-name-sheet" role="dialog" aria-modal="true" aria-labelledby="prismaticNameTitle">
+        <header><span><small>PRISMATIC GLASS</small><b id="prismaticNameTitle">DECK NAME</b></span><button id="prismaticNameClose" type="button" aria-label="Close deck name editor">&times;</button></header>
+        <label><span>TYPE OR PASTE</span><input id="prismaticDeckName" type="text" value="YOUR DECK NAME" autocomplete="off" autocapitalize="characters" spellcheck="false"></label>
+        <button id="prismaticNameDone" class="prismatic-name-done" type="button">DONE</button>
+      </section>
+    </div>
+
+    <footer><span>LOCAL // NOTHING UPLOADED</span><span>CTRL + ENTER // COPY</span></footer>
+  </main>
+</body>
+</html>

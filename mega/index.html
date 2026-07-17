@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en-CA">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#171a14">
+  <meta name="description" content="Mega is the complete private Arena deck-name colour workshop: gradients, stop cards, MTG presets, profiles, diagnostics and portable backups.">
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="manifest" href="site.webmanifest">
+  <title>TurdGobbler's Deck Name Colourifier &mdash; MEGA</title>
+  <link rel="stylesheet" href="styles.css?v=mega-1.0.0">
+  <link rel="stylesheet" href="metal.css?v=mega-1.0.0">
+  <link rel="stylesheet" href="mega.css?v=mega-1.0.0">
+  <script src="logic.js?v=mega-1.0.0" defer></script>
+  <script src="app.js?v=mega-1.0.0" defer></script>
+</head>
+<body>
+  <main class="app-shell mega-shell">
+    <header class="mega-masthead">
+      <span class="state-star" aria-hidden="true">★</span>
+      <span class="mega-title"><small>TURDGOBBLER STATE COLOUR WORKS</small><strong>MEGA</strong><em>METAL VERSION 3</em></span>
+      <span class="serial-plate"><small>MODEL</small><b>64-M</b><i>LOCAL APPARATUS</i></span>
+    </header>
+
+    <div class="status-rail" aria-label="Machine status">
+      <span><i class="lamp live"></i> ENGINE ONLINE</span>
+      <span><i class="lamp"></i> NETWORK ISOLATED</span>
+      <span id="systemStatus"><i class="lamp amber"></i> PROFILE MEMORY READY</span>
+      <button id="viewModeToggle" class="lever-switch" type="button" aria-pressed="false" aria-label="Switch to compact name and copy controls"><span>FULL DECK</span><i><b></b></i><span>COMPACT LCD</span></button>
+    </div>
+
+    <section id="consoleSurface" class="console mega-console" aria-label="Mega Deck Name Colourifier">
+      <section class="command-deck" aria-labelledby="commandTitle">
+        <header class="panel-label"><span>01</span><b id="commandTitle">PRIMARY COMMAND DECK</b><small>TYPE // INSPECT // COPY</small></header>
+        <div class="classic-name-entry">
+          <div class="field-head">
+            <label for="deckName">DECK NAME INPUT</label>
+            <span class="top-gradient-status"><span id="inputState"></span><span id="gradientPips" class="gradient-pips" aria-label="Gradient stages"></span></span>
+          </div>
+          <input id="deckName" class="deck-input" type="text" value="YOUR DECK NAME" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-describedby="inputState">
+        </div>
+
+        <div class="name-copy-bridge"><span id="rawCount" class="raw-count">0 / 64</span></div>
+
+        <div class="copy-style-row">
+          <div class="copy-cluster">
+            <button id="prismaticEdit" class="prismatic-action prismatic-edit" type="button" aria-label="Edit deck name"><b aria-hidden="true">✎</b><span>NAME</span></button>
+            <button id="copyButton" class="copy-button" type="button" aria-label="Copy coloured deck name" aria-describedby="copyHint copyStatus">
+              <span id="outputPreview" class="output-preview" aria-hidden="true"></span>
+              <span id="copyHint" class="copy-hint"><span class="copy-hint-default"><span class="desktop-copy">CLICK</span><span class="mobile-copy">TAP</span> TO COPY</span><span id="copyHintMessage" class="copy-hint-message" aria-hidden="true"></span></span>
+              <span class="paste-hint">PASTE INTO ARENA</span>
+              <span id="copyBurst" class="copy-burst" aria-hidden="true"></span>
+              <span class="prismatic-action prismatic-copy copy-affordance" aria-hidden="true"><b>▣</b><span>COPY</span></span>
+            </button>
+          </div>
+          <div class="format-pad copy-format-pad" role="group" aria-label="Global text styling">
+            <button type="button" data-format="bold" aria-label="Bold" aria-pressed="false"><b>B</b></button>
+            <button type="button" data-format="italic" aria-label="Italic" aria-pressed="false"><i>I</i></button>
+            <button type="button" data-format="underline" aria-label="Underline" aria-pressed="false"><u>U</u></button>
+            <button type="button" data-format="strike" aria-label="Strikethrough" aria-pressed="false"><s>S</s></button>
+          </div>
+        </div>
+        <p id="copyStatus" class="sr-only" role="status" aria-live="polite"></p>
+      </section>
+
+      <details class="machine-module gradient-module" open>
+        <summary><span class="module-number">02</span><span><b>GRADIENT REACTOR</b><small>LIVE TUBE // SEVEN-COLOUR CAPACITY</small></span><i aria-hidden="true"></i></summary>
+        <div class="module-body">
+          <section class="workbench" aria-label="Gradient workbench">
+            <div class="gradient-label" aria-hidden="true"><span>ACTIVE GRADIENT MANIFOLD</span></div>
+            <div class="gradient-tube-row">
+              <div id="gradientBar" class="gradient-bar" role="button" tabindex="0" aria-label="Gradient tube. Touch an open area to edit Colour 1."><span id="barStopMarkers" class="bar-stop-markers"></span></div>
+              <button id="tubeAddButton" class="tube-add-button" type="button" aria-label="Add a draggable colour bubble" title="Add a draggable colour bubble"><span aria-hidden="true">+</span></button>
+            </div>
+            <div id="tubeHint" class="tube-hint" aria-hidden="true">TOUCH TUBE TO EDIT COLOUR 1 &middot; + ADDS A BUBBLE</div>
+            <div id="stageWarning" class="stage-warning" role="status" aria-live="polite"></div>
+            <button id="deleteZone" class="delete-zone" type="button" tabindex="-1" aria-disabled="true"><span>DRAG A COLOUR HERE TO DELETE</span></button>
+
+            <div class="tool-row mega-tool-row">
+              <div class="history-tools">
+                <button id="undoButton" class="tool-button" type="button" title="Undo" disabled><b aria-hidden="true">↶</b><span>UNDO</span></button>
+                <button id="redoButton" class="tool-button" type="button" title="Redo" disabled><b aria-hidden="true">↷</b><span>REDO</span></button>
+              </div>
+              <div class="order-tools" aria-label="Gradient order controls">
+                <button id="rotateGradient" class="tool-button" type="button" title="Rotate unlocked colours"><b aria-hidden="true">↻</b><span>ROTATE</span></button>
+                <button id="flipGradient" class="tool-button" type="button" title="Reverse unlocked colours"><b aria-hidden="true">⇄</b><span>FLIP</span></button>
+              </div>
+              <div id="quickPalettes" class="quick-palette-pad" role="group" aria-label="Palette library"></div>
+            </div>
+
+            <div id="paletteTray" class="palette-tray" hidden>
+              <div class="palette-toolbar"><span><small>PALETTE MAGAZINE</small><b>COLOURS ONLY</b></span><div class="palette-toolbar-actions"><button id="favouriteCurrent" type="button" aria-pressed="false"><b aria-hidden="true">☆</b> SAVE CURRENT</button></div></div>
+              <div id="builtInPalettes" class="palette-strip" aria-label="Built-in palettes"></div>
+              <div id="savedPalettes" class="saved-palettes"></div>
+            </div>
+
+            <details class="subassembly stop-card-assembly" open>
+              <summary><b>INDIVIDUAL COLOUR CHANNELS</b><small>HEX // POSITION // LOCK // ORDER</small></summary>
+              <div class="subassembly-controls"><button id="addStopCard" type="button">+ ADD CHANNEL</button><span>Colour 1 is mechanically fixed. Lock any other channel before experimenting.</span></div>
+              <div id="stopCards" class="stop-card-grid" aria-label="Gradient colour channel cards"></div>
+            </details>
+
+            <div id="stopEditorBackdrop" class="stop-editor-backdrop" hidden>
+              <section id="stopEditor" class="stop-editor" role="dialog" aria-modal="true" aria-labelledby="stopEditorTitle" tabindex="-1">
+                <header><span><small>CALIBRATE COLOUR</small><b id="stopEditorTitle">1</b></span><div class="stop-editor-header-actions"><button id="stopEditorConfirm" class="stop-editor-confirm" type="button"><span>CONFIRM</span></button><button id="stopEditorClose" class="stop-editor-close" type="button" aria-label="Close colour editor">&times;</button></div></header>
+                <div class="stop-editor-controls">
+                  <div class="stop-editor-picker"><span class="colour-wheel-shell"><canvas id="stopEditorWheel" width="240" height="240" role="img" aria-label="Full colour wheel. Drag to choose a colour."></canvas><i id="stopEditorWheelCursor" aria-hidden="true"></i></span><span>SELECT COLOUR</span></div>
+                  <div class="stop-editor-side">
+                    <div id="stopEditorPreview" class="stop-editor-preview" aria-label="Selected colour preview"><i aria-hidden="true"></i><span><small>PREVIEW</small><b id="stopEditorPreviewHex">#FFFFFF</b></span></div>
+                    <label class="stop-editor-hex"><span>HEX CODE</span><input id="stopEditorHex" type="text" value="#FFFFFF" maxlength="7" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Hex code for selected colour"></label>
+                  </div>
+                </div>
+              </section>
+            </div>
+          </section>
+        </div>
+      </details>
+
+      <details class="machine-module mtg-module">
+        <summary><span class="module-number">03</span><span><b>WUBRG COMBINATION MATRIX</b><small>MONO // GUILDS // SHARDS // WEDGES // FOUR // FIVE</small></span><i aria-hidden="true"></i></summary>
+        <div class="module-body">
+          <section class="colour-dock mtg-station" aria-label="MTG preset finder">
+            <div class="mtg-station-head"><span><small>PRESET FINDER</small><b>MTG SHORTCUTS</b></span><small>PIPS FILTER RESULTS</small></div>
+            <div id="manaComposer" class="mana-composer" role="group" aria-label="Choose up to five MTG colours in gradient order"></div>
+            <div class="identity-readout"><span><small>IDENTITY</small><b id="identityName">CHOOSE COLOURS</b></span><span><small>ORDER</small><b id="manaOrder">&mdash;</b></span><button id="clearMana" type="button" disabled>CLEAR</button></div>
+            <div class="preset-context"><span id="presetContext">PRESETS OFFLINE</span><small id="selectionSummary">SELECT PIPS</small></div>
+            <div id="presetRail" class="preset-rail" aria-label="Matching MTG colour presets"></div>
+          </section>
+        </div>
+      </details>
+
+      <details class="machine-module profile-module">
+        <summary><span class="module-number">04</span><span><b>PERMANENT PROFILE VAULT</b><small>NAME // DUPLICATE // RESTORE // PORTABLE BACKUP</small></span><i aria-hidden="true"></i></summary>
+        <div class="module-body">
+          <section class="profile-console" aria-label="Saved machine profiles">
+            <div class="profile-entry"><label for="profileName">PROFILE DESIGNATION</label><input id="profileName" type="text" maxlength="48" placeholder="e.g. DIMIR CONTROL"><button id="saveProfile" type="button">SAVE CURRENT MACHINE</button></div>
+            <div class="profile-actions"><button id="exportProfiles" type="button">EXPORT ALL</button><button id="importProfiles" type="button">IMPORT BACKUP</button><input id="profileFile" type="file" accept="application/json,.json" hidden><span id="profileMessage" role="status" aria-live="polite">LOCAL MEMORY // NO PRACTICAL SLOT LIMIT</span></div>
+            <div id="profileList" class="profile-list"></div>
+          </section>
+        </div>
+      </details>
+
+      <details class="machine-module diagnostic-module">
+        <summary><span class="module-number">05</span><span><b>CODE &amp; DIAGNOSTIC BAY</b><small>RAW ARENA STRING // BUDGET // MACHINE STATE</small></span><i aria-hidden="true"></i></summary>
+        <div class="module-body diagnostic-grid">
+          <section class="raw-console"><header><b>RAW ARENA OUTPUT</b><button id="copyRaw" type="button">COPY RAW</button></header><textarea id="rawOutput" readonly spellcheck="false" aria-label="Raw Arena deck name"></textarea></section>
+          <section class="diagnostic-console"><header><b>LIVE TELEMETRY</b></header><dl id="diagnosticReadout"></dl></section>
+        </div>
+      </details>
+    </section>
+
+    <div id="prismaticNameBackdrop" class="prismatic-name-backdrop" hidden>
+      <section class="prismatic-name-sheet" role="dialog" aria-modal="true" aria-labelledby="prismaticNameTitle">
+        <header><span><small>COMPACT LCD CONTROL</small><b id="prismaticNameTitle">DECK NAME</b></span><button id="prismaticNameClose" type="button" aria-label="Close deck name editor">&times;</button></header>
+        <label><span>TYPE OR PASTE</span><input id="prismaticDeckName" type="text" value="YOUR DECK NAME" autocomplete="off" autocapitalize="characters" spellcheck="false"></label>
+        <button id="prismaticNameDone" class="prismatic-name-done" type="button">COMMIT NAME</button>
+      </section>
+    </div>
+
+    <footer class="mega-footer"><span>FACTORY NO. 64 // LOCAL OPERATION</span><span>CTRL + ENTER // COPY</span><span>CTRL + Z / CTRL + Y // HISTORY</span></footer>
+  </main>
+</body>
+</html>

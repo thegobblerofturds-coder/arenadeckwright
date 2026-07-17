@@ -256,6 +256,8 @@ footer{
   letter-spacing:.08em;
   text-transform:uppercase;
 }
+footer .mega-link{color:inherit;opacity:.42;text-decoration:none;transition:opacity .16s,color .16s}
+footer .mega-link:hover,footer .mega-link:focus-visible{color:#2b2723;opacity:.9;outline:none;text-decoration:underline;text-underline-offset:3px}
 
 .current-showcase:focus-visible,.launch:focus-visible{
   outline:3px solid var(--cyan);
