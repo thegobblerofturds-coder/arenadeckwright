@@ -777,3 +777,20 @@ footer{padding-top:11px;opacity:.7}
   .tool-row{gap:5px}.tool-button{min-width:49px;height:44px}.order-tools{gap:4px}.palette-menu-button{width:50px;height:44px}
   .mtg-station-head{padding-bottom:6px}.mana-composer{min-height:52px}
 }
+
+/* Rounded-square stops make their physical footprint explicit. The fixed first cap keeps a stricter exclusion zone. */
+.bar-marker:not(.anchor),.bar-marker:not(.anchor).selected,.bar-marker:not(.anchor).dragging{border-radius:13px}
+.bar-marker:not(.anchor) span,.bar-marker:not(.anchor).selected span,.bar-marker:not(.anchor).dragging span{border-radius:9px}
+.bar-marker:not(.anchor) span::after{border-radius:6px}
+.bar-marker.anchor,.bar-marker.anchor.selected{width:56px}
+.bar-marker.anchor span,.bar-marker.anchor.selected span{width:46px;height:29px}
+
+/* At the seven-colour ceiling the add control disappears and the tube occupies its bay. */
+.gradient-tube-row.at-stop-limit{grid-template-columns:minmax(0,1fr)}
+.gradient-tube-row.at-stop-limit .gradient-bar{margin-right:0}
+.gradient-tube-row.at-stop-limit .tube-add-button{display:none}
+
+@media(max-width:390px){
+  .bar-marker.anchor,.bar-marker.anchor.selected{width:52px}
+  .bar-marker.anchor span,.bar-marker.anchor.selected span{width:43px;height:28px}
+}

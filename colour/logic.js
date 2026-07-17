@@ -72,49 +72,54 @@
     return source;
   }
 
-  function gradientStopGap(count, requestedGap) {
-    if (count < 2) return 0;
-    const parsed = Number(requestedGap);
-    const gap = Number.isFinite(parsed) ? Math.max(0, parsed) : 0;
-    return Math.min(gap, 1 / (count - 1));
+  function gradientStopGaps(count, requestedGap, requestedAnchorGap = requestedGap) {
+    if (count < 2) return {regular: 0, anchor: 0};
+    const parsedGap = Number(requestedGap);
+    const parsedAnchorGap = Number(requestedAnchorGap);
+    const regular = Number.isFinite(parsedGap) ? Math.max(0, parsedGap) : 0;
+    const anchor = Number.isFinite(parsedAnchorGap) ? Math.max(regular, parsedAnchorGap) : regular;
+    const requestedTotal = anchor + regular * Math.max(0, count - 2);
+    const scale = requestedTotal > 1 ? 1 / requestedTotal : 1;
+    return {regular: regular * scale, anchor: anchor * scale};
   }
 
-  function separateGradientStops(stops, minimumGap = 0) {
+  function separateGradientStops(stops, minimumGap = 0, anchorGap = minimumGap) {
     const source = normaliseGradientStops(stops);
     if (source.length < 2) return source;
-    const gap = gradientStopGap(source.length, minimumGap);
-    if (!gap) return source;
+    const gaps = gradientStopGaps(source.length, minimumGap, anchorGap);
+    if (!gaps.regular && !gaps.anchor) return source;
     source[0].position = 0;
     for (let index = 1; index < source.length; index += 1) {
+      const gap = index === 1 ? gaps.anchor : gaps.regular;
       source[index].position = Math.max(source[index].position, source[index - 1].position + gap);
     }
     if (source[source.length - 1].position > 1) {
       source[source.length - 1].position = 1;
       for (let index = source.length - 2; index > 0; index -= 1) {
-        source[index].position = Math.min(source[index].position, source[index + 1].position - gap);
+        source[index].position = Math.min(source[index].position, source[index + 1].position - gaps.regular);
       }
     }
     source[0].position = 0;
     return source;
   }
 
-  function collisionPosition(stops, movingIndex, requestedPosition, minimumGap = 0) {
+  function collisionPosition(stops, movingIndex, requestedPosition, minimumGap = 0, anchorGap = minimumGap) {
     const source = Array.isArray(stops) ? stops : [];
     const requested = Math.max(0, Math.min(1, Number(requestedPosition) || 0));
     if (movingIndex < 0 || movingIndex >= source.length || source.length < 2) return requested;
-    const gap = gradientStopGap(source.length, minimumGap);
-    if (!gap) return requested;
+    const gaps = gradientStopGaps(source.length, minimumGap, anchorGap);
+    if (!gaps.regular && !gaps.anchor) return requested;
     const occupied = source
       .map((stop, index) => ({index, position: Math.max(0, Math.min(1, Number(stop?.position) || 0))}))
       .filter((stop) => stop.index !== movingIndex)
-      .map((stop) => stop.position)
-      .sort((left, right) => left - right);
+      .sort((left, right) => left.position - right.position);
     const intervals = [];
     let intervalStart = 0;
-    occupied.forEach((position) => {
-      const intervalEnd = position - gap;
+    occupied.forEach((stop) => {
+      const gap = stop.index === 0 || movingIndex === 0 ? gaps.anchor : gaps.regular;
+      const intervalEnd = stop.position - gap;
       if (intervalEnd >= intervalStart) intervals.push([intervalStart, intervalEnd]);
-      intervalStart = Math.max(intervalStart, position + gap);
+      intervalStart = Math.max(intervalStart, stop.position + gap);
     });
     if (intervalStart <= 1) intervals.push([intervalStart, 1]);
     if (!intervals.length) return requested;

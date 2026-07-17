@@ -6,7 +6,8 @@
   const STORAGE_KEY = 'turdgobbler-deckwright-v6';
   const MAX_STOPS = 7;
   const MAX_FAVOURITES = 10;
-  const MIN_BUBBLE_GAP_PX = 60;
+  const MIN_BUBBLE_GAP_PX = 38;
+  const ANCHOR_BUBBLE_GAP_PX = 58;
   const TUBE_INSET = 14;
   const ANCHOR_SWAP_ZONE = .04;
   const MANA_ORDER = ['W', 'U', 'B', 'R', 'G'];
@@ -118,9 +119,20 @@
     return Math.min(MIN_BUBBLE_GAP_PX / trackWidth, 1 / (count - 1));
   }
 
+  function tubeAnchorCollisionGap(count = gradientStops.length) {
+    if (count < 2) return 0;
+    const bounds = els.gradientBar.getBoundingClientRect();
+    const trackWidth = Math.max(1, bounds.width - TUBE_INSET * 2);
+    return Math.min(ANCHOR_BUBBLE_GAP_PX / trackWidth, 1);
+  }
+
   function normalisePalette(stops) {
     const source = Logic.normaliseGradientStops(stops).slice(0, MAX_STOPS);
-    return Logic.separateGradientStops(source, tubeCollisionGap(source.length));
+    return Logic.separateGradientStops(
+      source,
+      tubeCollisionGap(source.length),
+      tubeAnchorCollisionGap(source.length)
+    );
   }
 
   function haptic(duration = 6) {
@@ -460,7 +472,8 @@
         gradientStops,
         index,
         requested,
-        tubeCollisionGap()
+        tubeCollisionGap(),
+        tubeAnchorCollisionGap()
       );
     }
     gradientStops.sort((left, right) => left.position - right.position);
@@ -505,7 +518,8 @@
       gradientStops,
       index,
       requested,
-      tubeCollisionGap()
+      tubeCollisionGap(),
+      tubeAnchorCollisionGap()
     );
     gradientStops[index].position = position;
     dragState.requested = requested;
@@ -674,12 +688,15 @@
     els.deleteZone.classList.toggle('disabled', !canDelete);
     els.deleteZone.tabIndex = -1;
     els.deleteZone.setAttribute('aria-disabled', String(!canDelete));
-    els.deleteZone.setAttribute('aria-label', canDelete ? 'Drag a gradient circle here to delete it' : 'One colour minimum');
-    els.deleteZone.querySelector('span').textContent = canDelete ? 'DRAG A CIRCLE HERE TO DELETE' : 'ONE COLOUR MINIMUM';
+    els.deleteZone.setAttribute('aria-label', canDelete ? 'Drag a gradient colour here to delete it' : 'One colour minimum');
+    els.deleteZone.querySelector('span').textContent = canDelete ? 'DRAG A COLOUR HERE TO DELETE' : 'ONE COLOUR MINIMUM';
     els.undoButton.disabled = history.length === 0;
     els.rotateGradient.disabled = gradientStops.length < 2;
     els.flipGradient.disabled = gradientStops.length < 2;
-    els.tubeAddButton.disabled = gradientStops.length >= MAX_STOPS;
+    const atStopLimit = gradientStops.length >= MAX_STOPS;
+    els.tubeAddButton.disabled = atStopLimit;
+    els.tubeAddButton.hidden = atStopLimit;
+    els.tubeAddButton.closest('.gradient-tube-row').classList.toggle('at-stop-limit', atStopLimit);
     els.tubeAddButton.setAttribute('aria-label', els.tubeAddButton.disabled
       ? 'Maximum of seven colour bubbles reached'
       : 'Add a draggable colour bubble');

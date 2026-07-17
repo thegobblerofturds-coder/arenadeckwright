@@ -10,13 +10,14 @@ Version 6 is the dark prism-glass edition. It keeps the complete command deck in
 - the final placed colour naturally bleeding through the right edge of the tube, reinforced by a gentle edge-wash pulse
 - a quiet V6 / Prismatic Glass switch that exchanges the full name field for compact pencil and copy controls without changing the workbench
 - a compact full colour wheel with its full preview panel, a top-mounted Confirm control, and direct three- or six-digit hex entry
-- an illuminated circle-to-delete rail with one-colour minimum protection
-- spherical glass colour bubbles with generous invisible mobile touch targets
-- freely position and reorder colours while a collision gap keeps every gradient bubble visible and easy to grab
+- an illuminated drag-to-delete rail with one-colour minimum protection
+- rounded-square glass colour controls with generous invisible mobile touch targets
+- forgiving box-sized spacing between movable colours, plus a stricter collision zone protecting Colour 1
 - an explicit illuminated SWAP state when a bubble trades colours with Colour 1 at the tube's beginning
 - staged colour editing: Confirm applies a colour while closing the editor cancels it
 - repeated spaces preserved faithfully in the live finished-name preview
 - tapping the tube edits Colour 1, while a dedicated illuminated + launches each new draggable bubble into the tube
+- at seven colours the + control disappears and the gradient tube expands into its space, returning as soon as another colour is removed
 - a spring-loaded launch animation that visibly connects the + control to the new bubble
 - a pressable numbered Colour 1 cap whenever multiple colours are present; empty tube space becomes non-interactive in that state
 - three colour-tinted curved signals cascade from the final bubble to show its colour washing through the remaining tube
