@@ -100,7 +100,7 @@
     guide.textContent = '➤';
     guide.setAttribute('aria-hidden', 'true');
     link.className = 'cheug-version-link';
-    link.href = '../colour/';
+    link.href = 'https://turdgobbler.com/colour/';
     link.textContent = '➤';
     link.title = 'Escape to the current Colourifier';
     link.setAttribute('aria-label', 'Escape to the current Colourifier');

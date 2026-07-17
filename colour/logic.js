@@ -1,7 +1,7 @@
 (function (root, factory) {
   const api = factory();
   if (typeof module === 'object' && module.exports) module.exports = api;
-  else root.DeckwrightV5Logic = api;
+  else root.DeckwrightV6Logic = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   'use strict';
 
@@ -60,17 +60,15 @@
           colour: stop.colour.toUpperCase(),
           position: Math.max(0, Math.min(1, Number(stop.position)))
         };
-        if (stop.locked === true) normalised.locked = true;
         return normalised;
       })
       .sort((left, right) => left.position - right.position);
-    if (!source.length) return [{colour: '#FFFFFF', position: 0}, {colour: '#FFFFFF', position: 1}];
-    if (source.length === 1) return [
-      {colour: source[0].colour, position: 0},
-      {colour: source[0].colour, position: 1}
-    ];
+    if (!source.length) return [{colour: '#FFFFFF', position: 0}];
+    if (source.length === 1) {
+      source[0].position = 0;
+      return source;
+    }
     source[0].position = 0;
-    source[source.length - 1].position = 1;
     return source;
   }
 
@@ -78,8 +76,8 @@
     const source = normaliseGradientStops(stops);
     const point = Math.max(0, Math.min(1, Number(position) || 0));
     const rightIndex = source.findIndex((stop) => stop.position >= point);
-    if (rightIndex <= 0) return source[0].colour;
     if (rightIndex < 0) return source[source.length - 1].colour;
+    if (rightIndex === 0) return source[0].colour;
     const left = source[rightIndex - 1];
     const right = source[rightIndex];
     const distance = right.position - left.position;
@@ -90,6 +88,20 @@
     const count = Math.max(1, Math.floor(steps));
     if (count === 1) return [colourAtPosition(stops, .5)];
     return Array.from({length: count}, (_, index) => colourAtPosition(stops, index / (count - 1)));
+  }
+
+  function isWhiteish(colour) {
+    if (!validHex(colour)) return false;
+    const [red, green, blue] = hexToRgb(colour);
+    const brightness = .2126 * red + .7152 * green + .0722 * blue;
+    const chroma = Math.max(red, green, blue) - Math.min(red, green, blue);
+    return brightness >= 218 && chroma <= 65;
+  }
+
+  function isMostlyWhite(stops) {
+    const samples = sampleGradientStops(stops, 13);
+    const whiteishSamples = samples.filter(isWhiteish).length;
+    return whiteishSamples >= Math.ceil(samples.length * 2 / 3);
   }
 
   function mergeAdjacent(segments) {
@@ -201,6 +213,8 @@
     normaliseGradientStops,
     colourAtPosition,
     sampleGradientStops,
+    isWhiteish,
+    isMostlyWhite,
     mergeAdjacent,
     distribute,
     serialize,

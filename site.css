@@ -33,79 +33,6 @@ body::before{
   background-size:29px 31px;
 }
 
-.topbar{
-  position:sticky;
-  z-index:30;
-  top:max(9px,env(safe-area-inset-top));
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  width:min(1380px,calc(100% - 32px));
-  min-height:54px;
-  margin:14px auto 0;
-  padding:6px 7px 6px 12px;
-  border:1px solid #62595055;
-  border-radius:14px;
-  background:#f8f4efdd;
-  box-shadow:0 9px 28px #3e332825,0 1px #fff inset;
-  backdrop-filter:blur(14px);
-}
-.brand{
-  display:flex;
-  align-items:center;
-  gap:9px;
-  color:#29231f;
-  font:800 10px/1 ui-monospace,SFMono-Regular,Consolas,monospace;
-  letter-spacing:.09em;
-  text-decoration:none;
-  text-transform:uppercase;
-}
-.brand b{
-  display:grid;
-  place-items:center;
-  width:29px;
-  height:29px;
-  border:2px solid #171310;
-  border-radius:8px;
-  color:#171310;
-  background:var(--yellow);
-  box-shadow:2px 2px 0 #171310;
-  font-size:11px;
-}
-.quick-launch{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  min-height:40px;
-  padding:6px 10px 6px 12px;
-  border:1px solid #224b31;
-  border-radius:9px;
-  color:#eafff0;
-  background:#07100a;
-  box-shadow:0 3px 0 #1b1a18,0 0 18px #32ff7914;
-  text-decoration:none;
-  transition:transform .12s,border-color .12s,box-shadow .12s;
-}
-.quick-launch span,.quick-launch small{display:block}
-.quick-launch span{
-  font:800 10px/1 ui-monospace,SFMono-Regular,Consolas,monospace;
-  letter-spacing:.07em;
-  text-transform:uppercase;
-}
-.quick-launch small{
-  margin-bottom:4px;
-  color:#699379;
-  font-size:7px;
-  letter-spacing:.12em;
-}
-.quick-launch>b{color:var(--matrix);font-size:16px}
-.quick-launch:hover{
-  border-color:var(--matrix);
-  box-shadow:0 3px 0 #1b1a18,0 0 20px #32ff793d;
-  transform:translateY(-1px);
-}
-.quick-launch:active{box-shadow:none;transform:translateY(2px)}
-
 main{width:min(1380px,calc(100% - 32px));margin:auto}
 .eyebrow{
   display:flex;
@@ -131,7 +58,7 @@ main{width:min(1380px,calc(100% - 32px));margin:auto}
   grid-template-columns:minmax(390px,.78fr) minmax(560px,1.22fr);
   gap:clamp(42px,6vw,100px);
   align-items:center;
-  min-height:calc(100svh - 68px);
+  min-height:100svh;
   padding:42px 0 72px;
 }
 .hero h1{
@@ -305,63 +232,6 @@ main{width:min(1380px,calc(100% - 32px));margin:auto}
 }
 .showcase-action b{font-size:17px}
 
-.legacy{padding:70px 0 35px;border-top:1px solid #aca097}
-.legacy-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:35px;margin-bottom:22px}
-.legacy-heading .eyebrow{margin-bottom:7px}
-.legacy-heading h2{margin:0;font-size:clamp(25px,3vw,38px);letter-spacing:-.04em}
-.legacy-heading>p{max-width:460px;margin:0;color:#766c65;font-size:12px;line-height:1.5;text-align:right}
-.legacy-grid{display:grid;grid-template-columns:repeat(2,minmax(0,330px));justify-content:end;gap:11px}
-.legacy-tile{
-  display:grid;
-  grid-template-columns:78px minmax(0,1fr) 24px;
-  gap:13px;
-  align-items:center;
-  min-height:92px;
-  padding:9px 12px 9px 9px;
-  border:1px solid #aaa097;
-  border-radius:13px;
-  color:#2b2723;
-  background:#f8f4f0cc;
-  box-shadow:0 7px 17px #44372e20;
-  text-decoration:none;
-  transition:transform .13s,filter .13s;
-}
-.legacy-tile:hover{filter:brightness(1.04);transform:translateY(-2px)}
-.legacy-thumb{
-  display:grid;
-  place-items:center;
-  width:78px;
-  height:72px;
-  overflow:hidden;
-  border:2px solid #171513;
-  border-radius:8px;
-}
-.metal-thumb{
-  color:#80ff83;
-  background:repeating-linear-gradient(94deg,#777 0 2px,#4a4e4a 2px 5px,#8c9089 5px 6px);
-  font:900 10px/1 ui-monospace,SFMono-Regular,Consolas,monospace;
-}
-.metal-thumb b{
-  padding:9px 5px;
-  border:4px solid #20241f;
-  color:#80ff83;
-  background:#071509;
-  box-shadow:0 0 12px #58ff5a77;
-  text-shadow:0 0 6px #6aff71;
-}
-.box-art-thumb{background:url("box-art/version3-art.webp") center/cover}
-.arcane-thumb{background:url("arcane/arcane-workshop.webp") center 34%/cover}
-.legacy-copy{min-width:0}
-.legacy-copy>*{display:block}
-.legacy-copy small{
-  color:#877b72;
-  font:900 7px/1 ui-monospace,SFMono-Regular,Consolas,monospace;
-  letter-spacing:.12em;
-  text-transform:uppercase;
-}
-.legacy-copy strong{margin-top:6px;font-size:17px}
-.legacy-copy em{margin-top:4px;overflow:hidden;color:#746a62;font-size:9px;font-style:normal;text-overflow:ellipsis;white-space:nowrap}
-.legacy-arrow{color:#5e554e;font-size:18px}
 .privacy{
   display:flex;
   justify-content:center;
@@ -387,7 +257,7 @@ footer{
   text-transform:uppercase;
 }
 
-.brand:focus-visible,.quick-launch:focus-visible,.current-showcase:focus-visible,.launch:focus-visible,.legacy-tile:focus-visible{
+.current-showcase:focus-visible,.launch:focus-visible{
   outline:3px solid var(--cyan);
   outline-offset:4px;
 }
@@ -397,12 +267,10 @@ footer{
   .hero h1,.hook,.intro{margin-left:auto;margin-right:auto}
   .hero-actions,.trust-line,.eyebrow{justify-content:center}
   .current-showcase{width:min(850px,100%);margin:auto}
-  .legacy-grid{justify-content:center}
 }
 
 @media(max-width:700px){
-  .topbar,main{width:min(100% - 18px,560px)}
-  .topbar{top:max(7px,env(safe-area-inset-top));margin-top:7px}
+  main{width:min(100% - 18px,560px)}
   .hero{gap:46px;padding:44px 0 78px}
   .hero h1 .owner{font-size:17px}
   .hero h1 .product{font-size:clamp(43px,13vw,67px);line-height:.88;letter-spacing:-.07em}
@@ -412,24 +280,17 @@ footer{
   .console-preview{min-height:390px;border-radius:10px}
   .version-flag{top:-21px;left:4px}
   .showcase-action{right:18px;bottom:18px;padding:10px 13px}
-  .legacy-heading{display:block;text-align:center}
-  .legacy-heading>p{margin:10px auto 0;text-align:center}
-  .legacy-grid{grid-template-columns:minmax(0,380px)}
   .privacy{flex-direction:column;align-items:center;text-align:center}
   footer{flex-direction:column}
 }
 
 @media(max-width:400px){
-  .brand span{display:none}
-  .quick-launch{min-height:38px;padding:5px 9px 5px 11px}
   .hero h1 .product{font-size:44px}
   .hook{font-size:19px}
   .launch{width:100%}
   .hero-actions{display:block}
   .made-with-love{display:block;margin-top:17px}
   .showcase-action{right:14px;bottom:14px;font-size:8px}
-  .legacy-tile{grid-template-columns:70px minmax(0,1fr) 20px}
-  .legacy-thumb{width:70px}
 }
 
 @media(prefers-reduced-motion:reduce){
