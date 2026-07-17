@@ -10,9 +10,9 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="manifest" href="site.webmanifest">
   <title>TurdGobbler's Deck Name Colourifier &mdash; Version 6</title>
-  <link rel="stylesheet" href="styles.css?v=6.1.0">
-  <script src="logic.js?v=6.1.0" defer></script>
-  <script src="app.js?v=6.1.0" defer></script>
+  <link rel="stylesheet" href="styles.css?v=6.2.0">
+  <script src="logic.js?v=6.2.0" defer></script>
+  <script src="app.js?v=6.2.0" defer></script>
 </head>
 <body>
   <main class="app-shell">
@@ -68,7 +68,6 @@
         <div class="gradient-tube-row">
           <div id="gradientBar" class="gradient-bar" role="button" tabindex="0" aria-label="Gradient tube. Touch an open area to edit Colour 1.">
             <span id="barStopMarkers" class="bar-stop-markers"></span>
-            <i class="bleed-flow" aria-hidden="true"></i>
           </div>
           <button id="tubeAddButton" class="tube-add-button" type="button" aria-label="Add a draggable colour bubble" title="Add a draggable colour bubble"><span aria-hidden="true">+</span></button>
         </div>
@@ -96,10 +95,13 @@
           <div id="savedPalettes" class="saved-palettes"></div>
         </div>
         <div id="stopEditorBackdrop" class="stop-editor-backdrop" hidden>
-          <section id="stopEditor" class="stop-editor" role="dialog" aria-modal="true" aria-labelledby="stopEditorTitle">
+          <section id="stopEditor" class="stop-editor" role="dialog" aria-modal="true" aria-labelledby="stopEditorTitle" tabindex="-1">
             <header>
               <span><small>EDIT COLOUR</small><b id="stopEditorTitle">1</b></span>
-              <button id="stopEditorClose" type="button" aria-label="Close colour editor">&times;</button>
+              <div class="stop-editor-header-actions">
+                <button id="stopEditorConfirm" class="stop-editor-confirm" type="button"><span>CONFIRM</span></button>
+                <button id="stopEditorClose" class="stop-editor-close" type="button" aria-label="Close colour editor">&times;</button>
+              </div>
             </header>
             <div class="stop-editor-controls">
               <div class="stop-editor-picker">
@@ -120,7 +122,6 @@
                 </label>
               </div>
             </div>
-            <button id="stopEditorConfirm" class="stop-editor-confirm" type="button"><span>CONFIRM COLOUR</span></button>
           </section>
         </div>
       </section>

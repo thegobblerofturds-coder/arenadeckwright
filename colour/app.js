@@ -5,6 +5,7 @@
   const DEFAULT_NAME = 'YOUR DECK NAME';
   const STORAGE_KEY = 'turdgobbler-deckwright-v6';
   const MAX_STOPS = 7;
+  const MAX_FAVOURITES = 10;
   const TUBE_INSET = 14;
   const ANCHOR_SWAP_ZONE = .04;
   const MANA_ORDER = ['W', 'U', 'B', 'R', 'G'];
@@ -263,9 +264,12 @@
     selectedStop = Math.max(0, Math.min(index, gradientStops.length - 1));
     stopEditorOpen = true;
     editorDraftColour = gradientStops[selectedStop].colour;
+    els.stopEditorHex.blur();
+    document.body.classList.add('stop-editor-open');
     renderGradientBar();
     renderStopEditor();
     els.stopEditorBackdrop.hidden = false;
+    requestAnimationFrame(() => els.stopEditor.focus({preventScroll: true}));
     pulseSelectedMarker(selectedStop);
     haptic(4);
   }
@@ -273,6 +277,8 @@
   function closeStopEditor() {
     stopEditorOpen = false;
     editorDraftColour = null;
+    els.stopEditorHex.blur();
+    document.body.classList.remove('stop-editor-open');
     els.stopEditorBackdrop.hidden = true;
     els.stopEditorHex.classList.remove('error');
     els.stopEditorHex.removeAttribute('aria-invalid');
@@ -312,7 +318,7 @@
         secondStopMemory = {colour: stored.secondStopMemory.colour.toUpperCase(), position: 1};
       }
       if (Array.isArray(stored.favourites)) {
-        favourites = stored.favourites.filter(validSavedPalette).slice(0, 4).map((entry, index) => ({
+        favourites = stored.favourites.filter(validSavedPalette).slice(0, MAX_FAVOURITES).map((entry, index) => ({
           name: `SLOT ${String(index + 1).padStart(2, '0')}`,
           stops: saveableStops(entry.stops)
         }));
@@ -529,6 +535,12 @@
       const markerLabel = document.createElement('span');
       markerLabel.textContent = String(index + 1);
       marker.appendChild(markerLabel);
+      if (index === gradientStops.length - 1) {
+        const flowArrow = document.createElement('i');
+        flowArrow.className = 'marker-flow-arrow';
+        flowArrow.setAttribute('aria-hidden', 'true');
+        marker.appendChild(flowArrow);
+      }
       marker.setAttribute('role', 'slider');
       marker.setAttribute('aria-label', movable
         ? `Gradient colour ${index + 1}. Drag to position or reorder.`
@@ -904,13 +916,13 @@
     els.savedPalettes.replaceChildren();
     const currentSignature = stopSignature();
     const favouriteIndex = favourites.findIndex((entry) => stopSignature(entry.stops) === currentSignature);
-    const paletteSlotsFull = favourites.length >= 4 && favouriteIndex < 0;
+    const paletteSlotsFull = favourites.length >= MAX_FAVOURITES && favouriteIndex < 0;
     els.favouriteCurrent.setAttribute('aria-pressed', String(favouriteIndex >= 0));
     els.favouriteCurrent.disabled = paletteSlotsFull;
     els.favouriteCurrent.innerHTML = favouriteIndex >= 0
       ? '<b aria-hidden="true">&#9733;</b> SAVED'
       : paletteSlotsFull
-        ? '<b aria-hidden="true">4/4</b> SLOTS FULL'
+        ? `<b aria-hidden="true">${MAX_FAVOURITES}/${MAX_FAVOURITES}</b> SLOTS FULL`
         : '<b aria-hidden="true">&#9734;</b> SAVE CURRENT';
     els.favouriteCurrent.title = paletteSlotsFull ? 'Remove a saved palette to free a slot' : '';
 
@@ -918,7 +930,7 @@
       const group = document.createElement('section');
       const heading = document.createElement('h3');
       const strip = document.createElement('div');
-      heading.textContent = 'SAVED PALETTES // 4 SLOTS';
+      heading.textContent = `SAVED PALETTES // ${MAX_FAVOURITES} SLOTS`;
       strip.className = 'palette-strip compact';
       favourites.forEach((entry, index) => {
         const wrap = document.createElement('div');
@@ -944,9 +956,10 @@
     const signature = stopSignature();
     const index = favourites.findIndex((entry) => stopSignature(entry.stops) === signature);
     if (index >= 0) favourites.splice(index, 1);
-    else if (favourites.length < 4) {
+    else if (favourites.length < MAX_FAVOURITES) {
       const occupied = new Set(favourites.map((entry) => Number((entry.name.match(/SLOT\s+(\d+)/) || [])[1])));
-      const slot = [1, 2, 3, 4].find((candidate) => !occupied.has(candidate)) || favourites.length + 1;
+      const slot = Array.from({length: MAX_FAVOURITES}, (_, index) => index + 1)
+        .find((candidate) => !occupied.has(candidate)) || favourites.length + 1;
       favourites.push({name: `SLOT ${String(slot).padStart(2, '0')}`, stops: saveableStops()});
     }
     persist(); renderSavedPalettes(); haptic(8);

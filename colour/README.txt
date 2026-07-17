@@ -9,7 +9,7 @@ Version 6 is the dark prism-glass edition. It keeps the complete command deck in
 - Colour 1 integrated directly into the tube's left edge when alone, then revealed as a fixed sealed cap when a second colour is added
 - the final placed colour naturally bleeding through the right edge of the tube, reinforced by a gentle edge-wash pulse
 - a quiet V6 / Prismatic Glass switch that exchanges the full name field for compact pencil and copy controls without changing the workbench
-- a compact bottom-sheet full colour wheel with a dedicated preview window and direct three- or six-digit hex entry
+- a compact full colour wheel with its full preview panel, a top-mounted Confirm control, and direct three- or six-digit hex entry
 - an illuminated circle-to-delete rail with one-colour minimum protection
 - spherical glass colour bubbles with generous invisible mobile touch targets
 - freely position and reorder colours by dragging their bubbles through one another in the gradient tube
@@ -19,7 +19,7 @@ Version 6 is the dark prism-glass edition. It keeps the complete command deck in
 - tapping the tube edits Colour 1, while a dedicated illuminated + launches each new draggable bubble into the tube
 - a spring-loaded launch animation that visibly connects the + control to the new bubble
 - a pressable numbered Colour 1 cap whenever multiple colours are present; empty tube space becomes non-interactive in that state
-- a bright right-travelling bleed indicator with a static reduced-motion fallback
+- a bright right-travelling bleed indicator attached directly to the final colour bubble, with a static reduced-motion fallback
 - Arena-budget feedback that dims colour stops a long name cannot afford and explains why
 - a shorter, cooler copy display with the four global style controls moved directly beside it
 - a final stripped-back prismatic finish with matched control heights, quieter secondary chrome, and a single consistent tactile language
@@ -28,7 +28,7 @@ Version 6 is the dark prism-glass edition. It keeps the complete command deck in
 - dormant mono, guild, three-colour, generic four-colour, and five-colour presets revealed by the selected mana pips
 - a labelled, full-size palette-library control beside the style pad
 - a single open/close palette toggle with no redundant tray controls
-- built-in palettes plus four deliberate local save slots
+- built-in palettes plus ten persistent local save slots
 - locally remembered gradient and formatting choices; deck names are never stored
 - global bold, italic, underline, and strikethrough controls
 - clearly differentiated normal and bold preview weights

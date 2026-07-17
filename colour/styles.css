@@ -496,11 +496,13 @@ footer{color:#687a84}
 body.tube-dragging{overscroll-behavior:none;touch-action:none;user-select:none}
 
 .stop-editor-backdrop[hidden]{display:none}
-.stop-editor-backdrop{position:fixed;z-index:2147483500;inset:0;display:flex;align-items:flex-end;justify-content:center;padding:18px 12px max(18px,env(safe-area-inset-bottom));background:#010509b8;backdrop-filter:blur(9px);animation:stop-editor-fade .16s ease both}
-.stop-editor{position:relative;width:min(100%,460px);padding:15px;border:1px solid #7f939e;border-radius:22px 22px 16px 16px;color:#eaf7fc;background:radial-gradient(circle at 10% 0,color-mix(in srgb,var(--editor-colour) 24%,transparent),transparent 38%),linear-gradient(155deg,#18242ce8,#070c11f5 68%);box-shadow:0 0 0 3px #05080c,0 -14px 42px #000b,0 0 32px color-mix(in srgb,var(--editor-colour) 38%,transparent),0 1px #fff2 inset;animation:stop-editor-rise .22s cubic-bezier(.2,.8,.2,1) both}
+.stop-editor-backdrop{position:fixed;z-index:2147483500;inset:0;display:flex;align-items:flex-start;justify-content:center;padding:max(10px,env(safe-area-inset-top)) 12px max(12px,env(safe-area-inset-bottom));overflow-y:auto;background:#010509d6;backdrop-filter:blur(9px);animation:stop-editor-fade .16s ease both}
+.stop-editor{position:relative;width:min(100%,460px);max-height:calc(100dvh - max(22px,env(safe-area-inset-top)));padding:15px;overflow-y:auto;border:1px solid #7f939e;border-radius:18px;color:#eaf7fc;background:radial-gradient(circle at 10% 0,color-mix(in srgb,var(--editor-colour) 24%,transparent),transparent 38%),linear-gradient(155deg,#18242ce8,#070c11f5 68%);box-shadow:0 0 0 3px #05080c,0 14px 42px #000b,0 0 32px color-mix(in srgb,var(--editor-colour) 38%,transparent),0 1px #fff2 inset;outline:0;animation:stop-editor-rise .22s cubic-bezier(.2,.8,.2,1) both}
 .stop-editor header{display:flex;align-items:center;justify-content:space-between;padding:1px 1px 12px;border-bottom:1px solid #7f939e55}
 .stop-editor header>span{display:grid;gap:4px}.stop-editor header small{color:#7f97a3;font:850 7px/1 var(--font-ui);letter-spacing:.18em}.stop-editor header b{color:#fff;font:950 17px/1 var(--font-ui);letter-spacing:.04em;text-shadow:0 0 12px var(--editor-colour)}
-.stop-editor header button{display:grid;place-items:center;width:44px;height:44px;padding:0;border:1px solid #667983;border-radius:14px;color:#dff5ff;background:linear-gradient(#22313a,#080d11);box-shadow:0 2px 0 #020305,0 1px #fff2 inset;appearance:none;font:300 28px/1 Arial,sans-serif}
+.stop-editor-header-actions{display:flex;align-items:center;gap:8px}
+.stop-editor header button{display:grid;place-items:center;height:44px;padding:0;border:1px solid #667983;border-radius:12px;appearance:none}
+.stop-editor-close{width:44px;color:#dff5ff;background:linear-gradient(#22313a,#080d11);box-shadow:0 2px 0 #020305,0 1px #fff2 inset;font:300 28px/1 Arial,sans-serif}
 .stop-editor-controls{display:grid;grid-template-columns:112px minmax(0,1fr);gap:12px;margin-top:14px}
 .stop-editor-picker,.stop-editor-hex{display:grid;gap:8px;color:#8da2ad;font:900 7px/1 var(--font-ui);letter-spacing:.13em}
 .stop-editor-side{display:grid;grid-template-rows:46px minmax(0,1fr);gap:9px;min-width:0}
@@ -512,9 +514,10 @@ body.tube-dragging{overscroll-behavior:none;touch-action:none;user-select:none}
 .stop-editor-hex input{min-width:0;width:100%;height:54px;padding:0 13px;border:1px solid #71858f;border-radius:13px;outline:0;color:#dff7ff;background:repeating-linear-gradient(180deg,#ffffff05 0 1px,transparent 1px 5px),#08141a;box-shadow:0 5px 12px #0009 inset,0 0 16px color-mix(in srgb,var(--editor-colour) 25%,transparent);font:950 clamp(17px,5.4vw,23px)/1 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.02em;text-transform:uppercase}
 .stop-editor-hex input:focus{border-color:#fff;box-shadow:0 0 0 3px #0b1116,0 0 0 5px color-mix(in srgb,var(--editor-colour) 65%,#6bd5ff),0 5px 12px #0009 inset,0 0 24px color-mix(in srgb,var(--editor-colour) 48%,transparent)}
 .stop-editor-hex input.error{border-color:#ff6479;color:#fff;background:#4a111c;box-shadow:0 0 0 3px #23060c,0 0 19px #ff304c99}
-.stop-editor-confirm{display:flex;align-items:center;justify-content:center;width:100%;height:50px;margin-top:13px;border:1px solid #fff;border-radius:14px;color:#061017;background:linear-gradient(145deg,#effcff,color-mix(in srgb,var(--editor-colour) 48%,#69ceff));box-shadow:0 3px 0 #182832,0 0 0 3px #0b1116,0 0 20px color-mix(in srgb,var(--editor-colour) 56%,transparent),0 1px #fff inset;font:950 9px/1 var(--font-ui);letter-spacing:.13em;transition:transform .12s,filter .12s,box-shadow .12s}
+.stop-editor-confirm{width:92px;color:#061017;background:linear-gradient(145deg,#effcff,color-mix(in srgb,var(--editor-colour) 48%,#69ceff));box-shadow:0 2px 0 #182832,0 0 0 2px #0b1116,0 0 17px color-mix(in srgb,var(--editor-colour) 52%,transparent),0 1px #fff inset;font:950 7px/1 var(--font-ui);letter-spacing:.11em;transition:transform .12s,filter .12s,box-shadow .12s}
 .stop-editor-confirm:active{transform:translateY(2px);filter:brightness(1.15);box-shadow:0 1px 0 #182832,0 0 0 3px #0b1116,0 0 26px color-mix(in srgb,var(--editor-colour) 70%,transparent)}
 @keyframes stop-editor-fade{from{opacity:0}to{opacity:1}}@keyframes stop-editor-rise{from{opacity:.4;transform:translateY(28px) scale(.98)}to{opacity:1;transform:none}}
+.stop-editor-open .prismatic-edit{visibility:hidden;pointer-events:none}
 
 .field-head span.trolling{padding:5px 8px;border:1px solid #ffbd6c88;border-radius:999px;color:#ffd18d;background:#3b1909c7;box-shadow:0 0 14px #ff7b2755,0 0 26px #ffba4260 inset;text-shadow:0 0 5px #fff,0 0 12px #ff8b39,0 0 24px #ff6b24;animation:trolling-bounce 1.05s cubic-bezier(.3,.7,.25,1) infinite}
 @keyframes trolling-bounce{0%,100%{transform:translateY(0) scale(1);filter:brightness(1)}38%{transform:translateY(-4px) scale(1.055);filter:brightness(1.28)}58%{transform:translateY(1px) scale(.99);filter:brightness(1.08)}}
@@ -681,13 +684,11 @@ body.tube-dragging{overscroll-behavior:none;touch-action:none;user-select:none}
 .stage-warning{display:none;margin:6px 8px 1px;padding:7px 9px;border:1px solid #9a7a4666;border-radius:8px;color:#ffd995;background:linear-gradient(90deg,#2a1c0dcc,#16100bd9);box-shadow:0 0 14px #ff9e2f25 inset;font:900 6.5px/1.25 var(--font-mono);letter-spacing:.09em;text-align:center}
 .stage-warning.visible{display:block}.stage-warning.over{border-color:#ff667288;color:#ffd4d8;background:linear-gradient(90deg,#3b0c14e8,#1b090de8);box-shadow:0 0 17px #ff405f35 inset,0 0 13px #ff405f20}
 
-/* A real foreground travelling pulse makes the final colour's rightward wash unmistakable. */
+/* The rightward wash belongs to the last colour bubble, never the empty tube edge. */
 .bar-stop-markers::after{display:none}
-.bleed-flow{position:absolute;z-index:8;right:2px;top:50%;display:block;width:28px;height:20px;overflow:visible;pointer-events:none;transform:translateY(-50%)}
-.bleed-flow::before{content:"";position:absolute;left:0;top:5px;width:23px;height:10px;background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--user-glow-b) 74%,#fff) 45%,#fff 68%,var(--user-glow-b));clip-path:polygon(0 26%,68% 26%,68% 0,100% 50%,68% 100%,68% 74%,0 74%);filter:drop-shadow(0 0 4px var(--user-glow-b)) drop-shadow(0 0 8px var(--user-glow-b));opacity:.18;animation:bleed-flow-travel 1.35s cubic-bezier(.24,.72,.22,1) infinite}
-.bleed-flow::after{content:"";position:absolute;right:-1px;top:3px;width:14px;height:14px;border:2px solid color-mix(in srgb,var(--user-glow-b) 72%,#fff);border-left-color:transparent;border-radius:50%;opacity:.12;animation:bleed-flow-ring 1.35s cubic-bezier(.24,.72,.22,1) infinite}
-@keyframes bleed-flow-travel{0%,46%,100%{opacity:.12;transform:translateX(-12px) scaleX(.45)}64%{opacity:1;transform:translateX(0) scaleX(1.08)}82%{opacity:.18;transform:translateX(7px) scaleX(.62)}}
-@keyframes bleed-flow-ring{0%,54%,100%{opacity:.08;transform:scale(.45)}70%{opacity:.85;transform:scale(1.15)}88%{opacity:0;transform:scale(1.55)}}
+.marker-flow-arrow{position:absolute;z-index:7;left:calc(50% + 12px);top:50%;display:block;width:25px;height:16px;pointer-events:none;transform:translateY(-50%)}
+.marker-flow-arrow::before{content:"";position:absolute;inset:3px 0;background:linear-gradient(90deg,transparent,#fff 58%,var(--stop-colour));clip-path:polygon(0 28%,68% 28%,68% 0,100% 50%,68% 100%,68% 72%,0 72%);filter:drop-shadow(0 0 4px #fff) drop-shadow(0 0 8px var(--stop-colour));animation:marker-flow-pulse 1.25s cubic-bezier(.24,.72,.22,1) infinite}
+@keyframes marker-flow-pulse{0%,42%,100%{opacity:.12;transform:translateX(-8px) scaleX(.55)}62%{opacity:1;transform:translateX(0) scaleX(1.08)}82%{opacity:.24;transform:translateX(7px) scaleX(.68)}}
 
 @media(max-width:390px){
   .copy-style-row{grid-template-columns:minmax(0,1fr) 44px;gap:6px}
@@ -700,8 +701,7 @@ body.tube-dragging{overscroll-behavior:none;touch-action:none;user-select:none}
 }
 
 @media(prefers-reduced-motion:reduce){
-  .bleed-flow::before{animation:none!important;opacity:.82;transform:translateX(1px)!important}
-  .bleed-flow::after{animation:none!important;opacity:.45;transform:scale(1)!important}
+  .marker-flow-arrow::before{animation:none!important;opacity:.82;transform:translateX(1px)!important}
 }
 
 /* VERSION 6 — FINAL PRISMATIC PASS
