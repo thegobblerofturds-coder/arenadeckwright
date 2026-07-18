@@ -1270,6 +1270,7 @@
   els.stopEditorWheel.addEventListener('pointerdown', (event) => {
     event.preventDefault();
     els.stopEditorHex.blur();
+    els.stopEditorBackdrop.classList.remove('hex-entry-active');
     const original = editorDraftColour || gradientStops[selectedStop].colour;
     let draft = original;
     try { els.stopEditorWheel.setPointerCapture(event.pointerId); } catch (_) {}
@@ -1336,13 +1337,6 @@
   els.stopEditorHex.addEventListener('change', applyEditorHexDraft);
   els.stopEditorHex.addEventListener('focus', () => {
     els.stopEditorBackdrop.classList.add('hex-entry-active');
-  });
-  els.stopEditorHex.addEventListener('blur', () => {
-    setTimeout(() => {
-      if (document.activeElement !== els.stopEditorHex) {
-        els.stopEditorBackdrop.classList.remove('hex-entry-active');
-      }
-    }, 0);
   });
   els.stopEditorHex.addEventListener('keydown', (event) => {
     if (event.key !== 'Enter') return;
