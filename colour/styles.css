@@ -496,7 +496,8 @@ footer{color:#687a84}
 body.tube-dragging{overscroll-behavior:none;touch-action:none;user-select:none}
 
 .stop-editor-backdrop[hidden]{display:none}
-.stop-editor-backdrop{position:fixed;z-index:2147483500;inset:0;display:flex;align-items:flex-start;justify-content:center;padding:max(10px,env(safe-area-inset-top)) 12px max(12px,env(safe-area-inset-bottom));overflow-y:auto;background:#010509d6;backdrop-filter:blur(9px);animation:stop-editor-fade .16s ease both}
+.stop-editor-backdrop{position:fixed;z-index:2147483500;inset:0;display:flex;align-items:center;justify-content:center;padding:max(10px,env(safe-area-inset-top)) 12px max(12px,env(safe-area-inset-bottom));overflow-y:auto;background:#010509d6;backdrop-filter:blur(9px);animation:stop-editor-fade .16s ease both}
+.stop-editor-backdrop.hex-entry-active{align-items:flex-start}
 .stop-editor{position:relative;width:min(100%,460px);max-height:calc(100dvh - max(22px,env(safe-area-inset-top)));padding:15px;overflow-y:auto;border:1px solid #7f939e;border-radius:18px;color:#eaf7fc;background:radial-gradient(circle at 10% 0,color-mix(in srgb,var(--editor-colour) 24%,transparent),transparent 38%),linear-gradient(155deg,#18242ce8,#070c11f5 68%);box-shadow:0 0 0 3px #05080c,0 14px 42px #000b,0 0 32px color-mix(in srgb,var(--editor-colour) 38%,transparent),0 1px #fff2 inset;outline:0;animation:stop-editor-rise .22s cubic-bezier(.2,.8,.2,1) both}
 .stop-editor header{display:flex;align-items:center;justify-content:space-between;padding:1px 1px 12px;border-bottom:1px solid #7f939e55}
 .stop-editor header>span{display:grid;gap:4px}.stop-editor header small{color:#7f97a3;font:850 7px/1 var(--font-ui);letter-spacing:.18em}.stop-editor header b{color:#fff;font:950 17px/1 var(--font-ui);letter-spacing:.04em;text-shadow:0 0 12px var(--editor-colour)}
@@ -825,3 +826,8 @@ footer{padding-top:11px;opacity:.7}
 
 /* ALT VIEW's framed copy surface must occupy the frame's content box, not repeat its outer height. */
 .console.prismatic-mode .copy-style-row[data-bold-supported="false"] .copy-button{height:100%;min-height:0}
+
+/* The web build offers the exact offline package without competing with the machine controls. */
+.offline-download{color:#91b9ca;text-decoration:none;text-underline-offset:3px;transition:color .15s,text-shadow .15s}
+.offline-download:hover,.offline-download:focus-visible{color:#effbff;text-shadow:0 0 10px #54cfff;outline:0;text-decoration:underline}
+.offline-download[hidden]{display:none}

@@ -8,7 +8,7 @@
   const MAX_FAVOURITES = 10;
   // Arena currently ignores <b>. Change only this flag to true if support returns.
   const ARENA_BOLD_SUPPORTED = false;
-  const START_PRISMATIC_BY_DEFAULT = false;
+  const DEFAULT_VIEW_MODE = 'v6';
   const MIN_BUBBLE_GAP_PX = 38;
   const ANCHOR_BUBBLE_GAP_PX = 58;
   const TUBE_INSET = 14;
@@ -62,8 +62,11 @@
     stopEditorTitle: $('stopEditorTitle'), stopEditorClose: $('stopEditorClose'),
     stopEditorWheel: $('stopEditorWheel'), stopEditorWheelCursor: $('stopEditorWheelCursor'),
     stopEditorPreview: $('stopEditorPreview'),
-    stopEditorHex: $('stopEditorHex'), stopEditorConfirm: $('stopEditorConfirm')
+    stopEditorHex: $('stopEditorHex'), stopEditorConfirm: $('stopEditorConfirm'),
+    offlineDownload: $('offlineDownload')
   };
+
+  if (location.protocol === 'file:') els.offlineDownload.hidden = true;
 
   let gradientStops = makeStops([MANA.U.colour, MANA.R.colour, MANA.G.colour]);
   let formatting = {bold: false, italic: false, underline: false, strike: false};
@@ -78,7 +81,7 @@
   let secondStopMemory = {colour: MANA.R.colour, position: 1};
   let stopEditorOpen = false;
   let editorDraftColour = null;
-  let viewMode = 'v6';
+  let viewMode = DEFAULT_VIEW_MODE;
 
   function clone(value) {
     return JSON.parse(JSON.stringify(value));
@@ -287,6 +290,7 @@
     stopEditorOpen = true;
     editorDraftColour = gradientStops[selectedStop].colour;
     els.stopEditorHex.blur();
+    els.stopEditorBackdrop.classList.remove('hex-entry-active');
     document.body.classList.add('stop-editor-open');
     renderGradientBar();
     renderStopEditor();
@@ -300,6 +304,7 @@
     stopEditorOpen = false;
     editorDraftColour = null;
     els.stopEditorHex.blur();
+    els.stopEditorBackdrop.classList.remove('hex-entry-active');
     document.body.classList.remove('stop-editor-open');
     els.stopEditorBackdrop.hidden = true;
     els.stopEditorHex.classList.remove('error');
@@ -318,7 +323,7 @@
   function persist() {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        gradientStops, formatting, manaSelection, favourites, secondStopMemory, viewMode
+        gradientStops, formatting, manaSelection, favourites, secondStopMemory
       }));
     } catch (_) {}
   }
@@ -331,7 +336,7 @@
     try {
       const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
       if (Array.isArray(stored.gradientStops)) gradientStops = normalisePalette(stored.gradientStops);
-      viewMode = START_PRISMATIC_BY_DEFAULT ? 'prismatic' : 'v6';
+      viewMode = DEFAULT_VIEW_MODE;
       if (stored.formatting && typeof stored.formatting === 'object') {
         Object.keys(formatting).forEach((key) => { formatting[key] = Boolean(stored.formatting[key]); });
       }
@@ -1328,6 +1333,12 @@
     if (colour) setEditorDraft(colour, false);
   });
   els.stopEditorHex.addEventListener('change', applyEditorHexDraft);
+  els.stopEditorHex.addEventListener('focus', () => {
+    els.stopEditorBackdrop.classList.add('hex-entry-active');
+  });
+  els.stopEditorHex.addEventListener('blur', () => {
+    els.stopEditorBackdrop.classList.remove('hex-entry-active');
+  });
   els.stopEditorHex.addEventListener('keydown', (event) => {
     if (event.key !== 'Enter') return;
     event.preventDefault();
@@ -1362,7 +1373,6 @@
   els.viewModeToggle.addEventListener('click', () => {
     viewMode = viewMode === 'v6' ? 'prismatic' : 'v6';
     renderViewMode();
-    persist();
     haptic([7, 9]);
   });
   els.prismaticEdit.addEventListener('click', openPrismaticNameEditor);
