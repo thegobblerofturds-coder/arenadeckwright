@@ -74,6 +74,7 @@
   let manaSelection = [];
   let paletteTrayOpen = false;
   let favourites = [];
+  let savedPaletteScrollLeft = 0;
   let history = [];
   let currentBuild = null;
   let feedbackTimer = null;
@@ -1045,7 +1046,8 @@
 
   function renderSavedPalettes() {
     const previousStrip = els.savedPalettes.querySelector('.palette-strip.compact');
-    const previousScrollLeft = previousStrip ? previousStrip.scrollLeft : 0;
+    const previousScrollLeft = previousStrip ? previousStrip.scrollLeft : savedPaletteScrollLeft;
+    savedPaletteScrollLeft = previousScrollLeft;
     els.savedPalettes.replaceChildren();
     const currentSignature = stopSignature();
     const favouriteIndex = favourites.findIndex((entry) => stopSignature(entry.stops) === currentSignature);
@@ -1090,11 +1092,18 @@
       });
       group.append(heading, strip);
       els.savedPalettes.appendChild(group);
-      requestAnimationFrame(() => {
+      const restoreScrollPosition = () => {
         if (!strip.isConnected) return;
         const maximumScroll = Math.max(0, strip.scrollWidth - strip.clientWidth);
-        strip.scrollLeft = Math.min(previousScrollLeft, maximumScroll);
-      });
+        strip.scrollLeft = Math.min(savedPaletteScrollLeft, maximumScroll);
+      };
+      strip.addEventListener('scroll', () => {
+        savedPaletteScrollLeft = strip.scrollLeft;
+      }, {passive: true});
+      restoreScrollPosition();
+      requestAnimationFrame(restoreScrollPosition);
+    } else {
+      savedPaletteScrollLeft = 0;
     }
   }
 
