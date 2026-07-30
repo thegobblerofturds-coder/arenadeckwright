@@ -54,7 +54,7 @@ SPRITES
 - Sprite numbers remain in accessible labels, hover titles, and raw code, but are not drawn over the emoji artwork.
 - These extracted assets are used as small functional previews in this free, unofficial fan utility. Their local source and mapping are documented in assets/sprites/README.txt.
 - Click/tap remains available on desktop, mobile, keyboard, and assistive technology.
-- Selected-range start/end styling is also deferred. Version 7 supports stable from-caret changes while retaining native mobile text selection instead of introducing a fragile contenteditable surface.
+- Selected-range start/end styling is also deferred. Ultimate supports stable from-caret changes while retaining native mobile text selection instead of introducing a fragile contenteditable surface.
 
 ARENA LAB
 - Shows the exact generated Arena string in a read-only field.
@@ -71,7 +71,7 @@ PREVIEW AND DATA
 - A separate VISUAL WIDTH WATCH/RISK indicator compares the browser-rendered name with the available Arena Mirror width. It is deliberately approximate and never alters the exact raw-code TOTAL/64 budget; Arena display geometry still needs calibration from user tests.
 - Browser text shaping and Unity TextMesh Pro can still differ in kerning, SDF edges, spacing units, clipping, and shader behavior. Validate calibration in Arena before claiming pixel identity.
 - The embedded Arena font and sprite provenance was reviewed for the 2026-07-29 release. The site carries the Wizards fan-content notice, remains free, and should remove the assets if a rights holder requests it.
-- Global settings and palettes use the Version 7 local-storage key. Version 7 can import Version 6 preferences on first use and does not overwrite the Version 6 key.
+- Global settings and palettes retain the legacy Version 7 local-storage key for compatibility. Ultimate can import Version 6 preferences on first use and does not overwrite the Version 6 key.
 - Deck names and inline events are not persisted. Nothing is uploaded.
 - Copy fallback, colour/style undo, reduced-motion handling, offline operation, and native accessible text entry are retained from Version 6.
 
