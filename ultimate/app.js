@@ -817,7 +817,7 @@
     const endX = targetBounds.left + targetWidth * laneRatio - canvasBounds.left;
     const targetBottom = targetBounds.bottom - canvasBounds.top;
     const railTop = els.tubeLayerRail.getBoundingClientRect().top - canvasBounds.top;
-    const endY = Math.min(startY - 30, targetBottom + 6, railTop - 18);
+    const endY = Math.min(startY - 44, targetBottom + 6, railTop - 18);
     const deltaX = endX - startX;
     const deltaY = endY - startY;
     const length = Math.hypot(deltaX, deltaY);
