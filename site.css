@@ -140,6 +140,13 @@ main{width:min(1380px,calc(100% - 32px));margin:auto}
 }
 .launch:hover{filter:brightness(1.1);transform:translateY(-2px)}
 .launch:active{box-shadow:0 1px 0 #4e4945;transform:translateY(4px)}
+.launch-ultimate{
+  border-color:#111820;
+  color:#eafbff;
+  background:linear-gradient(120deg,#18242d,#0d1118 58%,#271a35);
+  box-shadow:0 5px 0 #202933,0 11px 22px #211b3042,0 1px #fff3 inset,0 0 20px #7b63f235;
+}
+.launch-ultimate:active{box-shadow:0 1px 0 #202933,0 0 14px #7b63f235 inset}
 .made-with-love{
   color:#766b63;
   font:900 9px/1 ui-monospace,SFMono-Regular,Consolas,monospace;
@@ -292,6 +299,7 @@ footer .fan-content-notice{max-width:680px;font-size:7px;font-weight:750;line-he
   .hook{font-size:19px}
   .launch{width:100%}
   .hero-actions{display:block}
+  .launch+.launch{margin-top:12px}
   .made-with-love{display:block;margin-top:17px}
   .showcase-action{right:14px;bottom:14px;font-size:8px}
 }

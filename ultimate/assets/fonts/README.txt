@@ -1,7 +1,7 @@
 VERSION 7 FONT ASSET PROVENANCE
 
 STATUS
-Included as a functional preview asset in the free, unofficial Version 7 fan utility after the 2026-07-29 provenance and fan-content review. Remove it if a rights holder requests it.
+Included as a functional preview asset in the free, unofficial Ultimate Version fan utility after the 2026-07-29 provenance and fan-content review. Remove it if a rights holder requests it.
 
 LOCAL SOURCE
 - User-installed current MTG Arena Steam build.

@@ -4,49 +4,38 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#05080c">
-  <meta name="description" content="Version 7 of TurdGobbler's browser-based Arena deck-name colourifier, with structured rich-text effects and exact 64-character budgeting.">
+  <meta name="description" content="A fast, private Arena deck-name colourifier with direct gradient editing and ordered MTG colour composition.">
   <link rel="icon" href="favicon.ico" sizes="any">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="manifest" href="site.webmanifest">
-  <title>TurdGobbler's Deck Name Colourifier &mdash; Version 7</title>
-  <link rel="stylesheet" href="styles.css?v=7.4.0-black-arena-mirror">
-  <script src="logic.js?v=7.4.0-black-arena-mirror" defer></script>
-  <script src="app.js?v=7.4.0-black-arena-mirror" defer></script>
+  <title>TurdGobbler's Deck Name Colourifier &mdash; Version 6</title>
+  <link rel="stylesheet" href="styles.css?v=6.7.4-black-arena-background">
+  <script src="logic.js?v=6.4.0" defer></script>
+  <script src="app.js?v=6.7.4-black-arena-background" defer></script>
 </head>
 <body>
   <main class="app-shell">
     <div class="view-mode-switcher">
       <button id="viewModeToggle" class="view-mode-toggle" type="button" aria-pressed="false" aria-label="Switch to the alternate name and copy controls">
-        <span>V7</span><i aria-hidden="true"><b></b></i><span>ALT VIEW</span>
+        <span>V6</span><i aria-hidden="true"><b></b></i><span>ALT VIEW</span>
       </button>
     </div>
     <header class="masthead">
       <h1><span>TURDGOBBLER'S</span> DECK NAME COLOURIFIER</h1>
-      <b>V7 LAB</b>
+      <b>V6</b>
     </header>
 
-    <section id="consoleSurface" class="console" aria-label="Version 7 Deck Name Colourifier">
+    <section id="consoleSurface" class="console" aria-label="Version 6 Deck Name Colourifier">
       <div class="classic-name-entry">
         <div class="field-head">
           <label for="deckName">DECK NAME</label>
           <span class="top-gradient-status"><span id="inputState"></span><span id="gradientPips" class="gradient-pips" aria-label="Gradient stages"></span></span>
         </div>
-        <div class="deck-input-row">
-          <input id="deckName" class="deck-input" type="text" value="Your Deck Name" autocomplete="off" autocapitalize="off" spellcheck="false" aria-describedby="inputState inlineEvents">
-          <button id="startOver" class="start-over" type="button" aria-label="Start over and reset the current deck name, colours, and effects"><span>START</span><b>OVER</b></button>
-        </div>
+        <input id="deckName" class="deck-input" type="text" value="YOUR DECK NAME" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-describedby="inputState">
       </div>
 
       <div class="name-copy-bridge"><span id="rawCount" class="raw-count">0 / 64</span></div>
-
-      <div id="budgetBreakdown" class="budget-breakdown" role="status" aria-live="polite" aria-label="Arena raw character budget">
-        <span><small>TEXT</small><b id="budgetText">0</b></span><i aria-hidden="true">+</i>
-        <span><small>FX</small><b id="budgetFx">0</b></span><i aria-hidden="true">+</i>
-        <span><small>COLOUR</small><b id="budgetColour">0</b></span><i aria-hidden="true">=</i>
-        <span class="budget-total"><small>TOTAL</small><b id="budgetTotal">0/64</b></span>
-        <span id="budgetStages" class="budget-stages">0/0 COLOUR STAGES</span>
-      </div>
 
       <div class="copy-style-row" data-bold-supported="false">
         <div class="copy-cluster">
@@ -70,74 +59,20 @@
           <button type="button" data-format="italic" aria-label="Italic" aria-pressed="false"><i>I</i></button>
           <button type="button" data-format="underline" aria-label="Underline" aria-pressed="false"><u>U</u></button>
           <button type="button" data-format="strike" aria-label="Strikethrough" aria-pressed="false"><s>S</s></button>
-          <button class="case-toggle" type="button" data-effect="allCaps" aria-label="All caps, zero Arena characters" aria-pressed="false"><b>ALL<br>CAPS</b></button>
-          <button class="case-toggle" type="button" data-effect="smallCaps" aria-label="Small caps, costs the smallcaps tag" aria-pressed="false"><b>SMALL<br>CAPS</b></button>
         </div>
       </div>
       <p id="copyStatus" class="sr-only" role="status" aria-live="polite"></p>
 
-      <div id="inlineEvents" class="inline-events fx-timeline" aria-label="Arena code pieces available for the Mega Tube"></div>
-
-      <details id="fxDrawer" class="fx-drawer">
-        <summary><span><small>ARENA-VERIFIED / CORE</small><b>FX DRAWER</b></span><i aria-hidden="true">+</i></summary>
-        <div class="fx-drawer-body">
-          <div class="fx-global-panel">
-            <section id="fxBubbleEditor" class="fx-bubble-editor" aria-labelledby="fxBubbleEditorTitle" tabindex="-1" hidden>
-              <header>
-                <span><small>MEGA TUBE CONTEXT</small><b id="fxBubbleEditorTitle">EDIT FX BUBBLE</b></span>
-                <span class="fx-bubble-editor-actions"><button id="fxBubbleDelete" type="button">DELETE</button><button id="fxBubbleEditorDone" type="button">DONE</button></span>
-              </header>
-              <p id="fxBubbleEditorMeta">Choose a verified effect below. Its position and raw-code order stay unchanged.</p>
-              <div id="fxBubbleChoices" class="fx-bubble-choices" role="group" aria-label="Replace the selected Mega Tube effect"></div>
-            </section>
-            <div class="fx-toggle-row" role="group" aria-label="Global vertical text effects">
-              <button type="button" data-fx-toggle="sup" aria-pressed="false"><b>SUP</b><span>SUPERSCRIPT</span><code>&lt;sup&gt;</code></button>
-              <button type="button" data-fx-toggle="sub" aria-pressed="false"><b>SUB</b><span>SUBSCRIPT</span><code>&lt;sub&gt;</code></button>
-            </div>
-            <div class="fx-number-grid">
-              <div class="fx-number-card" data-fx-card="size"><div class="fx-number-head"><label><input type="checkbox" data-fx-enabled="size"><span>SIZE</span></label><input type="number" data-fx-value="size" value="10" min="5" max="29" step="1" aria-label="Size exact value"></div><input type="range" data-fx-slider="size" value="10" min="5" max="29" step="1" aria-label="Size slider from 5 to 29"><div class="fx-range-label"><span>5</span><small>ARENA TESTED // USEFUL 5 · 10 · 20 · 29</small><span>29</span></div><code>&lt;size=n&gt;</code></div>
-              <div class="fx-number-card" data-fx-card="cspace"><div class="fx-number-head"><label><input type="checkbox" data-fx-enabled="cspace"><span>CSPACE</span></label><input type="number" data-fx-value="cspace" value="5" min="-20" max="50" step="0.5" aria-label="Character spacing exact value"></div><input type="range" data-fx-slider="cspace" value="5" min="-20" max="50" step="0.5" aria-label="Character spacing slider from minus 20 to 50"><div class="fx-range-label"><span>-20</span><small>TOOL RANGE // ARENA MAX UNKNOWN</small><span>50</span></div><code>&lt;cspace=n&gt;</code></div>
-              <div class="fx-number-card" data-fx-card="rotate"><div class="fx-number-head"><label><input type="checkbox" data-fx-enabled="rotate"><span>ROTATE</span></label><input type="number" data-fx-value="rotate" value="15" min="-180" max="180" step="1" aria-label="Rotation exact value in degrees"></div><input type="range" data-fx-slider="rotate" value="15" min="-180" max="180" step="1" aria-label="Rotation slider from minus 180 to 180 degrees"><div class="fx-range-label"><span>-180&deg;</span><small>FULL PREVIEW RANGE</small><span>180&deg;</span></div><code>&lt;rotate=n&gt;</code></div>
-              <div class="fx-number-card" data-fx-card="voffset"><div class="fx-number-head"><label><input type="checkbox" data-fx-enabled="voffset"><span>VOFFSET</span></label><input type="number" data-fx-value="voffset" value="5" min="-50" max="50" step="0.5" aria-label="Vertical offset exact value"></div><input type="range" data-fx-slider="voffset" value="5" min="-50" max="50" step="0.5" aria-label="Vertical offset slider from minus 50 to 50"><div class="fx-range-label"><span>-50</span><small>TOOL RANGE // ARENA MAX UNKNOWN</small><span>50</span></div><code>&lt;voffset=n&gt;</code></div>
-              <div class="fx-number-card" data-fx-card="pos"><div class="fx-number-head"><label><input type="checkbox" data-fx-enabled="pos"><span>POS</span></label><input type="number" data-fx-value="pos" value="40" min="0" max="500" step="1" aria-label="Horizontal position exact value"></div><input type="range" data-fx-slider="pos" value="40" min="0" max="500" step="1" aria-label="Horizontal position slider from 0 to 500"><div class="fx-range-label"><span>0</span><small>TOOL RANGE // ARENA MAX UNKNOWN</small><span>500</span></div><code>&lt;pos=n&gt;</code></div>
-            </div>
-            <section class="caret-fx-panel" aria-labelledby="caretFxTitle">
-              <header><span><small>INLINE // LATER TAG WINS</small><b id="caretFxTitle">APPLY FROM ACTIVE CARET</b></span><small>REAPPLY TO CHANGE FX LATER</small></header>
-              <div class="caret-current-grid" role="group" aria-label="Insert a current global effect value at the caret">
-                <button type="button" data-caret-current="size">SIZE</button><button type="button" data-caret-current="cspace">CSPACE</button><button type="button" data-caret-current="rotate">ROTATE</button><button type="button" data-caret-current="voffset">VOFFSET</button><button type="button" data-caret-current="pos">POS</button>
-                <button type="button" data-caret-code="&lt;sup&gt;">SUP</button><button type="button" data-caret-code="&lt;sub&gt;">SUB</button>
-              </div>
-              <div class="caret-value-grid">
-                <label><span>MSPACE</span><input type="text" data-caret-value="mspace" value="1em" autocomplete="off" spellcheck="false" aria-label="Mspace value"><button type="button" data-caret-insert="mspace">INSERT</button></label>
-                <label><span>SPACE</span><input type="text" data-caret-value="space" value="1em" autocomplete="off" spellcheck="false" aria-label="Space value"><button type="button" data-caret-insert="space">INSERT</button></label>
-                <label><span>MARK</span><input type="text" data-caret-value="mark" value="#FFFF0080" autocomplete="off" spellcheck="false" aria-label="Highlight mark hex value"><button type="button" data-caret-insert="mark">INSERT</button></label>
-                <label><span>ALPHA</span><input type="text" data-caret-value="alpha" value="#80" autocomplete="off" spellcheck="false" aria-label="Alpha hex value"><button type="button" data-caret-insert="alpha">INSERT</button></label>
-              </div>
-              <p>These verified tags are stored as ordered inline events; inserting the same tag later preserves both so Arena can apply the newer value from that caret onward.</p>
-            </section>
-            <button id="insertBreak" class="insert-break" type="button"><b>INSERT LINE BREAK</b><code>&lt;br&gt;</code><span>AT ACTIVE CARET</span></button>
-          </div>
-          <section class="sprite-panel" aria-labelledby="spriteTrayTitle">
-            <header><span><small>INLINE EVENT</small><b id="spriteTrayTitle">ARENA SPRITES 0&ndash;15</b></span><small>CLICK AT CARET / DRAG TO TIMELINE</small></header>
-            <div id="spriteTray" class="sprite-tray" role="group" aria-label="Arena sprites 0 through 15"></div>
-            <p>Faces extracted from the installed Arena EmojiOne TMP atlas. Each face keeps its exact <code>&lt;sprite=n&gt;</code> mapping in its accessible label and raw code without covering the artwork.</p>
-          </section>
-        </div>
-        <p class="fx-preview-note">The finished-name field uses Arena's local Beleren font and sprite atlas and applies ordered FX from each caret. TextMesh Pro geometry can still require calibration; raw Arena code and character accounting are exact.</p>
-      </details>
-
       <section class="workbench" aria-label="Gradient workbench">
-        <div class="gradient-label"><span>MEGA TUBE</span><small>COLOUR + FX // RAW CODE ORDER</small></div>
+        <div class="gradient-label" aria-hidden="true"><span>YOUR GRADIENT</span></div>
         <div class="gradient-tube-row">
-          <div id="gradientBar" class="gradient-bar mega-tube" role="button" tabindex="0" aria-label="Mega Tube. Colour and effect bubbles follow Arena code order.">
+          <div id="gradientBar" class="gradient-bar" role="button" tabindex="0" aria-label="Gradient tube. Touch an open area to edit Colour 1.">
             <span id="barStopMarkers" class="bar-stop-markers"></span>
-            <span id="megaFxLayer" class="mega-fx-layer"></span>
           </div>
           <button id="tubeAddButton" class="tube-add-button" type="button" aria-label="Add a draggable colour bubble" title="Add a draggable colour bubble"><span aria-hidden="true">+</span></button>
         </div>
-        <div id="tubeHint" class="tube-hint">DRAG COLOUR + FX BUBBLES // ORDER MATCHES RAW ARENA CODE</div>
+        <div id="tubeHint" class="tube-hint" aria-hidden="true">TOUCH TUBE TO EDIT COLOUR 1 &middot; + ADDS A BUBBLE</div>
         <div id="stageWarning" class="stage-warning" role="status" aria-live="polite"></div>
-        <div id="visualWarning" class="visual-warning" role="status" aria-live="polite"></div>
         <button id="deleteZone" class="delete-zone" type="button" tabindex="-1" aria-disabled="true"><span>DRAG A COLOUR HERE TO DELETE</span></button>
 
         <div class="tool-row">
@@ -178,32 +113,6 @@
         </div>
         <div id="presetRail" class="preset-rail" aria-label="Matching MTG colour presets"></div>
       </section>
-
-      <details id="arenaLab" class="arena-lab">
-        <summary><span><small>ADVANCED</small><b>ARENA LAB</b></span><i aria-hidden="true">+</i></summary>
-        <div class="arena-lab-body">
-          <section class="raw-code-panel" aria-labelledby="rawCodeTitle">
-            <header><span><small>GENERATED // READ ONLY</small><b id="rawCodeTitle">RAW ARENA CODE</b></span><button id="copyRawCode" type="button">COPY RAW</button></header>
-            <textarea id="rawCode" rows="4" readonly spellcheck="false" aria-describedby="rawCodeNote"></textarea>
-            <p id="rawCodeNote">This is the exact string copied to Arena. ALL CAPS changes letters in the compiler and costs zero tag characters.</p>
-          </section>
-          <section class="probe-panel verified-probes" aria-labelledby="verifiedProbeTitle">
-            <header><span><small>ARENA-VERIFIED / CORE</small><b id="verifiedProbeTitle">REFERENCE TAGS</b></span><em>VERIFIED</em></header>
-            <div id="verifiedProbeList" class="probe-list"></div>
-          </section>
-          <section class="probe-panel candidate-probes" aria-labelledby="candidateProbeTitle">
-            <header><span><small>TEXTMESHPRO-LIKE</small><b id="candidateProbeTitle">CANDIDATE PROBES</b></span><em>UNVERIFIED</em></header>
-            <p>Generate these one at a time for manual Arena testing. Candidate status is not a claim of Arena support.</p>
-            <div id="candidateProbeList" class="probe-list"></div>
-            <p class="no-op-results"><b>KNOWN NO-OP // NO CONTROLS:</b> <code>&lt;font-weight&gt;</code> has no visible effect; sprite tint is ignored by Arena.</p>
-            <p class="unsafe-results"><b>UNSUPPORTED / UNSAFE // NO PROBES:</b> <code>&lt;font&gt;</code> may hide or truncate all following deck-name content. Font and material probes are intentionally unavailable.</p>
-          </section>
-          <section class="probe-output-panel" aria-labelledby="probeOutputTitle">
-            <header><b id="probeOutputTitle">SELECTED PROBE</b><button id="copyProbe" type="button">COPY PROBE</button></header>
-            <input id="probeOutput" type="text" readonly value="Select a probe above" aria-label="Selected Arena candidate probe code">
-          </section>
-        </div>
-      </details>
     </section>
 
     <div id="stopEditorBackdrop" class="stop-editor-backdrop" hidden>
@@ -236,40 +145,15 @@
       </section>
     </div>
 
-    <div id="fxPickerBackdrop" class="stop-editor-backdrop fx-picker-backdrop" hidden>
-      <section id="fxPicker" class="stop-editor fx-picker" role="dialog" aria-modal="true" aria-labelledby="fxPickerTitle" tabindex="-1">
-        <header>
-          <span><small id="fxPickerKicker">EDIT FX BUBBLE</small><b id="fxPickerTitle">CHOOSE FX</b></span>
-          <div class="stop-editor-header-actions">
-            <button id="fxPickerBack" class="fx-picker-back" type="button" hidden><span>BACK</span></button>
-            <button id="fxPickerClose" class="stop-editor-close" type="button" aria-label="Close FX picker">&times;</button>
-          </div>
-        </header>
-        <div id="fxPickerChoices" class="fx-picker-step">
-          <p>Choose what this bubble does. Each card shows a browser approximation; Arena remains authoritative. The bubble’s caret position will stay put.</p>
-          <div id="fxPickerGrid" class="fx-picker-grid" role="group" aria-label="Verified Arena effects"></div>
-        </div>
-        <div id="fxPickerAdjust" class="fx-picker-step fx-picker-adjust" hidden>
-          <div id="fxPickerSelected" class="fx-picker-selected"></div>
-          <div id="fxPickerAdjustment" class="fx-picker-adjustment"></div>
-          <div class="fx-picker-footer-actions">
-            <button id="fxPickerDrawer" class="fx-picker-drawer-link" type="button"><span>FULL FX DRAWER</span></button>
-            <button id="fxPickerApply" class="stop-editor-confirm fx-picker-apply" type="button"><span>APPLY FX</span></button>
-          </div>
-        </div>
-      </section>
-    </div>
-
     <div id="prismaticNameBackdrop" class="prismatic-name-backdrop" hidden>
       <section class="prismatic-name-sheet" role="dialog" aria-modal="true" aria-labelledby="prismaticNameTitle">
         <header><span><small>ALT VIEW</small><b id="prismaticNameTitle">DECK NAME</b></span><button id="prismaticNameClose" type="button" aria-label="Close deck name editor">&times;</button></header>
-        <label><span>TYPE OR PASTE</span><input id="prismaticDeckName" type="text" value="Your Deck Name" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
+        <label><span>TYPE OR PASTE</span><input id="prismaticDeckName" type="text" value="YOUR DECK NAME" autocomplete="off" autocapitalize="characters" spellcheck="false"></label>
         <button id="prismaticNameDone" class="prismatic-name-done" type="button">DONE</button>
       </section>
     </div>
 
-    <footer><span>LOCAL // NOTHING UPLOADED</span><a id="offlineDownload" class="offline-download" href="turdgobbler-colourifier-v7-offline.zip" download>DOWNLOAD V7 OFFLINE ZIP</a><span>CTRL + ENTER // COPY</span></footer>
-    <p class="fan-content-notice">TurdGobbler's Deck Name Colourifier is unofficial Fan Content permitted under the Fan Content Policy. Not approved/endorsed by Wizards. Portions of the materials used are property of Wizards of the Coast. &copy; Wizards of the Coast LLC.</p>
+    <footer><span>LOCAL // NOTHING UPLOADED</span><a id="offlineDownload" class="offline-download" href="turdgobbler-colourifier-v6-offline.zip" download>DOWNLOAD OFFLINE ZIP</a><span>CTRL + ENTER // COPY</span></footer>
   </main>
 </body>
 </html>
