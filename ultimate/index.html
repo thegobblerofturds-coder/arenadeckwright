@@ -10,9 +10,9 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="manifest" href="site.webmanifest">
   <title>TurdGobbler's Deck Name Colourifier — Ultimate Version</title>
-  <link rel="stylesheet" href="styles.css?v=ultimate-7.2">
+  <link rel="stylesheet" href="styles.css?v=ultimate-7.3">
   <script src="logic.js?v=ultimate-3.0" defer></script>
-  <script src="app.js?v=ultimate-7.2" defer></script>
+  <script src="app.js?v=ultimate-7.3" defer></script>
 </head>
 <body>
   <main class="app-shell">
@@ -61,6 +61,11 @@
                 <div id="dropGuide" class="drop-guide" aria-hidden="true"></div>
               </div>
             </div>
+            <div id="globalToggleBar" class="global-toggle-bar" role="group" aria-label="Whole-name controls">
+              <button type="button" data-global-toggle="allCaps" aria-pressed="false"><i aria-hidden="true">AA</i><span>ALL CAPS</span></button>
+              <button type="button" data-global-toggle="smallCaps" aria-pressed="false"><i aria-hidden="true">Aa</i><span>SMALL CAPS</span></button>
+              <button id="forceGradient" class="force-gradient" type="button"><span>AUTO GRADIENT</span></button>
+            </div>
 
             <div class="tube-dock">
               <div class="source-bubbles" role="group" aria-label="Drag a new layer into the Mega Tube">
@@ -91,12 +96,6 @@
                 <button id="undoButton" class="tool-button" type="button" disabled><span aria-hidden="true">↶</span> UNDO</button>
                 <button id="redoButton" class="tool-button" type="button" disabled><span aria-hidden="true">↷</span> REDO</button>
                 <button id="startOver" class="tool-button danger-soft" type="button">START OVER</button>
-              </div>
-              <div id="globalToggleBar" class="global-toggle-bar" role="group" aria-label="Whole-name controls">
-                <span>WHOLE NAME</span>
-                <button type="button" data-global-toggle="allCaps" aria-pressed="false"><i aria-hidden="true">AA</i><span>ALL CAPS</span></button>
-                <button type="button" data-global-toggle="smallCaps" aria-pressed="false"><i aria-hidden="true">Aa</i><span>SMALL CAPS</span></button>
-                <button id="forceGradient" class="force-gradient" type="button"><span>AUTO GRADIENT</span></button>
               </div>
             </div>
           </div>

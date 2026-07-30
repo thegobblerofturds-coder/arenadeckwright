@@ -811,7 +811,7 @@
     const endX = targetBounds.left + targetWidth * laneRatio - canvasBounds.left;
     const targetBottom = targetBounds.bottom - canvasBounds.top;
     const railTop = els.tubeLayerRail.getBoundingClientRect().top - canvasBounds.top;
-    const endY = Math.min(startY - 6, Math.max(targetBottom + 7, railTop - 10));
+    const endY = Math.min(startY - 6, targetBottom + 8, railTop - 12);
     const deltaX = endX - startX;
     const deltaY = endY - startY;
     const length = Math.hypot(deltaX, deltaY);
@@ -975,7 +975,7 @@
 
   function setLayerDragFocus(active) {
     document.body.classList.toggle('layer-drag-active', Boolean(active));
-    els.megaTube.classList.toggle('drag-focus', Boolean(active));
+    els.tubeTrack.classList.toggle('drag-focus', Boolean(active));
   }
 
   function beginTokenDrag(event, options) {
@@ -1211,6 +1211,7 @@
   }
 
   function renderTube() {
+    els.tubeTrack.classList.toggle('selection-focus', Boolean(state.selected));
     els.tubeFill.style.background = gradientCss();
     els.tubeLayerRail.replaceChildren();
     els.tubeLayerGuides.replaceChildren();
@@ -2337,14 +2338,15 @@
     const buttons = Array.from(els.effectSources.children);
     const count = buttons.length;
     buttons.forEach((button, index) => {
-      const angle = (-90 + index * 360 / Math.max(1, count)) * Math.PI / 180;
-      button.style.left = `${50 + Math.cos(angle) * 35}%`;
-      button.style.top = `${50 + Math.sin(angle) * 38}%`;
+      const angle = (count === 1 ? -90 : -155 + index * 130 / (count - 1)) * Math.PI / 180;
+      button.style.left = `${50 + Math.cos(angle) * 38}%`;
+      button.style.top = `${72 + Math.sin(angle) * 55}%`;
     });
   }
 
-  function appendFxPage(keys, pageSize = 5) {
+  function appendFxPage(keys) {
     const effects = keys.map((key) => EFFECT_BY_KEY[key]).filter(Boolean);
+    const pageSize = effects.length > 4 ? 3 : 4;
     const pageCount = Math.max(1, Math.ceil(effects.length / pageSize));
     fxMenuPage = ((fxMenuPage % pageCount) + pageCount) % pageCount;
     effects.slice(fxMenuPage * pageSize, fxMenuPage * pageSize + pageSize).forEach((effect) => {
@@ -2485,22 +2487,34 @@
     let recipes = identityRecipes().filter((recipe) => required.every((code) => recipe.codes.includes(code)));
     if (required.length >= 4) {
       recipes = [{key: canonicalIdentity(required), name: identityName(required), codes: required.slice()}];
-    } else {
-      recipes = recipes.slice(0, 12);
     }
     els.wubrgContext.textContent = `${recipes.length} MATCHING ${recipes.length === 1 ? 'IDENTITY' : 'IDENTITIES'} · TAP THE ACTIVE ONE TO CYCLE COLOURS`;
-    recipes.forEach((recipe) => {
-      const button = document.createElement('button');
-      button.type = 'button';
-      const selected = state.wubrg.length === recipe.codes.length
-        && canonicalIdentity(state.wubrg) === canonicalIdentity(recipe.codes);
-      button.className = 'wubrg-quick-preset';
-      button.classList.toggle('selected', selected);
-      button.style.setProperty('--preset', gradientFromColours(recipe.codes.map((code) => MANA[code].colour)));
-      button.innerHTML = `<b>${wubrgRecipeName(recipe)}</b><span>${selected ? `CYCLE COLOURS · ${state.wubrg.join(' → ')}` : recipe.codes.join(' / ')}</span>`;
-      attachPresetPreview(button, () => previewEvenWubrgColours(recipe.codes.map((code) => MANA[code].colour)));
-      button.addEventListener('click', () => applyWubrgRecipe(recipe));
-      els.wubrgResults.appendChild(button);
+    [
+      {label: '2 COLOUR', matches: recipes.filter((recipe) => recipe.codes.length === 2)},
+      {label: '3 COLOUR', matches: recipes.filter((recipe) => recipe.codes.length === 3)},
+      {label: '4 / 5 COLOUR', matches: recipes.filter((recipe) => recipe.codes.length >= 4)}
+    ].filter((group) => group.matches.length).forEach((group) => {
+      const section = document.createElement('section');
+      section.className = 'wubrg-recipe-group';
+      const label = document.createElement('small');
+      label.textContent = group.label;
+      const row = document.createElement('div');
+      row.className = 'wubrg-recipe-row';
+      group.matches.forEach((recipe) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        const selected = state.wubrg.length === recipe.codes.length
+          && canonicalIdentity(state.wubrg) === canonicalIdentity(recipe.codes);
+        button.className = 'wubrg-quick-preset';
+        button.classList.toggle('selected', selected);
+        button.style.setProperty('--preset', gradientFromColours(recipe.codes.map((code) => MANA[code].colour)));
+        button.innerHTML = `<b>${wubrgRecipeName(recipe)}</b><span>${selected ? `CYCLE COLOURS · ${state.wubrg.join(' → ')}` : recipe.codes.join(' / ')}</span>`;
+        attachPresetPreview(button, () => previewEvenWubrgColours(recipe.codes.map((code) => MANA[code].colour)));
+        button.addEventListener('click', () => applyWubrgRecipe(recipe));
+        row.appendChild(button);
+      });
+      section.append(label, row);
+      els.wubrgResults.appendChild(section);
     });
   }
 
