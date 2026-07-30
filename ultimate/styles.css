@@ -270,9 +270,14 @@ button:disabled{cursor:not-allowed;opacity:.38}
   text-align:center;
   cursor:crosshair;
 }
-/* Arena Mirror contract: the live copy surface is always fully opaque Arena black. */
-.tube-name-canvas,.tube-name-canvas:hover,.tube-name-canvas:active,.tube-name-canvas:focus-within{background:#000;backdrop-filter:none;}
-.tube-name-canvas::after{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;box-shadow:inset 0 0 0 1px #ffffff05}
+/* Arena Mirror contract: the final-product editing surface is immutable #000000. */
+.tube-name-canvas,.tube-name-canvas:hover,.tube-name-canvas:active,.tube-name-canvas:focus-within{
+  background:#000!important;
+  background-image:none!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+.tube-name-canvas::after{display:none!important;content:none!important}
 .canvas-kicker{
   position:absolute;
   left:12px;top:9px;
@@ -303,10 +308,10 @@ button:disabled{cursor:not-allowed;opacity:.38}
   transform-origin:center;
 }
 .preview-glyph:hover,.preview-glyph.drop-hover,.preview-end-target.drop-hover{
-  background:#42e6ff28!important;
+  background:transparent!important;
   box-shadow:inset 0 -2px var(--cyan),0 0 12px #42e6ff66;
 }
-.preview-glyph.affected{background:#c94bff20;box-shadow:inset 0 -2px #c94bff}
+.preview-glyph.affected{background:transparent;box-shadow:inset 0 -2px #c94bff}
 .preview-sprite{
   display:inline-block;
   width:25px;
