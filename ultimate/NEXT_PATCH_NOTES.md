@@ -17,7 +17,7 @@ The Ultimate development source was rebuilt around one editing surface.
 
 - One Mega Tube with the live deck name as its permanent editing canvas.
 - Exact character-aware mouse, pen, and touch drops.
-- Separate visual lanes for positioned FX above and colours below the name.
+- One shared visual rail for colours, positioned FX, and sprites.
 - One inspector for colour, FX, sprite, and global-style layers.
 - Contextual colour and effect overlays that appear only after a bubble drop or
   placed-layer selection.
@@ -50,12 +50,12 @@ The Ultimate development source was rebuilt around one editing surface.
 
 - Replaced the five creation buttons with two draggable reservoirs: Colour and
   FX.
-- Dropping either reservoir anywhere on the live name locks that exact caret
-  and opens only its matching submenu.
+- Dropping Colour locks its exact percentage across the tube; dropping FX locks
+  the exact text position and opens only its matching submenu.
 - Choosing a swatch, custom colour, effect, or sprite commits it to the locked
   position and closes the picker.
 - The same pointer-drag flow now handles mouse, pen, and touch. Enter or Space
-  places a focused reservoir at the active caret for keyboard access.
+  places a focused reservoir at the current text position for keyboard access.
 - WUBRG, Colour Presets, and Stylized Presets remain as a separate compact
   three-item shelf.
 - Reauthored Bubbles, Drift Away, Matrix Glitch, and Upside Down with fewer
@@ -73,6 +73,72 @@ The Ultimate development source was rebuilt around one editing surface.
 - Budget details, history, Clear FX, Start Over, and raw Arena code now live
   behind one `•••` More disclosure.
 
+### Local v5.1 refinement — not published
+
+- Paired the Colour and FX creation bubbles directly beneath the Mega Tube.
+- Moved global styles, positioned FX, sprites, the live name, and colour stops
+  into one black tube interior; removed the decorative lane labels and ticks.
+- Fixed mobile contextual menus with an explicitly bounded bottom sheet and a
+  dedicated momentum-scrolling panel.
+- Clicking a placed layer now opens a compact nearby editor. The full source
+  library opens only through More Colours or More FX.
+- Dragging includes a magnified percentage or text-position readout.
+- FX sharing one text position remain separate, individually clickable bubbles.
+- Added four device-local recent Colour and FX choices.
+- Long names scale down inside the tube instead of disappearing beyond it.
+
+### Local v6 interface rebuild — not published
+
+- Preserved the entire v5.1 local build as a verified offline snapshot before
+  replacing the interface.
+- Replaced separate colour and FX lanes with one horizontal layer rail beneath
+  the live name.
+- Anchored FX to measured rendered-glyph geometry and colours to continuous
+  edge-to-edge tube coordinates.
+- Added a shared collision resolver across colours, positioned FX, and sprites
+  so items cannot all accumulate at the right edge.
+- Restored drag-to-delete as a red target that appears only while an existing
+  layer is moving and lights up on entry.
+- Removed selected-range underlines and other decoration from the name.
+- Reduced selected-layer controls to the essential value, character nudge,
+  change, duplicate, and delete actions.
+- Combined the two source bubbles and three preset launchers into one compact
+  dock directly beneath the tube.
+
+### Local v6.1 interaction correction — not published
+
+- Colour placement is now continuous across the full tube and clamps to true
+  0% and 100% edges instead of snapping back to letters.
+- Collision-displaced bubbles draw quiet perspective guides to their real
+  colour point or text anchor.
+- Removed numbered FX stacks; each effect and sprite remains its own clickable,
+  draggable, and deletable bubble.
+- Removed the visible caret readout and caret wording from the product surface.
+- Aligned the deck-name and Arena export controls as two labelled fields.
+- Removed the decorative Ultimate badge and Live Mega Tube heading, then pulled
+  the editor closer to the top of the page.
+
+### Ultimate v6.2 control-model release — published 2026-07-30
+
+- FX bubbles now store a continuous visual position anywhere across the tube
+  while separately compiling at the nearest text insertion point. Existing
+  anchor lines remain the explicit connection between those two facts.
+- Replaced the blocking modal overlay with a bounded, touch-scrollable panel
+  below the tube so the live preview never disappears behind a menu.
+- Removed whole-name variants from the FX picker. All Caps and Small Caps are
+  direct toggles beside the source bubbles; Bold, Italic, Underline, Strike,
+  Superscript, Subscript, Size, Spacing, Rotate, and Offset are positioned FX.
+- Removed the duplicate global chips and their inspector.
+- Merged Colour Presets and combined colour-and-FX recipes into one Presets
+  panel and moved its launcher away from the creation bubbles.
+- Restored the Version 6 WUBRG rhythm: pip taps immediately change the gradient,
+  order badges remain visible, and matching identities are quick rotate/apply
+  choices with no extra Apply step or search form.
+- Made Undo and Start Over persistent controls.
+- Replaced the raw-code drawer in More with device-local complete saved presets
+  that restore the name, colours, whole-name toggles, positioned FX, and
+  sprites.
+
 ### Removed from the product surface
 
 - Alternate/prismatic duplicate name view.
@@ -84,10 +150,10 @@ The Ultimate development source was rebuilt around one editing surface.
   those surfaces.
 
 The exact compiler, 64-character budget, opaque-black Arena Mirror, verified
-effects, sprite mapping, local font, copy fallback, raw-code view, offline
-operation, reduced-motion support, and fan-content notice remain.
+effects, sprite mapping, local font, copy fallback, offline operation,
+reduced-motion support, and fan-content notice remain.
 
 ## Release status
 
-This live-name Ultimate build is the `/ultimate/` release line. `/colour/`
-remains Version 6 and Version Lite remains shelved.
+The v6.2 interface is the `/ultimate/` release in both website mirrors as of
+2026-07-30. `/colour/` remains Version 6 and Version Lite remains shelved.

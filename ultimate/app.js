@@ -54,38 +54,39 @@
     {
       id: 'bubbles', name: 'BUBBLES', note: 'BOUNCING SIZE + VERTICAL WAVES', sample: 'OoO',
       colours: ['#73F2FF', '#FFB4E6'],
-      formatting: {}, effects: {size: {enabled: true, value: 10}, cspace: {enabled: true, value: 1}}, pattern: 'bubbles'
+      formatting: {}, effects: {}, startCodes: ['<size=10>', '<cspace=1>'], pattern: 'bubbles'
     },
     {
       id: 'drift-away', name: 'DRIFT AWAY', note: 'SHRINK, RISE, AND SPACE OUT', sample: 'drift',
       colours: ['#F4FBFF', '#9CDBFF', '#848BFF'],
-      formatting: {italic: true}, effects: {cspace: {enabled: true, value: 2}}, pattern: 'drift'
+      formatting: {}, effects: {}, startCodes: ['<i>', '<cspace=2>'], pattern: 'drift'
     },
     {
       id: 'matrix-glitch', name: 'MATRIX GLITCH', note: 'MATRIX GREEN + STAGGERED GLITCH', sample: '0101',
       colours: ['#073B1B', '#00FF66', '#C8FFD9'],
-      formatting: {}, effects: {allCaps: true, cspace: {enabled: true, value: 1}}, pattern: 'glitch'
+      formatting: {}, effects: {allCaps: true}, startCodes: ['<cspace=1>'], pattern: 'glitch'
     },
     {
       id: 'upside-down', name: 'UPSIDE DOWN', note: '180° ROTATION + VOID COLOUR', sample: 'ɐuǝɹ∀',
       colours: ['#B9FFEE', '#56D7D2', '#D384FF'],
-      formatting: {}, effects: {rotate: {enabled: true, value: 180}, cspace: {enabled: true, value: 1}}
+      formatting: {}, effects: {}, startCodes: ['<rotate=180>', '<cspace=1>']
     }
   ];
   const EFFECTS = [
-    {key: 'italic', label: 'ITALIC', hint: 'SLANT TEXT', code: '<i>', global: 'formatting'},
-    {key: 'underline', label: 'UNDERLINE', hint: 'LINE BELOW', code: '<u>', global: 'formatting'},
-    {key: 'strike', label: 'STRIKE', hint: 'LINE THROUGH', code: '<s>', global: 'formatting'},
-    {key: 'allCaps', label: 'ALL CAPS', hint: 'ZERO TAG COST', global: 'boolean', inline: false},
-    {key: 'smallCaps', label: 'SMALL CAPS', hint: 'EXPERIMENTAL TAG', code: '<smallcaps>', global: 'boolean', inline: false},
-    {key: 'sup', label: 'SUPERSCRIPT', hint: 'RAISE + SHRINK', code: '<sup>', global: 'boolean'},
-    {key: 'sub', label: 'SUBSCRIPT', hint: 'LOWER + SHRINK', code: '<sub>', global: 'boolean'},
-    {key: 'size', label: 'SIZE', hint: 'GLYPH SCALE', code: '<size=10>', global: 'numeric', min: 5, max: 29, step: 1, value: 10},
-    {key: 'cspace', label: 'CHAR SPACE', hint: 'LETTER GAP', code: '<cspace=5>', global: 'numeric', min: -20, max: 50, step: .5, value: 5},
-    {key: 'rotate', label: 'ROTATE', hint: 'PER-LETTER TILT', code: '<rotate=15>', global: 'numeric', min: -180, max: 180, step: 1, value: 15},
-    {key: 'voffset', label: 'VERT OFFSET', hint: 'MOVE UP / DOWN', code: '<voffset=5>', global: 'numeric', min: -50, max: 50, step: .5, value: 5},
-    {key: 'pos', label: 'POSITION', hint: 'HORIZONTAL START', code: '<pos=40>', global: 'numeric', min: 0, max: 500, step: 1, value: 40},
-    {key: 'br', label: 'LINE BREAK', hint: 'BREAK AT CARET', code: '<br>', global: null},
+    {key: 'bold', label: 'BOLD', hint: 'HEAVIER TEXT', code: '<b>'},
+    {key: 'italic', label: 'ITALIC', hint: 'SLANT TEXT', code: '<i>'},
+    {key: 'underline', label: 'UNDERLINE', hint: 'LINE BELOW', code: '<u>'},
+    {key: 'strike', label: 'STRIKE', hint: 'LINE THROUGH', code: '<s>'},
+    {key: 'allCaps', label: 'ALL CAPS', hint: 'ZERO TAG COST', wholeName: true, inline: false},
+    {key: 'smallCaps', label: 'SMALL CAPS', hint: 'EXPERIMENTAL TAG', code: '<smallcaps>', wholeName: true, inline: false},
+    {key: 'sup', label: 'SUPERSCRIPT', hint: 'RAISE + SHRINK', code: '<sup>'},
+    {key: 'sub', label: 'SUBSCRIPT', hint: 'LOWER + SHRINK', code: '<sub>'},
+    {key: 'size', label: 'SIZE', hint: 'GLYPH SCALE', code: '<size=10>', min: 5, max: 29, step: 1, value: 10},
+    {key: 'cspace', label: 'CHAR SPACE', hint: 'LETTER GAP', code: '<cspace=5>', min: -20, max: 50, step: .5, value: 5},
+    {key: 'rotate', label: 'ROTATE', hint: 'PER-LETTER TILT', code: '<rotate=15>', min: -180, max: 180, step: 1, value: 15},
+    {key: 'voffset', label: 'VERT OFFSET', hint: 'MOVE UP / DOWN', code: '<voffset=5>', min: -50, max: 50, step: .5, value: 5},
+    {key: 'pos', label: 'POSITION', hint: 'HORIZONTAL START', code: '<pos=40>', min: 0, max: 500, step: 1, value: 40},
+    {key: 'br', label: 'LINE BREAK', hint: 'BREAK AT POSITION', code: '<br>', global: null},
     {key: 'mspace', label: 'MONO SPACE', hint: 'FIXED WIDTH', code: '<mspace=1em>', global: null, value: '1em'},
     {key: 'space', label: 'SPACE', hint: 'INSERT SPACING', code: '<space=1em>', global: null, value: '1em'},
     {key: 'mark', label: 'HIGHLIGHT', hint: 'MARK COLOUR', code: '<mark=#FFFF0080>', global: null, value: '#FFFF0080'},
@@ -94,27 +95,32 @@
   const EFFECT_BY_KEY = Object.fromEntries(EFFECTS.map((effect) => [effect.key, effect]));
   const $ = (id) => document.getElementById(id);
   const els = {
-    deckName: $('deckName'), startOver: $('startOver'), caretReadout: $('caretReadout'),
+    deckName: $('deckName'), startOver: $('startOver'),
     copyButton: $('copyButton'), copyLabel: $('copyLabel'), outputPreview: $('outputPreview'),
     budgetTotal: $('budgetTotal'), budgetText: $('budgetText'), budgetColour: $('budgetColour'),
     budgetFx: $('budgetFx'), outputStatus: $('outputStatus'), colourCount: $('colourCount'),
     effectCount: $('effectCount'), spriteCount: $('spriteCount'), megaTube: $('megaTube'),
-    tubeGlobals: $('tubeGlobals'), tubeTrack: $('tubeTrack'), tubeFill: $('tubeFill'),
-    tubeTicks: $('tubeTicks'), tubeFxLayer: $('tubeFxLayer'), tubeColourLayer: $('tubeColourLayer'),
-    tubeNameCanvas: $('tubeNameCanvas'), characterTargets: $('characterTargets'),
-    dropGuide: $('dropGuide'), undoButton: $('undoButton'), redoButton: $('redoButton'),
+    tubeTrack: $('tubeTrack'), tubeFill: $('tubeFill'),
+    tubeLayerRail: $('tubeLayerRail'), tubeLayerGuides: $('tubeLayerGuides'),
+    trashDropZone: $('trashDropZone'),
+    tubeNameCanvas: $('tubeNameCanvas'),
+    dropGuide: $('dropGuide'), dropMagnifier: $('dropMagnifier'),
+    dropMagnifierGlyph: $('dropMagnifierGlyph'), dropMagnifierLabel: $('dropMagnifierLabel'),
+    undoButton: $('undoButton'), redoButton: $('redoButton'),
     clearFxButton: $('clearFxButton'), tubeStatus: $('tubeStatus'), layerInspector: $('layerInspector'),
     colourPicker: $('colourPicker'), colourHex: $('colourHex'), addCustomColour: $('addCustomColour'),
     colourWheel: $('colourWheel'), wheelCursor: $('wheelCursor'),
     rotateColours: $('rotateColours'), flipColours: $('flipColours'), savePalette: $('savePalette'),
     savedPalettes: $('savedPalettes'),
-    colourSources: $('colourSources'), effectSources: $('effectSources'), spriteSources: $('spriteSources'),
+    colourSources: $('colourSources'), recentColours: $('recentColours'),
+    effectSources: $('effectSources'), recentEffects: $('recentEffects'), spriteSources: $('spriteSources'),
     wubrgComposer: $('wubrgComposer'), wubrgIdentity: $('wubrgIdentity'), wubrgOrder: $('wubrgOrder'),
-    applyWubrg: $('applyWubrg'), clearWubrg: $('clearWubrg'), wubrgSearch: $('wubrgSearch'),
+    clearWubrg: $('clearWubrg'), wubrgContext: $('wubrgContext'),
     wubrgResults: $('wubrgResults'), colourPresets: $('colourPresets'), stylePresets: $('stylePresets'),
     colourLayerBubble: $('colourLayerBubble'), fxLayerBubble: $('fxLayerBubble'),
     sourceLibrary: $('sourceLibrary'),
-    rawCode: $('rawCode'), copyRawCode: $('copyRawCode'), toast: $('toast')
+    saveComposition: $('saveComposition'), savedCompositions: $('savedCompositions'),
+    toast: $('toast')
   };
 
   let nextId = 1;
@@ -124,6 +130,7 @@
   let toastTimer = null;
   let previewOverride = null;
   let pendingLayerOffset = null;
+  let pendingLayerPosition = null;
   let pendingLayerCategory = null;
   let state = createDefaultState();
 
@@ -151,12 +158,21 @@
       selected: null,
       activeTab: null,
       wubrg: [],
-      favourites: []
+      favourites: [],
+      savedCompositions: [],
+      recentColours: [],
+      recentEffects: []
     };
   }
 
   function clone(value) {
     return JSON.parse(JSON.stringify(value));
+  }
+
+  function escapeHtml(value) {
+    return String(value).replace(/[&<>"']/g, (character) => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    })[character]);
   }
 
   function snapshot() {
@@ -169,7 +185,10 @@
       caret: state.caret,
       selected: state.selected,
       wubrg: state.wubrg,
-      favourites: state.favourites
+      favourites: state.favourites,
+      savedCompositions: state.savedCompositions,
+      recentColours: state.recentColours,
+      recentEffects: state.recentEffects
     });
   }
 
@@ -199,7 +218,12 @@
     state.effects = Logic.normaliseEffects(state.effects || {});
     state.events = Logic.normaliseInlineEvents(state.events, state.name.length).map((event) => ({
       ...event,
-      id: event.id || uid('event')
+      id: event.id || uid('event'),
+      position: Number.isFinite(Number(event.position))
+        ? Math.max(0, Math.min(1, Number(event.position)))
+        : state.name.length
+          ? event.offset / state.name.length
+          : 0
     }));
     state.wubrg = Array.isArray(state.wubrg)
       ? state.wubrg.filter((code, index, source) => MANA[code] && source.indexOf(code) === index).slice(0, 5)
@@ -211,6 +235,23 @@
         name: String(entry.name || `SAVED ${index + 1}`),
         colours: entry.colours.filter(Logic.validHex).slice(0, MAX_COLOURS).map((colour) => colour.toUpperCase())
       }));
+    state.savedCompositions = (Array.isArray(state.savedCompositions) ? state.savedCompositions : [])
+      .filter((entry) => entry?.composition && Array.isArray(entry.composition.colours))
+      .slice(0, 12)
+      .map((entry, index) => ({
+        id: String(entry.id || uid('saved')),
+        name: String(entry.name || `SAVED PRESET ${index + 1}`).slice(0, 48),
+        composition: clone(entry.composition)
+      }));
+    state.recentColours = (Array.isArray(state.recentColours) ? state.recentColours : [])
+      .filter(Logic.validHex)
+      .map((colour) => colour.toUpperCase())
+      .filter((colour, index, source) => source.indexOf(colour) === index)
+      .slice(0, 4);
+    state.recentEffects = (Array.isArray(state.recentEffects) ? state.recentEffects : [])
+      .filter((entry) => entry?.label && entry?.payload?.kind === 'event' && entry.payload.event)
+      .slice(0, 4)
+      .map((entry) => ({label: String(entry.label), payload: clone(entry.payload)}));
     if (state.selected?.kind === 'colour' && !state.colours.some((stop) => stop.id === state.selected.id)) state.selected = null;
     if (state.selected?.kind === 'event' && !state.events.some((event) => event.id === state.selected.id)) state.selected = null;
   }
@@ -269,8 +310,15 @@
 
   function undo() {
     if (!history.length) return;
+    const libraries = {
+      favourites: state.favourites,
+      savedCompositions: state.savedCompositions,
+      recentColours: state.recentColours,
+      recentEffects: state.recentEffects
+    };
     future.push(snapshot());
     restoreSnapshot(history.pop());
+    Object.assign(state, libraries);
     persist();
     renderAll();
     announce('Undid last change');
@@ -278,8 +326,15 @@
 
   function redo() {
     if (!future.length) return;
+    const libraries = {
+      favourites: state.favourites,
+      savedCompositions: state.savedCompositions,
+      recentColours: state.recentColours,
+      recentEffects: state.recentEffects
+    };
     history.push(snapshot());
     restoreSnapshot(future.pop());
+    Object.assign(state, libraries);
     persist();
     renderAll();
     announce('Redid change');
@@ -317,7 +372,7 @@
     const definition = EFFECT_BY_KEY[key];
     if (!definition || definition.inline === false) return null;
     if (key === 'br') return {kind: 'event', event: {type: 'br'}};
-    if (['italic', 'underline', 'strike', 'sup', 'sub'].includes(key)) {
+    if (['bold', 'italic', 'underline', 'strike', 'sup', 'sub'].includes(key)) {
       return {kind: 'event', event: {type: 'tag', code: definition.code}};
     }
     if (['size', 'cspace', 'rotate', 'voffset', 'pos'].includes(key)) {
@@ -334,7 +389,8 @@
     if (event.type === 'sprite') return 'sprite';
     if (event.type === 'br') return 'br';
     const match = String(event.code || '').match(/^<([a-z]+)(?:=|>)/i);
-    return match ? match[1].toLowerCase() : 'fx';
+    if (!match) return 'fx';
+    return {b: 'bold', i: 'italic', u: 'underline', s: 'strike'}[match[1].toLowerCase()] || match[1].toLowerCase();
   }
 
   function eventLabel(event) {
@@ -361,18 +417,8 @@
 
   function activeGlobals(source = state) {
     const entries = [];
-    ['italic', 'underline', 'strike'].forEach((key) => {
-      if (source.formatting[key]) entries.push({key, label: EFFECT_BY_KEY[key].label, code: EFFECT_BY_KEY[key].code});
-    });
-    ['allCaps', 'smallCaps', 'sup', 'sub'].forEach((key) => {
+    ['allCaps', 'smallCaps'].forEach((key) => {
       if (source.effects[key]) entries.push({key, label: EFFECT_BY_KEY[key].label, code: EFFECT_BY_KEY[key].code || 'Aa→AA'});
-    });
-    ['size', 'cspace', 'rotate', 'voffset', 'pos'].forEach((key) => {
-      if (source.effects[key]?.enabled) entries.push({
-        key,
-        label: EFFECT_BY_KEY[key].label,
-        code: `<${key}=${source.effects[key].value}>`
-      });
     });
     return entries;
   }
@@ -400,6 +446,7 @@
 
   function initialPreviewState(source = effectiveState()) {
     return {
+      bold: source.formatting.bold,
       italic: source.formatting.italic,
       underline: source.formatting.underline,
       strike: source.formatting.strike,
@@ -418,9 +465,10 @@
   }
 
   function applyPreviewTag(preview, code) {
-    const simple = String(code).match(/^<(i|u|s|sup|sub|smallcaps)>$/i);
+    const simple = String(code).match(/^<(b|i|u|s|sup|sub|smallcaps)>$/i);
     if (simple) {
       const key = simple[1].toLowerCase();
+      if (key === 'b') preview.bold = true;
       if (key === 'i') preview.italic = true;
       if (key === 'u') preview.underline = true;
       if (key === 's') preview.strike = true;
@@ -442,6 +490,7 @@
 
   function applyGlyphStyles(glyph, preview) {
     glyph.style.color = glyph.dataset.colour;
+    if (preview.bold) glyph.style.fontWeight = '900';
     if (preview.italic) glyph.style.fontStyle = 'italic';
     const decorations = [preview.underline && 'underline', preview.strike && 'line-through'].filter(Boolean);
     if (decorations.length) glyph.style.textDecoration = decorations.join(' ');
@@ -463,34 +512,6 @@
     if (transforms.length) glyph.style.transform = transforms.join(' ');
   }
 
-  function selectedRange(build) {
-    if (!state.selected) return null;
-    if (state.selected.kind === 'global') return {start: 0, end: build.text.length};
-    if (state.selected.kind === 'colour') {
-      const colours = state.colours.slice().sort((left, right) => left.position - right.position);
-      const index = colours.findIndex((stop) => stop.id === state.selected.id);
-      if (index < 0) return null;
-      const start = index === 0 || build.text.length < 2 ? 0 : Math.round(colours[index].position * (build.text.length - 1));
-      const end = index === colours.length - 1 || build.text.length < 2
-        ? build.text.length
-        : Math.max(start + 1, Math.round(colours[index + 1].position * (build.text.length - 1)));
-      return {start, end};
-    }
-    if (state.selected.kind === 'event') {
-      const selected = state.events.find((event) => event.id === state.selected.id);
-      if (!selected) return null;
-      if (selected.type === 'sprite' || selected.type === 'br') {
-        return {start: selected.offset, end: Math.min(build.text.length, selected.offset + 1)};
-      }
-      const key = eventKey(selected);
-      const next = state.events
-        .filter((event) => event.offset > selected.offset && eventKey(event) === key)
-        .sort((left, right) => left.offset - right.offset)[0];
-      return {start: selected.offset, end: next?.offset ?? build.text.length};
-    }
-    return null;
-  }
-
   function renderPreview(build) {
     els.outputPreview.replaceChildren();
     if (!build.text && !build.inlineEvents.length) {
@@ -501,7 +522,6 @@
       return;
     }
     const preview = initialPreviewState();
-    const affected = selectedRange(build);
     const eventsAt = new Map();
     build.inlineEvents.forEach((event) => {
       if (!eventsAt.has(event.offset)) eventsAt.set(event.offset, []);
@@ -516,7 +536,7 @@
           sprite.className = 'preview-sprite';
           sprite.dataset.dropOffset = String(offset);
           sprite.style.backgroundImage = `var(--arena-sprite-${event.value})`;
-          sprite.setAttribute('aria-label', `Sprite ${event.value} at caret ${offset}`);
+          sprite.setAttribute('aria-label', `Sprite ${event.value} at position ${offset}`);
           els.outputPreview.appendChild(sprite);
         } else {
           applyPreviewTag(preview, event.code);
@@ -527,7 +547,6 @@
       glyph.className = 'preview-glyph';
       glyph.dataset.colour = previewColourAt(build, offset);
       glyph.dataset.dropOffset = String(offset);
-      glyph.classList.toggle('affected', Boolean(affected && offset >= affected.start && offset < affected.end));
       glyph.textContent = build.text[offset];
       applyGlyphStyles(glyph, preview);
       els.outputPreview.appendChild(glyph);
@@ -535,7 +554,7 @@
     const endTarget = document.createElement('span');
     endTarget.className = 'preview-end-target';
     endTarget.dataset.dropOffset = String(build.text.length);
-    endTarget.setAttribute('aria-label', `End of name, caret ${build.text.length}`);
+    endTarget.setAttribute('aria-label', `End of name, position ${build.text.length}`);
     els.outputPreview.appendChild(endTarget);
   }
 
@@ -547,12 +566,13 @@
 
   function renderOutput() {
     const build = compile();
+    const fittedSize = Math.max(13, 22 - Math.max(0, state.name.length - 18) * .28);
+    els.tubeNameCanvas.style.setProperty('--name-size', `${fittedSize.toFixed(1)}px`);
     renderPreview(build);
     els.budgetText.textContent = String(build.breakdown.text);
     els.budgetColour.textContent = String(build.breakdown.colour);
     els.budgetFx.textContent = String(build.breakdown.fx);
     els.budgetTotal.textContent = String(build.rawLength);
-    els.rawCode.value = build.raw;
     const over = build.overLimit;
     els.copyButton.disabled = !build.raw;
     els.copyButton.classList.toggle('over-budget', over);
@@ -568,6 +588,11 @@
 
   function tubePosition(clientX) {
     const bounds = els.tubeTrack.getBoundingClientRect();
+    return Math.max(0, Math.min(1, (clientX - bounds.left) / Math.max(1, bounds.width)));
+  }
+
+  function colourPositionFromClientX(clientX) {
+    const bounds = els.tubeLayerRail.getBoundingClientRect();
     return Math.max(0, Math.min(1, (clientX - bounds.left) / Math.max(1, bounds.width)));
   }
 
@@ -588,6 +613,80 @@
     return colourPositionFromOffset(state.caret);
   }
 
+  function colourOffsetFromPosition(position) {
+    if (state.name.length <= 1) return 0;
+    return Math.max(0, Math.min(state.name.length - 1, Math.round(position * (state.name.length - 1))));
+  }
+
+  function railXFromOffset(offset) {
+    const railBounds = els.tubeLayerRail.getBoundingClientRect();
+    if (!railBounds.width) return positionFromOffset(offset) * 100;
+    const exact = els.outputPreview.querySelector(`.preview-glyph[data-drop-offset="${offset}"], .preview-end-target[data-drop-offset="${offset}"]`);
+    if (!exact) return positionFromOffset(offset) * railBounds.width;
+    const targetBounds = exact.getBoundingClientRect();
+    return Math.max(0, Math.min(railBounds.width, targetBounds.left + targetBounds.width / 2 - railBounds.left));
+  }
+
+  function railXFromColourPosition(position) {
+    const width = els.tubeLayerRail.getBoundingClientRect().width;
+    return Math.max(0, Math.min(1, Number(position) || 0)) * width;
+  }
+
+  function addAnchorGuide(startX, endX, kind) {
+    const startY = els.tubeLayerRail.offsetTop + 16;
+    const endY = els.tubeFill.offsetTop + els.tubeFill.offsetHeight / 2;
+    const deltaX = endX - startX;
+    const deltaY = endY - startY;
+    const length = Math.hypot(deltaX, deltaY);
+    if (Math.abs(deltaX) < 4 || length < 4) return;
+    const guide = document.createElement('i');
+    guide.className = `layer-guide guide-${kind}`;
+    guide.style.left = `${(els.tubeLayerRail.offsetLeft + startX).toFixed(1)}px`;
+    guide.style.top = `${startY.toFixed(1)}px`;
+    guide.style.width = `${length.toFixed(1)}px`;
+    guide.style.transform = `rotate(${Math.atan2(deltaY, deltaX)}rad)`;
+    els.tubeLayerGuides.appendChild(guide);
+  }
+
+  function layoutRailTokens() {
+    const railBounds = els.tubeLayerRail.getBoundingClientRect();
+    els.tubeLayerGuides.replaceChildren();
+    const tokens = Array.from(els.tubeLayerRail.querySelectorAll('.tube-token'))
+      .map((token) => {
+        const kind = token.dataset.layerKind || 'effect';
+        const anchor = kind === 'colour'
+          ? railXFromColourPosition(Number(token.dataset.anchorPosition || 0))
+          : railXFromOffset(Number(token.dataset.anchorOffset || 0));
+        const desired = token.hasAttribute('data-visual-position')
+          ? railXFromColourPosition(Number(token.dataset.visualPosition || 0))
+          : anchor;
+        return {token, kind, anchor, desired};
+      })
+      .sort((left, right) => left.desired - right.desired);
+    if (!tokens.length || !railBounds.width) return;
+    const edge = 16;
+    const available = Math.max(1, railBounds.width - edge * 2);
+    const gap = Math.min(35, available / Math.max(1, tokens.length - 1));
+    const dense = gap < 27;
+    let previous = edge - gap;
+    tokens.forEach((entry) => {
+      entry.resolved = Math.max(entry.desired, previous + gap);
+      previous = entry.resolved;
+    });
+    const overflow = Math.max(0, tokens.at(-1).resolved - (railBounds.width - edge));
+    if (overflow) tokens.forEach((entry) => { entry.resolved -= overflow; });
+    for (let index = tokens.length - 2; index >= 0; index -= 1) {
+      tokens[index].resolved = Math.min(tokens[index].resolved, tokens[index + 1].resolved - gap);
+    }
+    const underflow = Math.max(0, edge - tokens[0].resolved);
+    tokens.forEach((entry) => {
+      entry.resolved += underflow;
+      entry.token.classList.toggle('dense', dense);
+      entry.token.style.left = `${entry.resolved.toFixed(1)}px`;
+      addAnchorGuide(entry.resolved, entry.anchor, entry.kind);
+    });
+  }
+
   function setCaret(offset, focusInput = false) {
     state.caret = Math.max(0, Math.min(state.name.length, Math.round(offset)));
     if (focusInput) {
@@ -599,36 +698,20 @@
   }
 
   function renderCaret() {
-    els.caretReadout.textContent = `CARET ${state.caret} / ${state.name.length}`;
     els.tubeStatus.textContent = pendingLayerOffset !== null
-      ? `POSITION ${pendingLayerOffset} LOCKED · CHOOSE ${pendingLayerCategory === 'colours' ? 'A COLOUR' : 'AN EFFECT OR SPRITE'}`
-      : `DRAG COLOUR OR FX ONTO A LETTER · TAP A PLACED LAYER TO EDIT`;
+      ? pendingLayerCategory === 'colours'
+        ? `COLOUR POINT ${Math.round((pendingLayerPosition ?? colourCaretPosition()) * 100)}% LOCKED · CHOOSE A COLOUR`
+        : `FX BUBBLE ${Math.round((pendingLayerPosition ?? positionFromOffset(pendingLayerOffset)) * 100)}% · COMPILES AT TEXT POSITION ${pendingLayerOffset}`
+      : `COLOUR + FX MOVE FREELY · GUIDE LINES SHOW THE COMPILED TEXT POSITION`;
     els.megaTube.classList.toggle('layer-pending', pendingLayerOffset !== null);
     if (pendingLayerCategory) els.megaTube.dataset.pendingCategory = pendingLayerCategory;
     else delete els.megaTube.dataset.pendingCategory;
   }
 
-  function renderTicks() {
-    els.tubeTicks.replaceChildren();
-    const length = state.name.length;
-    const stride = length <= 24 ? 1 : Math.ceil(length / 24);
-    for (let offset = 0; offset <= length; offset += stride) {
-      const tick = document.createElement('i');
-      tick.style.left = `${positionFromOffset(offset) * 100}%`;
-      tick.dataset.offset = String(offset);
-      els.tubeTicks.appendChild(tick);
-    }
-    if (length && length % stride) {
-      const tick = document.createElement('i');
-      tick.style.left = '100%';
-      tick.dataset.offset = String(length);
-      els.tubeTicks.appendChild(tick);
-    }
-  }
-
   function selectLayer(kind, id) {
     cancelPendingLayer();
     state.selected = {kind, id};
+    state.activeTab = null;
     if (kind === 'colour') {
       const stop = state.colours.find((candidate) => candidate.id === id);
       if (stop) setColourDraft(stop.colour);
@@ -637,7 +720,7 @@
     renderOutput();
     renderTube();
     renderInspector();
-    setActiveTab(kind === 'colour' ? 'colours' : 'effects');
+    setActiveTab(null);
   }
 
   function clearSelection() {
@@ -647,6 +730,20 @@
     renderTube();
     renderInspector();
     setActiveTab(null);
+  }
+
+  function pointerInside(element, clientX, clientY) {
+    if (!element || element.hidden) return false;
+    const bounds = element.getBoundingClientRect();
+    return clientX >= bounds.left && clientX <= bounds.right && clientY >= bounds.top && clientY <= bounds.bottom;
+  }
+
+  function setTrashZone(visible, hot = false, available = true) {
+    els.trashDropZone.hidden = !visible;
+    els.trashDropZone.classList.toggle('hot', visible && hot && available);
+    els.trashDropZone.classList.toggle('unavailable', visible && !available);
+    const label = els.trashDropZone.querySelector('span');
+    if (label) label.textContent = available ? 'DROP TO DELETE' : 'KEEP ONE COLOUR';
   }
 
   function beginTokenDrag(event, options) {
@@ -665,33 +762,63 @@
       if (!moved) {
         moved = true;
         target.classList.add('dragging');
-        target.style.setProperty('--stack-x', '0px');
-        target.style.setProperty('--stack-y', '0px');
         els.megaTube.classList.add('dragging-layer');
+        setTrashZone(true, false, options.canRemove !== false);
       }
-      const position = tubePosition(moveEvent.clientX);
-      options.update(position);
-      target.style.left = `${(options.visualPosition(position) * 100).toFixed(3)}%`;
-      els.dropGuide.style.left = `${(position * 100).toFixed(3)}%`;
-      els.dropGuide.classList.add('visible');
+      const overTrash = pointerInside(els.trashDropZone, moveEvent.clientX, moveEvent.clientY);
+      setTrashZone(true, overTrash, options.canRemove !== false);
+      if (overTrash) {
+        showCanvasDropTarget(null);
+        hideDropMagnifier();
+        return;
+      }
+      const direct = document.elementFromPoint(moveEvent.clientX, moveEvent.clientY);
+      const snapTarget = options.kind === 'colour' ? null : canvasTargetFromPoint(moveEvent.clientX, direct);
+      const position = colourPositionFromClientX(moveEvent.clientX);
+      const offset = options.kind === 'colour'
+        ? colourOffsetFromPosition(position)
+        : snapTarget
+          ? Number(snapTarget.dataset.dropOffset)
+          : offsetFromPosition(tubePosition(moveEvent.clientX));
+      options.update(position, offset);
+      target.style.left = `${railXFromColourPosition(position).toFixed(1)}px`;
+      showCanvasDropTarget(snapTarget);
+      showDropMagnifier(snapTarget, offset, moveEvent.clientX, options.kind === 'colour' ? position : null);
       renderOutput();
       els.tubeFill.style.background = gradientCss();
     };
     const finish = (finishEvent, cancelled = false) => {
       if (finishEvent.pointerId !== event.pointerId) return;
+      const deleteRequested = moved && pointerInside(els.trashDropZone, finishEvent.clientX, finishEvent.clientY);
       target.removeEventListener('pointermove', move);
       target.removeEventListener('pointerup', finish);
       target.removeEventListener('pointercancel', cancel);
       try { if (target.hasPointerCapture(event.pointerId)) target.releasePointerCapture(event.pointerId); } catch (_) {}
       target.classList.remove('dragging');
       els.megaTube.classList.remove('dragging-layer');
+      setTrashZone(false);
       els.dropGuide.classList.remove('visible');
+      hideDropMagnifier();
+      showCanvasDropTarget(null);
       if (!moved) {
         options.select();
         return;
       }
       if (cancelled) {
         restoreSnapshot(before);
+      } else if (deleteRequested) {
+        if (options.canRemove === false || options.remove?.() === false) {
+          restoreSnapshot(before);
+          announce('The Mega Tube needs at least one colour', true);
+        } else {
+          history.push(before);
+          if (history.length > MAX_HISTORY) history.shift();
+          future = [];
+          state.selected = null;
+          normaliseState();
+          persist();
+          announce('Layer deleted');
+        }
       } else {
         history.push(before);
         if (history.length > MAX_HISTORY) history.shift();
@@ -708,15 +835,16 @@
     target.addEventListener('pointercancel', cancel);
   }
 
-  function colourToken(stop, index, stackIndex = 0, stackCount = 1, compiling = true) {
+  function colourToken(stop, index, compiling = true) {
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'tube-token colour-token';
-    button.style.left = `${stop.position * 100}%`;
     button.style.setProperty('--token-colour', stop.colour);
-    button.style.setProperty('--stack-x', `${(stackIndex - (stackCount - 1) / 2) * 18}px`);
-    button.style.setProperty('--stack-y', `${(stackIndex % 2) * 5}px`);
     button.dataset.layerId = stop.id;
+    const anchorOffset = colourOffsetFromPosition(stop.position);
+    button.dataset.layerKind = 'colour';
+    button.dataset.anchorPosition = String(stop.position);
+    button.dataset.anchorOffset = String(anchorOffset);
     button.classList.toggle('selected', state.selected?.kind === 'colour' && state.selected.id === stop.id);
     button.classList.toggle('ghost', !compiling);
     button.innerHTML = `<span>${index + 1}</span>`;
@@ -726,10 +854,17 @@
     button.setAttribute('aria-valuemax', '100');
     button.setAttribute('aria-valuenow', String(Math.round(stop.position * 100)));
     button.addEventListener('pointerdown', (event) => beginTokenDrag(event, {
+      kind: 'colour',
       update: (position) => { stop.position = position; },
-      visualPosition: (position) => position,
       select: () => selectLayer('colour', stop.id),
-      finish: () => { state.selected = {kind: 'colour', id: stop.id}; }
+      finish: () => { state.selected = {kind: 'colour', id: stop.id}; },
+      canRemove: state.colours.length > 1,
+      remove: () => {
+        if (state.colours.length <= 1) return false;
+        state.colours = state.colours.filter((candidate) => candidate.id !== stop.id);
+        state.wubrg = [];
+        return true;
+      }
     }));
     button.addEventListener('keydown', (event) => {
       if (['Enter', ' '].includes(event.key)) {
@@ -744,13 +879,14 @@
       }
       if (!['ArrowLeft', 'ArrowRight', 'Home', 'End', 'PageUp', 'PageDown'].includes(event.key)) return;
       event.preventDefault();
-      const base = state.name.length > 1 ? 1 / (state.name.length - 1) : .05;
-      const step = event.shiftKey || ['PageUp', 'PageDown'].includes(event.key) ? base * 5 : base;
+      const step = event.shiftKey || ['PageUp', 'PageDown'].includes(event.key) ? 5 : 1;
       mutate(() => {
         if (event.key === 'Home') stop.position = 0;
         else if (event.key === 'End') stop.position = 1;
-        else if (event.key === 'ArrowLeft' || event.key === 'PageDown') stop.position -= step;
-        else stop.position += step;
+        else {
+          const direction = event.key === 'ArrowLeft' || event.key === 'PageDown' ? -1 : 1;
+          stop.position = Math.max(0, Math.min(1, stop.position + direction * step / 100));
+        }
         state.selected = {kind: 'colour', id: stop.id};
       }, `Moved colour ${index + 1}`);
       requestAnimationFrame(() => document.querySelector(`[data-layer-id="${stop.id}"]`)?.focus());
@@ -758,15 +894,15 @@
     return button;
   }
 
-  function eventToken(event, stackIndex = 0, stackCount = 1) {
+  function eventToken(event) {
     const key = eventKey(event);
     const button = document.createElement('button');
     button.type = 'button';
     button.className = `tube-token effect-token token-${key}`;
     if (event.type === 'sprite') button.classList.add('sprite-token');
-    button.style.left = `${positionFromOffset(event.offset) * 100}%`;
-    button.style.setProperty('--stack-x', `${(stackIndex - (stackCount - 1) / 2) * 20}px`);
-    button.style.setProperty('--stack-y', `${(stackIndex % 2) * 6}px`);
+    button.dataset.layerKind = 'effect';
+    button.dataset.anchorOffset = String(event.offset);
+    button.dataset.visualPosition = String(event.position ?? positionFromOffset(event.offset));
     button.dataset.layerId = event.id;
     button.classList.toggle('selected', state.selected?.kind === 'event' && state.selected.id === event.id);
     if (event.type === 'sprite') {
@@ -775,15 +911,23 @@
       button.innerHTML = `<span>${key === 'br' ? '↵' : (EFFECT_BY_KEY[key]?.label || key).slice(0, 3)}</span>`;
     }
     button.setAttribute('role', 'slider');
-    button.setAttribute('aria-label', `${eventLabel(event)} at caret ${event.offset}. Drag to move; press Enter to edit.`);
+    button.setAttribute('aria-label', `${eventLabel(event)} bubble at ${Math.round((event.position ?? positionFromOffset(event.offset)) * 100)} percent, compiled at text position ${event.offset}. Drag to move; press Enter to edit.`);
     button.setAttribute('aria-valuemin', '0');
-    button.setAttribute('aria-valuemax', String(state.name.length));
-    button.setAttribute('aria-valuenow', String(event.offset));
+    button.setAttribute('aria-valuemax', '100');
+    button.setAttribute('aria-valuenow', String(Math.round((event.position ?? positionFromOffset(event.offset)) * 100)));
     button.addEventListener('pointerdown', (pointerEvent) => beginTokenDrag(pointerEvent, {
-      update: (position) => { event.offset = offsetFromPosition(position); },
-      visualPosition: () => positionFromOffset(event.offset),
+      kind: 'event',
+      update: (position, offset) => {
+        event.position = position;
+        event.offset = offset;
+      },
       select: () => selectLayer('event', event.id),
-      finish: () => { state.selected = {kind: 'event', id: event.id}; }
+      finish: () => { state.selected = {kind: 'event', id: event.id}; },
+      canRemove: true,
+      remove: () => {
+        state.events = state.events.filter((candidate) => candidate.id !== event.id);
+        return true;
+      }
     }));
     button.addEventListener('keydown', (keyEvent) => {
       if (['Enter', ' '].includes(keyEvent.key)) {
@@ -800,10 +944,11 @@
       keyEvent.preventDefault();
       const step = keyEvent.shiftKey || ['PageUp', 'PageDown'].includes(keyEvent.key) ? 5 : 1;
       mutate(() => {
-        if (keyEvent.key === 'Home') event.offset = 0;
-        else if (keyEvent.key === 'End') event.offset = state.name.length;
-        else if (keyEvent.key === 'ArrowLeft' || keyEvent.key === 'PageDown') event.offset -= step;
-        else event.offset += step;
+        const direction = keyEvent.key === 'ArrowLeft' || keyEvent.key === 'PageDown' ? -1 : 1;
+        if (keyEvent.key === 'Home') event.position = 0;
+        else if (keyEvent.key === 'End') event.position = 1;
+        else event.position = Math.max(0, Math.min(1, (event.position ?? positionFromOffset(event.offset)) + direction * step / 100));
+        event.offset = offsetFromPosition(event.position);
         state.selected = {kind: 'event', id: event.id};
       }, `Moved ${eventLabel(event)}`);
       requestAnimationFrame(() => document.querySelector(`[data-layer-id="${event.id}"]`)?.focus());
@@ -813,33 +958,20 @@
 
   function renderTube() {
     els.tubeFill.style.background = gradientCss();
-    renderTicks();
-    els.tubeColourLayer.replaceChildren();
-    els.tubeFxLayer.replaceChildren();
+    els.tubeLayerRail.replaceChildren();
+    els.tubeLayerGuides.replaceChildren();
     const sortedColours = state.colours.slice().sort((left, right) => left.position - right.position);
     const compilingCount = Math.max(1, Math.min(sortedColours.length, currentBuild?.requestedSegments?.length || sortedColours.length));
     const compilingIndices = new Set(compilingCount === 1
       ? [0]
       : Array.from({length: compilingCount}, (_, index) => Math.round(index * (sortedColours.length - 1) / (compilingCount - 1))));
     sortedColours.forEach((stop, index) => {
-      const cluster = sortedColours.filter((candidate) => Math.abs(candidate.position - stop.position) < .001);
-      els.tubeColourLayer.appendChild(colourToken(stop, index, cluster.indexOf(stop), cluster.length, compilingIndices.has(index)));
+      els.tubeLayerRail.appendChild(colourToken(stop, index, compilingIndices.has(index)));
     });
     state.events.forEach((event) => {
-      const cluster = state.events.filter((candidate) => candidate.offset === event.offset);
-      els.tubeFxLayer.appendChild(eventToken(event, cluster.indexOf(event), cluster.length));
+      els.tubeLayerRail.appendChild(eventToken(event));
     });
-    els.tubeGlobals.replaceChildren();
-    activeGlobals().forEach((entry) => {
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = 'global-token';
-      button.classList.toggle('selected', state.selected?.kind === 'global' && state.selected.id === entry.key);
-      button.innerHTML = `<b>${entry.label}</b><code>${entry.code}</code>`;
-      button.setAttribute('aria-label', `Global ${entry.label}. Click to edit.`);
-      button.addEventListener('click', () => selectLayer('global', entry.key));
-      els.tubeGlobals.appendChild(button);
-    });
+    layoutRailTokens();
     const globals = activeGlobals();
     els.colourCount.textContent = String(state.colours.length);
     els.effectCount.textContent = String(globals.length + state.events.filter((event) => event.type !== 'sprite').length);
@@ -871,10 +1003,17 @@
     return button;
   }
 
+  function openSelectedChoices() {
+    if (!state.selected) return;
+    renderSources();
+    setActiveTab(state.selected.kind === 'colour' ? 'colours' : 'effects');
+  }
+
   function renderColourInspector(stop) {
-    els.layerInspector.replaceChildren(inspectorHeader('COLOUR LAYER', stop.colour, `POSITION ${Math.round(stop.position * 100)}%`));
+    const currentPercent = Math.round(stop.position * 100);
+    els.layerInspector.replaceChildren(inspectorHeader('COLOUR', stop.colour, `${currentPercent}% ACROSS TUBE`));
     const body = document.createElement('div');
-    body.className = 'inspector-controls colour-inspector-controls';
+    body.className = 'inspector-controls';
     const picker = document.createElement('input');
     picker.type = 'color';
     picker.value = stop.colour;
@@ -884,13 +1023,6 @@
     hex.value = stop.colour;
     hex.maxLength = 7;
     hex.setAttribute('aria-label', 'Selected colour hex code');
-    const position = document.createElement('input');
-    position.type = 'range';
-    position.min = '0';
-    position.max = '100';
-    position.step = '1';
-    position.value = String(Math.round(stop.position * 100));
-    position.setAttribute('aria-label', 'Colour position in Mega Tube');
     const applyColour = (value) => {
       const clean = normaliseHex(value);
       if (!clean) return;
@@ -912,20 +1044,20 @@
       }
       applyColour(clean);
     });
-    position.addEventListener('change', () => mutate(() => {
-      stop.position = Number(position.value) / 100;
-      state.selected = {kind: 'colour', id: stop.id};
-    }, 'Colour position updated'));
     const fields = document.createElement('div');
     fields.className = 'inspector-fields';
     fields.append(
       labelledControl('COLOUR', picker),
       labelledControl('HEX', hex),
-      labelledControl('TUBE POSITION', position)
+      positionStepper(currentPercent, 100, (percent) => mutate(() => {
+        stop.position = percent / 100;
+        state.selected = {kind: 'colour', id: stop.id};
+      }, `Colour moved to ${percent}%`))
     );
     const actions = document.createElement('div');
     actions.className = 'inspector-actions';
     actions.append(
+      actionButton('MORE COLOURS', 'more-choices-button', openSelectedChoices),
       actionButton('DUPLICATE', 'quiet-button', () => duplicateColour(stop.id)),
       actionButton('DELETE', 'delete-button', () => removeColour(stop.id))
     );
@@ -941,11 +1073,26 @@
     return wrap;
   }
 
+  function positionStepper(value, maximum, update) {
+    const wrap = document.createElement('div');
+    wrap.className = 'position-stepper';
+    const previous = actionButton('←', 'step-button', () => update(Math.max(0, value - 1)));
+    previous.setAttribute('aria-label', 'Move layer one character left');
+    previous.disabled = value <= 0;
+    const readout = document.createElement('span');
+    readout.innerHTML = `<small>POSITION</small><b>${value} / ${maximum}</b>`;
+    const next = actionButton('→', 'step-button', () => update(Math.min(maximum, value + 1)));
+    next.setAttribute('aria-label', 'Move layer one character right');
+    next.disabled = value >= maximum;
+    wrap.append(previous, readout, next);
+    return wrap;
+  }
+
   function renderEventInspector(event) {
     const key = eventKey(event);
     const definition = EFFECT_BY_KEY[key];
     els.layerInspector.replaceChildren(inspectorHeader(
-      event.type === 'sprite' ? 'SPRITE LAYER' : 'POSITIONED FX LAYER',
+      event.type === 'sprite' ? `SPRITE · COMPILES AT ${event.offset}` : `FX · COMPILES AT ${event.offset}`,
       eventLabel(event),
       event.code || `<sprite=${event.value}>`
     ));
@@ -990,21 +1137,16 @@
       }, `${definition.label} updated`));
       fields.appendChild(labelledControl('VALUE', value));
     }
-    const position = document.createElement('input');
-    position.type = 'range';
-    position.min = '0';
-    position.max = String(state.name.length);
-    position.step = '1';
-    position.value = String(event.offset);
-    position.setAttribute('aria-label', 'Effect caret position');
-    position.addEventListener('change', () => mutate(() => {
-      event.offset = Number(position.value);
+    const visualPercent = Math.round((event.position ?? positionFromOffset(event.offset)) * 100);
+    fields.appendChild(positionStepper(visualPercent, 100, (percent) => mutate(() => {
+      event.position = percent / 100;
+      event.offset = offsetFromPosition(event.position);
       state.selected = {kind: 'event', id: event.id};
-    }, `${eventLabel(event)} moved to caret ${position.value}`));
-    fields.appendChild(labelledControl(`CARET ${event.offset} / ${state.name.length}`, position));
+    }, `${eventLabel(event)} bubble moved to ${percent}%`)));
     const actions = document.createElement('div');
     actions.className = 'inspector-actions';
     actions.append(
+      actionButton(event.type === 'sprite' ? 'MORE SPRITES / FX' : 'MORE FX', 'more-choices-button', openSelectedChoices),
       actionButton('DUPLICATE', 'quiet-button', () => duplicateEvent(event.id)),
       actionButton('DELETE', 'delete-button', () => removeEvent(event.id))
     );
@@ -1014,84 +1156,22 @@
 
   function globalEnabled(key) {
     const definition = EFFECT_BY_KEY[key];
-    if (!definition) return false;
-    if (definition.global === 'formatting') return Boolean(state.formatting[key]);
-    if (definition.global === 'numeric') return Boolean(state.effects[key]?.enabled);
+    if (!definition?.wholeName) return false;
     return Boolean(state.effects[key]);
   }
 
   function toggleGlobal(key, force) {
     const definition = EFFECT_BY_KEY[key];
-    if (!definition?.global) return;
+    if (!definition?.wholeName) return;
     const next = force === undefined ? !globalEnabled(key) : Boolean(force);
-    if (definition.global === 'formatting') state.formatting[key] = next;
-    else if (definition.global === 'numeric') {
-      state.effects[key] = {enabled: next, value: state.effects[key]?.value ?? definition.value};
-    } else {
-      state.effects[key] = next;
-      if (key === 'sup' && next) state.effects.sub = false;
-      if (key === 'sub' && next) state.effects.sup = false;
-    }
+    state.effects[key] = next;
   }
 
-  function renderGlobalInspector(key) {
-    const definition = EFFECT_BY_KEY[key];
-    if (!definition) {
-      state.selected = null;
-      renderInspector();
-      return;
-    }
-    const code = key === 'allCaps'
-      ? 'ZERO TAG COST'
-      : definition.global === 'numeric'
-        ? `<${key}=${state.effects[key].value}>`
-        : definition.code;
-    els.layerInspector.replaceChildren(inspectorHeader('GLOBAL STYLE LAYER', definition.label, code));
-    const body = document.createElement('div');
-    body.className = 'inspector-controls';
-    const fields = document.createElement('div');
-    fields.className = 'inspector-fields';
-    if (definition.global === 'numeric') {
-      const value = document.createElement('input');
-      value.type = 'range';
-      value.min = String(definition.min);
-      value.max = String(definition.max);
-      value.step = String(definition.step);
-      value.value = state.effects[key].value;
-      const exact = document.createElement('input');
-      exact.type = 'number';
-      exact.min = String(definition.min);
-      exact.max = String(definition.max);
-      exact.step = String(definition.step);
-      exact.value = state.effects[key].value;
-      const update = (raw) => mutate(() => {
-        const safe = Math.max(definition.min, Math.min(definition.max, Number(raw)));
-        state.effects[key] = {enabled: true, value: Logic.shortestNumber(safe, definition.value)};
-        state.selected = {kind: 'global', id: key};
-      }, `${definition.label} updated`);
-      value.addEventListener('change', () => update(value.value));
-      exact.addEventListener('change', () => update(exact.value));
-      fields.append(labelledControl('VALUE', exact), labelledControl(`${definition.min} — ${definition.max}`, value));
-    } else {
-      const explanation = document.createElement('p');
-      explanation.className = 'inspector-note';
-      explanation.textContent = definition.hint;
-      fields.appendChild(explanation);
-    }
-    const actions = document.createElement('div');
-    actions.className = 'inspector-actions';
-    if (effectPayload(key)) {
-      actions.appendChild(actionButton('DUPLICATE AT CARET', 'quiet-button', () => {
-        insertPayload(effectPayload(key), state.caret);
-      }));
-    }
-    actions.appendChild(actionButton('REMOVE GLOBAL', 'delete-button', () => mutate(() => {
-      toggleGlobal(key, false);
-      state.selected = null;
-      state.activeTab = null;
-    }, `${definition.label} removed`)));
-    body.append(fields, actions);
-    els.layerInspector.appendChild(body);
+  function renderWholeNameToggles() {
+    document.querySelectorAll('[data-global-toggle]').forEach((button) => {
+      const key = button.dataset.globalToggle;
+      button.setAttribute('aria-pressed', String(globalEnabled(key)));
+    });
   }
 
   function renderInspector() {
@@ -1099,7 +1179,7 @@
     const canUseColour = pendingLayerCategory === 'colours' || selected?.kind === 'colour';
     els.addCustomColour.disabled = !canUseColour;
     els.addCustomColour.textContent = pendingLayerCategory === 'colours'
-      ? `USE AT CARET ${pendingLayerOffset}`
+      ? `USE AT ${Math.round((pendingLayerPosition ?? colourCaretPosition()) * 100)}%`
       : selected?.kind === 'colour'
         ? 'APPLY TO SELECTED'
         : 'DROP COLOUR FIRST';
@@ -1116,7 +1196,6 @@
       const event = state.events.find((candidate) => candidate.id === selected.id);
       if (event) return renderEventInspector(event);
     }
-    if (selected.kind === 'global') return renderGlobalInspector(selected.id);
     state.selected = null;
     renderInspector();
   }
@@ -1142,7 +1221,7 @@
       state.colours.push(newStop);
       state.selected = {kind: 'colour', id: newStop.id};
       state.wubrg = [];
-    }, `${clean} added at the active caret`);
+    }, `${clean} added`);
   }
 
   function removeColour(id) {
@@ -1173,23 +1252,26 @@
     }, 'Colour layer duplicated');
   }
 
-  function beginLayerSelection(category, offset) {
+  function beginLayerSelection(category, offset, position = null) {
     const safeOffset = Math.max(0, Math.min(state.name.length, Math.round(offset)));
     pendingLayerOffset = safeOffset;
+    pendingLayerPosition = Math.max(0, Math.min(1, position ?? (
+      category === 'colours' ? colourPositionFromOffset(safeOffset) : positionFromOffset(safeOffset)
+    )));
     pendingLayerCategory = category;
     state.selected = null;
     renderInspector();
     setCaret(safeOffset, false);
     setActiveTab(category);
     const label = category === 'colours' ? 'colour' : 'effect or sprite';
-    requestAnimationFrame(() => {
-      document.querySelector(`[data-panel="${category}"]`)?.scrollIntoView({block: 'nearest', behavior: 'smooth'});
-    });
-    announce(`Position locked at caret ${safeOffset} — choose a ${label}`);
+    announce(category === 'colours'
+      ? `Colour point locked at ${Math.round(pendingLayerPosition * 100)}% — choose a ${label}`
+      : `FX bubble locked at ${Math.round(pendingLayerPosition * 100)}% — it compiles at text position ${safeOffset}`);
   }
 
   function cancelPendingLayer() {
     pendingLayerOffset = null;
+    pendingLayerPosition = null;
     pendingLayerCategory = null;
     renderCaret();
   }
@@ -1197,9 +1279,11 @@
   function selectSourcePayload(payload, label) {
     if (pendingLayerOffset !== null) {
       const offset = pendingLayerOffset;
+      const position = pendingLayerPosition;
+      rememberSourcePayload(payload, label);
       cancelPendingLayer();
       state.activeTab = null;
-      placePayloadAtOffset(payload, offset);
+      placePayloadAtOffset(payload, offset, position);
       setActiveTab(null);
       els.tubeNameCanvas.scrollIntoView?.({block: 'nearest', behavior: 'smooth'});
       return;
@@ -1207,6 +1291,7 @@
     if (payload.kind === 'colour' && state.selected?.kind === 'colour') {
       const stop = state.colours.find((candidate) => candidate.id === state.selected.id);
       if (!stop) return;
+      rememberSourcePayload(payload, label);
       state.activeTab = null;
       mutate(() => {
         stop.colour = normaliseHex(payload.colour);
@@ -1218,10 +1303,12 @@
     if (payload.kind === 'event' && state.selected?.kind === 'event') {
       const selected = state.events.find((event) => event.id === state.selected.id);
       if (!selected) return;
+      rememberSourcePayload(payload, label);
       const replacement = {
         ...clone(payload.event),
         id: selected.id,
         offset: selected.offset,
+        position: selected.position,
         sequence: selected.sequence
       };
       state.activeTab = null;
@@ -1249,12 +1336,13 @@
       ...payload.event,
       id: uid('event'),
       offset: Math.max(0, Math.min(state.name.length, Math.round(offset))),
+      position: Math.max(0, Math.min(1, position ?? positionFromOffset(offset))),
       sequence: state.events.reduce((highest, item) => Math.max(highest, Number(item.sequence) || 0), 0) + 1
     };
     mutate(() => {
       state.events.push(event);
       state.selected = {kind: 'event', id: event.id};
-    }, `${eventLabel(event)} layered at caret ${event.offset}`);
+    }, `${eventLabel(event)} layered at position ${event.offset}`);
   }
 
   function removeEvent(id) {
@@ -1272,6 +1360,7 @@
       ...source,
       id: uid('event'),
       offset: Math.min(state.name.length, source.offset + 1),
+      position: Math.min(1, (source.position ?? positionFromOffset(source.offset)) + .05),
       sequence: state.events.reduce((highest, item) => Math.max(highest, Number(item.sequence) || 0), 0) + 1
     };
     mutate(() => {
@@ -1280,12 +1369,14 @@
     }, `${eventLabel(copy)} duplicated`);
   }
 
-  function placePayloadAtOffset(payload, offset) {
+  function placePayloadAtOffset(payload, offset, position = null) {
     if (!payload) return;
     const safeOffset = Math.max(0, Math.min(state.name.length, Math.round(offset)));
-    const colourPosition = colourPositionFromOffset(safeOffset);
+    const visualPosition = position === null
+      ? payload.kind === 'colour' ? colourPositionFromOffset(safeOffset) : positionFromOffset(safeOffset)
+      : Math.max(0, Math.min(1, position));
     setCaret(safeOffset, false);
-    insertPayload(payload, safeOffset, colourPosition);
+    insertPayload(payload, safeOffset, visualPosition);
   }
 
   function enableReservoirDrag(element, payload) {
@@ -1326,17 +1417,27 @@
           moveEvent.clientY >= bounds.top && moveEvent.clientY <= bounds.bottom;
         if (!inside) {
           showCanvasDropTarget(null);
+          hideDropMagnifier();
           els.dropGuide.classList.remove('visible');
           els.megaTube.classList.remove('drop-ready');
           return;
         }
         const direct = document.elementFromPoint(moveEvent.clientX, moveEvent.clientY);
-        const target = canvasTargetFromPoint(moveEvent.clientX, direct);
-        if (target) showCanvasDropTarget(target);
-        else {
-          els.dropGuide.style.left = `${tubePosition(moveEvent.clientX) * 100}%`;
+        const target = payload.category === 'colours' ? null : canvasTargetFromPoint(moveEvent.clientX, direct);
+        const visualPosition = colourPositionFromClientX(moveEvent.clientX);
+        const offset = payload.category === 'colours'
+          ? colourOffsetFromPosition(visualPosition)
+          : target
+            ? Number(target.dataset.dropOffset)
+            : offsetFromPosition(tubePosition(moveEvent.clientX));
+        if (target) {
+          showCanvasDropTarget(target);
+        } else {
+          const canvasBounds = els.tubeNameCanvas.getBoundingClientRect();
+          els.dropGuide.style.left = `${Math.max(0, Math.min(canvasBounds.width, moveEvent.clientX - canvasBounds.left))}px`;
           els.dropGuide.classList.add('visible');
         }
+        showDropMagnifier(target, offset, moveEvent.clientX, payload.category === 'colours' ? visualPosition : null);
         els.megaTube.classList.add('drop-ready');
       };
       const cleanup = () => {
@@ -1348,6 +1449,7 @@
         element.classList.remove('dragging');
         els.megaTube.classList.remove('source-dragging', 'drop-ready');
         showCanvasDropTarget(null);
+        hideDropMagnifier();
         els.dropGuide.classList.remove('visible');
       };
       const finish = (finishEvent) => {
@@ -1365,9 +1467,14 @@
           return;
         }
         const direct = document.elementFromPoint(finishEvent.clientX, finishEvent.clientY);
-        const target = canvasTargetFromPoint(finishEvent.clientX, direct);
-        const offset = target ? Number(target.dataset.dropOffset) : offsetFromPosition(tubePosition(finishEvent.clientX));
-        beginLayerSelection(payload.category, offset);
+        const target = payload.category === 'colours' ? null : canvasTargetFromPoint(finishEvent.clientX, direct);
+        const visualPosition = colourPositionFromClientX(finishEvent.clientX);
+        const offset = payload.category === 'colours'
+          ? colourOffsetFromPosition(visualPosition)
+          : target
+            ? Number(target.dataset.dropOffset)
+            : offsetFromPosition(tubePosition(finishEvent.clientX));
+        beginLayerSelection(payload.category, offset, visualPosition);
       };
       const cancel = (cancelEvent) => {
         if (cancelEvent.pointerId !== event.pointerId) return;
@@ -1500,6 +1607,7 @@
     const push = (fraction, ...codes) => {
       codes.forEach((code) => steps.push({offset: offset(fraction), code}));
     };
+    push(0, ...(preset.startCodes || []));
     if (preset.pattern === 'bubbles') {
       push(.34, '<size=18>');
       push(.68, '<size=11>');
@@ -1561,8 +1669,142 @@
     });
   }
 
+  function currentComposition() {
+    return clone({
+      name: state.name,
+      colours: state.colours,
+      formatting: state.formatting,
+      effects: state.effects,
+      events: state.events,
+      caret: state.caret
+    });
+  }
+
+  function compositionSignature(composition) {
+    return JSON.stringify({
+      name: composition.name,
+      colours: composition.colours?.map(({colour, position}) => ({colour, position})),
+      formatting: composition.formatting,
+      effects: composition.effects,
+      events: composition.events?.map(({type, code, value, offset, position, sequence}) => ({
+        type, code, value, offset, position, sequence
+      }))
+    });
+  }
+
+  function renderSavedCompositions() {
+    els.savedCompositions.replaceChildren();
+    if (!state.savedCompositions.length) {
+      const empty = document.createElement('p');
+      empty.className = 'empty-saved';
+      empty.textContent = 'NO SAVED PRESETS YET';
+      els.savedCompositions.appendChild(empty);
+      return;
+    }
+    state.savedCompositions.forEach((entry, index) => {
+      const row = document.createElement('div');
+      row.className = 'saved-composition';
+      const load = document.createElement('button');
+      load.type = 'button';
+      load.className = 'load-composition';
+      const colours = entry.composition.colours?.map((stop) => stop.colour).filter(Logic.validHex) || ['#FFFFFF'];
+      const fxCount = entry.composition.events?.length || 0;
+      load.innerHTML = `<i style="background:${gradientFromColours(colours)}"></i><span><b>${escapeHtml(entry.name)}</b><small>${colours.length} COLOURS · ${fxCount} POSITIONED FX</small></span><em>LOAD</em>`;
+      load.addEventListener('click', () => mutate(() => {
+        const favourites = state.favourites;
+        const savedCompositions = state.savedCompositions;
+        const recentColours = state.recentColours;
+        const recentEffects = state.recentEffects;
+        Object.assign(state, clone(entry.composition), {
+          favourites,
+          savedCompositions,
+          recentColours,
+          recentEffects,
+          selected: null,
+          activeTab: null,
+          wubrg: []
+        });
+      }, `${entry.name} loaded`));
+      const remove = document.createElement('button');
+      remove.type = 'button';
+      remove.className = 'remove-saved';
+      remove.textContent = '×';
+      remove.setAttribute('aria-label', `Delete saved preset ${entry.name}`);
+      remove.addEventListener('click', () => {
+        state.savedCompositions.splice(index, 1);
+        persist();
+        renderSavedCompositions();
+        announce(`${entry.name} deleted`);
+      });
+      row.append(load, remove);
+      els.savedCompositions.appendChild(row);
+    });
+  }
+
+  function saveCurrentComposition() {
+    const composition = currentComposition();
+    const signature = compositionSignature(composition);
+    if (state.savedCompositions.some((entry) => compositionSignature(entry.composition) === signature)) {
+      announce('This complete preset is already saved');
+      return;
+    }
+    const baseName = state.name.trim() || 'UNTITLED';
+    const matchingNames = state.savedCompositions.filter((entry) => entry.name.startsWith(baseName)).length;
+    const name = matchingNames ? `${baseName} ${matchingNames + 1}` : baseName;
+    state.savedCompositions.unshift({id: uid('saved'), name, composition});
+    state.savedCompositions = state.savedCompositions.slice(0, 12);
+    persist();
+    renderSavedCompositions();
+    announce('Complete preset saved on this device');
+  }
+
+  function rememberSourcePayload(payload, label) {
+    if (payload.kind === 'colour') {
+      const colour = normaliseHex(payload.colour);
+      if (!colour) return;
+      state.recentColours = [colour, ...state.recentColours.filter((entry) => entry !== colour)].slice(0, 4);
+    } else if (payload.kind === 'event') {
+      const signature = JSON.stringify(payload.event);
+      state.recentEffects = [
+        {label, payload: clone(payload)},
+        ...state.recentEffects.filter((entry) => JSON.stringify(entry.payload.event) !== signature)
+      ].slice(0, 4);
+    }
+    persist();
+  }
+
+  function renderRecentColours() {
+    els.recentColours.replaceChildren();
+    els.recentColours.hidden = !state.recentColours.length;
+    state.recentColours.forEach((colour) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'recent-choice';
+      button.style.setProperty('--recent-colour', colour);
+      button.innerHTML = `<i></i><span>${colour}</span>`;
+      button.addEventListener('click', () => selectSourcePayload({kind: 'colour', colour}, colour));
+      els.recentColours.appendChild(button);
+    });
+  }
+
+  function renderRecentEffects() {
+    els.recentEffects.replaceChildren();
+    const available = state.selected?.kind !== 'global' && state.recentEffects.length;
+    els.recentEffects.hidden = !available;
+    if (!available) return;
+    state.recentEffects.forEach((entry) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'recent-choice';
+      button.innerHTML = `<span>${entry.label}</span><code>${entry.payload.event.code || `SPRITE ${entry.payload.event.value}`}</code>`;
+      button.addEventListener('click', () => selectSourcePayload(clone(entry.payload), entry.label));
+      els.recentEffects.appendChild(button);
+    });
+  }
+
   function renderColourSources() {
     els.colourSources.replaceChildren();
+    renderRecentColours();
     QUICK_COLOURS.forEach(([name, colour]) => {
       const button = document.createElement('button');
       button.type = 'button';
@@ -1596,6 +1838,7 @@
     else if (key === 'space') example.append(letter('A'), letter('A', 'spaced'));
     else if (key === 'mark') example.append(letter('Aa', 'marked'));
     else if (key === 'alpha') example.append(letter('Aa', 'faded'));
+    else if (key === 'bold') example.append(letter('Aa', 'bold'));
     else if (key === 'italic') example.append(letter('Aa', 'italic'));
     else if (key === 'underline') example.append(letter('Aa', 'underline'));
     else if (key === 'strike') example.append(letter('Aa', 'strike'));
@@ -1606,42 +1849,23 @@
 
   function renderEffectSources() {
     els.effectSources.replaceChildren();
+    renderRecentEffects();
     EFFECTS.forEach((effect) => {
+      if (effect.wholeName) return;
       const card = document.createElement('div');
       card.className = `effect-source-card source-${effect.key}`;
-      card.classList.toggle('active', globalEnabled(effect.key));
       const payload = effectPayload(effect.key);
       const place = document.createElement('button');
       place.type = 'button';
       place.className = 'effect-source';
       place.disabled = !payload;
-      place.innerHTML = `<span><b>${effect.label}</b><small>${payload ? 'CHOOSE FOR THIS POSITION' : 'WHOLE NAME ONLY'}</small><code>${effect.code || 'Aa→AA'}</code></span>`;
+      place.innerHTML = `<span><b>${effect.label}</b><small>PLACE AT THIS POSITION</small><code>${effect.code}</code></span>`;
       renderFxExample(place, effect.key);
-      place.setAttribute('aria-label', payload
-        ? `Choose ${effect.label} for the current position.`
-        : `${effect.label} is available for the whole name.`);
+      place.setAttribute('aria-label', `Choose ${effect.label} for the current position.`);
       if (payload) {
         place.addEventListener('click', () => selectSourcePayload(effectPayload(effect.key), effect.label));
       }
       card.appendChild(place);
-      if (effect.global) {
-        const toggle = document.createElement('button');
-        toggle.type = 'button';
-        toggle.className = 'global-effect-toggle';
-        toggle.setAttribute('aria-pressed', String(globalEnabled(effect.key)));
-        toggle.innerHTML = `<span>APPLY ALL</span><b>${globalEnabled(effect.key) ? 'ON' : 'OFF'}</b>`;
-        toggle.addEventListener('click', () => {
-          const removing = globalEnabled(effect.key);
-          cancelPendingLayer();
-          state.activeTab = null;
-          mutate(() => {
-            toggleGlobal(effect.key);
-            state.selected = globalEnabled(effect.key) ? {kind: 'global', id: effect.key} : null;
-          }, `${effect.label} ${removing ? 'removed from' : 'applied to'} the whole name`);
-          setActiveTab(null);
-        });
-        card.appendChild(toggle);
-      }
       els.effectSources.appendChild(card);
     });
   }
@@ -1682,49 +1906,66 @@
       button.setAttribute('aria-label', `${MANA[code].name}${selectedIndex >= 0 ? `, position ${selectedIndex + 1}` : ''}`);
       button.innerHTML = `<b>${code}</b><span>${selectedIndex >= 0 ? selectedIndex + 1 : MANA[code].name}</span>`;
       button.addEventListener('click', () => {
-        const current = state.wubrg.indexOf(code);
-        if (current >= 0) state.wubrg.splice(current, 1);
-        else state.wubrg.push(code);
-        persist();
-        renderWubrg();
+        mutate(() => {
+          const current = state.wubrg.indexOf(code);
+          if (current >= 0) state.wubrg.splice(current, 1);
+          else if (state.wubrg.length < 5) state.wubrg.push(code);
+          if (state.wubrg.length) {
+            state.colours = makeColours(state.wubrg.map((manaCode) => MANA[manaCode].colour));
+          }
+          state.selected = null;
+          state.activeTab = 'wubrg';
+        }, state.wubrg.includes(code) ? `${MANA[code].name} removed` : `${MANA[code].name} added`);
       });
       els.wubrgComposer.appendChild(button);
     });
     els.wubrgIdentity.textContent = identityName(state.wubrg);
     els.wubrgOrder.textContent = state.wubrg.length ? state.wubrg.join(' → ') : '—';
-    els.applyWubrg.disabled = !state.wubrg.length;
     els.clearWubrg.disabled = !state.wubrg.length;
     renderWubrgResults();
   }
 
+  function applyWubrgRecipe(recipe) {
+    const sameIdentity = state.wubrg.length === recipe.codes.length
+      && canonicalIdentity(state.wubrg) === canonicalIdentity(recipe.codes);
+    const nextCodes = sameIdentity
+      ? [...state.wubrg.slice(1), state.wubrg[0]]
+      : recipe.codes.slice();
+    mutate(() => {
+      state.wubrg = nextCodes;
+      state.colours = makeColours(nextCodes.map((code) => MANA[code].colour));
+      state.selected = null;
+      state.activeTab = 'wubrg';
+    }, sameIdentity ? `${recipe.name} order rotated` : `${recipe.name} applied`);
+  }
+
   function renderWubrgResults() {
-    const query = els.wubrgSearch.value.trim().toLowerCase();
-    const currentKey = canonicalIdentity(state.wubrg);
-    let recipes = identityRecipes().filter((recipe) => {
-      if (!query) return recipe.codes.length >= 2 && recipe.codes.length <= 3;
-      return `${recipe.name} ${recipe.key} ${recipe.codes.map((code) => MANA[code].name).join(' ')}`.toLowerCase().includes(query);
-    });
-    if (currentKey) {
-      recipes = recipes.sort((left, right) => (right.key === currentKey) - (left.key === currentKey));
-    }
-    recipes = recipes.slice(0, query ? 20 : 12);
     els.wubrgResults.replaceChildren();
+    const required = Array.from(new Set(state.wubrg));
+    if (!required.length) {
+      els.wubrgContext.textContent = 'SELECT PIPS · COLOURS APPLY IMMEDIATELY';
+      return;
+    }
+    let recipes = identityRecipes().filter((recipe) => required.every((code) => recipe.codes.includes(code)));
+    if (required.length >= 4) {
+      recipes = [{key: canonicalIdentity(required), name: required.length === 4 ? 'FOUR COLOUR' : 'FIVE COLOUR', codes: required.slice()}];
+    } else {
+      recipes = recipes.slice(0, 12);
+    }
+    els.wubrgContext.textContent = `${recipes.length} MATCHING ${recipes.length === 1 ? 'IDENTITY' : 'IDENTITIES'} · TAP THE ACTIVE ONE TO ROTATE`;
     recipes.forEach((recipe) => {
       const button = document.createElement('button');
       button.type = 'button';
-      button.className = 'preset-card wubrg-card';
-      button.classList.toggle('match', recipe.key === currentKey);
-      button.innerHTML = `<span class="preset-gradient" style="background:${gradientFromColours(recipe.codes.map((code) => MANA[code].colour))}"></span><span><b>${recipe.name}</b><small>${recipe.codes.join(' · ')}</small></span><em>APPLY</em>`;
+      const selected = state.wubrg.length === recipe.codes.length
+        && canonicalIdentity(state.wubrg) === canonicalIdentity(recipe.codes);
+      button.className = 'wubrg-quick-preset';
+      button.classList.toggle('selected', selected);
+      button.style.setProperty('--preset', gradientFromColours(recipe.codes.map((code) => MANA[code].colour)));
+      button.innerHTML = `<b>${recipe.name}</b><span>${selected ? `${state.wubrg.join(' → ')} · ROTATE` : recipe.codes.join(' / ')}</span>`;
       attachPresetPreview(button, () => previewColours(recipe.codes.map((code) => MANA[code].colour)));
-      button.addEventListener('click', () => applyColourRecipe(recipe.codes.map((code) => MANA[code].colour), recipe.name));
+      button.addEventListener('click', () => applyWubrgRecipe(recipe));
       els.wubrgResults.appendChild(button);
     });
-    if (!recipes.length) {
-      const empty = document.createElement('p');
-      empty.className = 'empty-results';
-      empty.textContent = 'NO IDENTITY MATCHES THAT SEARCH';
-      els.wubrgResults.appendChild(empty);
-    }
   }
 
   function gradientFromColours(colours) {
@@ -1776,8 +2017,10 @@
   }
 
   function setActiveTab(name, focus = false) {
-    const valid = ['colours', 'effects', 'wubrg', 'colour-presets', 'style-presets'];
-    state.activeTab = valid.includes(name) ? name : null;
+    const valid = ['colours', 'effects', 'wubrg', 'presets'];
+    const nextTab = valid.includes(name) ? name : null;
+    const changed = state.activeTab !== nextTab;
+    state.activeTab = nextTab;
     const tabs = Array.from(document.querySelectorAll('[data-tab]'));
     const activePresetTab = tabs.some((tab) => tab.dataset.tab === state.activeTab);
     tabs.forEach((tab) => {
@@ -1790,11 +2033,17 @@
       panel.hidden = panel.dataset.panel !== state.activeTab;
     });
     els.sourceLibrary.hidden = !state.activeTab;
-    document.body.classList.toggle('context-open', Boolean(state.activeTab));
+    if (state.activeTab && changed) {
+      requestAnimationFrame(() => {
+        const panel = document.querySelector(`[data-panel="${state.activeTab}"]`);
+        if (panel) panel.scrollTop = 0;
+      });
+    }
     persist();
   }
 
   function renderSources() {
+    renderColourSources();
     renderEffectSources();
     renderWubrg();
   }
@@ -1805,9 +2054,11 @@
     renderCaret();
     renderOutput();
     renderTube();
+    renderWholeNameToggles();
     renderInspector();
     renderSources();
     renderSavedPalettes();
+    renderSavedCompositions();
     setActiveTab(state.activeTab);
   }
 
@@ -1891,6 +2142,38 @@
     els.dropGuide.classList.add('visible');
   }
 
+  function showDropMagnifier(target, offset, clientX, colourPosition = null) {
+    const safeOffset = Math.max(0, Math.min(state.name.length, Number(offset) || 0));
+    const isColour = colourPosition !== null;
+    const percent = isColour ? Math.round(colourPosition * 100) : null;
+    const glyph = isColour
+      ? `${percent}%`
+      : safeOffset >= state.name.length
+        ? 'END'
+        : state.name[safeOffset] === ' '
+          ? '␠'
+          : state.name[safeOffset] || '∅';
+    const bounds = els.tubeTrack.getBoundingClientRect();
+    const left = Math.max(54, Math.min(bounds.width - 54, clientX - bounds.left));
+    els.dropMagnifier.style.left = `${left}px`;
+    els.dropMagnifierGlyph.textContent = glyph;
+    els.dropMagnifierLabel.textContent = isColour
+      ? percent === 0
+        ? 'LEFT EDGE'
+        : percent === 100
+          ? 'RIGHT EDGE'
+          : 'COLOUR POINT'
+      : safeOffset >= state.name.length
+        ? `END · POSITION ${safeOffset}`
+        : `BEFORE ${state.name[safeOffset] === ' ' ? 'SPACE' : state.name[safeOffset]} · POSITION ${safeOffset}`;
+    els.dropMagnifier.hidden = false;
+    if (target) target.classList.add('drop-hover');
+  }
+
+  function hideDropMagnifier() {
+    els.dropMagnifier.hidden = true;
+  }
+
   function selectWheelPoint(event) {
     const bounds = els.colourWheel.getBoundingClientRect();
     const scaleX = els.colourWheel.width / Math.max(1, bounds.width);
@@ -1915,10 +2198,13 @@
     els.startOver.addEventListener('click', () => mutate(() => {
       const fresh = createDefaultState();
       const activeTab = state.activeTab;
-      state = {...fresh, activeTab};
+      const favourites = state.favourites;
+      const savedCompositions = state.savedCompositions;
+      const recentColours = state.recentColours;
+      const recentEffects = state.recentEffects;
+      state = {...fresh, activeTab, favourites, savedCompositions, recentColours, recentEffects};
     }, 'Started over — Undo is available'));
     els.copyButton.addEventListener('click', () => copyText(currentBuild?.raw, currentBuild?.overLimit ? 'Copied — Arena may truncate it' : 'Arena name copied'));
-    els.copyRawCode.addEventListener('click', () => copyText(currentBuild?.raw, 'Raw Arena code copied'));
     els.undoButton.addEventListener('click', undo);
     els.redoButton.addEventListener('click', redo);
     els.clearFxButton.addEventListener('click', () => mutate(() => {
@@ -1989,15 +2275,22 @@
       renderSavedPalettes();
       announce('Palette saved on this device');
     });
-    els.applyWubrg.addEventListener('click', () => {
-      if (state.wubrg.length) applyColourRecipe(state.wubrg.map((code) => MANA[code].colour), identityName(state.wubrg));
-    });
     els.clearWubrg.addEventListener('click', () => {
       state.wubrg = [];
       persist();
       renderWubrg();
     });
-    els.wubrgSearch.addEventListener('input', renderWubrgResults);
+    els.saveComposition.addEventListener('click', saveCurrentComposition);
+    document.querySelectorAll('[data-global-toggle]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const key = button.dataset.globalToggle;
+        const removing = globalEnabled(key);
+        mutate(() => {
+          toggleGlobal(key);
+          state.selected = null;
+        }, `${EFFECT_BY_KEY[key].label} ${removing ? 'off' : 'on'} for the whole name`);
+      });
+    });
     const colourReservoirPayload = {kind: 'reservoir', category: 'colours'};
     const fxReservoirPayload = {kind: 'reservoir', category: 'effects'};
     enableReservoirDrag(els.colourLayerBubble, colourReservoirPayload);
@@ -2037,12 +2330,12 @@
     els.tubeNameCanvas.addEventListener('click', (event) => {
       const offset = offsetFromCanvasEvent(event);
       setCaret(offset, false);
-      announce(`Active caret moved to ${state.caret}`);
+      announce(`Text position set to ${state.caret}`);
     });
     els.tubeTrack.addEventListener('click', (event) => {
       if (event.target.closest('.tube-token, .tube-name-canvas')) return;
       setCaret(offsetFromPosition(tubePosition(event.clientX)), false);
-      announce(`Active caret moved to ${state.caret}`);
+      announce(`Text position set to ${state.caret}`);
     });
     els.tubeTrack.addEventListener('keydown', (event) => {
       if (!['ArrowLeft', 'ArrowRight', 'Home', 'End', 'Enter'].includes(event.key)) return;
@@ -2055,6 +2348,11 @@
       if (event.key === 'Home') setCaret(0);
       else if (event.key === 'End') setCaret(state.name.length);
       else setCaret(state.caret + (event.key === 'ArrowRight' ? step : -step));
+    });
+    window.addEventListener('resize', () => requestAnimationFrame(layoutRailTokens));
+    document.fonts?.ready?.then(() => {
+      renderOutput();
+      renderTube();
     });
     document.addEventListener('keydown', (event) => {
       if (event.key === 'Escape') {

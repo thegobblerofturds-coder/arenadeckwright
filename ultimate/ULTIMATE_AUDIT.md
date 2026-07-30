@@ -9,7 +9,8 @@ One composition area should explain the complete product:
 - Colours and effects are sources.
 - The always-visible live name inside the Mega Tube is the destination and the
   only position editor.
-- WUBRG, colour recipes, and stylized recipes are the three preset systems.
+- WUBRG remains its own immediate engine. Colour recipes and combined
+  colour-and-FX recipes share one visible Presets panel.
 - Category-specific presets can be layered because each replaces only its own
   state domain.
 - Sprites stay adjacent to effects in a submenu.
@@ -29,12 +30,12 @@ so compiler correctness does not require a fixed visual bubble.
 
 - Pure Arena compiler and literal serializer.
 - Exact 64-character accounting and colour-stage fallback.
-- Structured inline events and caret rebasing after text edits.
+- Structured inline events and position rebasing after text edits.
 - Global effects, positioned effects, all 16 sprites, and the local preview
   assets.
 - Arena-black live name canvas, clipboard fallback, local persistence, undo,
   keyboard controls, and reduced-motion behavior.
-- Advanced read-only raw Arena code.
+- Internal raw Arena serialization used by the Copy action.
 
 ## Removed
 
@@ -50,16 +51,20 @@ so compiler correctness does not require a fixed visual bubble.
 
 - The separate preview/control relationship was collapsed: the rendered deck
   name is now the character-aware drop surface.
-- FX bubbles sit directly above the name and colour bubbles directly below it.
+- The live name sits above one shared horizontal rail for colour stops,
+  positioned FX, and sprites. Necessary whole-name transformations are direct
+  toggles rather than a second layer species inside the tube.
 - Two compact typed reservoirs replace the previous five source-orb controls.
 - The final dock reduces direct creation to two typed reservoirs—Colour and
   FX—while keeping the three preset systems separate.
-- A reservoir drop stores the exact caret first; the subsequent picker choice
-  commits to that stored position.
-- Source libraries no longer occupy permanent layout space. A bubble drop,
-  placed-layer click, or preset launcher opens one contextual overlay.
-- Mouse, pen, and touch use the same drag gesture, resolved against actual glyph
-  geometry instead of an approximate full-width rail.
+- A reservoir drop stores either an exact continuous colour point or an exact
+  FX text position; the subsequent picker choice commits there.
+- Source libraries no longer occupy permanent layout space. A bubble drop or
+  preset launcher opens a bounded panel below the tube; a placed-layer click opens a
+  compact editor with an explicit path to the full choices.
+- Mouse, pen, and touch use the same drag gesture. FX resolve against actual
+  glyph geometry; colours use the entire rail so both absolute edges are
+  reachable.
 - Full colour-wheel editing, palette rotation/flip, and saved palettes returned
   without restoring duplicate editing surfaces.
 - Preset hover/focus previews are temporary and compile through the same exact
@@ -67,6 +72,19 @@ so compiler correctness does not require a fixed visual bubble.
 - Selected layers highlight the exact character range they affect.
 - Budget-trimmed colour bubbles remain visible as ghosts instead of silently
   disappearing.
+- Colour and FX creation bubbles are paired directly under the tube.
+- Dragging shows a magnified colour percentage or text position.
+- Coincident FX remain independent clickable bubbles. Collision spacing fans
+  them apart and perspective guides lead back to their shared anchor.
+- Colour and FX tokens share one cross-type collision pass. Both have continuous
+  visual positions; FX also retain a compiled glyph-based insertion offset
+  shown by their guide line.
+- Existing layers reveal a red drag-to-delete target; the target
+  is hidden during normal editing.
+- Layer selection is expressed on the layer token only. The rendered name no
+  longer receives a purple affected-range underline.
+- Recent Colour and positioned-FX choices are stored locally and shown first.
+- Mobile sheets use a bounded flex scroller with momentum touch scrolling.
 
 ## Stylized preset shelf
 
@@ -102,7 +120,7 @@ so compiler correctness does not require a fixed visual bubble.
   https://developer.apple.com/design/human-interface-guidelines/drag-and-drop
 - WCAG 2.2 recommends a simple pointer alternative to dragging. The product
   intentionally removed pointer click-then-place after usability feedback;
-  focused source bubbles still place at the active caret with Enter or Space,
+  focused source bubbles still place at the current text position with Enter or Space,
   and every tube layer has keyboard movement and an inspector. A single-pointer
   creation alternative remains an explicit accessibility tradeoff to revisit.
   https://www.w3.org/WAI/WCAG22/Understanding/dragging-movements.html
@@ -114,8 +132,9 @@ so compiler correctness does not require a fixed visual bubble.
 ## State boundaries
 
 - `colours`: ordered colour stops with stable IDs and free positions.
-- `formatting` + `effects`: global style layer.
-- `events`: positioned FX, breaks, and sprites with stable IDs, caret offsets,
+- `formatting` + `effects`: compiler state for necessary whole-name
+  transformations and combined-preset compatibility.
+- `events`: positioned FX, breaks, and sprites with stable IDs, text offsets,
   and serializer sequence.
 - `wubrg`: temporary search/composer selection.
 
@@ -131,4 +150,12 @@ Only the compiler turns these domains into one raw Arena string.
 - Stylized recipes cannot remove manually positioned effects or sprites.
 - Every positioned bubble is a keyboard-operable slider.
 - The always-visible live name surface remains fully opaque black.
+- All positioned FX render on the tube rail; All Caps and Small Caps remain
+  visible as direct whole-name toggles beside the source bubbles.
+- Colour, positioned FX, and sprites resolve onto one horizontal
+  rail using actual rendered glyph centres.
+- Dragging any removable rail item exposes the delete target and participates
+  in Undo.
+- Selected effects do not decorate or underline the affected letters.
+- Mobile context panels have a bounded, touch-scrollable content region.
 - Public route mirrors remain unchanged until an explicit Ultimate release.
