@@ -10,9 +10,9 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="manifest" href="site.webmanifest">
   <title>TurdGobbler's Deck Name Colourifier — Ultimate Version</title>
-  <link rel="stylesheet" href="styles.css?v=ultimate-7.5">
-  <script src="logic.js?v=ultimate-3.0" defer></script>
-  <script src="app.js?v=ultimate-7.5" defer></script>
+  <link rel="stylesheet" href="styles.css?v=ultimate-7.6">
+  <script src="logic.js?v=ultimate-7.6" defer></script>
+  <script src="app.js?v=ultimate-7.6" defer></script>
 </head>
 <body>
   <main class="app-shell">
@@ -111,8 +111,8 @@
             <b id="pendingChoiceTitle">PICK A COLOUR TO PLACE THIS BUBBLE</b>
           </div>
           <div id="pendingChoiceActions" class="choice-confirm-actions" hidden>
-            <button id="pendingChoiceConfirm" class="preset-keep-button" type="button"><span aria-hidden="true">✓</span> ADD THIS COLOUR</button>
             <button id="pendingChoiceCancel" class="preset-cancel-button" type="button">CANCEL</button>
+            <button id="pendingChoiceConfirm" class="preset-keep-button" type="button"><span aria-hidden="true">✓</span> ADD THIS COLOUR</button>
           </div>
           <div class="library-panels">
             <section id="panelColours" class="library-panel" role="tabpanel" aria-label="Colour context menu" data-panel="colours" hidden>
@@ -179,8 +179,8 @@
                 <span><b>WUBRG ENGINE</b></span>
               </header>
               <div class="choice-confirm-actions wubrg-confirm-actions">
-                <button id="wubrgKeepButton" class="preset-keep-button" type="button"><span aria-hidden="true">✓</span> KEEP WUBRG</button>
                 <button id="wubrgCancelButton" class="preset-cancel-button" type="button">CANCEL</button>
+                <button id="wubrgKeepButton" class="preset-keep-button" type="button"><span aria-hidden="true">✓</span> KEEP WUBRG</button>
               </div>
               <div id="wubrgComposer" class="wubrg-composer" role="group" aria-label="Build an ordered WUBRG identity"></div>
               <div id="wubrgResults" class="wubrg-preset-rail" aria-label="Matching WUBRG identities" hidden></div>
@@ -203,8 +203,8 @@
               </div>
               <div id="presetRenameEditor" class="preset-rename-editor" hidden>
                 <label for="presetRenameInput"><span>PRESET NAME</span><input id="presetRenameInput" type="text" maxlength="48" autocomplete="off"></label>
-                <button id="presetRenameSave" type="button">SAVE NAME</button>
-                <button id="presetRenameCancel" class="quiet-button" type="button">CANCEL</button>
+                <button id="presetRenameCancel" class="preset-cancel-button" type="button">CANCEL</button>
+                <button id="presetRenameSave" class="preset-keep-button" type="button"><span aria-hidden="true">✓</span> SAVE NAME</button>
               </div>
               <p id="presetOrbitStatus" class="preset-orbit-status" aria-live="polite">CHOOSE A COLLECTION</p>
             </section>

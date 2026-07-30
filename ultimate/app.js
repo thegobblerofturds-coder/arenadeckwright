@@ -94,8 +94,8 @@
   const FX_GROUPS = [
     {key: 'motion', label: 'MOTION', icon: '↝', note: 'MOVE AND OFFSET', effects: ['voffset', 'pos', 'space', 'br']},
     {key: 'text', label: 'TEXT', icon: 'Aa', note: 'LETTER TREATMENT', effects: ['italic', 'underline', 'strike']},
-    {key: 'transform', label: 'TRANSFORM', icon: '↻', note: 'SHAPE AND SCALE', effects: ['size', 'rotate', 'sup', 'sub', 'cspace']},
-    {key: 'visual', label: 'VISUAL', icon: '✦', note: 'FINISH AND WIDTH', effects: ['mark', 'alpha', 'mspace']}
+    {key: 'transform', label: 'TRANSFORM', icon: '↻', note: 'SHAPE AND SCALE', effects: ['size', 'rotate', 'sup', 'sub']},
+    {key: 'visual', label: 'VISUAL', icon: '✦', note: 'FINISH AND SPACING', effects: ['mark', 'alpha', 'cspace']}
   ];
   const EFFECT_BY_KEY = Object.fromEntries(EFFECTS.map((effect) => [effect.key, effect]));
   const $ = (id) => document.getElementById(id);
@@ -155,7 +155,6 @@
   let pendingSourceLabel = '';
   let wubrgSession = null;
   let fxMenuLevel = 'root';
-  let fxMenuPage = 0;
   let presetMenuLevel = 'root';
   let presetMenuPage = 0;
   let selectedSavedPresetId = null;
@@ -1566,6 +1565,10 @@
     const definition = EFFECT_BY_KEY[key];
     if (!definition?.wholeName) return;
     const next = force === undefined ? !globalEnabled(key) : Boolean(force);
+    if (next) {
+      const exclusiveKey = key === 'allCaps' ? 'smallCaps' : key === 'smallCaps' ? 'allCaps' : '';
+      if (exclusiveKey) state.effects[exclusiveKey] = false;
+    }
     state.effects[key] = next;
   }
 
@@ -2377,7 +2380,6 @@
 
   function setFxMenu(level) {
     fxMenuLevel = level;
-    fxMenuPage = 0;
     renderEffectSources();
   }
 
@@ -2402,12 +2404,8 @@
     });
   }
 
-  function appendFxPage(keys) {
-    const effects = keys.map((key) => EFFECT_BY_KEY[key]).filter(Boolean);
-    const pageSize = effects.length > 4 ? 3 : 4;
-    const pageCount = Math.max(1, Math.ceil(effects.length / pageSize));
-    fxMenuPage = ((fxMenuPage % pageCount) + pageCount) % pageCount;
-    effects.slice(fxMenuPage * pageSize, fxMenuPage * pageSize + pageSize).forEach((effect) => {
+  function appendFxGroup(keys) {
+    keys.map((key) => EFFECT_BY_KEY[key]).filter(Boolean).forEach((effect) => {
       const payload = effectPayload(effect.key);
       appendFxOrbitButton({
         label: effect.label,
@@ -2419,18 +2417,6 @@
         }
       }).disabled = !payload;
     });
-    if (pageCount > 1) {
-      appendFxOrbitButton({
-        label: 'MORE',
-        note: `${fxMenuPage + 1} / ${pageCount}`,
-        icon: '→',
-        className: 'fx-more-option',
-        action: () => {
-          fxMenuPage = (fxMenuPage + 1) % pageCount;
-          renderEffectSources();
-        }
-      });
-    }
   }
 
   function renderEffectSources() {
@@ -2452,7 +2438,7 @@
       }));
     } else {
       els.fxOrbitStatus.textContent = `${group.label} FX · CHOOSE ONE`;
-      appendFxPage(group.effects);
+      appendFxGroup(group.effects);
     }
     positionFxOrbitButtons();
   }
@@ -2938,7 +2924,6 @@
       }
       if (state.activeTab === 'effects') {
         fxMenuLevel = 'root';
-        fxMenuPage = 0;
         renderEffectSources();
       }
       requestAnimationFrame(() => {

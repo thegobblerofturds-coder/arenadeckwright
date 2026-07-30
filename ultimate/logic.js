@@ -291,9 +291,10 @@
   }
 
   function normaliseEffects(effects = {}) {
+    const allCaps = Boolean(effects.allCaps);
     const normalised = {
-      allCaps: Boolean(effects.allCaps),
-      smallCaps: Boolean(effects.smallCaps),
+      allCaps,
+      smallCaps: !allCaps && Boolean(effects.smallCaps),
       sup: Boolean(effects.sup),
       sub: Boolean(effects.sub)
     };
