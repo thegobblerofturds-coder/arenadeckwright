@@ -1,14 +1,15 @@
 (() => {
   'use strict';
 
-  const Logic = window.DeckwrightV6Logic;
-  const DEFAULT_NAME = 'YOUR DECK NAME';
-  const STORAGE_KEY = 'turdgobbler-deckwright-v6';
+  const Logic = window.DeckwrightV7Logic;
+  const DEFAULT_NAME = 'Your Deck Name';
+  const STORAGE_KEY = 'turdgobbler-deckwright-v7';
+  const LEGACY_STORAGE_KEY = 'turdgobbler-deckwright-v6';
   const MAX_STOPS = 7;
   const MAX_FAVOURITES = 10;
   // Arena currently ignores <b>. Change only this flag to true if support returns.
   const ARENA_BOLD_SUPPORTED = false;
-  const DEFAULT_VIEW_MODE = 'v6';
+  const DEFAULT_VIEW_MODE = 'v7';
   const MIN_BUBBLE_GAP_PX = 38;
   const ANCHOR_BUBBLE_GAP_PX = 58;
   const TUBE_INSET = 14;
@@ -39,20 +40,50 @@
     {name: 'MIDNIGHT', colours: ['#080B18', '#14275E', '#315CB5', '#7A67C7']},
     {name: 'TOXIC', colours: ['#10190D', '#267026', '#63D42F', '#D7FF45']}
   ];
-
+  const VERIFIED_PROBES = [
+    {name: 'SIZE', code: '<size=10>'},
+    {name: 'CSPACE', code: '<cspace=5>'},
+    {name: 'ROTATE', code: '<rotate=15>'},
+    {name: 'VOFFSET', code: '<voffset=5>'},
+    {name: 'SUP', code: '<sup>'},
+    {name: 'SUB', code: '<sub>'},
+    {name: 'POS', code: '<pos=40>'},
+    {name: 'BREAK', code: '<br>'},
+    {name: 'SPRITE', code: '<sprite=15>'},
+    {name: 'MSPACE', code: '<mspace=1em>'},
+    {name: 'SPACE', code: '<space=1em>'},
+    {name: 'HIGHLIGHT / MARK', code: '<mark=#FFFF0080>'},
+    {name: 'ALPHA', code: '<alpha=#80>'},
+    {name: 'ALIGN // LAB ONLY', code: '<align=center>'}
+  ];
+  const CANDIDATE_PROBES = [
+    {name: 'SMALL CAPS', code: '<smallcaps>'},
+    {name: 'ALLCAPS TAG', code: '<allcaps>'},
+    {name: 'LOWERCASE', code: '<lowercase>'},
+    {name: 'INDENT', code: '<indent=10%>'},
+    {name: 'LINE INDENT', code: '<line-indent=10%>'},
+    {name: 'LINE HEIGHT', code: '<line-height=120%>'},
+    {name: 'MARGIN', code: '<margin=5>'},
+    {name: 'WIDTH', code: '<width=80%>'},
+    {name: 'NOBR', code: '<nobr>'},
+    {name: 'CLOSING / RESET', code: '<size=10>A</size><color=#FFF>B</color>', complete: true}
+  ];
   const $ = (id) => document.getElementById(id);
   const els = {
     consoleSurface: $('consoleSurface'), viewModeToggle: $('viewModeToggle'),
-    deckName: $('deckName'), inputState: $('inputState'), outputPreview: $('outputPreview'),
+    deckName: $('deckName'), startOver: $('startOver'), inputState: $('inputState'), outputPreview: $('outputPreview'),
     copyButton: $('copyButton'), copyBurst: $('copyBurst'), copyStatus: $('copyStatus'),
     copyHintMessage: $('copyHintMessage'),
     prismaticEdit: $('prismaticEdit'),
     prismaticNameBackdrop: $('prismaticNameBackdrop'), prismaticDeckName: $('prismaticDeckName'),
     prismaticNameClose: $('prismaticNameClose'), prismaticNameDone: $('prismaticNameDone'),
     rawCount: $('rawCount'), gradientPips: $('gradientPips'), undoButton: $('undoButton'),
+    budgetText: $('budgetText'), budgetFx: $('budgetFx'), budgetColour: $('budgetColour'),
+    budgetTotal: $('budgetTotal'), budgetStages: $('budgetStages'), inlineEvents: $('inlineEvents'),
     rotateGradient: $('rotateGradient'), flipGradient: $('flipGradient'), gradientBar: $('gradientBar'),
     tubeAddButton: $('tubeAddButton'), tubeHint: $('tubeHint'), stageWarning: $('stageWarning'),
-    barStopMarkers: $('barStopMarkers'), quickPalettes: $('quickPalettes'),
+    visualWarning: $('visualWarning'),
+    barStopMarkers: $('barStopMarkers'), megaFxLayer: $('megaFxLayer'), quickPalettes: $('quickPalettes'),
     paletteTray: $('paletteTray'),
     manaComposer: $('manaComposer'), identityName: $('identityName'), manaOrder: $('manaOrder'),
     clearMana: $('clearMana'), builtInPalettes: $('builtInPalettes'), savedPalettes: $('savedPalettes'),
@@ -63,13 +94,24 @@
     stopEditorWheel: $('stopEditorWheel'), stopEditorWheelCursor: $('stopEditorWheelCursor'),
     stopEditorPreview: $('stopEditorPreview'),
     stopEditorHex: $('stopEditorHex'), stopEditorConfirm: $('stopEditorConfirm'),
-    offlineDownload: $('offlineDownload')
+    fxDrawer: $('fxDrawer'), insertBreak: $('insertBreak'), spriteTray: $('spriteTray'),
+    fxBubbleEditor: $('fxBubbleEditor'), fxBubbleEditorTitle: $('fxBubbleEditorTitle'),
+    fxBubbleEditorMeta: $('fxBubbleEditorMeta'), fxBubbleChoices: $('fxBubbleChoices'),
+    fxBubbleDelete: $('fxBubbleDelete'), fxBubbleEditorDone: $('fxBubbleEditorDone'),
+    fxPickerBackdrop: $('fxPickerBackdrop'), fxPicker: $('fxPicker'), fxPickerKicker: $('fxPickerKicker'),
+    fxPickerTitle: $('fxPickerTitle'), fxPickerBack: $('fxPickerBack'), fxPickerClose: $('fxPickerClose'),
+    fxPickerChoices: $('fxPickerChoices'), fxPickerGrid: $('fxPickerGrid'), fxPickerAdjust: $('fxPickerAdjust'),
+    fxPickerSelected: $('fxPickerSelected'), fxPickerAdjustment: $('fxPickerAdjustment'),
+    fxPickerDrawer: $('fxPickerDrawer'), fxPickerApply: $('fxPickerApply'),
+    arenaLab: $('arenaLab'), rawCode: $('rawCode'), copyRawCode: $('copyRawCode'),
+    verifiedProbeList: $('verifiedProbeList'), candidateProbeList: $('candidateProbeList'),
+    probeOutput: $('probeOutput'), copyProbe: $('copyProbe')
   };
-
-  if (location.protocol === 'file:') els.offlineDownload.hidden = true;
 
   let gradientStops = makeStops([MANA.U.colour, MANA.R.colour, MANA.G.colour]);
   let formatting = {bold: false, italic: false, underline: false, strike: false};
+  let effects = Logic.normaliseEffects({});
+  let inlineEvents = [];
   let selectedStop = 0;
   let manaSelection = [];
   let paletteTrayOpen = false;
@@ -83,6 +125,18 @@
   let stopEditorOpen = false;
   let editorDraftColour = null;
   let viewMode = DEFAULT_VIEW_MODE;
+  let previousName = DEFAULT_NAME;
+  let activeTextInput = null;
+  let composerSelection = {start: DEFAULT_NAME.length, end: DEFAULT_NAME.length};
+  let nextInlineEventId = 1;
+  let selectedMegaEventId = null;
+  let selectedMegaGlobalKey = null;
+  let fxPickerOpen = false;
+  let fxPickerMode = 'edit';
+  let fxPickerSelectedKey = '';
+  let fxPickerDraftValue = '';
+  let pendingFxBubble = null;
+  let nextPendingFxId = 1;
 
   function clone(value) {
     return JSON.parse(JSON.stringify(value));
@@ -160,7 +214,7 @@
     els.consoleSurface.classList.toggle('prismatic-mode', prismatic);
     els.viewModeToggle.setAttribute('aria-pressed', String(prismatic));
     els.viewModeToggle.setAttribute('aria-label', prismatic
-      ? 'Switch to the Version 6 name and copy controls'
+      ? 'Switch to the Version 7 name and copy controls'
       : 'Switch to the alternate name and copy controls');
     if (!prismatic) closePrismaticNameEditor();
   }
@@ -287,6 +341,8 @@
   }
 
   function openStopEditor(index) {
+    closeFxPicker();
+    closeMegaBubbleEditor();
     selectedStop = Math.max(0, Math.min(index, gradientStops.length - 1));
     stopEditorOpen = true;
     editorDraftColour = gradientStops[selectedStop].colour;
@@ -296,6 +352,7 @@
     renderGradientBar();
     renderStopEditor();
     els.stopEditorBackdrop.hidden = false;
+    focusColourBubble(selectedStop);
     requestAnimationFrame(() => els.stopEditor.focus({preventScroll: true}));
     pulseSelectedMarker(selectedStop);
     haptic(4);
@@ -310,10 +367,14 @@
     els.stopEditorBackdrop.hidden = true;
     els.stopEditorHex.classList.remove('error');
     els.stopEditorHex.removeAttribute('aria-invalid');
+    clearBubbleFocus();
   }
 
   function snapshot() {
-    return clone({gradientStops, formatting, selectedStop, manaSelection, secondStopMemory});
+    return clone({
+      gradientStops, formatting, effects, inlineEvents, selectedStop, manaSelection, secondStopMemory,
+      deckName: els.deckName.value, defaultNameUntouched, previousName
+    });
   }
 
   function checkpoint() {
@@ -324,7 +385,7 @@
   function persist() {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        gradientStops, formatting, manaSelection, favourites, secondStopMemory
+        gradientStops, formatting, effects, manaSelection, favourites, secondStopMemory
       }));
     } catch (_) {}
   }
@@ -335,12 +396,13 @@
 
   function restorePreferences() {
     try {
-      const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+      const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY) || '{}');
       if (Array.isArray(stored.gradientStops)) gradientStops = normalisePalette(stored.gradientStops);
       viewMode = DEFAULT_VIEW_MODE;
       if (stored.formatting && typeof stored.formatting === 'object') {
         Object.keys(formatting).forEach((key) => { formatting[key] = Boolean(stored.formatting[key]); });
       }
+      if (stored.effects && typeof stored.effects === 'object') effects = Logic.normaliseEffects(stored.effects);
       if (Array.isArray(stored.manaSelection)) manaSelection = Array.from(new Set(stored.manaSelection.filter((code) => MANA[code]))).slice(0, 5);
       if (stored.secondStopMemory && /^#[0-9a-f]{6}$/i.test(stored.secondStopMemory.colour)) {
         secondStopMemory = {colour: stored.secondStopMemory.colour.toUpperCase(), position: 1};
@@ -374,27 +436,192 @@
     if (!previous) return;
     gradientStops = normalisePalette(previous.gradientStops);
     formatting = {...formatting, ...previous.formatting};
+    effects = Logic.normaliseEffects(previous.effects || effects);
+    inlineEvents = Array.isArray(previous.inlineEvents) ? previous.inlineEvents : inlineEvents;
     selectedStop = Math.min(previous.selectedStop, gradientStops.length - 1);
     manaSelection = previous.manaSelection || [];
     secondStopMemory = previous.secondStopMemory || secondStopMemory;
+    if (typeof previous.deckName === 'string') {
+      els.deckName.value = previous.deckName;
+      els.prismaticDeckName.value = previous.deckName;
+      previousName = typeof previous.previousName === 'string' ? previous.previousName : previous.deckName;
+      defaultNameUntouched = Boolean(previous.defaultNameUntouched);
+      composerSelection = {start: previous.deckName.length, end: previous.deckName.length};
+    }
     persist();
     renderAll();
     haptic(8);
   }
 
-  function renderPreview(segments) {
+  function startOver() {
+    checkpoint();
+    closeStopEditor();
+    closeFxPicker();
+    closeMegaBubbleEditor();
+    gradientStops = makeStops([MANA.U.colour, MANA.R.colour, MANA.G.colour]);
+    formatting = {bold: false, italic: false, underline: false, strike: false};
+    effects = Logic.normaliseEffects({});
+    inlineEvents = [];
+    selectedStop = 0;
+    manaSelection = [];
+    paletteTrayOpen = false;
+    els.fxDrawer.open = false;
+    els.arenaLab.open = false;
+    secondStopMemory = {colour: MANA.R.colour, position: 1};
+    els.deckName.value = DEFAULT_NAME;
+    els.prismaticDeckName.value = DEFAULT_NAME;
+    previousName = DEFAULT_NAME;
+    defaultNameUntouched = true;
+    activeTextInput = els.deckName;
+    composerSelection = {start: DEFAULT_NAME.length, end: DEFAULT_NAME.length};
+    viewMode = DEFAULT_VIEW_MODE;
+    renderViewMode();
+    persist();
+    renderAll();
+    playFeedback('STARTED OVER');
+    haptic([9, 14, 9]);
+  }
+
+  function previewColourAt(build, offset) {
+    const active = build.segments.reduce((match, segment) => segment.start <= offset ? segment : match, build.segments[0]);
+    return Logic.arenaColour(active?.colour || '#FFFFFF');
+  }
+
+  function previewNumber(value, fallback = 0) {
+    const parsed = Number.parseFloat(String(value ?? '').replace(/(?:px|em|%)$/i, ''));
+    return Number.isFinite(parsed) ? parsed : fallback;
+  }
+
+  function previewLength(value, options = {}) {
+    const match = String(value ?? '').trim().match(/^(-?\d+(?:\.\d+)?)(px|em|%)?$/i);
+    if (!match) return null;
+    const amount = Math.max(options.minimum ?? -80, Math.min(options.maximum ?? 180, Number(match[1])));
+    return `${Logic.shortestNumber(amount, 0)}${(match[2] || options.defaultUnit || 'px').toLowerCase()}`;
+  }
+
+  function previewHexColour(value) {
+    const clean = String(value || '').trim().replace(/^#/, '');
+    if (!/^[0-9a-f]{6}(?:[0-9a-f]{2})?$/i.test(clean)) return null;
+    const red = Number.parseInt(clean.slice(0, 2), 16);
+    const green = Number.parseInt(clean.slice(2, 4), 16);
+    const blue = Number.parseInt(clean.slice(4, 6), 16);
+    const alpha = clean.length === 8 ? Number.parseInt(clean.slice(6), 16) / 255 : 1;
+    return `rgba(${red},${green},${blue},${alpha.toFixed(3)})`;
+  }
+
+  function initialPreviewFxState() {
+    return {
+      size: effects.size.enabled ? previewNumber(effects.size.value, 10) : null,
+      cspace: effects.cspace.enabled ? previewNumber(effects.cspace.value) : null,
+      rotate: effects.rotate.enabled ? previewNumber(effects.rotate.value) : null,
+      voffset: effects.voffset.enabled ? previewNumber(effects.voffset.value) : null,
+      sup: Boolean(effects.sup), sub: Boolean(effects.sub), mspace: null, mark: null, alpha: 1,
+      pendingPos: effects.pos.enabled ? previewNumber(effects.pos.value) : null
+    };
+  }
+
+  function applyInlinePreviewTag(state, code) {
+    const match = String(code || '').match(/^<([a-z-]+)(?:=([^>]+))?>$/i);
+    if (!match) return null;
+    const name = match[1].toLowerCase();
+    const value = String(match[2] || '').replace(/^['"]|['"]$/g, '');
+    if (['size', 'cspace', 'rotate', 'voffset'].includes(name)) state[name] = previewNumber(value);
+    else if (name === 'pos') state.pendingPos = previewNumber(value);
+    else if (name === 'sup') { state.sup = true; state.sub = false; }
+    else if (name === 'sub') { state.sub = true; state.sup = false; }
+    else if (name === 'mspace') state.mspace = previewLength(value, {minimum: 0, maximum: 12, defaultUnit: 'em'});
+    else if (name === 'mark') state.mark = previewHexColour(value);
+    else if (name === 'alpha' && /^#[0-9a-f]{2}$/i.test(value)) state.alpha = Number.parseInt(value.slice(1), 16) / 255;
+    else if (name === 'space') return previewLength(value, {minimum: -20, maximum: 180, defaultUnit: 'px'});
+    return null;
+  }
+
+  function stylePreviewGlyph(element, state) {
+    if (state.size !== null) element.style.fontSize = `${Math.max(5, Math.min(29, state.size))}px`;
+    if (state.cspace !== null) element.style.marginRight = `${Math.max(-20, Math.min(50, state.cspace))}px`;
+    if (state.mspace) { element.style.width = state.mspace; element.style.textAlign = 'center'; }
+    if (state.mark) { element.style.backgroundColor = state.mark; element.style.boxDecorationBreak = 'clone'; }
+    element.style.opacity = String(Math.max(0, Math.min(1, state.alpha)));
+    if (state.pendingPos !== null) {
+      element.style.marginLeft = `${Math.max(0, Math.min(500, state.pendingPos))}px`;
+      state.pendingPos = null;
+    }
+    const transforms = [];
+    if (state.voffset !== null) transforms.push(`translateY(${-Math.max(-50, Math.min(50, state.voffset))}px)`);
+    if (state.sup) transforms.push('translateY(-.42em)', 'scale(.72)');
+    if (state.sub) transforms.push('translateY(.28em)', 'scale(.72)');
+    if (state.rotate !== null) transforms.push(`rotate(${Math.max(-180, Math.min(180, state.rotate))}deg)`);
+    element.style.transform = transforms.join(' ') || 'none';
+  }
+
+  function renderPreview(build) {
     els.outputPreview.replaceChildren();
-    segments.forEach((segment) => {
-      const span = document.createElement('span');
-      span.textContent = segment.text;
-      span.style.color = Logic.arenaColour(segment.colour);
-      span.style.fontWeight = formatting.bold ? '800' : '400';
-      span.style.fontStyle = formatting.italic ? 'italic' : 'normal';
-      span.style.textDecoration = [
-        formatting.underline && 'underline', formatting.strike && 'line-through'
-      ].filter(Boolean).join(' ') || 'none';
-      els.outputPreview.appendChild(span);
+    const wrapper = document.createElement('span');
+    wrapper.className = 'fx-preview-content';
+    wrapper.style.fontVariant = effects.smallCaps ? 'small-caps' : 'normal';
+    wrapper.style.fontWeight = formatting.bold ? '800' : '400';
+    wrapper.style.fontStyle = formatting.italic ? 'italic' : 'normal';
+    wrapper.style.textDecoration = [
+      formatting.underline && 'underline', formatting.strike && 'line-through'
+    ].filter(Boolean).join(' ') || 'none';
+    const activeFx = initialPreviewFxState();
+    const eventMap = new Map();
+    build.inlineEvents.forEach((event) => {
+      if (!eventMap.has(event.offset)) eventMap.set(event.offset, []);
+      eventMap.get(event.offset).push(event);
     });
+    for (let offset = 0; offset <= build.text.length; offset += 1) {
+      (eventMap.get(offset) || []).forEach((event) => {
+        if (event.type === 'br') {
+          const lineBreak = document.createElement('span');
+          lineBreak.className = 'preview-line-break';
+          lineBreak.setAttribute('aria-hidden', 'true');
+          wrapper.appendChild(lineBreak);
+          return;
+        }
+        if (event.type === 'sprite') {
+          const sprite = document.createElement('span');
+          sprite.className = 'sprite-placeholder preview-sprite';
+          sprite.dataset.spriteId = String(event.value);
+          sprite.dataset.textOffset = String(offset);
+          sprite.style.color = previewColourAt(build, offset);
+          sprite.setAttribute('aria-label', `Arena sprite ${event.value}`);
+          const hook = document.createElement('i');
+          sprite.appendChild(hook);
+          stylePreviewGlyph(sprite, activeFx);
+          wrapper.appendChild(sprite);
+          return;
+        }
+        if (event.type === 'tag') {
+          const spacing = applyInlinePreviewTag(activeFx, event.code);
+          if (spacing) {
+            const spacer = document.createElement('span');
+            spacer.className = 'preview-space';
+            if (spacing.startsWith('-')) {
+              spacer.style.width = '0';
+              spacer.style.marginRight = spacing;
+            } else spacer.style.width = spacing;
+            spacer.setAttribute('aria-hidden', 'true');
+            wrapper.appendChild(spacer);
+          }
+        }
+      });
+      if (offset < build.text.length) {
+        const character = document.createElement('span');
+        character.className = 'preview-glyph';
+        character.dataset.textOffset = String(offset);
+        character.textContent = build.text[offset];
+        character.style.color = previewColourAt(build, offset);
+        stylePreviewGlyph(character, activeFx);
+        wrapper.appendChild(character);
+      }
+    }
+    if (!wrapper.childNodes.length) {
+      const span = document.createElement('span');
+      span.textContent = 'EMPTY';
+      wrapper.appendChild(span);
+    }
+    els.outputPreview.appendChild(wrapper);
   }
 
   function renderPips(segments) {
@@ -438,14 +665,65 @@
     els.stageWarning.classList.toggle('over', over);
   }
 
+  function updateVisualWidthRisk(build) {
+    const wrapper = els.outputPreview.querySelector('.fx-preview-content');
+    if (!wrapper || !build?.text) {
+      els.visualWarning.textContent = '';
+      els.visualWarning.className = 'visual-warning';
+      return;
+    }
+    const available = Math.max(1, els.outputPreview.getBoundingClientRect().width);
+    let currentLine = 0;
+    let widestLine = 0;
+    [...wrapper.children].forEach((node) => {
+      if (node.classList.contains('preview-line-break')) {
+        widestLine = Math.max(widestLine, currentLine);
+        currentLine = 0;
+        return;
+      }
+      const bounds = node.getBoundingClientRect();
+      const style = getComputedStyle(node);
+      currentLine += bounds.width
+        + (Number.parseFloat(style.marginLeft) || 0)
+        + (Number.parseFloat(style.marginRight) || 0);
+    });
+    widestLine = Math.max(widestLine, currentLine);
+    const ratio = widestLine / available;
+    const glyphs = build.text.length + build.inlineEvents.filter((event) => event.type === 'sprite').length;
+    const risk = ratio >= 1;
+    const watch = !risk && ratio >= .82;
+    els.visualWarning.textContent = risk
+      ? `VISUAL WIDTH RISK · ${Math.round(ratio * 100)}% OF MIRROR · APPROX`
+      : watch
+        ? `VISUAL WIDTH WATCH · ${Math.round(ratio * 100)}% OF MIRROR · APPROX`
+        : '';
+    els.visualWarning.className = `visual-warning${risk ? ' visible risk' : watch ? ' visible watch' : ''}`;
+    els.visualWarning.title = `${glyphs} visible glyphs. Browser geometry only; Arena's tested display maximum is still being measured. This does not change the exact 64-character code budget.`;
+  }
+
   function renderOutput() {
     const sampled = Logic.sampleGradientStops(gradientStops, 7);
-    currentBuild = Logic.build(els.deckName.value, sampled, formatting, Logic.LIMIT);
-    renderPreview(currentBuild.segments);
+    currentBuild = Logic.compileArena({
+      text: els.deckName.value,
+      palette: sampled,
+      positionedColours: gradientStops,
+      formatting,
+      effects,
+      inlineEvents,
+      limit: Logic.LIMIT
+    });
+    renderPreview(currentBuild);
     renderPips(currentBuild.segments);
     const overBy = Math.max(0, currentBuild.rawLength - Logic.LIMIT);
     els.rawCount.textContent = overBy ? `${currentBuild.rawLength} / ${Logic.LIMIT} · +${overBy}` : `${currentBuild.rawLength} / ${Logic.LIMIT}`;
     els.rawCount.classList.toggle('over-limit', overBy > 0);
+    els.budgetText.textContent = String(currentBuild.breakdown.text);
+    els.budgetFx.textContent = String(currentBuild.breakdown.fx);
+    els.budgetColour.textContent = String(currentBuild.breakdown.colour);
+    els.budgetTotal.textContent = `${currentBuild.breakdown.total}/${Logic.LIMIT}`;
+    els.budgetStages.textContent = `${currentBuild.colourStages}/${currentBuild.requestedColourStages} COLOUR ${currentBuild.requestedColourStages === 1 ? 'STAGE' : 'STAGES'} FIT`;
+    els.budgetTotal.closest('.budget-total').classList.toggle('over-limit', overBy > 0);
+    els.rawCode.value = currentBuild.raw;
     const invalid = currentBuild.unsupported.length > 0;
     const trolling = !invalid && Logic.isMostlyWhite(gradientStops);
     els.inputState.textContent = invalid
@@ -456,6 +734,10 @@
     els.inputState.classList.toggle('error', invalid);
     els.inputState.classList.toggle('trolling', trolling);
     updateStageAvailability();
+    requestAnimationFrame(() => {
+      updateVisualWidthRisk(currentBuild);
+      layoutMegaTubeTokens(els.deckName.value.length);
+    });
   }
 
   function syncGradientSurface() {
@@ -474,8 +756,8 @@
 
   function placeTubeStop(index, requested, originalPosition) {
     const moving = gradientStops[index];
-    if (!moving || index <= 0) return;
-    if (requested <= ANCHOR_SWAP_ZONE) {
+    if (!moving) return;
+    if (index > 0 && requested <= ANCHOR_SWAP_ZONE) {
       gradientStops[0].position = originalPosition;
       moving.position = 0;
     } else {
@@ -543,7 +825,7 @@
       dragState.order = order;
       haptic(4);
     }
-    const swapReady = requested <= ANCHOR_SWAP_ZONE;
+    const swapReady = index > 0 && requested <= ANCHOR_SWAP_ZONE;
     if (swapReady !== dragState.swapReady) {
       dragState.swapReady = swapReady;
       els.gradientBar.classList.toggle('anchor-swap-ready', swapReady);
@@ -557,7 +839,7 @@
   function renderGradientBar() {
     syncGradientSurface();
     els.barStopMarkers.replaceChildren();
-    const tubeIsColourOneButton = gradientStops.length === 1;
+    const tubeIsColourOneButton = false;
     els.gradientBar.classList.toggle('single-colour-button', tubeIsColourOneButton);
     els.gradientBar.classList.toggle('multi-colour-track', !tubeIsColourOneButton);
     els.gradientBar.setAttribute('role', tubeIsColourOneButton ? 'button' : 'group');
@@ -565,22 +847,22 @@
     els.gradientBar.setAttribute('aria-label', tubeIsColourOneButton
       ? 'Colour 1. Touch anywhere on the tube to edit.'
       : 'Gradient track. Use the numbered cap or colour bubbles to edit colours.');
-    els.tubeHint.textContent = tubeIsColourOneButton
-      ? 'TOUCH TUBE TO EDIT COLOUR 1 · + ADDS A BUBBLE'
-      : 'PRESS 1 OR A BUBBLE TO EDIT · + ADDS ANOTHER';
+    els.tubeHint.textContent = 'SOLID BUBBLES COMPILE · GHOST COLOURS DO NOT FIT · DRAG FX OR COLOUR SOURCES INTO THE TUBE';
     gradientStops.forEach((stop, index) => {
-      if (index === 0 && gradientStops.length < 2) return;
-      const movable = index > 0;
+      const movable = true;
       const marker = document.createElement('button');
       marker.type = 'button';
-      marker.className = 'bar-marker';
+      marker.className = 'bar-marker mega-colour-token';
       marker.dataset.stopIndex = String(index);
-      marker.classList.toggle('first-bubble', !movable);
-      marker.classList.toggle('anchor', !movable);
+      marker.dataset.rawOffset = String(currentBuild?.text.length > 1 ? Math.round(stop.position * (currentBuild.text.length - 1)) : 0);
+      marker.dataset.rawOrder = '0';
+      marker.classList.remove('first-bubble', 'anchor');
       marker.classList.toggle('selected', index === selectedStop);
-      marker.style.left = `${stop.position * 100}%`;
+      const rawOffset = currentBuild?.text.length > 1 ? Math.round(stop.position * (currentBuild.text.length - 1)) : 0;
+      marker.style.left = `${currentBuild?.text.length ? rawOffset / currentBuild.text.length * 100 : 0}%`;
       marker.style.setProperty('--stop-colour', stop.colour);
       const markerLabel = document.createElement('span');
+      markerLabel.className = 'tube-sequence';
       markerLabel.textContent = String(index + 1);
       marker.appendChild(markerLabel);
       if (index === gradientStops.length - 1) {
@@ -594,17 +876,13 @@
         marker.appendChild(flowBrackets);
       }
       marker.setAttribute('role', 'slider');
-      marker.setAttribute('aria-label', movable
-        ? `Gradient colour ${index + 1}. Drag to position or reorder. Colours keep a visible gap.`
-        : 'Gradient colour 1, fixed at the beginning. Activate to edit.');
+      marker.setAttribute('aria-label', `Gradient colour ${index + 1}. Drag to position or reorder. Colours keep a visible gap.`);
       marker.dataset.baseLabel = marker.getAttribute('aria-label');
       marker.setAttribute('aria-valuemin', '0');
       marker.setAttribute('aria-valuemax', '100');
       marker.setAttribute('aria-valuenow', String(Math.round(stop.position * 100)));
-      marker.setAttribute('aria-readonly', String(!movable));
-      marker.title = movable
-        ? 'Drag to position or reorder this colour'
-        : 'Colour 1 · fixed at the tube start';
+      marker.setAttribute('aria-readonly', 'false');
+      marker.title = 'Drag to position or reorder this colour';
       marker.addEventListener('click', (event) => {
         event.stopPropagation();
         if (marker.dataset.dragged === 'true' || marker.dataset.pointerTap === 'true') return;
@@ -626,6 +904,7 @@
           if (!dragging) {
             checkpoint();
             dragging = true;
+            marker.style.setProperty('--serial-shift', '0px');
             marker.dataset.dragged = 'true';
             marker.classList.add('dragging');
             document.body.classList.add('tube-dragging');
@@ -679,7 +958,12 @@
         const step = event.shiftKey ? .1 : .02;
         let position = gradientStops[index].position;
         if (event.key === 'ArrowLeft') position -= step;
-        if (event.key === 'ArrowRight') position += step;
+        if (event.key === 'ArrowRight' && index === 0 && gradientStops.length > 1) {
+          const targetIndex = Math.min(gradientStops.length - 1, event.shiftKey ? 5 : 1);
+          position = gradientStops[targetIndex].position + tubeAnchorCollisionGap();
+        } else if (event.key === 'ArrowRight') {
+          position += step;
+        }
         if (event.key === 'Home') position = 0;
         if (event.key === 'End') position = 1;
         position = Math.max(0, Math.min(1, position));
@@ -830,6 +1114,7 @@
           }
         }, {name: 'MTG'});
       });
+      enableColourDragSource(button, MANA[code].colour);
       els.manaComposer.appendChild(button);
     });
     const key = identityKey(manaSelection);
@@ -1126,9 +1411,1176 @@
 
   function renderFormatting() {
     if (!ARENA_BOLD_SUPPORTED) formatting.bold = false;
-    document.querySelectorAll('.format-pad button').forEach((button) => {
+    document.querySelectorAll('.format-pad button[data-format]').forEach((button) => {
       button.setAttribute('aria-pressed', String(formatting[button.dataset.format]));
     });
+    document.querySelectorAll('.format-pad button[data-effect]').forEach((button) => {
+      button.setAttribute('aria-pressed', String(Boolean(effects[button.dataset.effect])));
+    });
+  }
+
+  function normaliseFxControlValue(name, value) {
+    const slider = document.querySelector(`[data-fx-slider="${name}"]`);
+    const parsed = Number(value);
+    const fallback = Logic.NUMERIC_EFFECT_DEFAULTS[name];
+    if (!slider || !Number.isFinite(parsed)) return Logic.shortestNumber(fallback, fallback);
+    const minimum = Number(slider.min);
+    const maximum = Number(slider.max);
+    const step = Number(slider.step) || 1;
+    const clamped = Math.max(minimum, Math.min(maximum, parsed));
+    const snapped = minimum + Math.round((clamped - minimum) / step) * step;
+    return Logic.shortestNumber(snapped, fallback);
+  }
+
+  function syncFxValueControls(name, value) {
+    const safe = normaliseFxControlValue(name, value);
+    const numberInput = document.querySelector(`[data-fx-value="${name}"]`);
+    const slider = document.querySelector(`[data-fx-slider="${name}"]`);
+    if (numberInput) numberInput.value = safe;
+    if (slider) {
+      slider.value = safe;
+      const minimum = Number(slider.min);
+      const maximum = Number(slider.max);
+      const progress = maximum === minimum ? 0 : (Number(safe) - minimum) / (maximum - minimum) * 100;
+      slider.style.setProperty('--fx-progress', `${Math.max(0, Math.min(100, progress)).toFixed(2)}%`);
+    }
+    const caretButton = document.querySelector(`[data-caret-current="${name}"]`);
+    if (caretButton) caretButton.textContent = `${name.toUpperCase()} ${safe}`;
+    const timelineButton = document.querySelector(`[data-timeline-current="${name}"]`);
+    if (timelineButton) timelineButton.textContent = `${name.toUpperCase()} ${safe}`;
+    return safe;
+  }
+
+  function renderFxControls() {
+    document.querySelectorAll('[data-fx-toggle]').forEach((button) => {
+      button.setAttribute('aria-pressed', String(Boolean(effects[button.dataset.fxToggle])));
+    });
+    document.querySelectorAll('[data-fx-enabled]').forEach((checkbox) => {
+      const name = checkbox.dataset.fxEnabled;
+      checkbox.checked = Boolean(effects[name]?.enabled);
+      syncFxValueControls(name, effects[name]?.value ?? Logic.NUMERIC_EFFECT_DEFAULTS[name]);
+      checkbox.closest('.fx-number-card')?.classList.toggle('enabled', checkbox.checked);
+    });
+  }
+
+  function retiredTimelineRenderer() {
+    els.inlineEvents.replaceChildren();
+    els.inlineEvents.hidden = false;
+    const nameLength = els.deckName.value.length;
+    const events = Logic.normaliseInlineEvents(inlineEvents, nameLength);
+    const header = document.createElement('header');
+    const title = document.createElement('span');
+    const eyebrow = document.createElement('small');
+    eyebrow.textContent = `TEXT POSITION // 0 TO ${nameLength}`;
+    const heading = document.createElement('b');
+    heading.textContent = 'INLINE FX TIMELINE';
+    title.append(eyebrow, heading);
+    const instruction = document.createElement('small');
+    instruction.textContent = 'DRAG MARKERS · ARROWS NUDGE · DELETE REMOVES';
+    header.append(title, instruction);
+
+    const track = document.createElement('div');
+    track.className = 'inline-timeline-track';
+    track.setAttribute('role', 'group');
+    track.setAttribute('aria-label', `Inline effect positions from 0 to ${nameLength}`);
+    const rail = document.createElement('i');
+    rail.className = 'inline-timeline-rail';
+    rail.setAttribute('aria-hidden', 'true');
+    track.appendChild(rail);
+
+    const positionCounts = new Map();
+    let maximumLane = 0;
+    events.forEach((inlineEvent) => {
+      const lane = positionCounts.get(inlineEvent.offset) || 0;
+      positionCounts.set(inlineEvent.offset, lane + 1);
+      maximumLane = Math.max(maximumLane, lane);
+      const node = document.createElement('span');
+      node.className = 'inline-event-node';
+      node.dataset.eventId = inlineEvent.id || '';
+      node.style.left = `${nameLength ? inlineEvent.offset / nameLength * 100 : 0}%`;
+      node.style.top = `${10 + lane * 38}px`;
+      node.style.setProperty('--event-lane', String(lane));
+
+      const marker = document.createElement('button');
+      marker.type = 'button';
+      marker.className = `inline-event-marker event-${inlineEvent.type}`;
+      marker.dataset.eventId = inlineEvent.id || '';
+      marker.dataset.eventOffset = String(inlineEvent.offset);
+      const label = inlineEvent.type === 'sprite'
+        ? `SPRITE ${inlineEvent.value}`
+        : inlineEvent.type === 'br'
+          ? 'BR'
+          : String(inlineEvent.code || '').replace(/^</, '').replace(/>$/, '').toUpperCase();
+      if (inlineEvent.type === 'sprite') {
+        const hook = document.createElement('i');
+        hook.style.backgroundImage = `var(--arena-sprite-${inlineEvent.value},none)`;
+        marker.appendChild(hook);
+      } else marker.textContent = label;
+      marker.setAttribute('aria-label', `${label} at text position ${inlineEvent.offset}. Drag or use arrow keys to move.`);
+      marker.title = `${label} @ ${inlineEvent.offset}`;
+
+      const remove = document.createElement('button');
+      remove.type = 'button';
+      remove.className = 'inline-event-remove';
+      remove.textContent = '\u00D7';
+      remove.setAttribute('aria-label', `Remove ${label} at text position ${inlineEvent.offset}`);
+      remove.addEventListener('click', () => commitMutation(() => {
+        inlineEvents = inlineEvents.filter((candidate) => candidate.id !== inlineEvent.id);
+      }));
+
+      const moveTo = (offset) => {
+        const target = Math.max(0, Math.min(nameLength, offset));
+        if (target === inlineEvent.offset) return;
+        commitMutation(() => {
+          inlineEvents = inlineEvents.map((candidate) => candidate.id === inlineEvent.id ? {...candidate, offset: target} : candidate);
+        }, {haptic: 7});
+      };
+      marker.addEventListener('keydown', (keyEvent) => {
+        let target = inlineEvent.offset;
+        if (keyEvent.key === 'ArrowLeft') target -= keyEvent.shiftKey ? 5 : 1;
+        else if (keyEvent.key === 'ArrowRight') target += keyEvent.shiftKey ? 5 : 1;
+        else if (keyEvent.key === 'Home') target = 0;
+        else if (keyEvent.key === 'End') target = nameLength;
+        else if (keyEvent.key === 'Delete' || keyEvent.key === 'Backspace') {
+          keyEvent.preventDefault();
+          remove.click();
+          return;
+        } else return;
+        keyEvent.preventDefault();
+        moveTo(target);
+      });
+      marker.addEventListener('pointerdown', (pointerEvent) => {
+        if (pointerEvent.button !== 0) return;
+        pointerEvent.preventDefault();
+        const originalOffset = inlineEvent.offset;
+        let draftOffset = originalOffset;
+        let moved = false;
+        try { marker.setPointerCapture(pointerEvent.pointerId); } catch (_) {}
+        const offsetFromPointer = (clientX) => {
+          const bounds = track.getBoundingClientRect();
+          if (!bounds.width) return originalOffset;
+          return Math.max(0, Math.min(nameLength, Math.round((clientX - bounds.left) / bounds.width * nameLength)));
+        };
+        const update = (moveEvent) => {
+          if (moveEvent.pointerId !== pointerEvent.pointerId) return;
+          draftOffset = offsetFromPointer(moveEvent.clientX);
+          moved = moved || draftOffset !== originalOffset;
+          if (moved) node.style.setProperty('--serial-shift', '0px');
+          node.style.left = `${nameLength ? draftOffset / nameLength * 100 : 0}%`;
+          marker.dataset.eventOffset = String(draftOffset);
+          marker.title = `${label} @ ${draftOffset}`;
+          marker.setAttribute('aria-label', `${label} at text position ${draftOffset}. Release to place.`);
+          marker.classList.toggle('dragging', moved);
+        };
+        const cleanup = () => {
+          marker.removeEventListener('pointermove', update);
+          marker.removeEventListener('pointerup', finish);
+          marker.removeEventListener('pointercancel', cancel);
+          try { if (marker.hasPointerCapture(pointerEvent.pointerId)) marker.releasePointerCapture(pointerEvent.pointerId); } catch (_) {}
+        };
+        const finish = (finishEvent) => {
+          if (finishEvent.pointerId !== pointerEvent.pointerId) return;
+          cleanup();
+          if (moved) moveTo(draftOffset);
+          else marker.classList.remove('dragging');
+        };
+        const cancel = (cancelEvent) => {
+          if (cancelEvent.pointerId !== pointerEvent.pointerId) return;
+          cleanup();
+          node.style.left = `${nameLength ? originalOffset / nameLength * 100 : 0}%`;
+          marker.classList.remove('dragging');
+        };
+        marker.addEventListener('pointermove', update);
+        marker.addEventListener('pointerup', finish);
+        marker.addEventListener('pointercancel', cancel);
+      });
+      node.append(marker, remove);
+      track.appendChild(node);
+    });
+    track.style.setProperty('--timeline-lanes', String(maximumLane + 1));
+    track.style.minHeight = `${54 + maximumLane * 38}px`;
+    if (!events.length) {
+      const empty = document.createElement('span');
+      empty.className = 'inline-timeline-empty';
+      empty.textContent = 'DROP FX HERE — OR CLICK / TAP AN FX TO INSERT AT THE CARET';
+      track.appendChild(empty);
+    }
+    const scale = document.createElement('div');
+    scale.className = 'inline-timeline-scale';
+    const start = document.createElement('span');
+    start.textContent = '0 // START';
+    const end = document.createElement('span');
+    end.textContent = `${nameLength} // END`;
+    scale.append(start, end);
+    const sourceStrip = document.createElement('div');
+    sourceStrip.className = 'inline-timeline-sources';
+    sourceStrip.setAttribute('role', 'group');
+    sourceStrip.setAttribute('aria-label', 'Inline effects to insert at the caret or drag onto the timeline');
+    const sourceLabel = document.createElement('b');
+    sourceLabel.textContent = 'DRAG IN';
+    sourceStrip.appendChild(sourceLabel);
+    const sourceDefinitions = [
+      ...['size', 'cspace', 'rotate', 'voffset', 'pos'].map((name) => ({
+        label: `${name.toUpperCase()} ${Logic.shortestNumber(effects[name]?.value, Logic.NUMERIC_EFFECT_DEFAULTS[name])}`,
+        current: name,
+        payload: () => ({type: 'tag', code: `<${name}=${Logic.shortestNumber(effects[name]?.value, Logic.NUMERIC_EFFECT_DEFAULTS[name])}>`})
+      })),
+      {label: 'SUP', payload: {type: 'tag', code: '<sup>'}},
+      {label: 'SUB', payload: {type: 'tag', code: '<sub>'}},
+      {label: 'BR', payload: {type: 'br'}},
+      ...['mspace', 'space', 'mark', 'alpha'].map((name) => ({
+        label: name.toUpperCase(),
+        payload: () => {
+          const input = document.querySelector(`[data-caret-value="${name}"]`);
+          const code = verifiedCaretTag(name, input?.value);
+          return code ? {type: 'tag', code} : null;
+        }
+      }))
+    ];
+    sourceDefinitions.forEach((definition) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.textContent = definition.label;
+      button.dataset.timelineSource = '';
+      if (definition.current) button.dataset.timelineCurrent = definition.current;
+      button.title = `${definition.label}: click to insert at the active caret, or drag onto the timeline`;
+      const payload = () => typeof definition.payload === 'function' ? definition.payload() : definition.payload;
+      button.addEventListener('click', () => {
+        const event = payload();
+        if (event) insertComposerEvent(event);
+        else playFeedback('INVALID FX VALUE', true);
+      });
+      enableFxDragSource(button, payload);
+      sourceStrip.appendChild(button);
+    });
+    track.addEventListener('dragover', (dragEvent) => {
+      if (!Array.from(dragEvent.dataTransfer?.types || []).includes('application/x-arena-fx')) return;
+      dragEvent.preventDefault();
+      track.classList.add('drop-target');
+    });
+    track.addEventListener('dragleave', () => track.classList.remove('drop-target'));
+    track.addEventListener('drop', (dropEvent) => {
+      track.classList.remove('drop-target');
+      const encoded = dropEvent.dataTransfer?.getData('application/x-arena-fx');
+      if (!encoded) return;
+      dropEvent.preventDefault();
+      try {
+        const payload = JSON.parse(encoded);
+        const bounds = track.getBoundingClientRect();
+        const offset = bounds.width ? Math.max(0, Math.min(nameLength, Math.round((dropEvent.clientX - bounds.left) / bounds.width * nameLength))) : 0;
+        insertComposerEventAt(payload, offset, null);
+      } catch (_) {}
+    });
+    els.inlineEvents.append(header, track, scale, sourceStrip);
+  }
+
+  function clearMirrorGuide() {
+    els.outputPreview.querySelectorAll('.mega-guide-target').forEach((glyph) => glyph.classList.remove('mega-guide-target'));
+  }
+
+  function showMirrorGuide(offset) {
+    clearMirrorGuide();
+    const length = els.deckName.value.length;
+    if (!length) return;
+    const target = Math.max(0, Math.min(length - 1, Number(offset) || 0));
+    els.outputPreview.querySelector(`[data-text-offset="${target}"]`)?.classList.add('mega-guide-target');
+  }
+
+  function megaEventLabel(event) {
+    if (event.type === 'sprite') return `SPRITE ${event.value}`;
+    if (event.type === 'br') return 'BR';
+    return String(event.code || '').replace(/^</, '').replace(/>$/, '').toUpperCase();
+  }
+
+  function megaEventKey(event) {
+    if (!event) return '';
+    if (event.type === 'sprite' || event.type === 'br') return event.type;
+    return String(event.code || '').match(/^<([a-z-]+)/i)?.[1]?.toLowerCase() || '';
+  }
+
+  function clearBubbleFocus() {
+    els.gradientBar.classList.remove('bubble-focus-mode', 'fx-focus-mode', 'colour-focus-mode');
+    els.outputPreview.classList.remove('bubble-focus-mode');
+    els.outputPreview.querySelectorAll('.bubble-focus-affected').forEach((node) => node.classList.remove('bubble-focus-affected'));
+  }
+
+  function focusMirrorRange(start, end) {
+    const length = els.deckName.value.length;
+    const from = Math.max(0, Math.min(length, Number(start) || 0));
+    const to = Math.max(from + 1, Math.min(length + 1, Number(end) || length));
+    els.outputPreview.classList.add('bubble-focus-mode');
+    els.outputPreview.querySelectorAll('[data-text-offset]').forEach((node) => {
+      const offset = Number(node.dataset.textOffset);
+      node.classList.toggle('bubble-focus-affected', offset >= from && offset < to);
+    });
+  }
+
+  function focusInlineBubble(eventId) {
+    clearBubbleFocus();
+    const events = Logic.normaliseInlineEvents(inlineEvents, els.deckName.value.length);
+    const selected = events.find((event) => event.id === eventId);
+    if (!selected) return;
+    const key = megaEventKey(selected);
+    const next = events.find((event) => event.offset > selected.offset && megaEventKey(event) === key);
+    const end = key === 'sprite' || key === 'br'
+      ? selected.offset + 1
+      : next?.offset ?? els.deckName.value.length;
+    els.gradientBar.classList.add('bubble-focus-mode', 'fx-focus-mode');
+    focusMirrorRange(selected.offset, end);
+  }
+
+  function focusFxPickerTarget(key = '') {
+    clearBubbleFocus();
+    const selected = selectedMegaEventId
+      ? Logic.normaliseInlineEvents(inlineEvents, els.deckName.value.length).find((event) => event.id === selectedMegaEventId)
+      : null;
+    const offset = selected?.offset ?? pendingFxBubble?.offset;
+    if (!Number.isFinite(Number(offset))) return;
+    const events = Logic.normaliseInlineEvents(inlineEvents, els.deckName.value.length);
+    const next = key
+      ? events.find((event) => event.id !== selectedMegaEventId && event.offset > offset && megaEventKey(event) === key)
+      : null;
+    const end = !key || key === 'sprite' || key === 'br'
+      ? Number(offset) + 1
+      : next?.offset ?? els.deckName.value.length;
+    els.gradientBar.classList.add('bubble-focus-mode', 'fx-focus-mode');
+    focusMirrorRange(Number(offset), end);
+  }
+
+  function focusColourBubble(index) {
+    clearBubbleFocus();
+    const stop = gradientStops[index];
+    if (!stop) return;
+    const length = els.deckName.value.length;
+    const active = [...activeStopIndices()].sort((left, right) => left - right);
+    const start = length > 1 ? Math.round(stop.position * (length - 1)) : 0;
+    const activePosition = active.indexOf(index);
+    const nextIndex = activePosition >= 0 ? active[activePosition + 1] : null;
+    const end = nextIndex === null || nextIndex === undefined
+      ? (activePosition >= 0 ? length : start + 1)
+      : Math.round(gradientStops[nextIndex].position * (length - 1));
+    els.gradientBar.classList.add('bubble-focus-mode', 'colour-focus-mode');
+    focusMirrorRange(start, Math.max(start + 1, end));
+  }
+
+  function fxChoiceDefinitions() {
+    const currentTag = (name) => ({
+      type: 'tag',
+      code: `<${name}=${Logic.shortestNumber(effects[name]?.value, Logic.NUMERIC_EFFECT_DEFAULTS[name])}>`
+    });
+    const valueTag = (name) => {
+      const input = document.querySelector(`[data-caret-value="${name}"]`);
+      const code = verifiedCaretTag(name, input?.value);
+      return code ? {type: 'tag', code} : null;
+    };
+    return [
+      ...['size', 'cspace', 'rotate', 'voffset', 'pos'].map((name) => ({
+        key: name,
+        label: `${name.toUpperCase()} ${Logic.shortestNumber(effects[name]?.value, Logic.NUMERIC_EFFECT_DEFAULTS[name])}`,
+        payload: () => currentTag(name)
+      })),
+      {key: 'sup', label: 'SUP', payload: () => ({type: 'tag', code: '<sup>'})},
+      {key: 'sub', label: 'SUB', payload: () => ({type: 'tag', code: '<sub>'})},
+      {key: 'br', label: 'BR', payload: () => ({type: 'br'})},
+      ...['mspace', 'space', 'mark', 'alpha'].map((name) => ({
+        key: name,
+        label: name.toUpperCase(),
+        payload: () => valueTag(name)
+      })),
+      {key: 'sprite', label: 'SPRITE FACE', spritePicker: true}
+    ];
+  }
+
+  const FX_PICKER_META = {
+    size: {label: 'SIZE', hint: 'GLYPH SCALE', code: '<size=n>', min: 5, max: 29, step: 1},
+    cspace: {label: 'CHAR SPACE', hint: 'SPACE BETWEEN LETTERS', code: '<cspace=n>', min: -20, max: 50, step: .5},
+    rotate: {label: 'ROTATE', hint: 'PER-LETTER ROTATION', code: '<rotate=n>', min: -180, max: 180, step: 1},
+    voffset: {label: 'VERT OFFSET', hint: 'MOVE LETTERS UP / DOWN', code: '<voffset=n>', min: -50, max: 50, step: .5},
+    pos: {label: 'POSITION', hint: 'HORIZONTAL START', code: '<pos=n>', min: 0, max: 500, step: 1},
+    sup: {label: 'SUPERSCRIPT', hint: 'RAISE + SHRINK', code: '<sup>'},
+    sub: {label: 'SUBSCRIPT', hint: 'LOWER + SHRINK', code: '<sub>'},
+    br: {label: 'LINE BREAK', hint: 'BREAK AT THIS CARET', code: '<br>'},
+    mspace: {label: 'MONO SPACE', hint: 'FIXED CHARACTER WIDTH', code: '<mspace=v>', input: '1em'},
+    space: {label: 'SPACE', hint: 'INSERT SPACING', code: '<space=v>', input: '1em'},
+    mark: {label: 'HIGHLIGHT', hint: 'MARK COLOUR', code: '<mark=#RRGGBBAA>', input: '#FFFF0080'},
+    alpha: {label: 'ALPHA', hint: 'TEXT OPACITY', code: '<alpha=#AA>', input: '#80'},
+    sprite: {label: 'SPRITE', hint: 'ARENA FACE 0–15', code: '<sprite=n>', input: 0}
+  };
+
+  function fxPickerCurrentEvent() {
+    return inlineEvents.find((event) => event.id === selectedMegaEventId) || null;
+  }
+
+  function fxPickerValueFor(key) {
+    const current = fxPickerCurrentEvent();
+    if (current && megaEventKey(current) === key) {
+      if (key === 'sprite') return Number(current.value) || 0;
+      const match = String(current.code || '').match(/^<[a-z-]+=([^>]+)>$/i);
+      if (match) return match[1];
+    }
+    if (Object.prototype.hasOwnProperty.call(Logic.NUMERIC_EFFECT_DEFAULTS, key)) {
+      return effects[key]?.value ?? Logic.NUMERIC_EFFECT_DEFAULTS[key];
+    }
+    const drawerInput = document.querySelector(`[data-caret-value="${key}"]`);
+    return drawerInput?.value || FX_PICKER_META[key]?.input || '';
+  }
+
+  function renderFxPickerPreview(container, key, value) {
+    const preview = document.createElement('div');
+    preview.className = 'fx-adjust-preview';
+    if (key === 'sprite') {
+      const face = document.createElement('i');
+      face.style.backgroundImage = `var(--arena-sprite-${Number(value) || 0},none)`;
+      preview.appendChild(face);
+    } else {
+      const sample = document.createElement('span');
+      sample.textContent = key === 'br' ? 'A ↵ B' : 'Arena';
+      const number = Number.parseFloat(value) || 0;
+      if (key === 'size') sample.style.fontSize = `${12 + Math.max(0, Math.min(24, number - 5)) * 1.5}px`;
+      if (key === 'cspace') sample.style.letterSpacing = `${Math.max(-4, Math.min(14, number * .28))}px`;
+      if (key === 'rotate') sample.style.transform = `rotate(${Math.max(-180, Math.min(180, number))}deg)`;
+      if (key === 'voffset') sample.style.transform = `translateY(${-Math.max(-20, Math.min(20, number * .45))}px)`;
+      if (key === 'pos') sample.style.transform = `translateX(${Math.max(0, Math.min(60, number * .12))}px)`;
+      if (key === 'sup') sample.style.transform = 'translateY(-9px) scale(.72)';
+      if (key === 'sub') sample.style.transform = 'translateY(8px) scale(.72)';
+      if (key === 'mark') sample.style.background = previewHexColour(value) || '#FFFF0080';
+      if (key === 'alpha' && /^#[0-9a-f]{2}$/i.test(String(value))) sample.style.opacity = String(Number.parseInt(String(value).slice(1), 16) / 255);
+      preview.appendChild(sample);
+    }
+    container.appendChild(preview);
+    return preview;
+  }
+
+  function renderFxPickerCardExample(container, key) {
+    const example = document.createElement('span');
+    example.className = `fx-picker-card-example example-${key}`;
+    example.setAttribute('aria-hidden', 'true');
+    const letter = (character, className = '') => {
+      const span = document.createElement('span');
+      span.className = className;
+      span.textContent = character;
+      return span;
+    };
+    if (key === 'size') example.append(letter('A', 'small'), letter('A', 'large'));
+    else if (key === 'cspace') {
+      const sample = letter('AAA');
+      sample.style.letterSpacing = '5px';
+      example.appendChild(sample);
+    } else if (key === 'rotate') example.append(letter('A', 'tilt-left'), letter('A', 'tilt-right'));
+    else if (key === 'voffset') example.append(letter('A', 'low'), letter('A', 'high'));
+    else if (key === 'pos') example.append(letter('A', 'positioned'));
+    else if (key === 'sup') example.append(letter('A'), letter('A', 'sup'));
+    else if (key === 'sub') example.append(letter('A'), letter('A', 'sub'));
+    else if (key === 'br') example.append(letter('A'), letter('B'));
+    else if (key === 'mspace') example.append(letter('A', 'cell'), letter('A', 'cell'), letter('A', 'cell'));
+    else if (key === 'space') example.append(letter('A'), letter('A', 'spaced'));
+    else if (key === 'mark') example.append(letter('Aa', 'marked'));
+    else if (key === 'alpha') example.append(letter('Aa', 'faded'));
+    else if (key === 'sprite') {
+      const sprite = document.createElement('i');
+      sprite.style.backgroundImage = 'var(--arena-sprite-15,none)';
+      example.appendChild(sprite);
+    }
+    container.appendChild(example);
+  }
+
+  function renderFxPickerChoices() {
+    fxPickerSelectedKey = '';
+    els.fxPickerBack.hidden = true;
+    els.fxPickerTitle.textContent = 'CHOOSE FX';
+    els.fxPickerChoices.hidden = false;
+    els.fxPickerAdjust.hidden = true;
+    els.fxPickerGrid.replaceChildren();
+    Object.entries(FX_PICKER_META).forEach(([key, meta]) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.dataset.fxPickerChoice = key;
+      const label = document.createElement('b');
+      label.textContent = meta.label;
+      const hint = document.createElement('small');
+      hint.textContent = meta.hint;
+      const code = document.createElement('code');
+      code.textContent = meta.code;
+      renderFxPickerCardExample(button, key);
+      button.append(label, hint, code);
+      button.addEventListener('click', () => selectFxPickerEffect(key));
+      els.fxPickerGrid.appendChild(button);
+    });
+  }
+
+  function selectFxPickerEffect(key) {
+    const meta = FX_PICKER_META[key];
+    if (!meta) return;
+    fxPickerSelectedKey = key;
+    fxPickerDraftValue = fxPickerValueFor(key);
+    els.fxPickerBack.hidden = false;
+    els.fxPickerDrawer.hidden = fxPickerMode !== 'edit';
+    els.fxPickerTitle.textContent = meta.label;
+    els.fxPickerChoices.hidden = true;
+    els.fxPickerAdjust.hidden = false;
+    els.fxPickerSelected.replaceChildren();
+    const label = document.createElement('b');
+    label.textContent = meta.label;
+    const code = document.createElement('code');
+    code.textContent = meta.code;
+    els.fxPickerSelected.append(label, code);
+    els.fxPickerAdjustment.replaceChildren();
+    focusFxPickerTarget(key);
+    let preview = renderFxPickerPreview(els.fxPickerAdjustment, key, fxPickerDraftValue);
+    if (Number.isFinite(meta.min)) {
+      const controls = document.createElement('div');
+      controls.className = 'fx-adjust-controls';
+      const range = document.createElement('input');
+      range.type = 'range'; range.min = String(meta.min); range.max = String(meta.max); range.step = String(meta.step); range.value = String(fxPickerDraftValue);
+      range.setAttribute('aria-label', `${meta.label} adjustment`);
+      const exact = document.createElement('input');
+      exact.type = 'number'; exact.min = String(meta.min); exact.max = String(meta.max); exact.step = String(meta.step); exact.value = String(fxPickerDraftValue);
+      exact.setAttribute('aria-label', `${meta.label} exact value`);
+      const endpoints = document.createElement('div');
+      endpoints.className = 'fx-adjust-endpoints';
+      endpoints.innerHTML = `<span>${meta.min}</span><small>ARENA VALUE</small><span>${meta.max}</span>`;
+      const sync = (source, target) => {
+        fxPickerDraftValue = source.value;
+        target.value = source.value;
+        preview.remove();
+        preview = renderFxPickerPreview(els.fxPickerAdjustment, key, fxPickerDraftValue);
+      };
+      range.addEventListener('input', () => sync(range, exact));
+      exact.addEventListener('input', () => sync(exact, range));
+      controls.append(range, exact, endpoints);
+      els.fxPickerAdjustment.appendChild(controls);
+    } else if (key === 'sprite') {
+      const sprites = document.createElement('div');
+      sprites.className = 'fx-picker-sprites';
+      Array.from({length: 16}, (_, sprite) => sprite).forEach((sprite) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'sprite-placeholder';
+        button.dataset.spriteId = String(sprite);
+        button.setAttribute('aria-label', `Choose Arena sprite ${sprite}`);
+        button.setAttribute('aria-pressed', String(Number(fxPickerDraftValue) === sprite));
+        const face = document.createElement('i');
+        button.appendChild(face);
+        button.addEventListener('click', () => {
+          fxPickerDraftValue = sprite;
+          sprites.querySelectorAll('button').forEach((candidate) => candidate.setAttribute('aria-pressed', String(candidate === button)));
+          preview.style.setProperty('--picker-sprite', `var(--arena-sprite-${sprite},none)`);
+          preview.querySelector('i').style.backgroundImage = `var(--arena-sprite-${sprite},none)`;
+        });
+        sprites.appendChild(button);
+      });
+      els.fxPickerAdjustment.appendChild(sprites);
+    } else if (['mspace', 'space', 'mark', 'alpha'].includes(key)) {
+      const field = document.createElement('label');
+      field.className = 'fx-adjust-value';
+      const caption = document.createElement('span');
+      caption.textContent = meta.hint;
+      const input = document.createElement('input');
+      input.type = 'text'; input.value = String(fxPickerDraftValue); input.autocomplete = 'off'; input.spellcheck = false;
+      input.setAttribute('aria-label', `${meta.label} value`);
+      input.addEventListener('input', () => {
+        fxPickerDraftValue = input.value;
+        if (key === 'mark' || key === 'alpha') {
+          preview.remove();
+          preview = renderFxPickerPreview(els.fxPickerAdjustment, key, fxPickerDraftValue);
+        }
+      });
+      field.append(caption, input);
+      els.fxPickerAdjustment.appendChild(field);
+    } else {
+      const ready = document.createElement('p');
+      ready.className = 'fx-adjust-ready';
+      ready.textContent = `${meta.code} needs no numeric adjustment. Apply it at this bubble's caret position.`;
+      els.fxPickerAdjustment.appendChild(ready);
+    }
+    requestAnimationFrame(() => els.fxPickerAdjust.querySelector('input,button')?.focus({preventScroll: true}));
+  }
+
+  function fxPickerPayload() {
+    const key = fxPickerSelectedKey;
+    const meta = FX_PICKER_META[key];
+    if (!meta) return null;
+    if (Number.isFinite(meta.min)) {
+      const rawValue = String(fxPickerDraftValue).trim();
+      const parsed = Number(rawValue);
+      if (!rawValue || !Number.isFinite(parsed)) return null;
+      const value = Math.max(meta.min, Math.min(meta.max, parsed));
+      return {type: 'tag', code: `<${key}=${Logic.shortestNumber(value, Logic.NUMERIC_EFFECT_DEFAULTS[key])}>`};
+    }
+    if (key === 'sprite') return {type: 'sprite', value: Math.max(0, Math.min(15, Math.round(Number(fxPickerDraftValue) || 0)))};
+    if (key === 'br') return {type: 'br'};
+    if (key === 'sup' || key === 'sub') return {type: 'tag', code: `<${key}>`};
+    const code = verifiedCaretTag(key, fxPickerDraftValue);
+    return code ? {type: 'tag', code} : null;
+  }
+
+  function openFxPicker(eventId = null, requestedOffset = null) {
+    closeStopEditor();
+    selectedMegaEventId = eventId && inlineEvents.some((event) => event.id === eventId) ? eventId : null;
+    selectedMegaGlobalKey = null;
+    fxPickerMode = selectedMegaEventId ? 'edit' : 'insert';
+    pendingFxBubble = selectedMegaEventId ? null : {
+      id: `pending-fx-${nextPendingFxId++}`,
+      offset: Math.max(0, Math.min(
+        els.deckName.value.length,
+        Math.round(
+          requestedOffset !== null && requestedOffset !== undefined && Number.isFinite(Number(requestedOffset))
+            ? Number(requestedOffset)
+            : composerSelection.start
+        )
+      ))
+    };
+    fxPickerOpen = true;
+    fxPickerSelectedKey = '';
+    document.body.classList.add('fx-picker-open');
+    els.fxPickerKicker.textContent = fxPickerMode === 'edit'
+      ? 'EDIT FX BUBBLE'
+      : `CHOOSE FX @ CARET ${pendingFxBubble.offset}`;
+    renderFxPickerChoices();
+    els.fxPickerBackdrop.hidden = false;
+    renderInlineEvents();
+    if (selectedMegaEventId) focusInlineBubble(selectedMegaEventId);
+    else focusFxPickerTarget();
+    requestAnimationFrame(() => els.fxPicker.focus({preventScroll: true}));
+    haptic(4);
+  }
+
+  function closeFxPicker(options = {}) {
+    const hadPendingBubble = Boolean(pendingFxBubble);
+    fxPickerOpen = false;
+    fxPickerSelectedKey = '';
+    fxPickerDraftValue = '';
+    pendingFxBubble = null;
+    document.body.classList.remove('fx-picker-open');
+    els.fxPickerBackdrop.hidden = true;
+    clearMirrorGuide();
+    clearBubbleFocus();
+    if (selectedMegaEventId && !options.keepSelection) closeMegaBubbleEditor();
+    if (hadPendingBubble && !options.skipRender) renderInlineEvents();
+  }
+
+  function openFxDrawerFromPicker() {
+    if (!selectedMegaEventId) return;
+    closeFxPicker({keepSelection: true});
+    els.fxDrawer.open = true;
+    renderInlineEvents();
+    focusInlineBubble(selectedMegaEventId);
+    requestAnimationFrame(() => {
+      els.fxBubbleEditor.scrollIntoView({block: 'nearest'});
+      els.fxBubbleEditor.focus({preventScroll: true});
+    });
+  }
+
+  function applyFxPicker() {
+    const payload = fxPickerPayload();
+    if (!payload) {
+      els.fxPickerAdjustment.classList.add('error');
+      playFeedback('INVALID FX VALUE', true);
+      haptic(24);
+      return;
+    }
+    els.fxPickerAdjustment.classList.remove('error');
+    if (fxPickerMode === 'edit') replaceSelectedMegaEvent(payload);
+    else {
+      const offset = pendingFxBubble?.offset ?? composerSelection.start;
+      pendingFxBubble = null;
+      insertComposerEventAt(payload, offset, null);
+    }
+    closeFxPicker({skipRender: true});
+  }
+
+  function replaceSelectedMegaEvent(payload) {
+    const selected = inlineEvents.find((event) => event.id === selectedMegaEventId);
+    if (!selected || !payload) return false;
+    commitMutation(() => {
+      inlineEvents = inlineEvents.map((event) => event.id === selected.id
+        ? {id: selected.id, offset: selected.offset, sequence: selected.sequence, ...payload}
+        : event);
+    }, {haptic: 8});
+    return true;
+  }
+
+  function closeMegaBubbleEditor() {
+    selectedMegaEventId = null;
+    selectedMegaGlobalKey = null;
+    els.fxBubbleEditor.hidden = true;
+    els.fxBubbleChoices.replaceChildren();
+    els.megaFxLayer.querySelectorAll('.is-selected').forEach((token) => token.classList.remove('is-selected'));
+    clearBubbleFocus();
+  }
+
+  function renderFxBubbleEditor(events) {
+    const selected = events.find((event) => event.id === selectedMegaEventId);
+    if (!selected) {
+      selectedMegaEventId = null;
+      els.fxBubbleEditor.hidden = true;
+      els.fxBubbleChoices.replaceChildren();
+      return;
+    }
+    const label = megaEventLabel(selected);
+    const currentKey = megaEventKey(selected);
+    els.fxBubbleEditor.hidden = false;
+    els.fxBubbleEditorTitle.textContent = `EDIT FX BUBBLE · ${label}`;
+    els.fxBubbleEditorMeta.textContent = `Position ${selected.offset}. Choose a verified replacement; the bubble keeps its place and raw-code order.`;
+    els.fxBubbleChoices.replaceChildren();
+    fxChoiceDefinitions().forEach((definition) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.textContent = definition.label;
+      button.dataset.fxBubbleChoice = definition.key;
+      button.setAttribute('aria-pressed', String(definition.key === currentKey));
+      button.addEventListener('click', () => {
+        if (definition.spritePicker) {
+          els.fxBubbleEditorMeta.textContent = 'Choose one of the Arena faces in the sprite tray. It will replace this bubble without moving it.';
+          els.spriteTray.scrollIntoView({block: 'nearest'});
+          els.spriteTray.querySelector('button')?.focus({preventScroll: true});
+          return;
+        }
+        const payload = definition.payload?.();
+        if (!payload) {
+          playFeedback('INVALID FX VALUE', true);
+          return;
+        }
+        replaceSelectedMegaEvent(payload);
+      });
+      els.fxBubbleChoices.appendChild(button);
+    });
+  }
+
+  function openMegaBubbleEditor(eventId) {
+    openFxPicker(eventId);
+  }
+
+  function openGlobalFxDrawer(effectKey) {
+    selectedMegaEventId = null;
+    selectedMegaGlobalKey = effectKey;
+    els.fxDrawer.open = true;
+    renderInlineEvents();
+    requestAnimationFrame(() => {
+      const target = document.querySelector(`[data-fx-card="${effectKey}"]`)
+        || document.querySelector(`[data-fx-toggle="${effectKey}"]`)
+        || document.querySelector(`[data-format="${effectKey}"]`)
+        || document.querySelector(`[data-effect="${effectKey}"]`)
+        || els.fxDrawer;
+      target.scrollIntoView({block: 'nearest'});
+      target.focus?.({preventScroll: true});
+    });
+    haptic(4);
+  }
+
+  function layoutMegaTubeTokens(nameLength) {
+    const tokens = [...els.barStopMarkers.querySelectorAll('.bar-marker'), ...els.megaFxLayer.querySelectorAll('.mega-code-token')];
+    const trackWidth = els.megaFxLayer.getBoundingClientRect().width
+      || Math.max(1, els.gradientBar.getBoundingClientRect().width - 40);
+    const packed = Logic.packTubeBubbles(tokens.map((token, sourceIndex) => ({
+      token,
+      sourceIndex,
+      offset: Number(token.dataset.rawOffset) || 0,
+      order: Number(token.dataset.rawOrder) || 0
+    })), trackWidth, nameLength, {maximumSize: 34, minimumSize: 18, breathingRoom: 5, edge: 2});
+    let sequence = 0;
+    packed.entries.forEach((entry, index) => {
+      const token = entry.token;
+      const dormant = token.classList.contains('stage-dormant');
+      const unassigned = token.dataset.unassignedFx === 'true';
+      const sprite = token.querySelector('.mega-event-marker.event-sprite');
+      const number = token.querySelector('.tube-sequence');
+      token.style.left = `${entry.left}px`;
+      token.style.setProperty('--serial-shift', '0px');
+      token.style.setProperty('--mega-bubble-size', `${packed.bubbleSize}px`);
+      token.style.zIndex = String(20 + index);
+      if (!dormant && !unassigned) sequence += 1;
+      token.dataset.tubeNumber = dormant || unassigned ? '' : String(sequence);
+      if (number) number.textContent = dormant ? '×' : unassigned ? '' : String(sequence);
+      if (sprite) {
+        const baseAria = sprite.dataset.baseAria || sprite.getAttribute('aria-label') || 'Arena sprite';
+        sprite.dataset.baseAria = baseAria;
+        sprite.setAttribute('aria-label', `${baseAria} Raw-code bubble ${sequence}.`);
+      }
+      if (token.dataset.eventId === selectedMegaEventId) {
+        token.classList.add('is-selected');
+        els.fxBubbleEditorTitle.textContent = `EDIT BUBBLE ${sequence} · ${megaEventLabel(inlineEvents.find((event) => event.id === selectedMegaEventId))}`;
+      }
+    });
+  }
+
+  function renderInlineEvents() {
+    els.inlineEvents.replaceChildren();
+    els.megaFxLayer.replaceChildren();
+    const nameLength = els.deckName.value.length;
+    const events = Logic.normaliseInlineEvents(inlineEvents, nameLength);
+
+    (currentBuild?.effectTags || []).forEach((effectTag, index) => {
+      const token = document.createElement('button');
+      token.type = 'button';
+      token.className = 'mega-code-token mega-global-token';
+      token.dataset.rawOffset = '0';
+      token.dataset.rawOrder = String(-100 + index);
+      token.dataset.globalKey = effectTag.key;
+      token.classList.toggle('is-selected', effectTag.key === selectedMegaGlobalKey);
+      const number = document.createElement('span');
+      number.className = 'tube-sequence';
+      number.textContent = String(index + 1);
+      token.appendChild(number);
+      token.title = `${effectTag.code} is emitted globally before the first colour tag`;
+      token.setAttribute('aria-label', `${effectTag.code}, global Arena effect at the start of the code`);
+      token.addEventListener('click', () => openGlobalFxDrawer(effectTag.key));
+      token.addEventListener('contextmenu', (contextEvent) => {
+        contextEvent.preventDefault();
+        openGlobalFxDrawer(effectTag.key);
+      });
+      token.addEventListener('pointerenter', () => showMirrorGuide(0));
+      token.addEventListener('pointerleave', clearMirrorGuide);
+      token.addEventListener('focus', () => showMirrorGuide(0));
+      token.addEventListener('blur', clearMirrorGuide);
+      els.megaFxLayer.appendChild(token);
+    });
+
+    events.forEach((inlineEvent) => {
+      const node = document.createElement('span');
+      node.className = 'mega-code-token mega-event-node';
+      node.dataset.eventId = inlineEvent.id || '';
+      node.dataset.rawOffset = String(inlineEvent.offset);
+      node.dataset.rawOrder = String(100 + (Number(inlineEvent.sequence) || 0));
+      node.style.left = `${nameLength ? inlineEvent.offset / nameLength * 100 : 0}%`;
+      const marker = document.createElement('button');
+      marker.type = 'button';
+      marker.className = `mega-event-marker event-${inlineEvent.type}`;
+      marker.dataset.eventId = inlineEvent.id || '';
+      marker.dataset.eventOffset = String(inlineEvent.offset);
+      const label = megaEventLabel(inlineEvent);
+      if (inlineEvent.type === 'sprite') {
+        const hook = document.createElement('i');
+        hook.style.backgroundImage = `var(--arena-sprite-${inlineEvent.value},none)`;
+        marker.appendChild(hook);
+      } else {
+        const number = document.createElement('span');
+        number.className = 'tube-sequence';
+        marker.appendChild(number);
+      }
+      marker.setAttribute('aria-label', `${label} at text position ${inlineEvent.offset}. Click to edit; drag or use arrow keys to move.`);
+      marker.title = `${inlineEvent.code} @ ${inlineEvent.offset}`;
+      marker.classList.toggle('is-selected', inlineEvent.id === selectedMegaEventId);
+      const removeEvent = () => {
+        if (selectedMegaEventId === inlineEvent.id) selectedMegaEventId = null;
+        commitMutation(() => {
+          inlineEvents = inlineEvents.filter((candidate) => candidate.id !== inlineEvent.id);
+        });
+      };
+      const moveTo = (offset) => {
+        const target = Math.max(0, Math.min(nameLength, offset));
+        if (target === inlineEvent.offset) return;
+        commitMutation(() => {
+          inlineEvents = inlineEvents.map((candidate) => candidate.id === inlineEvent.id ? {...candidate, offset: target} : candidate);
+        }, {haptic: 7});
+      };
+      marker.addEventListener('pointerenter', () => showMirrorGuide(inlineEvent.offset));
+      marker.addEventListener('pointerleave', clearMirrorGuide);
+      marker.addEventListener('focus', () => showMirrorGuide(inlineEvent.offset));
+      marker.addEventListener('blur', clearMirrorGuide);
+      marker.addEventListener('keydown', (keyEvent) => {
+        let target = inlineEvent.offset;
+        if (keyEvent.key === 'ArrowLeft') target -= keyEvent.shiftKey ? 5 : 1;
+        else if (keyEvent.key === 'ArrowRight') target += keyEvent.shiftKey ? 5 : 1;
+        else if (keyEvent.key === 'Home') target = 0;
+        else if (keyEvent.key === 'End') target = nameLength;
+        else if (keyEvent.key === 'Delete' || keyEvent.key === 'Backspace') {
+          keyEvent.preventDefault(); removeEvent(); return;
+        } else if (keyEvent.key === 'Enter' || keyEvent.key === ' ') {
+          keyEvent.preventDefault(); openMegaBubbleEditor(inlineEvent.id); return;
+        } else return;
+        keyEvent.preventDefault(); moveTo(target);
+      });
+      marker.addEventListener('pointerdown', (pointerEvent) => {
+        if (pointerEvent.button !== 0) return;
+        pointerEvent.preventDefault();
+        const originalOffset = inlineEvent.offset;
+        let draftOffset = originalOffset;
+        let moved = false;
+        try { marker.setPointerCapture(pointerEvent.pointerId); } catch (_) {}
+        const offsetFromPointer = (clientX) => {
+          const bounds = els.gradientBar.getBoundingClientRect();
+          return bounds.width ? Math.max(0, Math.min(nameLength, Math.round((clientX - bounds.left) / bounds.width * nameLength))) : originalOffset;
+        };
+        const update = (moveEvent) => {
+          if (moveEvent.pointerId !== pointerEvent.pointerId) return;
+          draftOffset = offsetFromPointer(moveEvent.clientX);
+          moved = moved || draftOffset !== originalOffset;
+          node.style.left = `${nameLength ? draftOffset / nameLength * 100 : 0}%`;
+          marker.classList.toggle('dragging', moved);
+          showMirrorGuide(draftOffset);
+        };
+        const cleanup = () => {
+          marker.removeEventListener('pointermove', update);
+          marker.removeEventListener('pointerup', finish);
+          marker.removeEventListener('pointercancel', cancel);
+          try { if (marker.hasPointerCapture(pointerEvent.pointerId)) marker.releasePointerCapture(pointerEvent.pointerId); } catch (_) {}
+          clearMirrorGuide();
+        };
+        const finish = (finishEvent) => {
+          if (finishEvent.pointerId !== pointerEvent.pointerId) return;
+          cleanup();
+          if (moved) moveTo(draftOffset);
+          else {
+            marker.classList.remove('dragging');
+            openMegaBubbleEditor(inlineEvent.id);
+          }
+        };
+        const cancel = (cancelEvent) => {
+          if (cancelEvent.pointerId !== pointerEvent.pointerId) return;
+          cleanup(); node.style.left = `${nameLength ? originalOffset / nameLength * 100 : 0}%`;
+          marker.classList.remove('dragging');
+        };
+        marker.addEventListener('pointermove', update);
+        marker.addEventListener('pointerup', finish);
+        marker.addEventListener('pointercancel', cancel);
+      });
+      marker.addEventListener('contextmenu', (contextEvent) => {
+        contextEvent.preventDefault();
+        openMegaBubbleEditor(inlineEvent.id);
+      });
+      node.appendChild(marker);
+      els.megaFxLayer.appendChild(node);
+    });
+
+    if (pendingFxBubble) {
+      const node = document.createElement('span');
+      node.className = 'mega-code-token mega-event-node pending-fx-token is-selected';
+      node.dataset.pendingFxId = pendingFxBubble.id;
+      node.dataset.unassignedFx = 'true';
+      node.dataset.rawOffset = String(pendingFxBubble.offset);
+      node.dataset.rawOrder = '999999';
+      node.style.left = `${nameLength ? pendingFxBubble.offset / nameLength * 100 : 0}%`;
+      const marker = document.createElement('button');
+      marker.type = 'button';
+      marker.className = 'mega-event-marker event-unassigned is-selected';
+      marker.tabIndex = -1;
+      marker.setAttribute('aria-label', `Unassigned FX placeholder at text position ${pendingFxBubble.offset}. Not included in Arena code.`);
+      marker.title = 'CHOOSE FX · not yet included in raw code or budget';
+      const label = document.createElement('span');
+      label.className = 'pending-fx-label';
+      label.textContent = 'FX';
+      marker.appendChild(label);
+      node.appendChild(marker);
+      els.megaFxLayer.appendChild(node);
+    }
+
+    renderFxBubbleEditor(events);
+
+    const sourceStrip = document.createElement('div');
+    sourceStrip.className = 'inline-timeline-sources mega-source-strip';
+    sourceStrip.setAttribute('role', 'group');
+    sourceStrip.setAttribute('aria-label', 'Add an effect bubble at the active caret');
+    const sourceLabel = document.createElement('b');
+    sourceLabel.textContent = 'ADD FX';
+    sourceStrip.appendChild(sourceLabel);
+    const genericFx = document.createElement('button');
+    genericFx.type = 'button';
+    genericFx.className = 'generic-fx-source';
+    genericFx.dataset.timelineSource = '';
+    genericFx.innerHTML = '<i>FX</i><span>CHOOSE EFFECT</span>';
+    genericFx.setAttribute('aria-label', 'Choose an effect at the active caret, or drag this generic FX bubble into the Mega Tube and choose after dropping');
+    genericFx.addEventListener('click', () => {
+      if (genericFx.dataset.dragged === 'true') return;
+      openFxPicker();
+    });
+    enableUnassignedFxDragSource(genericFx);
+    sourceStrip.appendChild(genericFx);
+    const scale = document.createElement('div');
+    scale.className = 'mega-tube-scale';
+    scale.innerHTML = `<span>0 // START</span><b>FX PICKER ADDS AT CARET · BUBBLES DRAG PRECISELY</b><span>${nameLength} // END</span>`;
+    els.inlineEvents.append(sourceStrip, scale);
+
+    if (!els.gradientBar.dataset.fxDropReady) {
+      els.gradientBar.dataset.fxDropReady = 'true';
+      els.gradientBar.addEventListener('dragover', (dragEvent) => {
+        const types = Array.from(dragEvent.dataTransfer?.types || []);
+        if (
+          !types.includes('application/x-arena-fx')
+          && !types.includes('application/x-arena-colour')
+          && !types.includes('application/x-arena-unassigned-fx')
+        ) return;
+        dragEvent.preventDefault(); els.gradientBar.classList.add('drop-target');
+      });
+      els.gradientBar.addEventListener('dragleave', () => els.gradientBar.classList.remove('drop-target'));
+      els.gradientBar.addEventListener('drop', (dropEvent) => {
+        els.gradientBar.classList.remove('drop-target');
+        const encoded = dropEvent.dataTransfer?.getData('application/x-arena-fx');
+        const colour = dropEvent.dataTransfer?.getData('application/x-arena-colour');
+        const unassignedFx = dropEvent.dataTransfer?.getData('application/x-arena-unassigned-fx');
+        if (!encoded && !colour && !unassignedFx) return;
+        dropEvent.preventDefault();
+        try {
+          const length = els.deckName.value.length;
+          const position = tubePositionFromClientX(dropEvent.clientX);
+          if (colour) insertGradientColourAt(colour, position);
+          else if (unassignedFx) openFxPicker(null, Math.round(position * length));
+          else insertComposerEventAt(JSON.parse(encoded), Math.round(position * length), null);
+        } catch (_) {}
+      });
+    }
+    layoutMegaTubeTokens(nameLength);
+    if ((fxPickerOpen || els.fxDrawer.open) && selectedMegaEventId) focusInlineBubble(selectedMegaEventId);
+    else if (fxPickerOpen && pendingFxBubble) focusFxPickerTarget(fxPickerSelectedKey);
+    requestAnimationFrame(() => layoutMegaTubeTokens(nameLength));
+  }
+
+  function rememberComposerSelection(input) {
+    if (!(input instanceof HTMLInputElement)) return;
+    activeTextInput = input;
+    composerSelection = {
+      start: Number.isInteger(input.selectionStart) ? input.selectionStart : input.value.length,
+      end: Number.isInteger(input.selectionEnd) ? input.selectionEnd : input.value.length
+    };
+  }
+
+  function insertComposerEventAt(event, requestedOffset, focusInput = null) {
+    const offset = Math.max(0, Math.min(els.deckName.value.length, Math.round(Number(requestedOffset) || 0)));
+    const id = `inline-${nextInlineEventId++}`;
+    commitMutation(() => {
+      defaultNameUntouched = false;
+      inlineEvents = Logic.insertInlineEvent(inlineEvents, {...event, id}, offset);
+    }, {haptic: 9});
+    if (focusInput instanceof HTMLInputElement) requestAnimationFrame(() => {
+      focusInput.focus({preventScroll: true});
+      focusInput.setSelectionRange(offset, offset);
+      rememberComposerSelection(focusInput);
+    });
+  }
+
+  function insertComposerEvent(event) {
+    const input = activeTextInput || els.deckName;
+    const offset = Math.max(0, Math.min(els.deckName.value.length, composerSelection.start));
+    insertComposerEventAt(event, offset, input);
+  }
+
+  function insertOrReplaceComposerEvent(event) {
+    if (replaceSelectedMegaEvent(event)) return;
+    insertComposerEvent(event);
+  }
+
+  function enableFxDragSource(element, payloadProvider) {
+    element.draggable = true;
+    element.classList.add('fx-drag-source');
+    element.addEventListener('dragstart', (dragEvent) => {
+      const payload = typeof payloadProvider === 'function' ? payloadProvider() : payloadProvider;
+      if (!payload || !dragEvent.dataTransfer) {
+        dragEvent.preventDefault();
+        return;
+      }
+      dragEvent.dataTransfer.effectAllowed = 'copy';
+      dragEvent.dataTransfer.setData('application/x-arena-fx', JSON.stringify(payload));
+      dragEvent.dataTransfer.setData('text/plain', payload.type === 'tag' ? payload.code : payload.type === 'sprite' ? `<sprite=${payload.value}>` : '<br>');
+      element.classList.add('dragging');
+    });
+    element.addEventListener('dragend', () => element.classList.remove('dragging'));
+  }
+
+  function enableUnassignedFxDragSource(element) {
+    element.draggable = true;
+    element.classList.add('fx-drag-source', 'unassigned-fx-drag-source');
+    element.addEventListener('dragstart', (dragEvent) => {
+      if (!dragEvent.dataTransfer) { dragEvent.preventDefault(); return; }
+      dragEvent.dataTransfer.effectAllowed = 'copy';
+      dragEvent.dataTransfer.setData('application/x-arena-unassigned-fx', 'choose-after-drop');
+      dragEvent.dataTransfer.setData('text/plain', 'FX');
+      element.dataset.dragged = 'true';
+      element.classList.add('dragging');
+    });
+    element.addEventListener('dragend', () => {
+      element.classList.remove('dragging');
+      setTimeout(() => { delete element.dataset.dragged; }, 0);
+    });
+  }
+
+  function enableColourDragSource(element, colourProvider) {
+    element.draggable = true;
+    element.classList.add('colour-drag-source');
+    element.addEventListener('dragstart', (dragEvent) => {
+      const colour = normaliseHex(typeof colourProvider === 'function' ? colourProvider() : colourProvider);
+      if (!colour || !dragEvent.dataTransfer) { dragEvent.preventDefault(); return; }
+      dragEvent.dataTransfer.effectAllowed = 'copy';
+      dragEvent.dataTransfer.setData('application/x-arena-colour', colour);
+      dragEvent.dataTransfer.setData('text/plain', colour);
+      element.classList.add('dragging');
+    });
+    element.addEventListener('dragend', () => element.classList.remove('dragging'));
+  }
+
+  function insertGradientColourAt(colour, requestedPosition) {
+    const clean = normaliseHex(colour);
+    if (!clean) return;
+    const position = Math.max(0, Math.min(1, Number(requestedPosition) || 0));
+    if (position > ANCHOR_SWAP_ZONE && gradientStops.length >= MAX_STOPS) {
+      playFeedback('SEVEN COLOURS MAX', true); haptic(18); return;
+    }
+    commitMutation(() => {
+      if (position <= ANCHOR_SWAP_ZONE) {
+        gradientStops[0] = {...gradientStops[0], colour: clean};
+        selectedStop = 0;
+      } else {
+        gradientStops = normalisePalette([...gradientStops, {colour: clean, position}]);
+        selectedStop = gradientStops.reduce((best, stop, index) => Math.abs(stop.position - position) < best.distance ? {index, distance: Math.abs(stop.position - position)} : best, {index: 0, distance: Infinity}).index;
+      }
+      manaSelection = [];
+    }, {haptic: 9});
+  }
+
+  function verifiedCaretTag(name, value) {
+    const clean = String(value || '').trim();
+    if (name === 'mspace' || name === 'space') {
+      return /^-?\d+(?:\.\d+)?(?:px|em|%)?$/i.test(clean) ? `<${name}=${clean}>` : '';
+    }
+    if (name === 'mark') return /^#[0-9a-f]{6}(?:[0-9a-f]{2})?$/i.test(clean) ? `<mark=${clean.toUpperCase()}>` : '';
+    if (name === 'alpha') return /^#[0-9a-f]{2}$/i.test(clean) ? `<alpha=${clean.toUpperCase()}>` : '';
+    return '';
+  }
+
+  function renderSpriteTray() {
+    els.spriteTray.replaceChildren();
+    Array.from({length: 16}, (_, sprite) => sprite).forEach((sprite) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'sprite-placeholder sprite-tile';
+      button.dataset.spriteId = String(sprite);
+      button.setAttribute('aria-label', `Insert Arena sprite ${sprite} at the active caret`);
+      button.title = `Arena sprite ${sprite}`;
+      const hook = document.createElement('i');
+      button.appendChild(hook);
+      button.addEventListener('click', () => insertOrReplaceComposerEvent({type: 'sprite', value: sprite}));
+      enableFxDragSource(button, {type: 'sprite', value: sprite});
+      els.spriteTray.appendChild(button);
+    });
+  }
+
+  function renderProbeButtons(target, probes) {
+    target.replaceChildren();
+    probes.forEach((probe) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      const label = document.createElement('b');
+      label.textContent = probe.name;
+      const code = document.createElement('code');
+      code.textContent = probe.code;
+      button.append(label, code);
+      button.addEventListener('click', () => {
+        els.probeOutput.value = probe.complete ? probe.code : `${probe.code}Arena`;
+        els.probeOutput.focus({preventScroll: true});
+        els.probeOutput.select();
+      });
+      target.appendChild(button);
+    });
+  }
+
+  function handleTextInput(source, mirror) {
+    const nextName = source.value;
+    inlineEvents = Logic.rebaseInlineEvents(inlineEvents, previousName, nextName);
+    previousName = nextName;
+    mirror.value = nextName;
+    defaultNameUntouched = false;
+    rememberComposerSelection(source);
+    renderOutput();
+    renderInlineEvents();
   }
 
   function configureOptionalFormats() {
@@ -1150,6 +2602,8 @@
     renderPaletteTray();
     renderSavedPalettes();
     renderFormatting();
+    renderFxControls();
+    renderInlineEvents();
   }
 
   function enableGlassRefraction() {
@@ -1187,10 +2641,7 @@
     const clean = pasted.replace(/[\r\n\t]+/g, ' ');
     const target = event.currentTarget;
     target.setRangeText(clean, target.selectionStart, target.selectionEnd, 'end');
-    if (target === els.prismaticDeckName) els.deckName.value = target.value;
-    else els.prismaticDeckName.value = target.value;
-    defaultNameUntouched = false;
-    renderOutput();
+    handleTextInput(target, target === els.prismaticDeckName ? els.deckName : els.prismaticDeckName);
   }
 
   async function writeClipboard(text) {
@@ -1254,15 +2705,29 @@
   configureOptionalFormats();
   renderViewMode();
   renderBuiltIns();
+  renderSpriteTray();
+  renderProbeButtons(els.verifiedProbeList, VERIFIED_PROBES);
+  renderProbeButtons(els.candidateProbeList, CANDIDATE_PROBES);
   renderAll();
   enableGlassRefraction();
+  let megaTubeResizeFrame = null;
+  const relayoutMegaTube = () => {
+    cancelAnimationFrame(megaTubeResizeFrame);
+    megaTubeResizeFrame = requestAnimationFrame(() => {
+      layoutMegaTubeTokens(els.deckName.value.length);
+      updateVisualWidthRisk(currentBuild);
+    });
+  };
+  if (typeof ResizeObserver === 'function') new ResizeObserver(relayoutMegaTube).observe(els.gradientBar);
+  else window.addEventListener('resize', relayoutMegaTube, {passive: true});
 
   els.undoButton.addEventListener('click', undo);
+  els.startOver.addEventListener('click', startOver);
   els.rotateGradient.addEventListener('click', rotateGradient);
   els.flipGradient.addEventListener('click', flipGradient);
   els.tubeAddButton.addEventListener('click', addBubbleFromButton);
   els.gradientBar.addEventListener('click', (event) => {
-    if (event.target.closest('.bar-marker')) return;
+    if (event.target.closest('.bar-marker,.mega-event-node,.mega-global-token')) return;
     if (gradientStops.length === 1) openStopEditor(0);
   });
   els.gradientBar.addEventListener('keydown', (event) => {
@@ -1353,33 +2818,144 @@
     confirmEditorColour();
   });
   els.stopEditorConfirm.addEventListener('click', confirmEditorColour);
-  document.querySelectorAll('.format-pad button').forEach((button) => button.addEventListener('click', () => {
+  document.querySelectorAll('.format-pad button[data-format]').forEach((button) => button.addEventListener('click', () => {
     commitMutation(() => { formatting[button.dataset.format] = !formatting[button.dataset.format]; });
   }));
+  document.querySelectorAll('.format-pad button[data-effect]').forEach((button) => button.addEventListener('click', () => {
+    const key = button.dataset.effect;
+    commitMutation(() => { effects = Logic.normaliseEffects({...effects, [key]: !effects[key]}); });
+  }));
+  document.querySelectorAll('[data-fx-toggle]').forEach((button) => button.addEventListener('click', () => {
+    const key = button.dataset.fxToggle;
+    commitMutation(() => {
+      const next = !effects[key];
+      effects = Logic.normaliseEffects({...effects, [key]: next, [key === 'sup' ? 'sub' : 'sup']: next ? false : effects[key === 'sup' ? 'sub' : 'sup']});
+    });
+  }));
+  document.querySelectorAll('[data-fx-enabled]').forEach((checkbox) => checkbox.addEventListener('change', () => {
+    const name = checkbox.dataset.fxEnabled;
+    const enabled = checkbox.checked;
+    commitMutation(() => {
+      effects = Logic.normaliseEffects({...effects, [name]: {...effects[name], enabled}});
+    });
+  }));
+  document.querySelectorAll('[data-fx-value],[data-fx-slider]').forEach((input) => {
+    const name = input.dataset.fxValue || input.dataset.fxSlider;
+    const rememberPreviousValue = () => {
+      const previous = effects[name]?.value ?? Logic.NUMERIC_EFFECT_DEFAULTS[name];
+      document.querySelectorAll(`[data-fx-value="${name}"],[data-fx-slider="${name}"]`).forEach((control) => {
+        control.dataset.previousValue = previous;
+      });
+    };
+    input.addEventListener('focus', rememberPreviousValue);
+    input.addEventListener('pointerdown', rememberPreviousValue);
+    input.addEventListener('input', () => {
+      const nextValue = normaliseFxControlValue(name, input.value);
+      effects[name] = {...effects[name], value: nextValue};
+      syncFxValueControls(name, nextValue);
+      renderOutput();
+    });
+    input.addEventListener('change', () => {
+      const previousValue = input.dataset.previousValue ?? Logic.NUMERIC_EFFECT_DEFAULTS[name];
+      const nextValue = normaliseFxControlValue(name, input.value);
+      effects[name] = {...effects[name], value: previousValue};
+      commitMutation(() => {
+        effects = Logic.normaliseEffects({...effects, [name]: {...effects[name], value: nextValue}});
+      });
+      document.querySelectorAll(`[data-fx-value="${name}"],[data-fx-slider="${name}"]`).forEach((control) => {
+        control.dataset.previousValue = nextValue;
+      });
+    });
+  });
+  els.insertBreak.addEventListener('click', () => insertOrReplaceComposerEvent({type: 'br'}));
+  enableFxDragSource(els.insertBreak, {type: 'br'});
+  document.querySelectorAll('[data-caret-current]').forEach((button) => {
+    const payload = () => {
+      const name = button.dataset.caretCurrent;
+      return {type: 'tag', code: `<${name}=${Logic.shortestNumber(effects[name]?.value, Logic.NUMERIC_EFFECT_DEFAULTS[name])}>`};
+    };
+    button.addEventListener('click', () => insertOrReplaceComposerEvent(payload()));
+    enableFxDragSource(button, payload);
+  });
+  document.querySelectorAll('[data-caret-code]').forEach((button) => {
+    const payload = {type: 'tag', code: button.dataset.caretCode};
+    button.addEventListener('click', () => insertOrReplaceComposerEvent(payload));
+    enableFxDragSource(button, payload);
+  });
+  document.querySelectorAll('[data-caret-insert]').forEach((button) => {
+    const payload = () => {
+      const name = button.dataset.caretInsert;
+      const input = document.querySelector(`[data-caret-value="${name}"]`);
+      const code = verifiedCaretTag(name, input?.value);
+      return code ? {type: 'tag', code} : null;
+    };
+    button.addEventListener('click', () => {
+      const name = button.dataset.caretInsert;
+      const input = document.querySelector(`[data-caret-value="${name}"]`);
+      const event = payload();
+      if (!event) {
+        input?.setAttribute('aria-invalid', 'true');
+        input?.focus({preventScroll: true});
+        playFeedback('INVALID FX VALUE', true);
+        haptic(24);
+        return;
+      }
+      input.removeAttribute('aria-invalid');
+      insertOrReplaceComposerEvent(event);
+    });
+    enableFxDragSource(button, payload);
+  });
+  els.fxBubbleEditorDone.addEventListener('click', () => {
+    closeMegaBubbleEditor();
+    els.fxDrawer.querySelector('summary')?.focus({preventScroll: true});
+  });
+  els.fxBubbleDelete.addEventListener('click', () => {
+    const selected = inlineEvents.find((event) => event.id === selectedMegaEventId);
+    if (!selected) return;
+    selectedMegaEventId = null;
+    commitMutation(() => {
+      inlineEvents = inlineEvents.filter((event) => event.id !== selected.id);
+    }, {haptic: 10});
+  });
+  els.fxDrawer.addEventListener('toggle', () => {
+    if (!els.fxDrawer.open) closeMegaBubbleEditor();
+  });
+  els.fxPickerBack.addEventListener('click', renderFxPickerChoices);
+  els.fxPickerClose.addEventListener('click', closeFxPicker);
+  els.fxPickerDrawer.addEventListener('click', openFxDrawerFromPicker);
+  els.fxPickerApply.addEventListener('click', applyFxPicker);
+  els.fxPickerBackdrop.addEventListener('pointerdown', (event) => {
+    if (event.target === els.fxPickerBackdrop) closeFxPicker();
+  });
+  els.fxPicker.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') { event.preventDefault(); closeFxPicker(); }
+  });
   els.deckName.addEventListener('focus', () => requestAnimationFrame(selectDefaultName));
   els.deckName.addEventListener('pointerup', (event) => {
-    if (!defaultNameUntouched || els.deckName.value !== DEFAULT_NAME) return;
-    event.preventDefault(); selectDefaultName();
+    if (defaultNameUntouched && els.deckName.value === DEFAULT_NAME) { event.preventDefault(); selectDefaultName(); }
+    requestAnimationFrame(() => rememberComposerSelection(els.deckName));
   });
   els.deckName.addEventListener('input', () => {
-    defaultNameUntouched = false;
-    els.prismaticDeckName.value = els.deckName.value;
-    renderOutput();
+    handleTextInput(els.deckName, els.prismaticDeckName);
   });
   els.deckName.addEventListener('paste', normalisePastedText);
+  els.deckName.addEventListener('select', () => rememberComposerSelection(els.deckName));
+  els.deckName.addEventListener('keyup', () => rememberComposerSelection(els.deckName));
   els.prismaticDeckName.addEventListener('input', () => {
-    defaultNameUntouched = false;
-    els.deckName.value = els.prismaticDeckName.value;
-    renderOutput();
+    handleTextInput(els.prismaticDeckName, els.deckName);
   });
   els.prismaticDeckName.addEventListener('paste', normalisePastedText);
+  els.prismaticDeckName.addEventListener('focus', () => rememberComposerSelection(els.prismaticDeckName));
+  els.prismaticDeckName.addEventListener('select', () => rememberComposerSelection(els.prismaticDeckName));
+  els.prismaticDeckName.addEventListener('keyup', () => rememberComposerSelection(els.prismaticDeckName));
+  els.prismaticDeckName.addEventListener('pointerup', () => requestAnimationFrame(() => rememberComposerSelection(els.prismaticDeckName)));
   els.prismaticDeckName.addEventListener('keydown', (event) => {
     if (event.key !== 'Enter') return;
     event.preventDefault();
     closePrismaticNameEditor();
   });
   els.viewModeToggle.addEventListener('click', () => {
-    viewMode = viewMode === 'v6' ? 'prismatic' : 'v6';
+    viewMode = viewMode === DEFAULT_VIEW_MODE ? 'prismatic' : DEFAULT_VIEW_MODE;
     renderViewMode();
     haptic([7, 9]);
   });
@@ -1390,11 +2966,19 @@
     if (event.target === els.prismaticNameBackdrop) closePrismaticNameEditor();
   });
   els.copyButton.addEventListener('click', copyResult);
+  els.copyRawCode.addEventListener('click', copyResult);
+  els.copyProbe.addEventListener('click', async () => {
+    const copied = await writeClipboard(els.probeOutput.value);
+    els.copyStatus.textContent = copied ? 'Arena probe copied.' : 'Probe copy blocked.';
+    haptic(copied ? 9 : 24);
+  });
   document.addEventListener('keydown', (event) => {
     const isTextField = event.target instanceof HTMLInputElement && ['text', 'search'].includes(event.target.type);
     if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') { event.preventDefault(); copyResult(); return; }
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'z' && !isTextField) { event.preventDefault(); undo(); }
+    if (event.key === 'Escape' && fxPickerOpen) { closeFxPicker(); return; }
     if (event.key === 'Escape' && !els.prismaticNameBackdrop.hidden) { closePrismaticNameEditor(); return; }
     if (event.key === 'Escape' && stopEditorOpen) { closeStopEditor(); return; }
+    if (event.key === 'Escape' && (selectedMegaEventId || selectedMegaGlobalKey)) { closeMegaBubbleEditor(); }
   });
 })();

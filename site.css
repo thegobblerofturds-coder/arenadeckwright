@@ -258,6 +258,7 @@ footer{
 }
 footer .mega-link{color:inherit;opacity:.42;text-decoration:none;transition:opacity .16s,color .16s}
 footer .mega-link:hover,footer .mega-link:focus-visible{color:#2b2723;opacity:.9;outline:none;text-decoration:underline;text-underline-offset:3px}
+footer .fan-content-notice{max-width:680px;font-size:7px;font-weight:750;line-height:1.5;letter-spacing:.04em;text-align:center}
 
 .current-showcase:focus-visible,.launch:focus-visible{
   outline:3px solid var(--cyan);
@@ -283,7 +284,7 @@ footer .mega-link:hover,footer .mega-link:focus-visible{color:#2b2723;opacity:.9
   .version-flag{top:-21px;left:4px}
   .showcase-action{right:18px;bottom:18px;padding:10px 13px}
   .privacy{flex-direction:column;align-items:center;text-align:center}
-  footer{flex-direction:column}
+  footer{align-items:center;flex-direction:column;text-align:center}
 }
 
 @media(max-width:400px){

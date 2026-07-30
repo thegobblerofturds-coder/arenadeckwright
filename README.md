@@ -5,7 +5,7 @@ A fan-made, browser-based utility for creating colourful Magic Arena deck names 
 ## Site structure
 
 - `/` is the landing page.
-- `/colour/` is the current Version 6 Deck Name Colourifier.
+- `/colour/` is the current Version 7 Deck Name Colourifier.
 - `/cheugs/` is an intentionally unlisted joke edition whose escape link returns to `/colour/`.
 
 The `/colour/` folder is what makes `https://turdgobbler.com/colour/` work. No backend or server-side code is required.
@@ -20,4 +20,4 @@ The project uses ordinary HTML, CSS and JavaScript with no external packages or 
 
 Upload the contents of this folder to the root of the GitHub Pages repository, preserving the `colour` and `cheugs` folders. The repository root must contain `index.html`, `site.css`, and `.nojekyll`.
 
-This is an unofficial fan-made utility and is not affiliated with Wizards of the Coast.
+TurdGobbler's Deck Name Colourifier is unofficial Fan Content permitted under the Fan Content Policy. Not approved/endorsed by Wizards. Portions of the materials used are property of Wizards of the Coast. © Wizards of the Coast LLC.
