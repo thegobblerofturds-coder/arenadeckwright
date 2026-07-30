@@ -119,7 +119,8 @@
     clearWubrg: $('clearWubrg'), wubrgContext: $('wubrgContext'),
     wubrgResults: $('wubrgResults'), colourPresets: $('colourPresets'), stylePresets: $('stylePresets'),
     colourLayerBubble: $('colourLayerBubble'), fxLayerBubble: $('fxLayerBubble'),
-    sourceLibrary: $('sourceLibrary'),
+    sourceLibrary: $('sourceLibrary'), choiceCard: $('choiceCard'),
+    pendingChoiceBanner: $('pendingChoiceBanner'), pendingChoiceTitle: $('pendingChoiceTitle'),
     saveComposition: $('saveComposition'), savedCompositions: $('savedCompositions'),
     toast: $('toast')
   };
@@ -633,16 +634,25 @@
     return Math.max(0, Math.min(1, Number(position) || 0)) * width;
   }
 
-  function addAnchorGuide(startX, endX, kind) {
-    const startY = els.tubeLayerRail.offsetTop + 16;
-    const endY = els.tubeFill.offsetTop + els.tubeFill.offsetHeight / 2;
+  function addAnchorGuide(token, offset, kind) {
+    const target = els.outputPreview.querySelector(
+      `.preview-glyph[data-drop-offset="${offset}"], .preview-end-target[data-drop-offset="${offset}"]`
+    );
+    if (!target) return;
+    const canvasBounds = els.tubeNameCanvas.getBoundingClientRect();
+    const tokenBounds = token.getBoundingClientRect();
+    const targetBounds = target.getBoundingClientRect();
+    const startX = tokenBounds.left + tokenBounds.width / 2 - canvasBounds.left;
+    const startY = tokenBounds.top - canvasBounds.top + 2;
+    const endX = targetBounds.left + targetBounds.width / 2 - canvasBounds.left;
+    const endY = targetBounds.bottom - canvasBounds.top - 1;
     const deltaX = endX - startX;
     const deltaY = endY - startY;
     const length = Math.hypot(deltaX, deltaY);
-    if (Math.abs(deltaX) < 4 || length < 4) return;
+    if (length < 8) return;
     const guide = document.createElement('i');
     guide.className = `layer-guide guide-${kind}`;
-    guide.style.left = `${(els.tubeLayerRail.offsetLeft + startX).toFixed(1)}px`;
+    guide.style.left = `${startX.toFixed(1)}px`;
     guide.style.top = `${startY.toFixed(1)}px`;
     guide.style.width = `${length.toFixed(1)}px`;
     guide.style.transform = `rotate(${Math.atan2(deltaY, deltaX)}rad)`;
@@ -661,7 +671,13 @@
         const desired = token.hasAttribute('data-visual-position')
           ? railXFromColourPosition(Number(token.dataset.visualPosition || 0))
           : anchor;
-        return {token, kind, anchor, desired};
+        return {
+          token,
+          kind,
+          anchor,
+          desired,
+          anchorOffset: Number(token.dataset.anchorOffset || 0)
+        };
       })
       .sort((left, right) => left.desired - right.desired);
     if (!tokens.length || !railBounds.width) return;
@@ -698,7 +714,7 @@
     tokens.forEach((entry) => {
       entry.token.classList.toggle('dense', dense);
       entry.token.style.left = `${entry.resolved.toFixed(1)}px`;
-      addAnchorGuide(entry.resolved, entry.anchor, entry.kind);
+      addAnchorGuide(entry.token, entry.anchorOffset, entry.kind);
     });
   }
 
@@ -807,8 +823,12 @@
           : offsetFromPosition(tubePosition(moveEvent.clientX));
       options.update(position, offset);
       target.dataset.visualPosition = String(position);
-      if (options.kind === 'colour') target.dataset.anchorPosition = String(position);
-      else target.dataset.anchorOffset = String(offset);
+      if (options.kind === 'colour') {
+        target.dataset.anchorPosition = String(position);
+        target.dataset.anchorOffset = String(colourOffsetFromPosition(position));
+      } else {
+        target.dataset.anchorOffset = String(offset);
+      }
       layoutRailTokens();
       showCanvasDropTarget(snapTarget);
       showDropMagnifier(snapTarget, offset, moveEvent.clientX, options.kind === 'colour' ? position : null);
@@ -1075,13 +1095,16 @@
     });
     const fields = document.createElement('div');
     fields.className = 'inspector-fields';
+    const compactColour = labelledControl('COLOUR', picker);
+    compactColour.classList.add('compact-colour-swatch');
     fields.append(
-      labelledControl('COLOUR', picker),
+      compactColour,
       labelledControl('HEX', hex),
-      positionStepper(currentPercent, 100, (percent) => mutate(() => {
+      draggableRange('TUBE POSITION', currentPercent, 0, 100, 1, (percent) => {
         stop.position = percent / 100;
+        state.wubrg = [];
         state.selected = {kind: 'colour', id: stop.id};
-      }, `Colour moved to ${percent}%`))
+      }, (percent) => `Colour moved to ${percent}%`, (percent) => `${percent}%`)
     );
     const actions = document.createElement('div');
     actions.className = 'inspector-actions';
@@ -1102,18 +1125,61 @@
     return wrap;
   }
 
-  function positionStepper(value, maximum, update) {
-    const wrap = document.createElement('div');
-    wrap.className = 'position-stepper';
-    const previous = actionButton('←', 'step-button', () => update(Math.max(0, value - 1)));
-    previous.setAttribute('aria-label', 'Move layer one character left');
-    previous.disabled = value <= 0;
-    const readout = document.createElement('span');
-    readout.innerHTML = `<small>POSITION</small><b>${value} / ${maximum}</b>`;
-    const next = actionButton('→', 'step-button', () => update(Math.min(maximum, value + 1)));
-    next.setAttribute('aria-label', 'Move layer one character right');
-    next.disabled = value >= maximum;
-    wrap.append(previous, readout, next);
+  function draggableRange(label, value, minimum, maximum, step, apply, message, format = String) {
+    const wrap = document.createElement('label');
+    wrap.className = 'drag-value-control';
+    const heading = document.createElement('span');
+    heading.textContent = label;
+    const row = document.createElement('span');
+    row.className = 'drag-value-row';
+    const range = document.createElement('input');
+    range.type = 'range';
+    range.min = String(minimum);
+    range.max = String(maximum);
+    range.step = String(step);
+    range.value = String(value);
+    range.setAttribute('aria-label', `${label}. Drag to adjust.`);
+    const readout = document.createElement('output');
+    const setReadout = () => {
+      const next = Number(range.value);
+      const progress = (next - minimum) / Math.max(1, maximum - minimum);
+      range.style.setProperty('--range-progress', `${Math.max(0, Math.min(1, progress)) * 100}%`);
+      readout.value = format(next);
+      readout.textContent = format(next);
+    };
+    let before = null;
+    const begin = () => {
+      if (!before) before = snapshot();
+    };
+    range.addEventListener('pointerdown', begin);
+    range.addEventListener('keydown', (event) => {
+      if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End', 'PageUp', 'PageDown'].includes(event.key)) begin();
+    });
+    range.addEventListener('input', () => {
+      begin();
+      const next = Number(range.value);
+      apply(next);
+      previewOverride = null;
+      setReadout();
+      persist();
+      renderOutput();
+      renderTube();
+    });
+    range.addEventListener('change', () => {
+      if (!before) return;
+      history.push(before);
+      if (history.length > MAX_HISTORY) history.shift();
+      future = [];
+      before = null;
+      normaliseState();
+      persist();
+      const next = Number(range.value);
+      renderAll();
+      announce(typeof message === 'function' ? message(next) : message);
+    });
+    setReadout();
+    row.append(range, readout);
+    wrap.append(heading, row);
     return wrap;
   }
 
@@ -1144,18 +1210,20 @@
       }, `Changed to sprite ${spriteSelect.value}`));
       fields.appendChild(labelledControl('SPRITE', spriteSelect));
     } else if (definition && ['size', 'cspace', 'rotate', 'voffset', 'pos'].includes(key)) {
-      const value = document.createElement('input');
-      value.type = 'number';
-      value.min = String(definition.min);
-      value.max = String(definition.max);
-      value.step = String(definition.step);
-      value.value = eventValue(event);
-      value.addEventListener('change', () => mutate(() => {
-        const safe = Math.max(definition.min, Math.min(definition.max, Number(value.value)));
-        event.code = `<${key}=${Logic.shortestNumber(safe, definition.value)}>`;
-        state.selected = {kind: 'event', id: event.id};
-      }, `${definition.label} updated`));
-      fields.appendChild(labelledControl('VALUE', value));
+      fields.appendChild(draggableRange(
+        'VALUE',
+        Number(eventValue(event)),
+        definition.min,
+        definition.max,
+        definition.step,
+        (next) => {
+          const safe = Math.max(definition.min, Math.min(definition.max, next));
+          event.code = `<${key}=${Logic.shortestNumber(safe, definition.value)}>`;
+          state.selected = {kind: 'event', id: event.id};
+        },
+        () => `${definition.label} updated`,
+        (next) => String(Logic.shortestNumber(next, definition.value))
+      ));
     } else if (definition && ['mspace', 'space', 'mark', 'alpha'].includes(key)) {
       const value = document.createElement('input');
       value.type = 'text';
@@ -1173,11 +1241,20 @@
       fields.appendChild(note);
     }
     const visualPercent = Math.round((event.position ?? positionFromOffset(event.offset)) * 100);
-    fields.appendChild(positionStepper(visualPercent, 100, (percent) => mutate(() => {
-      event.position = percent / 100;
-      event.offset = offsetFromPosition(event.position);
-      state.selected = {kind: 'event', id: event.id};
-    }, `${eventLabel(event)} bubble moved to ${percent}%`)));
+    fields.appendChild(draggableRange(
+      'TUBE POSITION',
+      visualPercent,
+      0,
+      100,
+      1,
+      (percent) => {
+        event.position = percent / 100;
+        event.offset = offsetFromPosition(event.position);
+        state.selected = {kind: 'event', id: event.id};
+      },
+      (percent) => `${eventLabel(event)} bubble moved to ${percent}%`,
+      (percent) => `${percent}%`
+    ));
     const actions = document.createElement('div');
     actions.className = 'inspector-actions';
     actions.append(
@@ -1295,6 +1372,13 @@
     )));
     pendingLayerCategory = category;
     state.selected = null;
+    els.pendingChoiceTitle.textContent = category === 'colours' ? 'CHOOSE A COLOUR' : 'CHOOSE AN EFFECT OR SPRITE';
+    const detail = els.pendingChoiceBanner.querySelector('small');
+    if (detail) {
+      detail.textContent = category === 'colours'
+        ? `The Colour bubble is waiting at ${Math.round(pendingLayerPosition * 100)}%. Choose a colour to place it.`
+        : `The FX bubble is waiting at ${Math.round(pendingLayerPosition * 100)}%. Choose an effect or sprite to place it.`;
+    }
     renderInspector();
     setCaret(safeOffset, false);
     setActiveTab(category);
@@ -1308,6 +1392,9 @@
     pendingLayerOffset = null;
     pendingLayerPosition = null;
     pendingLayerCategory = null;
+    els.pendingChoiceBanner.hidden = true;
+    els.sourceLibrary.classList.remove('pending-choice');
+    document.body.classList.remove('layer-choice-open');
     renderCaret();
   }
 
@@ -1558,7 +1645,11 @@
     const dy = y - radius;
     const distance = Math.min(1, Math.hypot(dx, dy) / radius);
     const hue = (Math.atan2(dy, dx) * 180 / Math.PI + 360) % 360;
-    return hslToHex(hue, distance, .5 + (1 - distance) * .5);
+    if (distance <= .72) {
+      const intensity = distance / .72;
+      return hslToHex(hue, intensity, 1 - intensity * .5);
+    }
+    return hslToHex(hue, 1, Math.max(0, .5 * (1 - (distance - .72) / .28)));
   }
 
   function drawColourWheel() {
@@ -1586,10 +1677,12 @@
 
   function positionWheelCursor(colour) {
     const hsl = hexToHsl(colour);
+    const distance = hsl.lightness < .5
+      ? .72 + (1 - hsl.lightness / .5) * .28
+      : Math.min(.72, Math.max(hsl.saturation, (1 - hsl.lightness) * 2) * .72);
     const radians = hsl.hue * Math.PI / 180;
-    const distance = hsl.saturation * 50;
-    els.wheelCursor.style.left = `${50 + Math.cos(radians) * distance}%`;
-    els.wheelCursor.style.top = `${50 + Math.sin(radians) * distance}%`;
+    els.wheelCursor.style.left = `${50 + Math.cos(radians) * distance * 50}%`;
+    els.wheelCursor.style.top = `${50 + Math.sin(radians) * distance * 50}%`;
     els.wheelCursor.style.setProperty('--cursor-colour', colour);
   }
 
@@ -2068,11 +2161,32 @@
     document.querySelectorAll('[data-panel]').forEach((panel) => {
       panel.hidden = panel.dataset.panel !== state.activeTab;
     });
+    const pendingChoice = Boolean(state.activeTab && pendingLayerOffset !== null);
+    const refiningChoice = Boolean(
+      state.activeTab &&
+      pendingLayerOffset === null &&
+      state.selected &&
+      ['colours', 'effects'].includes(state.activeTab)
+    );
+    els.sourceLibrary.classList.toggle('pending-choice', pendingChoice);
+    els.sourceLibrary.classList.toggle('refining-choice', refiningChoice);
+    els.pendingChoiceBanner.hidden = !pendingChoice;
+    document.body.classList.toggle('layer-choice-open', pendingChoice);
+    if (pendingChoice) {
+      els.choiceCard.setAttribute('role', 'dialog');
+      els.choiceCard.setAttribute('aria-modal', 'true');
+      els.choiceCard.setAttribute('aria-labelledby', 'pendingChoiceTitle');
+    } else {
+      els.choiceCard.setAttribute('role', 'region');
+      els.choiceCard.removeAttribute('aria-modal');
+      els.choiceCard.removeAttribute('aria-labelledby');
+    }
     els.sourceLibrary.hidden = !state.activeTab;
     if (state.activeTab && changed) {
       requestAnimationFrame(() => {
         const panel = document.querySelector(`[data-panel="${state.activeTab}"]`);
         if (panel) panel.scrollTop = 0;
+        if (pendingChoice) els.choiceCard.focus({preventScroll: true});
       });
     }
     persist();

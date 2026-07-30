@@ -155,6 +155,20 @@ The Ultimate development source was rebuilt around one editing surface.
 - Gated the short instructions behind the header Instructions button and moved
   More to the bottom of the editor.
 
+### Ultimate v6.4 placement context and direct manipulation
+
+- Made the incomplete Colour/FX drop state a viewport-level modal sheet with a
+  clear “finish placing this layer” banner. No bubble is committed until its
+  colour, effect, or sprite is chosen.
+- Kept selected-layer replacement as a smaller inline refinement panel.
+- Restored the Version 6 circular colour model, including its white centre and
+  dark outer ring, and made it the primary mobile choice instead of the native
+  colour swatch.
+- Replaced numeric value fields and arrow-only position controls with large
+  draggable ranges that update the live name.
+- Moved the guide layer out of the gradient rail and retargeted every dotted
+  callout to the bottom centre of its actual rendered character.
+
 ### Removed from the product surface
 
 - Alternate/prismatic duplicate name view.
@@ -171,5 +185,5 @@ reduced-motion support, and fan-content notice remain.
 
 ## Release status
 
-The v6.3 interface is the `/ultimate/` release in both website mirrors as of
+The v6.4 interface is the `/ultimate/` release in both website mirrors as of
 2026-07-30. `/colour/` remains Version 6 and Version Lite remains shelved.

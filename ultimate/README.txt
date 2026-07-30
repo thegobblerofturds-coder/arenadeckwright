@@ -1,7 +1,7 @@
 TURDGOBBLER'S DECK NAME COLOURIFIER — ULTIMATE VERSION
 
 STATUS
-This folder is the active Ultimate source. The v6.3 touch-repaired interface
+This folder is the active Ultimate source. The v6.4 placement-context interface
 is the release published at /ultimate/ on 2026-07-30.
 Version 6 remains the standard /colour/ release and Version Lite remains
 shelved.
@@ -13,15 +13,16 @@ QUICK START
 4. Drag either Colour or FX anywhere across the tube. Colour uses that exact
    point; FX compiles at the text insertion point shown by its guide line.
    Keyboard users can place either bubble with Enter or Space.
-5. Choose the exact colour, effect, or sprite from the submenu that opens at
-   that locked position.
+5. Finish the drop in the prominent full-screen chooser. The bubble is not
+   placed until an exact colour, effect, or sprite is chosen.
 6. Drag any bubble on the shared rail to reposition it, or click it to inspect
    and change it.
 7. Click Copy, then paste into Magic: The Gathering Arena.
 
 THE ONE-TUBE MODEL
-- The live deck name is the canvas. Colour, FX, WUBRG, and Preset choices open
-  only when needed in a bounded panel below the tube, never over the preview.
+- The live deck name is the canvas. An unfinished Colour or FX drop opens a
+  deliberately prominent completion sheet. Later refinement, WUBRG, and Preset
+  choices use a quieter bounded panel below the tube.
 - The Mega Tube is the only positioned editor. The name stays above one shared
   horizontal rail for colour, positioned FX, and sprites.
 - Global whole-name styles stay inside the top edge of the same black tube.
@@ -29,12 +30,15 @@ THE ONE-TUBE MODEL
   freely movable by pointer and keyboard.
 - Clicking a rendered character silently updates the keyboard insertion point.
 - Mouse, pen, and touch bubbles move continuously across the rail. FX retains a
-  separate compiled text offset, made explicit by its anchor guide.
+  separate compiled text offset. Every dotted guide terminates at the actual
+  rendered character affected by that offset.
 - Positioned bubbles support Arrow keys, Shift+Arrow, Page Up/Down, Home, End,
   Delete, and Backspace.
 - Dropping or moving a layer leaves the editor closed. Tapping a placed bubble
   opens its compact nearby editor; Change Colour or Change FX opens the full
   contextual menu only when needed.
+- Numeric FX values and tube positions use draggable range controls with live
+  name feedback.
 - Effects sharing one character remain separate clickable bubbles. Collision
   spacing keeps them accessible, and guide lines point back to their exact
   text anchors.
@@ -61,7 +65,9 @@ COLOUR + EFFECT SOURCES
   narrow mobile screens.
 - The colour picker offers the wheel, hex, swatches, and saved palettes. The FX
   picker offers whole-name or positioned effects and all sprites.
-- Full colour wheel, custom hex input, native colour picker, and fast swatches.
+- The V6 circular colour disc is the primary mobile picker: white at its centre,
+  full colour through the middle, and a dark outer ring. The native mobile
+  colour swatch is hidden.
 - The drop magnifier shows either an exact colour percentage or an FX text
   position. Both bubble types move continuously to the absolute tube edges.
 - All Caps and Small Caps are direct whole-name toggles. Bold, Italic,

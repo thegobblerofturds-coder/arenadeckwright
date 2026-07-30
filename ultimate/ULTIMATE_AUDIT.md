@@ -85,6 +85,13 @@ so compiler correctness does not require a fixed visual bubble.
   longer receives a purple affected-range underline.
 - Recent Colour and positioned-FX choices are stored locally and shown first.
 - Mobile sheets use a bounded flex scroller with momentum touch scrolling.
+- Unfinished reservoir drops now use a modal completion sheet; quiet inline
+  panels are reserved for refining an already placed layer.
+- The V6 circular white-to-colour-to-black picker replaces the native mobile
+  swatch as the primary colour control.
+- Numeric FX values and visual tube positions use draggable ranges.
+- Dotted layer guides use rendered glyph bounds as their endpoints rather than
+  terminating on the decorative gradient rail.
 
 ## Stylized preset shelf
 

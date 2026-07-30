@@ -10,9 +10,9 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="manifest" href="site.webmanifest">
   <title>TurdGobbler's Deck Name Colourifier — Ultimate Version</title>
-  <link rel="stylesheet" href="styles.css?v=ultimate-6.3">
+  <link rel="stylesheet" href="styles.css?v=ultimate-6.4">
   <script src="logic.js?v=ultimate-3.0" defer></script>
-  <script src="app.js?v=ultimate-6.3" defer></script>
+  <script src="app.js?v=ultimate-6.4" defer></script>
 </head>
 <body>
   <main class="app-shell">
@@ -50,9 +50,9 @@
             <div id="tubeTrack" class="tube-track" tabindex="0" role="group" aria-label="Mega Tube. Drag Colour anywhere across the tube or FX onto a text position.">
               <div id="tubeNameCanvas" class="tube-name-canvas" aria-label="Live Arena name and character drop surface">
                 <span id="outputPreview" class="output-preview"></span>
+                <div id="tubeLayerGuides" class="tube-layer-guides" aria-hidden="true"></div>
                 <div class="layer-rail-frame" aria-label="Positioned colour and effect layers">
                   <div id="tubeFill" class="tube-fill" aria-hidden="true"></div>
-                  <div id="tubeLayerGuides" class="tube-layer-guides" aria-hidden="true"></div>
                   <div id="tubeLayerRail" class="tube-layer-rail"></div>
                 </div>
                 <div id="dropGuide" class="drop-guide" aria-hidden="true"></div>
@@ -101,7 +101,12 @@
       </section>
 
       <section id="sourceLibrary" class="source-library" aria-label="Editor choices" hidden>
-        <div class="context-card" role="region" aria-label="Layer or preset choices">
+        <div id="choiceCard" class="context-card" role="region" aria-label="Layer or preset choices" tabindex="-1">
+          <div id="pendingChoiceBanner" class="pending-choice-banner" role="status" hidden>
+            <span>FINISH PLACING THIS LAYER</span>
+            <b id="pendingChoiceTitle">CHOOSE A COLOUR</b>
+            <small>The bubble is waiting for this choice.</small>
+          </div>
           <div class="library-panels">
             <section id="panelColours" class="library-panel" role="tabpanel" aria-label="Colour context menu" data-panel="colours" hidden>
               <header class="panel-head">
@@ -109,12 +114,15 @@
                 <button type="button" data-close-panel aria-label="Close Colour menu">×</button>
               </header>
               <div class="colour-lab">
-                <div class="colour-wheel-wrap">
-                  <canvas id="colourWheel" width="240" height="240" role="img" aria-label="Full colour wheel. Drag to choose a colour."></canvas>
-                  <i id="wheelCursor" aria-hidden="true"></i>
+                <div class="colour-wheel-control">
+                  <div class="colour-wheel-wrap">
+                    <canvas id="colourWheel" width="240" height="240" role="img" aria-label="Circular colour selector. Drag to choose colour, brightness, and saturation."></canvas>
+                    <i id="wheelCursor" aria-hidden="true"></i>
+                  </div>
+                  <span>DRAG THE COLOUR DISC</span>
                 </div>
                 <div class="custom-colour">
-                  <label for="colourPicker"><span>PICK</span><input id="colourPicker" type="color" value="#C94BFF"></label>
+                  <label class="native-colour-input" for="colourPicker"><span>DEVICE PICKER</span><input id="colourPicker" type="color" value="#C94BFF"></label>
                   <label for="colourHex"><span>HEX</span><input id="colourHex" type="text" value="#C94BFF" maxlength="7" autocomplete="off" autocapitalize="characters" spellcheck="false"></label>
                   <button id="addCustomColour" type="button">USE COLOUR</button>
                 </div>
