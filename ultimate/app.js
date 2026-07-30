@@ -102,17 +102,17 @@
   const els = {
     instructionsButton: $('instructionsButton'), instructionsPanel: $('instructionsPanel'),
     deckName: $('deckName'), startOver: $('startOver'),
-    copyButton: $('copyButton'), copyLabel: $('copyLabel'), previewCopyButton: $('previewCopyButton'),
+    previewCopyButton: $('previewCopyButton'),
     outputPreview: $('outputPreview'),
     budgetTotal: $('budgetTotal'), budgetText: $('budgetText'), budgetColour: $('budgetColour'),
     budgetFx: $('budgetFx'), outputStatus: $('outputStatus'), colourCount: $('colourCount'),
     effectCount: $('effectCount'), spriteCount: $('spriteCount'), megaTube: $('megaTube'),
     tubeTrack: $('tubeTrack'), tubeFill: $('tubeFill'),
     tubeLayerRail: $('tubeLayerRail'), tubeLayerGuides: $('tubeLayerGuides'),
+    tubeCentreMarker: $('tubeCentreMarker'),
     trashDropZone: $('trashDropZone'),
     tubeNameCanvas: $('tubeNameCanvas'),
-    dropGuide: $('dropGuide'), dropMagnifier: $('dropMagnifier'),
-    dropMagnifierGlyph: $('dropMagnifierGlyph'), dropMagnifierLabel: $('dropMagnifierLabel'),
+    dropGuide: $('dropGuide'),
     undoButton: $('undoButton'), redoButton: $('redoButton'), forceGradient: $('forceGradient'),
     clearFxButton: $('clearFxButton'), tubeStatus: $('tubeStatus'), layerInspector: $('layerInspector'),
     colourPicker: $('colourPicker'), colourHex: $('colourHex'), addCustomColour: $('addCustomColour'),
@@ -135,7 +135,6 @@
     colourLayerBubble: $('colourLayerBubble'), fxLayerBubble: $('fxLayerBubble'),
     spriteLayerBubble: $('spriteLayerBubble'),
     sourceLibrary: $('sourceLibrary'), choiceCard: $('choiceCard'),
-    globalPreviewShelf: $('globalPreviewShelf'), globalOutputPreview: $('globalOutputPreview'),
     pendingChoiceBanner: $('pendingChoiceBanner'), pendingChoiceTitle: $('pendingChoiceTitle'),
     toast: $('toast')
   };
@@ -384,7 +383,7 @@
     els.toast.classList.toggle('error', isError);
     els.toast.classList.add('visible');
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => els.toast.classList.remove('visible'), 2200);
+    toastTimer = setTimeout(() => els.toast.classList.remove('visible'), 3600);
   }
 
   function canonicalIdentity(codes) {
@@ -601,6 +600,7 @@
           const sprite = document.createElement('i');
           sprite.className = 'preview-sprite';
           sprite.dataset.dropOffset = String(offset);
+          if (event.id) sprite.dataset.eventId = String(event.id);
           sprite.style.backgroundImage = `var(--arena-sprite-${event.value})`;
           sprite.setAttribute('aria-label', `Sprite ${event.value} at position ${offset}`);
           applySpriteStyles(sprite, preview);
@@ -661,22 +661,18 @@
     const fittedSize = Math.max(13, 22 - Math.max(0, state.name.length - 18) * .28);
     els.tubeNameCanvas.style.setProperty('--name-size', `${fittedSize.toFixed(1)}px`);
     renderPreview(build);
-    renderPreview(build, els.globalOutputPreview);
     els.budgetText.textContent = String(build.breakdown.text);
     els.budgetColour.textContent = String(build.breakdown.colour);
     els.budgetFx.textContent = String(build.breakdown.fx);
     els.budgetTotal.textContent = String(build.rawLength);
     const over = build.overLimit;
-    els.copyButton.disabled = !build.raw;
     els.previewCopyButton.disabled = !build.raw;
-    els.copyButton.classList.toggle('over-budget', over);
     els.megaTube.classList.toggle('preset-previewing', Boolean(previewOverride));
     els.megaTube.style.setProperty('--budget-progress', `${Math.min(100, build.rawLength / build.limit * 100)}%`);
     els.outputStatus.classList.toggle('error', over);
     els.outputStatus.textContent = over
       ? `${build.rawLength - build.limit} OVER ARENA LIMIT`
       : `${build.limit - build.rawLength} CHARACTERS FREE · ${build.colourStages}/${build.requestedColourStages} COLOURS COMPILED`;
-    els.copyLabel.textContent = over ? 'COPY ANYWAY' : '✓ FINISHED';
     els.forceGradient.disabled = state.colours.length < 2 || allowableGradientStops(build) < 2;
     els.forceGradient.title = state.colours.length < 2
       ? 'Add at least two colours first'
@@ -741,36 +737,69 @@
     return Math.max(0, Math.min(1, Number(position) || 0)) * width;
   }
 
-  function addAnchorGuide(token, offset, kind) {
-    const target = els.outputPreview.querySelector(
-      `.preview-glyph[data-drop-offset="${offset}"], .preview-end-target[data-drop-offset="${offset}"]`
-    );
-    if (!target) return;
+  function guideTargetBounds(entry) {
+    const offset = String(entry.anchorOffset);
+    let targets = [];
+    if (entry.anchorTarget === 'sprite') {
+      const sprite = Array.from(els.outputPreview.querySelectorAll('.preview-sprite'))
+        .find((candidate) => candidate.dataset.eventId === entry.layerId);
+      if (sprite) targets = [sprite];
+    } else {
+      const textTarget = els.outputPreview.querySelector(
+        `.preview-glyph[data-drop-offset="${offset}"], .preview-end-target[data-drop-offset="${offset}"]`
+      );
+      if (entry.kind === 'effect') {
+        targets = Array.from(els.outputPreview.querySelectorAll(`.preview-sprite[data-drop-offset="${offset}"]`));
+      }
+      if (textTarget) targets.push(textTarget);
+    }
+    if (!targets.length) return null;
+    const bounds = targets.map((target) => target.getBoundingClientRect());
+    return {
+      left: Math.min(...bounds.map((box) => box.left)),
+      right: Math.max(...bounds.map((box) => box.right)),
+      top: Math.min(...bounds.map((box) => box.top)),
+      bottom: Math.max(...bounds.map((box) => box.bottom))
+    };
+  }
+
+  function addAnchorGuide(entry, laneIndex = 0, laneCount = 1) {
+    const targetBounds = guideTargetBounds(entry);
+    if (!targetBounds) return;
     const canvasBounds = els.tubeNameCanvas.getBoundingClientRect();
-    const tokenBounds = token.getBoundingClientRect();
-    const targetBounds = target.getBoundingClientRect();
+    const tokenBounds = entry.token.getBoundingClientRect();
     const startX = tokenBounds.left + tokenBounds.width / 2 - canvasBounds.left;
     const startY = tokenBounds.top - canvasBounds.top + 2;
-    const endX = targetBounds.left + targetBounds.width / 2 - canvasBounds.left;
-    const endY = targetBounds.bottom - canvasBounds.top - 1;
+    const endX = targetBounds.left - canvasBounds.left - 5;
+    const laneRatio = (laneIndex + 1) / (laneCount + 1);
+    const endY = targetBounds.top + (targetBounds.bottom - targetBounds.top) * laneRatio - canvasBounds.top;
     const deltaX = endX - startX;
     const deltaY = endY - startY;
     const length = Math.hypot(deltaX, deltaY);
     if (length < 8) return;
+    const selected = entry.token.classList.contains('selected');
     const guide = document.createElement('i');
-    guide.className = `layer-guide guide-${kind}`;
+    guide.className = `layer-guide guide-${entry.kind}${selected ? ' selected' : ''}`;
     guide.style.left = `${startX.toFixed(1)}px`;
     guide.style.top = `${startY.toFixed(1)}px`;
     guide.style.width = `${length.toFixed(1)}px`;
     guide.style.transform = `rotate(${Math.atan2(deltaY, deltaX)}rad)`;
     els.tubeLayerGuides.appendChild(guide);
+    if (selected) {
+      const bracket = document.createElement('b');
+      bracket.className = `anchor-bracket guide-${entry.kind}`;
+      bracket.style.left = `${(endX + 3).toFixed(1)}px`;
+      bracket.style.top = `${(targetBounds.top - canvasBounds.top - 2).toFixed(1)}px`;
+      bracket.style.height = `${Math.max(16, targetBounds.bottom - targetBounds.top + 4).toFixed(1)}px`;
+      els.tubeLayerGuides.appendChild(bracket);
+    }
   }
 
   function layoutRailTokens() {
     const railBounds = els.tubeLayerRail.getBoundingClientRect();
     els.tubeLayerGuides.replaceChildren();
     const tokens = Array.from(els.tubeLayerRail.querySelectorAll('.tube-token'))
-      .map((token) => {
+      .map((token, sourceIndex) => {
         const kind = token.dataset.layerKind || 'effect';
         const anchor = kind === 'colour'
           ? railXFromColourPosition(Number(token.dataset.anchorPosition || 0))
@@ -783,45 +812,62 @@
           kind,
           anchor,
           desired,
-          anchorOffset: Number(token.dataset.anchorOffset || 0)
+          sourceIndex,
+          layerId: token.dataset.layerId || '',
+          anchorTarget: token.dataset.anchorTarget || 'text',
+          anchorOffset: Number(token.dataset.anchorOffset || 0),
+          pinned: token.classList.contains('dragging')
         };
-      })
-      .sort((left, right) => left.desired - right.desired);
+      });
     if (!tokens.length || !railBounds.width) return;
-    const edge = 16;
+    const edge = 18;
     const available = Math.max(1, railBounds.width - edge * 2);
-    const gap = Math.min(35, available / Math.max(1, tokens.length - 1));
-    const dense = gap < 27;
+    const gap = Math.min(39, available / Math.max(1, tokens.length - 1));
+    const dense = gap < 31;
     const maximum = railBounds.width - edge;
-    tokens.forEach((entry) => {
-      entry.resolved = Math.max(edge, Math.min(maximum, entry.desired));
-      entry.pinned = entry.token.classList.contains('selected') || entry.token.classList.contains('dragging');
-    });
-    for (let pass = 0; pass < Math.max(8, tokens.length * 3); pass += 1) {
-      let changed = false;
-      for (let index = 0; index < tokens.length - 1; index += 1) {
-        const left = tokens[index];
-        const right = tokens[index + 1];
-        const overlap = gap - (right.resolved - left.resolved);
-        if (overlap <= .1) continue;
-        changed = true;
-        if (left.pinned && !right.pinned) {
-          right.resolved += overlap;
-        } else if (right.pinned && !left.pinned) {
-          left.resolved -= overlap;
-        } else {
-          left.resolved -= overlap / 2;
-          right.resolved += overlap / 2;
-        }
-        left.resolved = Math.max(edge, Math.min(maximum, left.resolved));
-        right.resolved = Math.max(edge, Math.min(maximum, right.resolved));
-      }
-      if (!changed) break;
+    const dragged = tokens.find((entry) => entry.pinned);
+    const ordered = tokens.filter((entry) => !entry.pinned)
+      .sort((left, right) => left.desired - right.desired || left.sourceIndex - right.sourceIndex);
+    if (dragged) {
+      const crossingThreshold = gap / 2;
+      const insertionIndex = ordered.filter((entry) => entry.desired < dragged.desired - crossingThreshold).length;
+      ordered.splice(insertionIndex, 0, dragged);
     }
-    tokens.forEach((entry) => {
+    ordered.forEach((entry) => {
+      entry.resolved = Math.max(edge, Math.min(maximum, entry.desired));
+    });
+    if (dragged) {
+      const pinnedIndex = ordered.indexOf(dragged);
+      dragged.resolved = Math.max(edge, Math.min(maximum, dragged.desired));
+      for (let index = pinnedIndex - 1; index >= 0; index -= 1) {
+        ordered[index].resolved = Math.min(ordered[index].resolved, ordered[index + 1].resolved - gap);
+      }
+      for (let index = pinnedIndex + 1; index < ordered.length; index += 1) {
+        ordered[index].resolved = Math.max(ordered[index].resolved, ordered[index - 1].resolved + gap);
+      }
+    } else {
+      for (let index = 1; index < ordered.length; index += 1) {
+        ordered[index].resolved = Math.max(ordered[index].resolved, ordered[index - 1].resolved + gap);
+      }
+    }
+    if (ordered[ordered.length - 1].resolved > maximum) {
+      const shift = ordered[ordered.length - 1].resolved - maximum;
+      ordered.forEach((entry) => { entry.resolved -= shift; });
+    }
+    if (ordered[0].resolved < edge) {
+      const shift = edge - ordered[0].resolved;
+      ordered.forEach((entry) => { entry.resolved += shift; });
+    }
+    const guideGroups = new Map();
+    ordered.forEach((entry) => {
       entry.token.classList.toggle('dense', dense);
       entry.token.style.left = `${entry.resolved.toFixed(1)}px`;
-      addAnchorGuide(entry.token, entry.anchorOffset, entry.kind);
+      const key = entry.anchorTarget === 'sprite' ? `sprite:${entry.layerId}` : `offset:${entry.anchorOffset}`;
+      if (!guideGroups.has(key)) guideGroups.set(key, []);
+      guideGroups.get(key).push(entry);
+    });
+    guideGroups.forEach((entries) => {
+      entries.forEach((entry, index) => addAnchorGuide(entry, index, entries.length));
     });
   }
 
@@ -921,7 +967,7 @@
       setTrashZone(true, overTrash, options.canRemove !== false);
       if (overTrash) {
         showCanvasDropTarget(null);
-        hideDropMagnifier();
+        setCentreMarker(null, false);
         return;
       }
       const direct = document.elementFromPoint(moveEvent.clientX, moveEvent.clientY);
@@ -942,7 +988,7 @@
       }
       layoutRailTokens();
       showCanvasDropTarget(snapTarget);
-      showDropMagnifier(snapTarget, offset, moveEvent.clientX, options.kind === 'colour' ? position : null);
+      setCentreMarker(position, true);
       renderOutput();
       els.tubeFill.style.background = gradientCss();
     };
@@ -958,7 +1004,7 @@
       els.megaTube.classList.remove('dragging-layer');
       setTrashZone(false);
       els.dropGuide.classList.remove('visible');
-      hideDropMagnifier();
+      setCentreMarker(null, false);
       showCanvasDropTarget(null);
       if (!moved) {
         options.select();
@@ -1060,7 +1106,8 @@
     button.type = 'button';
     button.className = `tube-token effect-token token-${key}`;
     if (event.type === 'sprite') button.classList.add('sprite-token');
-    button.dataset.layerKind = 'effect';
+    button.dataset.layerKind = event.type === 'sprite' ? 'sprite' : 'effect';
+    button.dataset.anchorTarget = event.type === 'sprite' ? 'sprite' : 'text';
     button.dataset.anchorOffset = String(event.offset);
     button.dataset.visualPosition = String(event.position ?? positionFromOffset(event.offset));
     button.dataset.layerId = event.id;
@@ -1571,7 +1618,7 @@
     setActiveTab(category);
     announce(isColour
       ? 'Colour point locked — choose a colour'
-      : `${sourceName} bubble locked — it compiles at text position ${safeOffset}`);
+      : `${sourceName} bubble locked — choose ${isSprite ? 'a sprite' : 'an effect'}`);
   }
 
   function cancelPendingLayer() {
@@ -1732,7 +1779,7 @@
           moveEvent.clientY >= bounds.top && moveEvent.clientY <= bounds.bottom;
         if (!inside) {
           showCanvasDropTarget(null);
-          hideDropMagnifier();
+          setCentreMarker(null, false);
           els.dropGuide.classList.remove('visible');
           els.megaTube.classList.remove('drop-ready');
           return;
@@ -1752,7 +1799,7 @@
           els.dropGuide.style.left = `${Math.max(0, Math.min(canvasBounds.width, moveEvent.clientX - canvasBounds.left))}px`;
           els.dropGuide.classList.add('visible');
         }
-        showDropMagnifier(target, offset, moveEvent.clientX, payload.category === 'colours' ? visualPosition : null);
+        setCentreMarker(visualPosition, true);
         els.megaTube.classList.add('drop-ready');
       };
       const cleanup = () => {
@@ -1764,7 +1811,7 @@
         element.classList.remove('dragging');
         els.megaTube.classList.remove('source-dragging', 'drop-ready');
         showCanvasDropTarget(null);
-        hideDropMagnifier();
+        setCentreMarker(null, false);
         els.dropGuide.classList.remove('visible');
       };
       const finish = (finishEvent) => {
@@ -2353,6 +2400,11 @@
       });
       els.wubrgComposer.appendChild(button);
     });
+    const core = document.createElement('span');
+    core.className = 'mana-orbit-core';
+    core.setAttribute('aria-hidden', 'true');
+    core.innerHTML = '<i></i><i></i><i></i><i></i><i></i><b>WUBRG</b>';
+    els.wubrgComposer.appendChild(core);
     renderWubrgResults();
   }
 
@@ -2614,6 +2666,14 @@
     renderPresetMenu();
   }
 
+  function positionGlobalChoicePanel() {
+    if (els.sourceLibrary.hidden || !els.sourceLibrary.classList.contains('global-choice')) return;
+    const nameBounds = els.outputPreview.getBoundingClientRect();
+    const minimumPanelHeight = Math.min(330, window.innerHeight * .62);
+    const top = Math.max(76, Math.min(window.innerHeight - minimumPanelHeight, nameBounds.bottom + 8));
+    els.sourceLibrary.style.setProperty('--global-panel-top', `${Math.round(top)}px`);
+  }
+
   function setActiveTab(name, focus = false) {
     const valid = ['colours', 'effects', 'sprites', 'wubrg', 'presets'];
     const nextTab = valid.includes(name) ? name : null;
@@ -2645,7 +2705,6 @@
     els.sourceLibrary.classList.toggle('global-choice', globalChoice);
     els.sourceLibrary.classList.toggle('refining-choice', refiningChoice);
     els.pendingChoiceBanner.hidden = !pendingChoice;
-    els.globalPreviewShelf.hidden = !globalChoice;
     document.body.classList.toggle('layer-choice-open', pendingChoice);
     if (pendingChoice) {
       els.choiceCard.setAttribute('role', 'dialog');
@@ -2657,6 +2716,7 @@
       els.choiceCard.removeAttribute('aria-labelledby');
     }
     els.sourceLibrary.hidden = !state.activeTab;
+    if (globalChoice) requestAnimationFrame(positionGlobalChoicePanel);
     if (state.activeTab && changed) {
       if (state.activeTab === 'presets') {
         presetMenuLevel = 'root';
@@ -2700,7 +2760,7 @@
     setActiveTab(state.activeTab);
   }
 
-  function playCopySail(source = els.copyButton) {
+  function playCopySail(source = els.previewCopyButton) {
     const bounds = source?.getBoundingClientRect?.() || {
       left: window.innerWidth / 2, width: 0, top: window.innerHeight / 2
     };
@@ -2720,7 +2780,7 @@
     setTimeout(() => sail.remove(), 1450);
   }
 
-  async function copyText(text, label = 'Copied', source = els.copyButton) {
+  async function copyText(text, label = 'Copied', source = els.previewCopyButton) {
     if (!text) return;
     try {
       await navigator.clipboard.writeText(text);
@@ -2796,14 +2856,6 @@
     }, null)?.candidate || null;
   }
 
-  function offsetFromCanvasEvent(event) {
-    const target = canvasTargetFromPoint(event.clientX, event.target);
-    if (target) return Number(target.dataset.dropOffset);
-    const bounds = els.tubeNameCanvas.getBoundingClientRect();
-    const position = Math.max(0, Math.min(1, (event.clientX - bounds.left) / Math.max(1, bounds.width)));
-    return offsetFromPosition(position);
-  }
-
   function showCanvasDropTarget(target) {
     els.outputPreview.querySelectorAll('.drop-hover').forEach((node) => node.classList.remove('drop-hover'));
     if (!target) return;
@@ -2815,31 +2867,10 @@
     els.dropGuide.classList.add('visible');
   }
 
-  function showDropMagnifier(target, offset, clientX, colourPosition = null) {
-    const safeOffset = Math.max(0, Math.min(state.name.length, Number(offset) || 0));
-    const isColour = colourPosition !== null;
-    const glyph = isColour
-      ? '●'
-      : safeOffset >= state.name.length
-        ? 'END'
-        : state.name[safeOffset] === ' '
-          ? '␠'
-          : state.name[safeOffset] || '∅';
-    const bounds = els.tubeTrack.getBoundingClientRect();
-    const left = Math.max(54, Math.min(bounds.width - 54, clientX - bounds.left));
-    els.dropMagnifier.style.left = `${left}px`;
-    els.dropMagnifierGlyph.textContent = glyph;
-    els.dropMagnifierLabel.textContent = isColour
-      ? tubePositionLabel(colourPosition)
-      : safeOffset >= state.name.length
-        ? `END · POSITION ${safeOffset}`
-        : `BEFORE ${state.name[safeOffset] === ' ' ? 'SPACE' : state.name[safeOffset]} · POSITION ${safeOffset}`;
-    els.dropMagnifier.hidden = false;
-    if (target) target.classList.add('drop-hover');
-  }
-
-  function hideDropMagnifier() {
-    els.dropMagnifier.hidden = true;
+  function setCentreMarker(position, active) {
+    const centred = Boolean(active) && Math.abs((Number(position) || 0) - .5) <= .035;
+    els.tubeCentreMarker.classList.toggle('visible', centred);
+    els.tubeTrack.classList.toggle('centre-locked', centred);
   }
 
   function selectWheelPoint(event) {
@@ -2869,7 +2900,6 @@
       const recentEffects = state.recentEffects;
       state = {...fresh, activeTab, favourites, savedCompositions, recentColours, recentEffects};
     }, 'Started over — Undo is available'));
-    els.copyButton.addEventListener('click', () => copyCurrentName(els.copyButton));
     els.previewCopyButton.addEventListener('click', (event) => {
       event.stopPropagation();
       copyCurrentName(els.previewCopyButton);
@@ -3024,16 +3054,6 @@
       if (state.activeTab === 'presets') closePresetMenu({keep: true});
       else setActiveTab(null);
     }, true);
-    els.tubeNameCanvas.addEventListener('click', (event) => {
-      const offset = offsetFromCanvasEvent(event);
-      setCaret(offset, false);
-      announce(`Text position set to ${state.caret}`);
-    });
-    els.tubeTrack.addEventListener('click', (event) => {
-      if (event.target.closest('.tube-token, .tube-name-canvas')) return;
-      setCaret(offsetFromPosition(tubePosition(event.clientX)), false);
-      announce(`Text position set to ${state.caret}`);
-    });
     els.tubeTrack.addEventListener('keydown', (event) => {
       if (!['ArrowLeft', 'ArrowRight', 'Home', 'End', 'Enter'].includes(event.key)) return;
       event.preventDefault();
@@ -3046,7 +3066,10 @@
       else if (event.key === 'End') setCaret(state.name.length);
       else setCaret(state.caret + (event.key === 'ArrowRight' ? step : -step));
     });
-    window.addEventListener('resize', () => requestAnimationFrame(layoutRailTokens));
+    window.addEventListener('resize', () => requestAnimationFrame(() => {
+      layoutRailTokens();
+      positionGlobalChoicePanel();
+    }));
     document.fonts?.ready?.then(() => {
       renderOutput();
       renderTube();
@@ -3074,7 +3097,7 @@
       }
       if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
         event.preventDefault();
-        copyCurrentName(els.copyButton);
+        copyCurrentName(els.previewCopyButton);
       }
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'z' && !event.shiftKey) {
         event.preventDefault();

@@ -10,9 +10,9 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="manifest" href="site.webmanifest">
   <title>TurdGobbler's Deck Name Colourifier — Ultimate Version</title>
-  <link rel="stylesheet" href="styles.css?v=ultimate-7.0">
+  <link rel="stylesheet" href="styles.css?v=ultimate-7.1">
   <script src="logic.js?v=ultimate-3.0" defer></script>
-  <script src="app.js?v=ultimate-7.0" defer></script>
+  <script src="app.js?v=ultimate-7.1" defer></script>
 </head>
 <body>
   <main class="app-shell">
@@ -27,7 +27,7 @@
     <section id="instructionsPanel" class="instructions-panel" aria-label="How to use the Colourifier" hidden>
       <button type="button" data-close-instructions aria-label="Close instructions">×</button>
       <p><b>ADD</b> Drag Colour, FX, or Sprite anywhere onto the black tube, then choose what it becomes.</p>
-      <p><b>EDIT</b> Tap a placed bubble. Drag it to move; its guide line shows Arena’s insertion point.</p>
+      <p><b>EDIT</b> Tap a placed bubble. Drag it to move; its arrowed guide shows where that layer begins.</p>
       <p><b>DELETE</b> Drag a placed bubble into the red bar that appears directly below the tube.</p>
       <p><b>BUILD</b> WUBRG and Presets open as focused global tools. Undo, Redo, and Start Over stay together; saved looks live inside Presets.</p>
     </section>
@@ -40,12 +40,6 @@
               <span>DECK NAME</span>
               <input id="deckName" type="text" value="Your Deck Name" autocomplete="off" autocapitalize="off" spellcheck="false" aria-describedby="outputStatus">
             </label>
-            <div class="copy-field">
-              <span>ARENA EXPORT</span>
-              <button id="copyButton" class="copy-button" type="button" aria-describedby="outputStatus">
-                <b id="copyLabel">✓ FINISHED</b><small>COPY TO ARENA</small>
-              </button>
-            </div>
           </div>
 
           <div class="tube-shell">
@@ -56,14 +50,12 @@
                   <span aria-hidden="true">⧉</span> COPY
                 </button>
                 <div id="tubeLayerGuides" class="tube-layer-guides" aria-hidden="true"></div>
+                <div id="tubeCentreMarker" class="tube-centre-marker" aria-hidden="true"><i></i></div>
                 <div class="layer-rail-frame" aria-label="Positioned colour and effect layers">
                   <div id="tubeFill" class="tube-fill" aria-hidden="true"></div>
                   <div id="tubeLayerRail" class="tube-layer-rail"></div>
                 </div>
                 <div id="dropGuide" class="drop-guide" aria-hidden="true"></div>
-                <div id="dropMagnifier" class="drop-magnifier" aria-hidden="true" hidden>
-                  <b id="dropMagnifierGlyph"></b><small id="dropMagnifierLabel"></small>
-                </div>
               </div>
             </div>
 
@@ -80,27 +72,28 @@
                 </button>
               </div>
 
-              <div id="presetHub" class="preset-hub" role="tablist" aria-label="Colour tools">
-                <button id="tabWubrg" type="button" role="tab" aria-selected="false" aria-controls="panelWubrg" data-tab="wubrg"><i>W</i><span>WUBRG</span></button>
-                <button id="tabPresets" type="button" role="tab" aria-selected="false" aria-controls="panelPresets" data-tab="presets"><i>◒</i><span>PRESETS</span></button>
-              </div>
-
               <div id="trashDropZone" class="trash-drop-zone" aria-hidden="true" hidden>
                 <i aria-hidden="true">×</i><span>DROP TO DELETE</span>
               </div>
             </div>
 
             <div class="editor-toolbar">
-              <div id="globalToggleBar" class="global-toggle-bar" role="group" aria-label="Whole-name controls">
-                <span>WHOLE NAME</span>
-                <button type="button" data-global-toggle="allCaps" aria-pressed="false"><i aria-hidden="true">AA</i><span>ALL CAPS</span></button>
-                <button type="button" data-global-toggle="smallCaps" aria-pressed="false"><i aria-hidden="true">Aa</i><span>SMALL CAPS</span></button>
-                <button id="forceGradient" class="force-gradient" type="button"><i aria-hidden="true">◒</i><span>GRADIENT</span></button>
+              <div id="presetHub" class="preset-hub" role="tablist" aria-label="Colour tools">
+                <button id="tabWubrg" type="button" role="tab" aria-selected="false" aria-controls="panelWubrg" data-tab="wubrg">
+                  <i class="mana-ring-icon" aria-hidden="true"><em></em><em></em><em></em><em></em><em></em></i><span>WUBRG</span>
+                </button>
+                <button id="tabPresets" type="button" role="tab" aria-selected="false" aria-controls="panelPresets" data-tab="presets"><i>◒</i><span>PRESETS</span></button>
               </div>
               <div class="persistent-actions" role="group" aria-label="Editing actions">
                 <button id="undoButton" class="tool-button" type="button" disabled><span aria-hidden="true">↶</span> UNDO</button>
                 <button id="redoButton" class="tool-button" type="button" disabled><span aria-hidden="true">↷</span> REDO</button>
                 <button id="startOver" class="tool-button danger-soft" type="button">START OVER</button>
+              </div>
+              <div id="globalToggleBar" class="global-toggle-bar" role="group" aria-label="Whole-name controls">
+                <span>WHOLE NAME</span>
+                <button type="button" data-global-toggle="allCaps" aria-pressed="false"><i aria-hidden="true">AA</i><span>ALL CAPS</span></button>
+                <button type="button" data-global-toggle="smallCaps" aria-pressed="false"><i aria-hidden="true">Aa</i><span>SMALL CAPS</span></button>
+                <button id="forceGradient" class="force-gradient" type="button"><span>AUTO GRADIENT</span></button>
               </div>
             </div>
           </div>
@@ -114,10 +107,6 @@
         <div id="choiceCard" class="context-card" role="region" aria-label="Layer or preset choices" tabindex="-1">
           <div id="pendingChoiceBanner" class="pending-choice-banner" role="status" hidden>
             <b id="pendingChoiceTitle">PICK A COLOUR TO PLACE THIS BUBBLE</b>
-          </div>
-          <div id="globalPreviewShelf" class="global-preview-shelf" hidden>
-            <small>LIVE RESULT</small>
-            <span id="globalOutputPreview" class="global-output-preview" aria-live="polite"></span>
           </div>
           <div class="library-panels">
             <section id="panelColours" class="library-panel" role="tabpanel" aria-label="Colour context menu" data-panel="colours" hidden>
