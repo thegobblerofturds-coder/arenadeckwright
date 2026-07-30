@@ -10,15 +10,17 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="manifest" href="site.webmanifest">
   <title>TurdGobbler's Deck Name Colourifier — Ultimate Version</title>
-  <link rel="stylesheet" href="styles.css?v=ultimate-6.9">
+  <link rel="stylesheet" href="styles.css?v=ultimate-7.0">
   <script src="logic.js?v=ultimate-3.0" defer></script>
-  <script src="app.js?v=ultimate-6.9" defer></script>
+  <script src="app.js?v=ultimate-7.0" defer></script>
 </head>
 <body>
   <main class="app-shell">
     <header class="masthead">
-      <div>
-        <h1><span>TURDGOBBLER'S</span> COLOURIFIER</h1>
+      <div class="brand-lockup">
+        <span class="brand-kicker">TURDGOBBLER'S</span>
+        <h1>COLOURIFIER</h1>
+        <i class="brand-prism" aria-hidden="true"></i>
       </div>
       <button id="instructionsButton" class="instructions-button" type="button" aria-expanded="false" aria-controls="instructionsPanel">INSTRUCTIONS</button>
     </header>
@@ -78,11 +80,9 @@
                 </button>
               </div>
 
-              <div id="globalToggleBar" class="global-toggle-bar" role="group" aria-label="Whole-name controls">
-                <span>WHOLE NAME</span>
-                <button type="button" data-global-toggle="allCaps" aria-pressed="false">ALL CAPS</button>
-                <button type="button" data-global-toggle="smallCaps" aria-pressed="false">SMALL CAPS</button>
-                <button id="forceGradient" class="force-gradient" type="button">FORCE GRADIENT</button>
+              <div id="presetHub" class="preset-hub" role="tablist" aria-label="Colour tools">
+                <button id="tabWubrg" type="button" role="tab" aria-selected="false" aria-controls="panelWubrg" data-tab="wubrg"><i>W</i><span>WUBRG</span></button>
+                <button id="tabPresets" type="button" role="tab" aria-selected="false" aria-controls="panelPresets" data-tab="presets"><i>◒</i><span>PRESETS</span></button>
               </div>
 
               <div id="trashDropZone" class="trash-drop-zone" aria-hidden="true" hidden>
@@ -91,9 +91,11 @@
             </div>
 
             <div class="editor-toolbar">
-              <div id="presetHub" class="preset-hub" role="tablist" aria-label="Colour tools">
-                <button id="tabWubrg" type="button" role="tab" aria-selected="false" aria-controls="panelWubrg" data-tab="wubrg"><i>W</i><span>WUBRG</span></button>
-                <button id="tabPresets" type="button" role="tab" aria-selected="false" aria-controls="panelPresets" data-tab="presets"><i>◒</i><span>PRESETS</span></button>
+              <div id="globalToggleBar" class="global-toggle-bar" role="group" aria-label="Whole-name controls">
+                <span>WHOLE NAME</span>
+                <button type="button" data-global-toggle="allCaps" aria-pressed="false"><i aria-hidden="true">AA</i><span>ALL CAPS</span></button>
+                <button type="button" data-global-toggle="smallCaps" aria-pressed="false"><i aria-hidden="true">Aa</i><span>SMALL CAPS</span></button>
+                <button id="forceGradient" class="force-gradient" type="button"><i aria-hidden="true">◒</i><span>GRADIENT</span></button>
               </div>
               <div class="persistent-actions" role="group" aria-label="Editing actions">
                 <button id="undoButton" class="tool-button" type="button" disabled><span aria-hidden="true">↶</span> UNDO</button>

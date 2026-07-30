@@ -1,7 +1,7 @@
 TURDGOBBLER'S DECK NAME COLOURIFIER — ULTIMATE VERSION
 
 STATUS
-This folder is the active Ultimate source. The v6.9 mobile global-tool layout
+This folder is the active Ultimate source. The v7.0 prismatic control layout
 is the release published at /ultimate/ on 2026-07-30.
 Version 6 remains the standard /colour/ release and Version Lite remains
 shelved.
@@ -25,7 +25,8 @@ THE ONE-TUBE MODEL
   WUBRG and Presets open below the tube with a pinned, exact-black live result.
 - The Mega Tube is the only positioned editor. The name stays above one shared
   horizontal rail for colour, positioned FX, and sprites.
-- Global whole-name styles stay inside the top edge of the same black tube.
+- On mobile, the whole-name controls sit beside the shortened black tube while
+  WUBRG and Presets move into the dock directly below it.
 - Every colour bubble, including bubble 1 and a single remaining bubble, is
   freely movable by pointer and keyboard.
 - Clicking a rendered character silently updates the keyboard insertion point.
@@ -54,6 +55,8 @@ THE TWO PRESET LAUNCHERS
    collections around a small centre. Inside a collection the centre becomes
    a red Back button. Tapping a look previews it; Keep commits it, Cancel
    restores the current look, and clicking away keeps the visible preview.
+   Preset buttons expose their full palette as a vivid sample strip so dark
+   recipes such as Toxic Foil remain recognizable before selection.
 
 WUBRG and colour recipes replace only the colour layer. Combined Presets replace
 the current non-sprite FX so every named look is deterministic while preserving

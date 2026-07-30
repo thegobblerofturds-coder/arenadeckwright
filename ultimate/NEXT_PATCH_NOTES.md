@@ -258,6 +258,21 @@ The Ultimate development source was rebuilt around one editing surface.
   confirmation controls, and reduced the placement scrim so Colour and FX
   choices keep the final product visible.
 
+### Ultimate v7.0 prismatic control hierarchy
+
+- Swapped the two global control zones: WUBRG and Presets now sit in the dock
+  below the Mega Tube, while All Caps, Small Caps, and Force Gradient occupy
+  the compact whole-name rail beside the mobile result.
+- Rebuilt the masthead as a cleaner prismatic brand lockup without adding
+  decorative clutter to the Arena-black result.
+- Unified buttons, menus, inspectors, colour choices, sprites, WUBRG pips, and
+  nested wheels around one opaque prismatic-glass system with visible focus,
+  hover, selected, pressed, and disabled states.
+- Made preset palettes materially brighter. Every preset orbit button now
+  exposes an unobscured colour strip, and the palette itself remains visible
+  beneath a much lighter readability layer.
+- Increased high-use mobile targets and retained the reduced-motion contract.
+
 ### Removed from the product surface
 
 - Alternate/prismatic duplicate name view.
@@ -274,5 +289,5 @@ reduced-motion support, and fan-content notice remain.
 
 ## Release status
 
-The v6.9 interface is the `/ultimate/` release in both website mirrors as of
+The v7.0 interface is the `/ultimate/` release in both website mirrors as of
 2026-07-30. `/colour/` remains Version 6 and Version Lite remains shelved.
