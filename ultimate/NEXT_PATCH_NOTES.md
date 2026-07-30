@@ -41,6 +41,5 @@ operation, reduced-motion support, and fan-content notice remain.
 
 ## Release status
 
-This is a local Ultimate development build. It has not replaced the currently
-published `/ultimate/` route. `/colour/` remains Version 6 and Version Lite
-remains shelved.
+This one-tube Ultimate build was published to `/ultimate/` on 2026-07-29.
+`/colour/` remains Version 6 and Version Lite remains shelved.

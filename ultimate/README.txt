@@ -1,9 +1,10 @@
 TURDGOBBLER'S DECK NAME COLOURIFIER — ULTIMATE VERSION
 
 STATUS
-This folder is the local Ultimate development source. Version 6 remains the
-standard /colour/ release and Version Lite remains shelved. The public
-/ultimate/ route is updated only during an explicit release.
+This folder is the source of the Ultimate build published at /ultimate/ on
+2026-07-29. Version 6 remains the standard /colour/ release and Version Lite
+remains shelved. Further Ultimate edits remain local until another explicit
+release.
 
 QUICK START
 1. Keep every file in this folder together.
