@@ -1,6 +1,6 @@
-# Ultimate Version — local rebuild record
+# Ultimate Version — name-canvas rebuild record
 
-## 2026-07-29: one Mega Tube
+## 2026-07-29: one live-name Mega Tube
 
 The Ultimate development source was rebuilt around one editing surface.
 
@@ -15,14 +15,20 @@ The Ultimate development source was rebuilt around one editing surface.
 
 ### Rebuilt
 
-- One Mega Tube with separate visual lanes for colours and positioned FX.
+- One Mega Tube with the live deck name as its permanent editing canvas.
+- Exact character-aware desktop drops plus tap-source, tap-character placement.
+- Separate visual lanes for positioned FX above and colours below the name.
 - One inspector for colour, FX, sprite, and global-style layers.
-- Colour and effect source trays with drag-to-place and click-at-caret behavior.
-- Three isolated preset systems: WUBRG, Colour Presets, and Style Presets.
+- Collapsible colour and effect source menus.
+- Full wheel, hex input, swatches, rotate, flip, and saved palettes.
+- Three isolated preset systems: WUBRG, Colour Presets, and Stylized Presets.
 - Layer-safe preset application: colour recipes do not reset effects; style
-  recipes do not reset colours, positioned FX, or sprites.
+  recipes do not reset manually positioned FX or sprites.
+- Ice Rainbow, Sunset, Bubbles, Drift Away, Matrix Glitch, and Upside Down
+  compound recipes with live pre-commit preview.
 - WUBRG identity search across one- through five-colour identities.
 - Sprite submenu inside the Effects source panel.
+- Selected-character highlighting and budget-trimmed colour ghosts.
 - Undo and Redo for every material editing action.
 
 ### Removed from the product surface
@@ -41,5 +47,5 @@ operation, reduced-motion support, and fan-content notice remain.
 
 ## Release status
 
-This one-tube Ultimate build was published to `/ultimate/` on 2026-07-29.
-`/colour/` remains Version 6 and Version Lite remains shelved.
+This live-name Ultimate build is the `/ultimate/` release line. `/colour/`
+remains Version 6 and Version Lite remains shelved.

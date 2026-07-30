@@ -7,8 +7,9 @@ Date: 2026-07-29
 One composition area should explain the complete product:
 
 - Colours and effects are sources.
-- The Mega Tube is the destination and the only position editor.
-- WUBRG, colour recipes, and style recipes are the three preset systems.
+- The always-visible live name inside the Mega Tube is the destination and the
+  only position editor.
+- WUBRG, colour recipes, and stylized recipes are the three preset systems.
 - Category-specific presets can be layered because each replaces only its own
   state domain.
 - Sprites stay adjacent to effects in a submenu.
@@ -31,7 +32,7 @@ so compiler correctness does not require a fixed visual bubble.
 - Structured inline events and caret rebasing after text edits.
 - Global effects, positioned effects, all 16 sprites, and the local preview
   assets.
-- Arena-black copy stage, clipboard fallback, local persistence, undo,
+- Arena-black live name canvas, clipboard fallback, local persistence, undo,
   keyboard controls, and reduced-motion behavior.
 - Advanced read-only raw Arena code.
 
@@ -44,6 +45,36 @@ so compiler correctness does not require a fixed visual bubble.
 - Experimental and unsafe controls that did not belong in the main workflow.
 - Dead renderers and special-case anchor branches.
 - CSS accumulated for retired surfaces.
+
+## Rebuilt after the first one-tube release
+
+- The separate preview/control relationship was collapsed: the rendered deck
+  name is now the character-aware drop surface.
+- FX bubbles sit directly above the name and colour bubbles directly below it.
+- Compact source orbs open one menu at a time and close when tapped again.
+- Desktop uses a sticky editor/source split so name changes stay visible while
+  browsing tools.
+- Touch uses source-then-character placement; desktop drag resolves to actual
+  glyph geometry instead of an approximate full-width rail.
+- Full colour-wheel editing, palette rotation/flip, and saved palettes returned
+  without restoring duplicate editing surfaces.
+- Preset hover/focus previews are temporary and compile through the same exact
+  Arena budget path as committed changes.
+- Selected layers highlight the exact character range they affect.
+- Budget-trimmed colour bubbles remain visible as ghosts instead of silently
+  disappearing.
+
+## Stylized preset shelf
+
+- Ice Rainbow and Sunset provide compact colour-led recipes.
+- Bubbles combines changing size and vertical offset into a wave.
+- Drift Away progressively shrinks, rises, spaces, and fades the name.
+- Matrix Glitch combines matrix greens, all caps, spacing, alternating rotation,
+  and vertical jitter.
+- Upside Down uses a whole-name 180-degree rotation with a void/ice palette.
+- Recipe-generated inline events carry their own source marker. Applying another
+  stylized preset removes only the previous recipe events and preserves effects
+  and sprites the user placed manually.
 
 ## Research translated into product decisions
 
@@ -86,9 +117,10 @@ Only the compiler turns these domains into one raw Arena string.
 
 - Bubble 1 and a single colour remain movable after normalization.
 - Arena output still starts with a colour tag.
-- Source drag and click paths insert the same structured payload.
+- Source drag and source-then-character tap paths insert the same structured
+  payload at the same caret.
 - WUBRG/colour recipes cannot remove effects or sprites.
-- Style recipes cannot remove colours, positioned effects, or sprites.
+- Stylized recipes cannot remove manually positioned effects or sprites.
 - Every positioned bubble is a keyboard-operable slider.
-- The copy surface remains fully opaque black.
+- The always-visible live name surface remains fully opaque black.
 - Public route mirrors remain unchanged until an explicit Ultimate release.

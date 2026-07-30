@@ -41,14 +41,36 @@
     {name: 'SILVER SCREEN', note: 'MONO METAL', colours: ['#282C31', '#7B8288', '#F2F3F3', '#9DA4AA', '#41464B']}
   ];
   const STYLE_PRESETS = [
-    {name: 'CLEAN SLATE', note: 'NO GLOBAL FX', sample: 'Arena', formatting: {}, effects: {}},
-    {name: 'ARCANE WHISPER', note: 'ITALIC · EXPERIMENTAL SMALL CAPS', sample: 'Arcane', formatting: {italic: true}, effects: {smallCaps: true}},
-    {name: 'TITAN', note: 'SIZE 20 · TIGHT', sample: 'TITAN', formatting: {}, effects: {size: {enabled: true, value: 20}, cspace: {enabled: true, value: -1}}},
-    {name: 'SKYLINE', note: 'SUPERSCRIPT · WIDE', sample: 'Skyline', formatting: {}, effects: {sup: true, cspace: {enabled: true, value: 2}}},
-    {name: 'CHAOS TILT', note: 'ROTATE · ITALIC', sample: 'Chaos', formatting: {italic: true}, effects: {rotate: {enabled: true, value: -8}}},
-    {name: 'SIGNAL FLARE', note: 'UNDERLINE · WIDE', sample: 'Signal', formatting: {underline: true}, effects: {cspace: {enabled: true, value: 3}}},
-    {name: 'MICRO TYPE', note: 'SIZE 7 · SPACED', sample: 'MICRO', formatting: {}, effects: {size: {enabled: true, value: 7}, cspace: {enabled: true, value: 4}}},
-    {name: 'FALLEN', note: 'SUBSCRIPT · STRIKE', sample: 'Fallen', formatting: {strike: true}, effects: {sub: true}}
+    {
+      id: 'ice-rainbow', name: 'ICE RAINBOW', note: 'FROSTED FULL-SPECTRUM COLOUR', sample: 'ICE',
+      colours: ['#E8FDFF', '#7CEBFF', '#6D9CFF', '#B778FF', '#FF91D8', '#FFF2B6'],
+      formatting: {}, effects: {}
+    },
+    {
+      id: 'sunset', name: 'SUNSET', note: 'VIOLET, EMBER, ORANGE, GOLD', sample: 'DUSK',
+      colours: ['#482367', '#A82F68', '#ED4D4B', '#FF8C31', '#FFD66A'],
+      formatting: {}, effects: {}
+    },
+    {
+      id: 'bubbles', name: 'BUBBLES', note: 'BOUNCING SIZE + VERTICAL WAVES', sample: 'OoO',
+      colours: ['#73F2FF', '#85B8FF', '#D694FF', '#FFB4E6'],
+      formatting: {}, effects: {cspace: {enabled: true, value: 2}}, pattern: 'bubbles'
+    },
+    {
+      id: 'drift-away', name: 'DRIFT AWAY', note: 'SHRINK, RISE, FADE, AND SPACE OUT', sample: 'drift',
+      colours: ['#F4FBFF', '#9CDBFF', '#848BFF'],
+      formatting: {italic: true}, effects: {cspace: {enabled: true, value: 2}}, pattern: 'drift'
+    },
+    {
+      id: 'matrix-glitch', name: 'MATRIX GLITCH', note: 'MATRIX GREEN + STAGGERED GLITCH', sample: '0101',
+      colours: ['#073B1B', '#00A846', '#00FF66', '#C8FFD9'],
+      formatting: {}, effects: {allCaps: true, cspace: {enabled: true, value: 1}}, pattern: 'glitch'
+    },
+    {
+      id: 'upside-down', name: 'UPSIDE DOWN', note: '180° ROTATION + VOID COLOUR', sample: 'ɐuǝɹ∀',
+      colours: ['#B9FFEE', '#56D7D2', '#7A5CFF', '#D384FF'],
+      formatting: {}, effects: {rotate: {enabled: true, value: 180}, cspace: {enabled: true, value: 1}}
+    }
   ];
   const EFFECTS = [
     {key: 'italic', label: 'ITALIC', hint: 'SLANT TEXT', code: '<i>', global: 'formatting'},
@@ -79,9 +101,13 @@
     effectCount: $('effectCount'), spriteCount: $('spriteCount'), megaTube: $('megaTube'),
     tubeGlobals: $('tubeGlobals'), tubeTrack: $('tubeTrack'), tubeFill: $('tubeFill'),
     tubeTicks: $('tubeTicks'), tubeFxLayer: $('tubeFxLayer'), tubeColourLayer: $('tubeColourLayer'),
+    tubeNameCanvas: $('tubeNameCanvas'), characterTargets: $('characterTargets'),
     dropGuide: $('dropGuide'), undoButton: $('undoButton'), redoButton: $('redoButton'),
     clearFxButton: $('clearFxButton'), tubeStatus: $('tubeStatus'), layerInspector: $('layerInspector'),
     colourPicker: $('colourPicker'), colourHex: $('colourHex'), addCustomColour: $('addCustomColour'),
+    applyCustomColour: $('applyCustomColour'), colourWheel: $('colourWheel'), wheelCursor: $('wheelCursor'),
+    rotateColours: $('rotateColours'), flipColours: $('flipColours'), savePalette: $('savePalette'),
+    savedPalettes: $('savedPalettes'),
     colourSources: $('colourSources'), effectSources: $('effectSources'), spriteSources: $('spriteSources'),
     wubrgComposer: $('wubrgComposer'), wubrgIdentity: $('wubrgIdentity'), wubrgOrder: $('wubrgOrder'),
     applyWubrg: $('applyWubrg'), clearWubrg: $('clearWubrg'), wubrgSearch: $('wubrgSearch'),
@@ -95,6 +121,9 @@
   let currentBuild = null;
   let toastTimer = null;
   let dragPayload = null;
+  let previewOverride = null;
+  let armedPayload = null;
+  let armedLabel = '';
   let state = createDefaultState();
 
   function uid(prefix) {
@@ -119,8 +148,9 @@
       events: [],
       caret: DEFAULT_NAME.length,
       selected: null,
-      activeTab: 'colours',
-      wubrg: []
+      activeTab: null,
+      wubrg: [],
+      favourites: []
     };
   }
 
@@ -137,7 +167,8 @@
       events: state.events,
       caret: state.caret,
       selected: state.selected,
-      wubrg: state.wubrg
+      wubrg: state.wubrg,
+      favourites: state.favourites
     });
   }
 
@@ -172,6 +203,13 @@
     state.wubrg = Array.isArray(state.wubrg)
       ? state.wubrg.filter((code, index, source) => MANA[code] && source.indexOf(code) === index).slice(0, 5)
       : [];
+    state.favourites = (Array.isArray(state.favourites) ? state.favourites : [])
+      .filter((entry) => entry && Array.isArray(entry.colours) && entry.colours.some(Logic.validHex))
+      .slice(0, 10)
+      .map((entry, index) => ({
+        name: String(entry.name || `SAVED ${index + 1}`),
+        colours: entry.colours.filter(Logic.validHex).slice(0, MAX_COLOURS).map((colour) => colour.toUpperCase())
+      }));
     if (state.selected?.kind === 'colour' && !state.colours.some((stop) => stop.id === state.selected.id)) state.selected = null;
     if (state.selected?.kind === 'event' && !state.events.some((event) => event.id === state.selected.id)) state.selected = null;
   }
@@ -201,7 +239,11 @@
             events: legacy.inlineEvents,
             caret: (legacy.name || DEFAULT_NAME).length,
             wubrg: legacy.manaSelection,
-            activeTab: 'colours'
+            favourites: (legacy.favourites || []).map((entry) => ({
+              name: entry.name,
+              colours: (entry.stops || []).map((stop) => stop.colour)
+            })),
+            activeTab: null
           };
         }
       }
@@ -210,11 +252,12 @@
     state = {...createDefaultState(), ...saved};
     state.activeTab = ['colours', 'effects', 'wubrg', 'colour-presets', 'style-presets'].includes(saved.activeTab)
       ? saved.activeTab
-      : 'colours';
+      : null;
     normaliseState();
   }
 
   function mutate(change, message = '') {
+    previewOverride = null;
     history.push(snapshot());
     if (history.length > MAX_HISTORY) history.shift();
     future = [];
@@ -306,31 +349,43 @@
     return match ? match[1] : '';
   }
 
-  function activeGlobals() {
+  function effectiveState() {
+    if (!previewOverride) return state;
+    return {
+      ...state,
+      colours: previewOverride.colours || state.colours,
+      formatting: previewOverride.formatting || state.formatting,
+      effects: previewOverride.effects || state.effects,
+      events: previewOverride.events || state.events
+    };
+  }
+
+  function activeGlobals(source = state) {
     const entries = [];
     ['italic', 'underline', 'strike'].forEach((key) => {
-      if (state.formatting[key]) entries.push({key, label: EFFECT_BY_KEY[key].label, code: EFFECT_BY_KEY[key].code});
+      if (source.formatting[key]) entries.push({key, label: EFFECT_BY_KEY[key].label, code: EFFECT_BY_KEY[key].code});
     });
     ['allCaps', 'smallCaps', 'sup', 'sub'].forEach((key) => {
-      if (state.effects[key]) entries.push({key, label: EFFECT_BY_KEY[key].label, code: EFFECT_BY_KEY[key].code || 'Aa→AA'});
+      if (source.effects[key]) entries.push({key, label: EFFECT_BY_KEY[key].label, code: EFFECT_BY_KEY[key].code || 'Aa→AA'});
     });
     ['size', 'cspace', 'rotate', 'voffset', 'pos'].forEach((key) => {
-      if (state.effects[key]?.enabled) entries.push({
+      if (source.effects[key]?.enabled) entries.push({
         key,
         label: EFFECT_BY_KEY[key].label,
-        code: `<${key}=${state.effects[key].value}>`
+        code: `<${key}=${source.effects[key].value}>`
       });
     });
     return entries;
   }
 
   function compile() {
+    const source = effectiveState();
     currentBuild = Logic.compileArena({
-      text: state.name,
-      positionedColours: state.colours.map(({colour, position}) => ({colour, position})),
-      formatting: state.formatting,
-      effects: state.effects,
-      inlineEvents: state.events,
+      text: source.name,
+      positionedColours: source.colours.map(({colour, position}) => ({colour, position})),
+      formatting: source.formatting,
+      effects: source.effects,
+      inlineEvents: source.events,
       limit: Logic.LIMIT
     });
     return currentBuild;
@@ -344,19 +399,19 @@
     return colour;
   }
 
-  function initialPreviewState() {
+  function initialPreviewState(source = effectiveState()) {
     return {
-      italic: state.formatting.italic,
-      underline: state.formatting.underline,
-      strike: state.formatting.strike,
-      smallCaps: state.effects.smallCaps,
-      sup: state.effects.sup,
-      sub: state.effects.sub,
-      size: state.effects.size.enabled ? Number(state.effects.size.value) : null,
-      cspace: state.effects.cspace.enabled ? Number(state.effects.cspace.value) : null,
-      rotate: state.effects.rotate.enabled ? Number(state.effects.rotate.value) : null,
-      voffset: state.effects.voffset.enabled ? Number(state.effects.voffset.value) : null,
-      pendingPos: state.effects.pos.enabled ? Number(state.effects.pos.value) : null,
+      italic: source.formatting.italic,
+      underline: source.formatting.underline,
+      strike: source.formatting.strike,
+      smallCaps: source.effects.smallCaps,
+      sup: source.effects.sup,
+      sub: source.effects.sub,
+      size: source.effects.size.enabled ? Number(source.effects.size.value) : null,
+      cspace: source.effects.cspace.enabled ? Number(source.effects.cspace.value) : null,
+      rotate: source.effects.rotate.enabled ? Number(source.effects.rotate.value) : null,
+      voffset: source.effects.voffset.enabled ? Number(source.effects.voffset.value) : null,
+      pendingPos: source.effects.pos.enabled ? Number(source.effects.pos.value) : null,
       mspace: '',
       mark: '',
       alpha: 1
@@ -409,6 +464,34 @@
     if (transforms.length) glyph.style.transform = transforms.join(' ');
   }
 
+  function selectedRange(build) {
+    if (!state.selected) return null;
+    if (state.selected.kind === 'global') return {start: 0, end: build.text.length};
+    if (state.selected.kind === 'colour') {
+      const colours = state.colours.slice().sort((left, right) => left.position - right.position);
+      const index = colours.findIndex((stop) => stop.id === state.selected.id);
+      if (index < 0) return null;
+      const start = index === 0 || build.text.length < 2 ? 0 : Math.round(colours[index].position * (build.text.length - 1));
+      const end = index === colours.length - 1 || build.text.length < 2
+        ? build.text.length
+        : Math.max(start + 1, Math.round(colours[index + 1].position * (build.text.length - 1)));
+      return {start, end};
+    }
+    if (state.selected.kind === 'event') {
+      const selected = state.events.find((event) => event.id === state.selected.id);
+      if (!selected) return null;
+      if (selected.type === 'sprite' || selected.type === 'br') {
+        return {start: selected.offset, end: Math.min(build.text.length, selected.offset + 1)};
+      }
+      const key = eventKey(selected);
+      const next = state.events
+        .filter((event) => event.offset > selected.offset && eventKey(event) === key)
+        .sort((left, right) => left.offset - right.offset)[0];
+      return {start: selected.offset, end: next?.offset ?? build.text.length};
+    }
+    return null;
+  }
+
   function renderPreview(build) {
     els.outputPreview.replaceChildren();
     if (!build.text && !build.inlineEvents.length) {
@@ -419,6 +502,7 @@
       return;
     }
     const preview = initialPreviewState();
+    const affected = selectedRange(build);
     const eventsAt = new Map();
     build.inlineEvents.forEach((event) => {
       if (!eventsAt.has(event.offset)) eventsAt.set(event.offset, []);
@@ -431,8 +515,9 @@
         } else if (event.type === 'sprite') {
           const sprite = document.createElement('i');
           sprite.className = 'preview-sprite';
+          sprite.dataset.dropOffset = String(offset);
           sprite.style.backgroundImage = `var(--arena-sprite-${event.value})`;
-          sprite.setAttribute('aria-hidden', 'true');
+          sprite.setAttribute('aria-label', `Sprite ${event.value} at caret ${offset}`);
           els.outputPreview.appendChild(sprite);
         } else {
           applyPreviewTag(preview, event.code);
@@ -442,14 +527,21 @@
       const glyph = document.createElement('span');
       glyph.className = 'preview-glyph';
       glyph.dataset.colour = previewColourAt(build, offset);
+      glyph.dataset.dropOffset = String(offset);
+      glyph.classList.toggle('affected', Boolean(affected && offset >= affected.start && offset < affected.end));
       glyph.textContent = build.text[offset];
       applyGlyphStyles(glyph, preview);
       els.outputPreview.appendChild(glyph);
     }
+    const endTarget = document.createElement('span');
+    endTarget.className = 'preview-end-target';
+    endTarget.dataset.dropOffset = String(build.text.length);
+    endTarget.setAttribute('aria-label', `End of name, caret ${build.text.length}`);
+    els.outputPreview.appendChild(endTarget);
   }
 
   function gradientCss() {
-    const stops = state.colours.slice().sort((left, right) => left.position - right.position);
+    const stops = effectiveState().colours.slice().sort((left, right) => left.position - right.position);
     if (stops.length === 1) return stops[0].colour;
     return `linear-gradient(90deg,${stops.map((stop) => `${stop.colour} ${(stop.position * 100).toFixed(2)}%`).join(',')})`;
   }
@@ -465,6 +557,8 @@
     const over = build.overLimit;
     els.copyButton.disabled = !build.raw;
     els.copyButton.classList.toggle('over-budget', over);
+    els.megaTube.classList.toggle('preset-previewing', Boolean(previewOverride));
+    els.megaTube.style.setProperty('--budget-progress', `${Math.min(100, build.rawLength / build.limit * 100)}%`);
     els.outputStatus.classList.toggle('error', over);
     els.outputStatus.textContent = over
       ? `${build.rawLength - build.limit} OVER ARENA LIMIT`
@@ -486,9 +580,13 @@
     return state.name.length ? Math.max(0, Math.min(1, offset / state.name.length)) : 0;
   }
 
+  function colourPositionFromOffset(offset) {
+    if (state.name.length <= 1) return state.name.length ? 1 : .5;
+    return Math.max(0, Math.min(1, offset / (state.name.length - 1)));
+  }
+
   function colourCaretPosition() {
-    if (state.name.length <= 1) return state.caret > 0 ? 1 : 0;
-    return Math.max(0, Math.min(1, state.caret / (state.name.length - 1)));
+    return colourPositionFromOffset(state.caret);
   }
 
   function setCaret(offset, focusInput = false) {
@@ -503,7 +601,10 @@
 
   function renderCaret() {
     els.caretReadout.textContent = `CARET ${state.caret} / ${state.name.length}`;
-    els.tubeStatus.textContent = `ACTIVE CARET ${state.caret} · CLICK A SOURCE TO LAYER HERE`;
+    els.tubeStatus.textContent = armedPayload
+      ? `${armedLabel} READY · TAP A LETTER OR THE END SLOT · ESC TO CANCEL`
+      : `ACTIVE CARET ${state.caret} · DRAG TO A LETTER OR OPEN A SOURCE MENU`;
+    els.megaTube.classList.toggle('placement-armed', Boolean(armedPayload));
   }
 
   function renderTicks() {
@@ -527,6 +628,7 @@
   function selectLayer(kind, id) {
     state.selected = {kind, id};
     persist();
+    renderOutput();
     renderTube();
     renderInspector();
   }
@@ -590,7 +692,7 @@
     target.addEventListener('pointercancel', cancel);
   }
 
-  function colourToken(stop, index, stackIndex = 0, stackCount = 1) {
+  function colourToken(stop, index, stackIndex = 0, stackCount = 1, compiling = true) {
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'tube-token colour-token';
@@ -600,9 +702,10 @@
     button.style.setProperty('--stack-y', `${(stackIndex % 2) * 5}px`);
     button.dataset.layerId = stop.id;
     button.classList.toggle('selected', state.selected?.kind === 'colour' && state.selected.id === stop.id);
+    button.classList.toggle('ghost', !compiling);
     button.innerHTML = `<span>${index + 1}</span>`;
     button.setAttribute('role', 'slider');
-    button.setAttribute('aria-label', `Colour ${index + 1}, ${stop.colour}. Drag to move; press Enter to edit.`);
+    button.setAttribute('aria-label', `Colour ${index + 1}, ${stop.colour}${compiling ? '' : ', currently omitted by the Arena budget'}. Drag to move; press Enter to edit.`);
     button.setAttribute('aria-valuemin', '0');
     button.setAttribute('aria-valuemax', '100');
     button.setAttribute('aria-valuenow', String(Math.round(stop.position * 100)));
@@ -698,9 +801,13 @@
     els.tubeColourLayer.replaceChildren();
     els.tubeFxLayer.replaceChildren();
     const sortedColours = state.colours.slice().sort((left, right) => left.position - right.position);
+    const compilingCount = Math.max(1, Math.min(sortedColours.length, currentBuild?.requestedSegments?.length || sortedColours.length));
+    const compilingIndices = new Set(compilingCount === 1
+      ? [0]
+      : Array.from({length: compilingCount}, (_, index) => Math.round(index * (sortedColours.length - 1) / (compilingCount - 1))));
     sortedColours.forEach((stop, index) => {
       const cluster = sortedColours.filter((candidate) => Math.abs(candidate.position - stop.position) < .001);
-      els.tubeColourLayer.appendChild(colourToken(stop, index, cluster.indexOf(stop), cluster.length));
+      els.tubeColourLayer.appendChild(colourToken(stop, index, cluster.indexOf(stop), cluster.length, compilingIndices.has(index)));
     });
     state.events.forEach((event) => {
       const cluster = state.events.filter((candidate) => candidate.offset === event.offset);
@@ -723,7 +830,7 @@
     els.spriteCount.textContent = String(state.events.filter((event) => event.type === 'sprite').length);
     els.undoButton.disabled = !history.length;
     els.redoButton.disabled = !future.length;
-    els.clearFxButton.disabled = !globals.length && !state.events.length;
+    els.clearFxButton.disabled = !globals.length && !state.events.some((event) => event.type !== 'sprite');
   }
 
   function inspectorHeader(kicker, title, code = '') {
@@ -796,6 +903,10 @@
     const actions = document.createElement('div');
     actions.className = 'inspector-actions';
     actions.append(
+      actionButton('OPEN COLOUR MENU', 'quiet-button', () => {
+        setColourDraft(stop.colour);
+        setActiveTab('colours');
+      }),
       actionButton('DUPLICATE', 'quiet-button', () => duplicateColour(stop.id)),
       actionButton('DELETE', 'delete-button', () => removeColour(stop.id))
     );
@@ -965,6 +1076,7 @@
 
   function renderInspector() {
     const selected = state.selected;
+    els.applyCustomColour.disabled = selected?.kind !== 'colour';
     if (!selected) {
       els.layerInspector.innerHTML = '<div class="inspector-empty"><span>SELECT A BUBBLE</span><p>Edit, duplicate, or delete a colour, effect, or sprite layer here.</p></div>';
       return;
@@ -1073,6 +1185,31 @@
     }, `${eventLabel(copy)} duplicated`);
   }
 
+  function clearArmedPlacement() {
+    armedPayload = null;
+    armedLabel = '';
+    els.outputPreview.querySelectorAll('.drop-hover').forEach((node) => node.classList.remove('drop-hover'));
+    renderCaret();
+  }
+
+  function armPlacement(payload, label) {
+    if (!payload) return;
+    armedPayload = clone(payload);
+    armedLabel = label;
+    renderCaret();
+    els.tubeNameCanvas.scrollIntoView?.({block: 'nearest', behavior: 'smooth'});
+    announce(`${label} ready — tap a letter in the live name`);
+  }
+
+  function placePayloadAtOffset(payload, offset) {
+    if (!payload) return;
+    const safeOffset = Math.max(0, Math.min(state.name.length, Math.round(offset)));
+    const colourPosition = colourPositionFromOffset(safeOffset);
+    clearArmedPlacement();
+    setCaret(safeOffset, false);
+    insertPayload(payload, safeOffset, colourPosition);
+  }
+
   function enableSourceDrag(element, payloadProvider) {
     element.draggable = true;
     element.classList.add('draggable-source');
@@ -1097,6 +1234,195 @@
     });
   }
 
+  function hslToHex(hue, saturation, lightness) {
+    const h = ((Number(hue) % 360) + 360) % 360 / 360;
+    const s = Math.max(0, Math.min(1, Number(saturation)));
+    const l = Math.max(0, Math.min(1, Number(lightness)));
+    const channel = (offset) => {
+      const k = (offset + h * 12) % 12;
+      const a = s * Math.min(l, 1 - l);
+      return Math.round(255 * (l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1))));
+    };
+    return `#${[channel(0), channel(8), channel(4)].map((value) => value.toString(16).padStart(2, '0')).join('').toUpperCase()}`;
+  }
+
+  function hexToHsl(hex) {
+    const clean = normaliseHex(hex) || '#FFFFFF';
+    const [red, green, blue] = [1, 3, 5].map((index) => Number.parseInt(clean.slice(index, index + 2), 16) / 255);
+    const maximum = Math.max(red, green, blue);
+    const minimum = Math.min(red, green, blue);
+    const lightness = (maximum + minimum) / 2;
+    const delta = maximum - minimum;
+    if (!delta) return {hue: 0, saturation: 0, lightness};
+    const saturation = delta / (1 - Math.abs(2 * lightness - 1));
+    let hue = maximum === red
+      ? 60 * (((green - blue) / delta) % 6)
+      : maximum === green
+        ? 60 * ((blue - red) / delta + 2)
+        : 60 * ((red - green) / delta + 4);
+    if (hue < 0) hue += 360;
+    return {hue, saturation, lightness};
+  }
+
+  function wheelColourAt(x, y) {
+    const radius = els.colourWheel.width / 2;
+    const dx = x - radius;
+    const dy = y - radius;
+    const distance = Math.min(1, Math.hypot(dx, dy) / radius);
+    const hue = (Math.atan2(dy, dx) * 180 / Math.PI + 360) % 360;
+    return hslToHex(hue, distance, .5 + (1 - distance) * .5);
+  }
+
+  function drawColourWheel() {
+    const canvas = els.colourWheel;
+    const context = canvas.getContext('2d', {alpha: true});
+    const image = context.createImageData(canvas.width, canvas.height);
+    const radius = canvas.width / 2;
+    for (let y = 0; y < canvas.height; y += 1) {
+      for (let x = 0; x < canvas.width; x += 1) {
+        const distance = Math.hypot(x - radius, y - radius);
+        const index = (y * canvas.width + x) * 4;
+        if (distance > radius) {
+          image.data[index + 3] = 0;
+          continue;
+        }
+        const colour = wheelColourAt(x, y);
+        image.data[index] = Number.parseInt(colour.slice(1, 3), 16);
+        image.data[index + 1] = Number.parseInt(colour.slice(3, 5), 16);
+        image.data[index + 2] = Number.parseInt(colour.slice(5, 7), 16);
+        image.data[index + 3] = 255;
+      }
+    }
+    context.putImageData(image, 0, 0);
+  }
+
+  function positionWheelCursor(colour) {
+    const hsl = hexToHsl(colour);
+    const radians = hsl.hue * Math.PI / 180;
+    const distance = hsl.saturation * 50;
+    els.wheelCursor.style.left = `${50 + Math.cos(radians) * distance}%`;
+    els.wheelCursor.style.top = `${50 + Math.sin(radians) * distance}%`;
+    els.wheelCursor.style.setProperty('--cursor-colour', colour);
+  }
+
+  function setColourDraft(colour) {
+    const clean = normaliseHex(colour);
+    if (!clean) return false;
+    els.colourHex.value = clean;
+    els.colourPicker.value = clean;
+    positionWheelCursor(clean);
+    return true;
+  }
+
+  function setPreview(override) {
+    previewOverride = override;
+    renderOutput();
+    els.tubeFill.style.background = gradientCss();
+  }
+
+  function clearPreview() {
+    if (!previewOverride) return;
+    previewOverride = null;
+    renderOutput();
+    els.tubeFill.style.background = gradientCss();
+  }
+
+  function previewColours(colours) {
+    const source = colours.filter(Logic.validHex);
+    setPreview({
+      colours: source.map((colour, index) => ({
+        id: `preview-${index}`,
+        colour: colour.toUpperCase(),
+        position: source.length === 1 ? .5 : index / (source.length - 1)
+      }))
+    });
+  }
+
+  function previewStyle(preset) {
+    const manualEvents = state.events.filter((event) => event.source !== 'stylized-preset');
+    setPreview({
+      colours: preset.colours ? makeColours(preset.colours) : state.colours,
+      formatting: {bold: false, italic: false, underline: false, strike: false, ...clone(preset.formatting)},
+      effects: Logic.normaliseEffects(clone(preset.effects)),
+      events: [...manualEvents, ...styledPresetEvents(preset)]
+    });
+  }
+
+  function styledPresetEvents(preset) {
+    const length = state.name.length;
+    const offset = (fraction) => Math.max(0, Math.min(length, Math.round(length * fraction)));
+    const steps = [];
+    const push = (fraction, ...codes) => {
+      codes.forEach((code) => steps.push({offset: offset(fraction), code}));
+    };
+    if (preset.pattern === 'bubbles') {
+      push(0, '<size=10>', '<voffset=0>');
+      push(.2, '<size=18>', '<voffset=-6>');
+      push(.4, '<size=12>', '<voffset=4>');
+      push(.6, '<size=20>', '<voffset=-8>');
+      push(.8, '<size=11>', '<voffset=3>');
+    } else if (preset.pattern === 'drift') {
+      push(0, '<size=19>', '<voffset=0>', '<alpha=#FF>');
+      push(.33, '<size=15>', '<voffset=3>', '<alpha=#CC>');
+      push(.66, '<size=11>', '<voffset=7>', '<alpha=#88>');
+      push(.84, '<size=7>', '<voffset=12>', '<alpha=#55>');
+    } else if (preset.pattern === 'glitch') {
+      push(0, '<rotate=-6>', '<voffset=-1>');
+      push(.25, '<rotate=8>', '<voffset=4>');
+      push(.5, '<rotate=-9>', '<voffset=-5>');
+      push(.75, '<rotate=5>', '<voffset=2>');
+    }
+    return steps.map((step, index) => ({
+      id: `styled-${preset.id}-${index}`,
+      type: 'tag',
+      code: step.code,
+      offset: step.offset,
+      sequence: 1000 + index,
+      source: 'stylized-preset',
+      presetId: preset.id
+    }));
+  }
+
+  function attachPresetPreview(button, enter, leave = clearPreview) {
+    button.addEventListener('pointerenter', enter);
+    button.addEventListener('focus', enter);
+    button.addEventListener('pointerleave', leave);
+    button.addEventListener('blur', leave);
+  }
+
+  function renderSavedPalettes() {
+    els.savedPalettes.replaceChildren();
+    if (!state.favourites.length) {
+      const empty = document.createElement('p');
+      empty.className = 'empty-saved';
+      empty.textContent = 'NO SAVED PALETTES YET';
+      els.savedPalettes.appendChild(empty);
+      return;
+    }
+    state.favourites.forEach((entry, index) => {
+      const card = document.createElement('div');
+      card.className = 'saved-palette';
+      const apply = document.createElement('button');
+      apply.type = 'button';
+      apply.innerHTML = `<i style="background:${gradientFromColours(entry.colours)}"></i><span><b>${entry.name}</b><small>${entry.colours.length} COLOURS</small></span>`;
+      attachPresetPreview(apply, () => previewColours(entry.colours));
+      apply.addEventListener('click', () => applyColourRecipe(entry.colours, entry.name));
+      const remove = document.createElement('button');
+      remove.type = 'button';
+      remove.className = 'remove-saved';
+      remove.textContent = '×';
+      remove.setAttribute('aria-label', `Delete ${entry.name}`);
+      remove.addEventListener('click', () => {
+        state.favourites.splice(index, 1);
+        persist();
+        renderSavedPalettes();
+        announce(`${entry.name} deleted`);
+      });
+      card.append(apply, remove);
+      els.savedPalettes.appendChild(card);
+    });
+  }
+
   function renderColourSources() {
     els.colourSources.replaceChildren();
     QUICK_COLOURS.forEach(([name, colour]) => {
@@ -1105,34 +1431,79 @@
       button.className = 'colour-source';
       button.style.setProperty('--source-colour', colour);
       button.innerHTML = `<i></i><span><b>${name}</b><code>${colour}</code></span>`;
-      button.addEventListener('click', () => addColour(colour));
+      button.addEventListener('click', () => armPlacement({kind: 'colour', colour}, name));
       enableSourceDrag(button, {kind: 'colour', colour});
       els.colourSources.appendChild(button);
     });
   }
 
+  function renderFxExample(container, key) {
+    const example = document.createElement('span');
+    example.className = `fx-example example-${key}`;
+    example.setAttribute('aria-hidden', 'true');
+    const letter = (text, className = '') => {
+      const span = document.createElement('span');
+      span.className = className;
+      span.textContent = text;
+      return span;
+    };
+    if (key === 'size') example.append(letter('A', 'small'), letter('A', 'large'));
+    else if (key === 'cspace') example.append(letter('A A A', 'wide'));
+    else if (key === 'rotate') example.append(letter('A', 'tilt-left'), letter('A', 'tilt-right'));
+    else if (key === 'voffset') example.append(letter('A', 'low'), letter('A', 'high'));
+    else if (key === 'pos') example.append(letter('A', 'positioned'));
+    else if (key === 'sup') example.append(letter('A'), letter('A', 'sup'));
+    else if (key === 'sub') example.append(letter('A'), letter('A', 'sub'));
+    else if (key === 'br') example.append(letter('A'), letter('B', 'new-line'));
+    else if (key === 'mspace') example.append(letter('A', 'cell'), letter('A', 'cell'));
+    else if (key === 'space') example.append(letter('A'), letter('A', 'spaced'));
+    else if (key === 'mark') example.append(letter('Aa', 'marked'));
+    else if (key === 'alpha') example.append(letter('Aa', 'faded'));
+    else if (key === 'italic') example.append(letter('Aa', 'italic'));
+    else if (key === 'underline') example.append(letter('Aa', 'underline'));
+    else if (key === 'strike') example.append(letter('Aa', 'strike'));
+    else if (key === 'allCaps') example.append(letter('Aa'), letter('AA', 'after'));
+    else if (key === 'smallCaps') example.append(letter('Aa', 'smallcaps'));
+    container.appendChild(example);
+  }
+
   function renderEffectSources() {
     els.effectSources.replaceChildren();
     EFFECTS.forEach((effect) => {
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = `effect-source source-${effect.key}`;
-      button.classList.toggle('active', globalEnabled(effect.key));
-      if (effect.global) button.setAttribute('aria-pressed', String(globalEnabled(effect.key)));
-      button.innerHTML = `<span class="effect-glyph">${effect.key === 'br' ? '↵' : effect.label.slice(0, 2)}</span><span><b>${effect.label}</b><small>${effect.hint}</small><code>${effect.code || 'Aa→AA'}</code></span>`;
-      button.addEventListener('click', () => {
-        if (effect.global) {
+      const card = document.createElement('div');
+      card.className = `effect-source-card source-${effect.key}`;
+      card.classList.toggle('active', globalEnabled(effect.key));
+      const payload = effectPayload(effect.key);
+      const place = document.createElement('button');
+      place.type = 'button';
+      place.className = 'effect-source';
+      place.disabled = !payload;
+      place.innerHTML = `<span><b>${effect.label}</b><small>${payload ? 'PLACE FROM A LETTER' : 'WHOLE NAME ONLY'}</small><code>${effect.code || 'Aa→AA'}</code></span>`;
+      renderFxExample(place, effect.key);
+      place.setAttribute('aria-label', payload
+        ? `Place ${effect.label} from a character. Click then choose a letter, or drag to the live name.`
+        : `${effect.label} is available for the whole name.`);
+      if (payload) {
+        place.addEventListener('click', () => armPlacement(effectPayload(effect.key), effect.label));
+        enableSourceDrag(place, () => effectPayload(effect.key));
+      }
+      card.appendChild(place);
+      if (effect.global) {
+        const toggle = document.createElement('button');
+        toggle.type = 'button';
+        toggle.className = 'global-effect-toggle';
+        toggle.setAttribute('aria-pressed', String(globalEnabled(effect.key)));
+        toggle.innerHTML = `<span>WHOLE NAME</span><b>${globalEnabled(effect.key) ? 'ON' : 'OFF'}</b>`;
+        toggle.addEventListener('click', () => {
+          const removing = globalEnabled(effect.key);
           mutate(() => {
             toggleGlobal(effect.key);
             state.selected = globalEnabled(effect.key) ? {kind: 'global', id: effect.key} : null;
-          }, `${effect.label} ${globalEnabled(effect.key) ? 'removed' : 'toggled'}`);
-        } else {
-          insertPayload(effectPayload(effect.key), state.caret);
-        }
-      });
-      const payload = effectPayload(effect.key);
-      if (payload) enableSourceDrag(button, () => effectPayload(effect.key));
-      els.effectSources.appendChild(button);
+          }, `${effect.label} ${removing ? 'removed from' : 'applied to'} the whole name`);
+        });
+        card.appendChild(toggle);
+      }
+      els.effectSources.appendChild(card);
     });
   }
 
@@ -1145,13 +1516,14 @@
       button.innerHTML = `<i style="background-image:var(--arena-sprite-${sprite})"></i><span>${sprite}</span>`;
       button.setAttribute('aria-label', `Arena sprite ${sprite}. Click to add at caret or drag into the Mega Tube.`);
       const payload = {kind: 'event', event: {type: 'sprite', value: sprite}};
-      button.addEventListener('click', () => insertPayload(payload, state.caret));
+      button.addEventListener('click', () => armPlacement(payload, `SPRITE ${sprite}`));
       enableSourceDrag(button, payload);
       els.spriteSources.appendChild(button);
     });
   }
 
   function applyColourRecipe(colours, label) {
+    previewOverride = null;
     mutate(() => {
       state.colours = makeColours(colours);
       state.wubrg = [];
@@ -1204,6 +1576,7 @@
       button.className = 'preset-card wubrg-card';
       button.classList.toggle('match', recipe.key === currentKey);
       button.innerHTML = `<span class="preset-gradient" style="background:${gradientFromColours(recipe.codes.map((code) => MANA[code].colour))}"></span><span><b>${recipe.name}</b><small>${recipe.codes.join(' · ')}</small></span><em>APPLY</em>`;
+      attachPresetPreview(button, () => previewColours(recipe.codes.map((code) => MANA[code].colour)));
       button.addEventListener('click', () => applyColourRecipe(recipe.codes.map((code) => MANA[code].colour), recipe.name));
       els.wubrgResults.appendChild(button);
     });
@@ -1227,6 +1600,7 @@
       button.type = 'button';
       button.className = 'preset-card colour-preset-card';
       button.innerHTML = `<span class="preset-gradient" style="background:${gradientFromColours(preset.colours)}"></span><span><b>${preset.name}</b><small>${preset.note} · ${preset.colours.length} COLOURS</small></span><em>APPLY</em>`;
+      attachPresetPreview(button, () => previewColours(preset.colours));
       button.addEventListener('click', () => applyColourRecipe(preset.colours, preset.name));
       els.colourPresets.appendChild(button);
     });
@@ -1234,33 +1608,44 @@
     STYLE_PRESETS.forEach((preset) => {
       const button = document.createElement('button');
       button.type = 'button';
-      button.className = 'preset-card style-preset-card';
+      button.className = `preset-card style-preset-card preset-${preset.id}`;
       const sampleStyle = [];
       if (preset.formatting.italic) sampleStyle.push('font-style:italic');
       if (preset.formatting.underline) sampleStyle.push('text-decoration:underline');
       if (preset.formatting.strike) sampleStyle.push('text-decoration:line-through');
       if (preset.effects.rotate?.enabled) sampleStyle.push(`transform:rotate(${preset.effects.rotate.value}deg)`);
       if (preset.effects.size?.enabled) sampleStyle.push(`font-size:${Math.min(25, Number(preset.effects.size.value) + 5)}px`);
+      if (preset.colours) sampleStyle.push(`background:${gradientFromColours(preset.colours)}`, 'color:transparent', 'background-clip:text');
       button.innerHTML = `<span class="style-sample" style="${sampleStyle.join(';')}">${preset.sample}</span><span><b>${preset.name}</b><small>${preset.note}</small></span><em>APPLY</em>`;
+      attachPresetPreview(button, () => previewStyle(preset));
       button.addEventListener('click', () => mutate(() => {
         state.formatting = {bold: false, italic: false, underline: false, strike: false, ...clone(preset.formatting)};
         state.effects = Logic.normaliseEffects(clone(preset.effects));
+        if (preset.colours) {
+          state.colours = makeColours(preset.colours);
+          state.wubrg = [];
+        }
+        state.events = [
+          ...state.events.filter((event) => event.source !== 'stylized-preset'),
+          ...styledPresetEvents(preset)
+        ];
         state.selected = null;
-      }, `${preset.name} replaced the global style layer`));
+      }, `${preset.name} layered onto the live name`));
       els.stylePresets.appendChild(button);
     });
   }
 
   function setActiveTab(name, focus = false) {
-    state.activeTab = name;
+    const valid = ['colours', 'effects', 'wubrg', 'colour-presets', 'style-presets'];
+    state.activeTab = valid.includes(name) ? name : null;
     document.querySelectorAll('[data-tab]').forEach((tab) => {
-      const active = tab.dataset.tab === name;
+      const active = tab.dataset.tab === state.activeTab;
       tab.setAttribute('aria-selected', String(active));
-      tab.tabIndex = active ? 0 : -1;
+      tab.tabIndex = state.activeTab ? (active ? 0 : -1) : 0;
       if (active && focus) tab.focus();
     });
     document.querySelectorAll('[data-panel]').forEach((panel) => {
-      panel.hidden = panel.dataset.panel !== name;
+      panel.hidden = panel.dataset.panel !== state.activeTab;
     });
     persist();
   }
@@ -1278,6 +1663,7 @@
     renderTube();
     renderInspector();
     renderSources();
+    renderSavedPalettes();
     setActiveTab(state.activeTab);
   }
 
@@ -1325,6 +1711,68 @@
     renderInspector();
   }
 
+  function canvasTargets() {
+    return Array.from(els.outputPreview.querySelectorAll('[data-drop-offset]'));
+  }
+
+  function canvasTargetFromPoint(clientX, directTarget = null) {
+    const direct = directTarget?.closest?.('[data-drop-offset]');
+    if (direct && els.outputPreview.contains(direct)) return direct;
+    const targets = canvasTargets();
+    if (!targets.length) return null;
+    return targets.reduce((closest, candidate) => {
+      const bounds = candidate.getBoundingClientRect();
+      const centre = bounds.left + bounds.width / 2;
+      const distance = Math.abs(clientX - centre);
+      return !closest || distance < closest.distance ? {candidate, distance} : closest;
+    }, null)?.candidate || null;
+  }
+
+  function offsetFromCanvasEvent(event) {
+    const target = canvasTargetFromPoint(event.clientX, event.target);
+    if (target) return Number(target.dataset.dropOffset);
+    const bounds = els.tubeNameCanvas.getBoundingClientRect();
+    const position = Math.max(0, Math.min(1, (event.clientX - bounds.left) / Math.max(1, bounds.width)));
+    return offsetFromPosition(position);
+  }
+
+  function showCanvasDropTarget(target) {
+    els.outputPreview.querySelectorAll('.drop-hover').forEach((node) => node.classList.remove('drop-hover'));
+    if (!target) return;
+    target.classList.add('drop-hover');
+    const targetBounds = target.getBoundingClientRect();
+    const trackBounds = els.tubeTrack.getBoundingClientRect();
+    const x = targetBounds.left + targetBounds.width / 2 - trackBounds.left;
+    els.dropGuide.style.left = `${Math.max(0, Math.min(trackBounds.width, x))}px`;
+    els.dropGuide.classList.add('visible');
+  }
+
+  function payloadFromDrop(event) {
+    if (dragPayload) return dragPayload;
+    try {
+      return JSON.parse(event.dataTransfer?.getData('application/x-ultimate-layer') || 'null');
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function selectWheelPoint(event) {
+    const bounds = els.colourWheel.getBoundingClientRect();
+    const scaleX = els.colourWheel.width / Math.max(1, bounds.width);
+    const scaleY = els.colourWheel.height / Math.max(1, bounds.height);
+    const radius = els.colourWheel.width / 2;
+    let x = (event.clientX - bounds.left) * scaleX;
+    let y = (event.clientY - bounds.top) * scaleY;
+    const dx = x - radius;
+    const dy = y - radius;
+    const distance = Math.hypot(dx, dy);
+    if (distance > radius) {
+      x = radius + dx / distance * radius;
+      y = radius + dy / distance * radius;
+    }
+    setColourDraft(wheelColourAt(x, y));
+  }
+
   function installEvents() {
     els.deckName.addEventListener('input', handleNameInput);
     ['click', 'keyup', 'select', 'focus'].forEach((type) => els.deckName.addEventListener(type, syncCaretFromInput));
@@ -1341,15 +1789,82 @@
     els.clearFxButton.addEventListener('click', () => mutate(() => {
       state.formatting = {bold: false, italic: false, underline: false, strike: false};
       state.effects = Logic.normaliseEffects({});
-      state.events = [];
+      state.events = state.events.filter((event) => event.type === 'sprite');
       state.selected = null;
-    }, 'All effect and sprite layers cleared'));
-    els.addCustomColour.addEventListener('click', () => addColour(els.colourHex.value));
-    els.colourPicker.addEventListener('input', () => { els.colourHex.value = els.colourPicker.value.toUpperCase(); });
+    }, 'All effect layers cleared; sprites preserved'));
+    els.addCustomColour.addEventListener('click', () => {
+      const colour = normaliseHex(els.colourHex.value);
+      if (!colour) {
+        announce('Use a six-digit hex colour', true);
+        return;
+      }
+      armPlacement({kind: 'colour', colour}, colour);
+    });
+    els.applyCustomColour.addEventListener('click', () => {
+      const stop = state.selected?.kind === 'colour'
+        ? state.colours.find((candidate) => candidate.id === state.selected.id)
+        : null;
+      const colour = normaliseHex(els.colourHex.value);
+      if (!stop || !colour) return;
+      mutate(() => {
+        stop.colour = colour;
+        state.wubrg = [];
+        state.selected = {kind: 'colour', id: stop.id};
+      }, `Selected colour changed to ${colour}`);
+    });
+    els.colourPicker.addEventListener('input', () => setColourDraft(els.colourPicker.value));
     els.colourHex.addEventListener('input', () => {
       els.colourHex.value = els.colourHex.value.toUpperCase();
       const clean = normaliseHex(els.colourHex.value);
-      if (clean) els.colourPicker.value = clean;
+      if (clean) {
+        els.colourPicker.value = clean;
+        positionWheelCursor(clean);
+      }
+    });
+    els.colourHex.addEventListener('change', () => {
+      if (!setColourDraft(els.colourHex.value)) {
+        els.colourHex.setAttribute('aria-invalid', 'true');
+        announce('Use a six-digit hex colour', true);
+      } else {
+        els.colourHex.removeAttribute('aria-invalid');
+      }
+    });
+    els.colourWheel.addEventListener('pointerdown', (event) => {
+      event.preventDefault();
+      try { els.colourWheel.setPointerCapture(event.pointerId); } catch (_) {}
+      selectWheelPoint(event);
+    });
+    els.colourWheel.addEventListener('pointermove', (event) => {
+      if (!els.colourWheel.hasPointerCapture?.(event.pointerId) && !event.buttons) return;
+      selectWheelPoint(event);
+    });
+    els.rotateColours.addEventListener('click', () => mutate(() => {
+      const sorted = state.colours.slice().sort((left, right) => left.position - right.position);
+      if (sorted.length < 2) return;
+      const values = sorted.map((stop) => stop.colour);
+      values.unshift(values.pop());
+      sorted.forEach((stop, index) => { stop.colour = values[index]; });
+      state.wubrg = [];
+    }, 'Palette rotated'));
+    els.flipColours.addEventListener('click', () => mutate(() => {
+      const sorted = state.colours.slice().sort((left, right) => left.position - right.position);
+      const values = sorted.map((stop) => stop.colour).reverse();
+      sorted.forEach((stop, index) => { stop.colour = values[index]; });
+      state.wubrg = [];
+    }, 'Palette direction flipped'));
+    els.savePalette.addEventListener('click', () => {
+      const colours = state.colours.slice().sort((left, right) => left.position - right.position).map((stop) => stop.colour);
+      const signature = colours.join(',');
+      const existing = state.favourites.findIndex((entry) => entry.colours.join(',') === signature);
+      if (existing >= 0) {
+        announce('That palette is already saved');
+        return;
+      }
+      state.favourites.unshift({name: `SAVED ${state.favourites.length + 1}`, colours});
+      state.favourites = state.favourites.slice(0, 10);
+      persist();
+      renderSavedPalettes();
+      announce('Palette saved on this device');
     });
     els.applyWubrg.addEventListener('click', () => {
       if (state.wubrg.length) applyColourRecipe(state.wubrg.map((code) => MANA[code].colour), identityName(state.wubrg));
@@ -1361,7 +1876,7 @@
     });
     els.wubrgSearch.addEventListener('input', renderWubrgResults);
     document.querySelectorAll('[data-tab]').forEach((tab) => {
-      tab.addEventListener('click', () => setActiveTab(tab.dataset.tab));
+      tab.addEventListener('click', () => setActiveTab(state.activeTab === tab.dataset.tab ? null : tab.dataset.tab));
       tab.addEventListener('keydown', (event) => {
         if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
         event.preventDefault();
@@ -1373,8 +1888,47 @@
         setActiveTab(tabs[next].dataset.tab, true);
       });
     });
+    document.querySelectorAll('[data-close-panel]').forEach((button) => {
+      button.addEventListener('click', () => setActiveTab(null));
+    });
+    els.tubeNameCanvas.addEventListener('click', (event) => {
+      const offset = offsetFromCanvasEvent(event);
+      if (armedPayload) {
+        placePayloadAtOffset(armedPayload, offset);
+        return;
+      }
+      setCaret(offset, false);
+      announce(`Active caret moved to ${state.caret}`);
+    });
+    els.tubeNameCanvas.addEventListener('dragover', (event) => {
+      const types = Array.from(event.dataTransfer?.types || []);
+      if (!dragPayload && !types.includes('application/x-ultimate-layer')) return;
+      event.preventDefault();
+      event.stopPropagation();
+      if (event.dataTransfer) event.dataTransfer.dropEffect = 'copy';
+      const target = canvasTargetFromPoint(event.clientX, event.target);
+      showCanvasDropTarget(target);
+      els.megaTube.classList.add('drop-ready');
+    });
+    els.tubeNameCanvas.addEventListener('dragleave', (event) => {
+      if (els.tubeNameCanvas.contains(event.relatedTarget)) return;
+      showCanvasDropTarget(null);
+      els.dropGuide.classList.remove('visible');
+      els.megaTube.classList.remove('drop-ready');
+    });
+    els.tubeNameCanvas.addEventListener('drop', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const payload = payloadFromDrop(event);
+      const offset = offsetFromCanvasEvent(event);
+      showCanvasDropTarget(null);
+      els.dropGuide.classList.remove('visible');
+      els.megaTube.classList.remove('drop-ready', 'source-dragging');
+      dragPayload = null;
+      if (payload) placePayloadAtOffset(payload, offset);
+    });
     els.tubeTrack.addEventListener('click', (event) => {
-      if (event.target.closest('.tube-token')) return;
+      if (event.target.closest('.tube-token, .tube-name-canvas')) return;
       setCaret(offsetFromPosition(tubePosition(event.clientX)), false);
       announce(`Active caret moved to ${state.caret}`);
     });
@@ -1407,10 +1961,7 @@
     });
     els.tubeTrack.addEventListener('drop', (event) => {
       event.preventDefault();
-      let payload = dragPayload;
-      if (!payload) {
-        try { payload = JSON.parse(event.dataTransfer?.getData('application/x-ultimate-layer') || 'null'); } catch (_) {}
-      }
+      const payload = payloadFromDrop(event);
       const position = tubePosition(event.clientX);
       els.dropGuide.classList.remove('visible');
       els.megaTube.classList.remove('drop-ready', 'source-dragging');
@@ -1418,6 +1969,10 @@
       if (payload) insertPayload(payload, offsetFromPosition(position), position);
     });
     document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && armedPayload) {
+        clearArmedPlacement();
+        announce('Placement cancelled');
+      }
       if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
         event.preventDefault();
         copyText(currentBuild?.raw, 'Arena name copied');
@@ -1434,6 +1989,8 @@
   }
 
   restore();
+  drawColourWheel();
+  setColourDraft('#C94BFF');
   renderColourSources();
   renderSpriteSources();
   renderPresets();
