@@ -1,7 +1,7 @@
 TURDGOBBLER'S DECK NAME COLOURIFIER — ULTIMATE VERSION
 
 STATUS
-This folder is the active Ultimate source. The v6.4 placement-context interface
+This folder is the active Ultimate source. The v6.5 progressive-picker interface
 is the release published at /ultimate/ on 2026-07-30.
 Version 6 remains the standard /colour/ release and Version Lite remains
 shelved.
@@ -10,9 +10,9 @@ QUICK START
 1. Keep every file in this folder together.
 2. Open index.html in a modern browser.
 3. Type a deck name.
-4. Drag either Colour or FX anywhere across the tube. Colour uses that exact
-   point; FX compiles at the text insertion point shown by its guide line.
-   Keyboard users can place either bubble with Enter or Space.
+4. Drag Colour, FX, or Sprite anywhere across the tube. Colour uses that exact
+   point; FX and Sprite compile at the text insertion point shown by the guide
+   line. Keyboard users can place any source bubble with Enter or Space.
 5. Finish the drop in the prominent full-screen chooser. The bubble is not
    placed until an exact colour, effect, or sprite is chosen.
 6. Drag any bubble on the shared rail to reposition it, or click it to inspect
@@ -43,28 +43,29 @@ THE ONE-TUBE MODEL
   spacing keeps them accessible, and guide lines point back to their exact
   text anchors.
 - Selecting a layer never draws decoration across the affected letters.
-- Undo and Start Over stay permanently visible. More contains Redo, budget
+- Undo and Redo stay permanently visible. More contains Start Over, budget
   details, Clear FX, and complete saved presets.
 
 THE TWO PRESET LAUNCHERS
 1. WUBRG applies Magic colour identities immediately as pips are selected.
-2. PRESETS contains both curated colour recipes and combined colour-and-FX
-   looks.
+2. PRESETS first opens Colour, Special, and Saved collections, then shows only
+   the chosen set of recipes.
 
 WUBRG and colour recipes replace only the colour layer. Combined Presets replace
 the current non-sprite FX so every named look is deterministic while preserving
 inline sprites. Ice Rainbow and Sunset are colour-led; Bubbles, Drift Away,
 Matrix Glitch, and Upside Down combine Arena-supported tags and colours.
 
-COLOUR + EFFECT SOURCES
-- The Layer Dock has exactly two draggable creation points, paired directly
-  beneath the tube: Colour and FX.
+COLOUR + EFFECT + SPRITE SOURCES
+- The Layer Dock has exactly three draggable creation points, paired directly
+  beneath the tube: Colour, FX, and Sprite.
 - A Colour drop locks an exact edge-to-edge percentage; an FX drop locks a text
   position before opening the matching picker.
-- The two bubbles sit directly beside the Mega Tube and remain reachable on
+- The three bubbles sit directly beside the Mega Tube and remain reachable on
   narrow mobile screens.
 - The colour picker offers the wheel, hex, swatches, and saved palettes. The FX
-  picker offers whole-name or positioned effects and all sprites.
+  picker uses five circular families before showing a few positioned effects.
+  Sprites have their own focused picker.
 - The V6 circular colour disc is the primary mobile picker: white at its centre,
   full colour through the middle, and a dark outer ring. The native mobile
   colour swatch is hidden.
@@ -81,7 +82,11 @@ COLOUR + EFFECT SOURCES
   spacing, rotation, vertical offset, and horizontal position.
 - Global ALL CAPS costs zero tag characters.
 - Positioned line break, mono spacing, spacing, highlight, and alpha effects.
-- Arena sprites 0 through 15 are kept in a submenu inside Effects.
+- Arena sprites 0 through 15 are kept in their own Sprite picker.
+- Force Gradient samples every chosen colour into as many smooth Arena colour
+  stages as the 64-character budget and deck-name length can support.
+- Copy is available both beside the name input and on the live black display;
+  successful copies raise a light, coloured COPIED! confirmation.
 - The Bubbles, Drift Away, Matrix Glitch, and Upside Down recipes use compact
   tag combinations that fit the default deck name within Arena's 64-character
   budget.

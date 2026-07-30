@@ -13,7 +13,7 @@ One composition area should explain the complete product:
   colour-and-FX recipes share one visible Presets panel.
 - Category-specific presets can be layered because each replaces only its own
   state domain.
-- Sprites stay adjacent to effects in a submenu.
+- Sprites use their own direct source bubble and focused picker.
 
 ## Root cause of the immovable “1” bubble
 
@@ -55,8 +55,8 @@ so compiler correctness does not require a fixed visual bubble.
   positioned FX, and sprites. Necessary whole-name transformations are direct
   toggles rather than a second layer species inside the tube.
 - Two compact typed reservoirs replace the previous five source-orb controls.
-- The final dock reduces direct creation to two typed reservoirs—Colour and
-  FX—while keeping the three preset systems separate.
+- The final dock reduces direct creation to three typed reservoirs—Colour, FX,
+  and Sprite—while keeping WUBRG and the nested Presets collections separate.
 - A reservoir drop stores either an exact continuous colour point or an exact
   FX text position; the subsequent picker choice commits there.
 - Source libraries no longer occupy permanent layout space. A bubble drop or
@@ -72,7 +72,7 @@ so compiler correctness does not require a fixed visual bubble.
 - Selected layers highlight the exact character range they affect.
 - Budget-trimmed colour bubbles remain visible as ghosts instead of silently
   disappearing.
-- Colour and FX creation bubbles are paired directly under the tube.
+- Colour, FX, and Sprite creation bubbles are paired directly under the tube.
 - Dragging shows a magnified colour percentage or text position.
 - Coincident FX remain independent clickable bubbles. Collision spacing fans
   them apart and perspective guides lead back to their shared anchor.
@@ -151,10 +151,12 @@ Only the compiler turns these domains into one raw Arena string.
 
 - Bubble 1 and a single colour remain movable after normalization.
 - Arena output still starts with a colour tag.
-- Colour and FX source bubbles share one pointer-drag path across mouse, pen,
-  and touch; keyboard placement commits through the same structured payload.
+- Colour, FX, and Sprite source bubbles share one pointer-drag path across
+  mouse, pen, and touch; keyboard placement commits through the same structured
+  payload.
 - WUBRG/colour recipes cannot remove effects or sprites.
-- Stylized recipes cannot remove manually positioned effects or sprites.
+- Stylized recipes replace manually positioned non-sprite FX predictably while
+  preserving sprites.
 - Every positioned bubble is a keyboard-operable slider.
 - The always-visible live name surface remains fully opaque black.
 - All positioned FX render on the tube rail; All Caps and Small Caps remain

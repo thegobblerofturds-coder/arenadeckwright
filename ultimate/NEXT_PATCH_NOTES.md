@@ -169,6 +169,28 @@ The Ultimate development source was rebuilt around one editing surface.
 - Moved the guide layer out of the gradient rail and retargeted every dotted
   callout to the bottom centre of its actual rendered character.
 
+### Ultimate v6.5 progressive pickers and copy clarity
+
+- Restored a light, coloured `COPIED!` confirmation that sails upward and
+  disappears after a successful clipboard write. Added a redundant Copy control
+  directly on the always-visible black Arena preview and made the main Arena
+  export button brighter and more inviting.
+- Replaced the inspector’s ambiguous close `×` with a calm checkmark labelled
+  “Done editing.”
+- Added Force Gradient beside the whole-name controls. With two or more chosen
+  colours it samples the full mix into the maximum number of smooth colour
+  stages supported by the deck-name length and remaining 64-character budget.
+- Replaced the intimidating flat FX catalogue with five large circular families:
+  Lettering, Scale, Motion, Spacing, and Finish. Choosing a family reveals only
+  its two to four relevant effects.
+- Promoted Sprite to a third draggable source bubble beside Colour and FX and
+  moved all sixteen smileys into their own focused picker.
+- Rebuilt Presets as a progressive three-collection picker: Colour, Special,
+  and Saved. Saving remains under More; Saved makes loading a complete look
+  quick.
+- Paired Undo and Redo beside WUBRG and Presets. Moved destructive Start Over
+  into More.
+
 ### Removed from the product surface
 
 - Alternate/prismatic duplicate name view.
@@ -185,5 +207,5 @@ reduced-motion support, and fan-content notice remain.
 
 ## Release status
 
-The v6.4 interface is the `/ultimate/` release in both website mirrors as of
+The v6.5 interface is the `/ultimate/` release in both website mirrors as of
 2026-07-30. `/colour/` remains Version 6 and Version Lite remains shelved.

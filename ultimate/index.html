@@ -4,15 +4,15 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#07090d">
-  <meta name="description" content="TurdGobbler's Ultimate Arena deck-name colourifier: one live Mega Tube with drag-in Colour and FX layers.">
+  <meta name="description" content="TurdGobbler's Ultimate Arena deck-name colourifier: one live Mega Tube with drag-in Colour, FX, and Sprite layers.">
   <link rel="icon" href="favicon.ico" sizes="any">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="manifest" href="site.webmanifest">
   <title>TurdGobbler's Deck Name Colourifier — Ultimate Version</title>
-  <link rel="stylesheet" href="styles.css?v=ultimate-6.4">
+  <link rel="stylesheet" href="styles.css?v=ultimate-6.5">
   <script src="logic.js?v=ultimate-3.0" defer></script>
-  <script src="app.js?v=ultimate-6.4" defer></script>
+  <script src="app.js?v=ultimate-6.5" defer></script>
 </head>
 <body>
   <main class="app-shell">
@@ -24,10 +24,10 @@
     </header>
     <section id="instructionsPanel" class="instructions-panel" aria-label="How to use the Colourifier" hidden>
       <button type="button" data-close-instructions aria-label="Close instructions">×</button>
-      <p><b>ADD</b> Drag Colour or FX anywhere onto the black tube, then choose what it becomes.</p>
+      <p><b>ADD</b> Drag Colour, FX, or Sprite anywhere onto the black tube, then choose what it becomes.</p>
       <p><b>EDIT</b> Tap a placed bubble. Drag it to move; its guide line shows Arena’s insertion point.</p>
       <p><b>DELETE</b> Drag a placed bubble into the red bar that appears directly below the tube.</p>
-      <p><b>BUILD</b> WUBRG applies immediately. Presets, Undo, Start Over, Copy, and saved looks remain separate.</p>
+      <p><b>BUILD</b> WUBRG applies immediately. Presets and Undo stay close; Start Over and saved looks live under More.</p>
     </section>
 
     <section class="studio" aria-label="Ultimate deck-name editor">
@@ -41,7 +41,7 @@
             <div class="copy-field">
               <span>ARENA EXPORT</span>
               <button id="copyButton" class="copy-button" type="button" aria-describedby="outputStatus">
-                <b id="copyLabel">COPY</b><small>NAME</small>
+                <b id="copyLabel">COPY</b><small>TO ARENA</small>
               </button>
             </div>
           </div>
@@ -50,6 +50,9 @@
             <div id="tubeTrack" class="tube-track" tabindex="0" role="group" aria-label="Mega Tube. Drag Colour anywhere across the tube or FX onto a text position.">
               <div id="tubeNameCanvas" class="tube-name-canvas" aria-label="Live Arena name and character drop surface">
                 <span id="outputPreview" class="output-preview"></span>
+                <button id="previewCopyButton" class="preview-copy-button" type="button" aria-label="Copy the displayed Arena deck name">
+                  <span aria-hidden="true">⧉</span> COPY
+                </button>
                 <div id="tubeLayerGuides" class="tube-layer-guides" aria-hidden="true"></div>
                 <div class="layer-rail-frame" aria-label="Positioned colour and effect layers">
                   <div id="tubeFill" class="tube-fill" aria-hidden="true"></div>
@@ -70,12 +73,16 @@
                 <button id="fxLayerBubble" class="side-bubble fx-reservoir" type="button" aria-label="Drag Effect anywhere across the tube. Keyboard: place at the current text position.">
                   <i aria-hidden="true">FX</i><span>EFFECT</span>
                 </button>
+                <button id="spriteLayerBubble" class="side-bubble sprite-reservoir" type="button" aria-label="Drag Sprite anywhere across the tube. Keyboard: place at the current text position.">
+                  <i aria-hidden="true">☺</i><span>SPRITE</span>
+                </button>
               </div>
 
               <div id="globalToggleBar" class="global-toggle-bar" role="group" aria-label="Whole-name controls">
                 <span>WHOLE NAME</span>
                 <button type="button" data-global-toggle="allCaps" aria-pressed="false">ALL CAPS</button>
                 <button type="button" data-global-toggle="smallCaps" aria-pressed="false">SMALL CAPS</button>
+                <button id="forceGradient" class="force-gradient" type="button">FORCE GRADIENT</button>
               </div>
 
               <div id="trashDropZone" class="trash-drop-zone" aria-hidden="true" hidden>
@@ -90,7 +97,7 @@
               </div>
               <div class="persistent-actions" role="group" aria-label="Editing actions">
                 <button id="undoButton" class="tool-button" type="button" disabled><span aria-hidden="true">↶</span> UNDO</button>
-                <button id="startOver" class="tool-button danger-soft" type="button">START OVER</button>
+                <button id="redoButton" class="tool-button" type="button" disabled><span aria-hidden="true">↷</span> REDO</button>
               </div>
             </div>
           </div>
@@ -142,16 +149,25 @@
 
             <section id="panelEffects" class="library-panel" role="tabpanel" aria-label="FX context menu" data-panel="effects" hidden>
               <header class="panel-head">
-                <span><small>FX</small><b>CHOOSE AN EFFECT OR SPRITE</b></span>
+                <span><small>FX</small><b>CHOOSE AN EFFECT</b></span>
                 <button type="button" data-close-panel aria-label="Close Effect menu">×</button>
               </header>
-              <p class="panel-note">Choose an effect for the dropped position. Whole-name transformations live beside the Colour and FX bubbles.</p>
+              <p class="panel-note">Choose a family, then one focused effect. Whole-name transformations live beside the source bubbles.</p>
               <div id="recentEffects" class="recent-choices" aria-label="Recently used effects" hidden></div>
+              <div class="fx-orbit" role="group" aria-label="Effect families">
+                <div id="fxCategories" class="fx-categories"></div>
+                <div class="fx-orbit-centre" aria-hidden="true"><small>FX FAMILY</small><b id="activeFxGroupLabel">LETTERING</b></div>
+              </div>
               <div id="effectSources" class="effect-sources" role="group" aria-label="Arena effect choices"></div>
-              <details class="sprite-submenu">
-                <summary><span><small>INLINE</small><b>SPRITES 0–15</b></span><i aria-hidden="true">+</i></summary>
-                <div id="spriteSources" class="sprite-sources" role="group" aria-label="Arena sprite choices"></div>
-              </details>
+            </section>
+
+            <section id="panelSprites" class="library-panel" role="tabpanel" aria-label="Sprite context menu" data-panel="sprites" hidden>
+              <header class="panel-head">
+                <span><small>SPRITE</small><b>CHOOSE A SMILEY</b></span>
+                <button type="button" data-close-panel aria-label="Close Sprite menu">×</button>
+              </header>
+              <p class="panel-note">Arena sprites are now their own layer. Pick one for the position where you dropped the Sprite bubble.</p>
+              <div id="spriteSources" class="sprite-sources standalone-sprite-sources" role="group" aria-label="Arena sprite choices"></div>
             </section>
 
             <section id="panelWubrg" class="library-panel preset-panel" role="tabpanel" aria-labelledby="tabWubrg" data-panel="wubrg" hidden>
@@ -170,16 +186,26 @@
 
             <section id="panelPresets" class="library-panel preset-panel" role="tabpanel" aria-labelledby="tabPresets" data-panel="presets" hidden>
               <header class="panel-head">
-                <span><small>PRESETS</small><b>COLOUR + COMBINED LOOKS</b></span>
+                <span><small>PRESETS</small><b>CHOOSE A COLLECTION</b></span>
                 <button type="button" data-close-panel aria-label="Close Presets">×</button>
               </header>
-              <section class="preset-section" aria-labelledby="colourPresetTitle">
-                <h3 id="colourPresetTitle">COLOUR</h3>
+              <div class="preset-orbit" role="tablist" aria-label="Preset collections">
+                <button type="button" role="tab" data-preset-section="colour" aria-selected="true"><i aria-hidden="true">◒</i><b>COLOUR</b><small>PALETTES</small></button>
+                <button type="button" role="tab" data-preset-section="special" aria-selected="false"><i aria-hidden="true">✦</i><b>SPECIAL</b><small>COLOUR + FX</small></button>
+                <button type="button" role="tab" data-preset-section="saved" aria-selected="false"><i aria-hidden="true">★</i><b>SAVED</b><small>THIS DEVICE</small></button>
+                <div class="preset-orbit-centre" aria-hidden="true"><small>PRESET</small><b id="activePresetSectionLabel">COLOUR</b></div>
+              </div>
+              <section class="preset-choice-view" data-preset-view="colour" aria-labelledby="colourPresetTitle">
+                <h3 id="colourPresetTitle">COLOUR PRESETS</h3>
                 <div id="colourPresets" class="preset-grid colour-preset-grid" aria-label="Colour presets"></div>
               </section>
-              <section class="preset-section" aria-labelledby="combinedPresetTitle">
-                <h3 id="combinedPresetTitle">COLOUR + FX</h3>
-                <div id="stylePresets" class="preset-grid style-preset-grid" aria-label="Combined presets"></div>
+              <section class="preset-choice-view" data-preset-view="special" aria-labelledby="combinedPresetTitle" hidden>
+                <h3 id="combinedPresetTitle">SPECIAL PRESETS</h3>
+                <div id="stylePresets" class="preset-grid style-preset-grid" aria-label="Special presets"></div>
+              </section>
+              <section class="preset-choice-view" data-preset-view="saved" aria-labelledby="savedPresetPickerTitle" hidden>
+                <h3 id="savedPresetPickerTitle">SAVED PRESETS</h3>
+                <div id="presetSavedCompositions" class="saved-composition-list preset-saved-compositions"></div>
               </section>
             </section>
           </div>
@@ -205,10 +231,8 @@
           </div>
 
           <div class="tube-actions">
-            <div class="history-actions">
-              <button id="redoButton" class="tool-button" type="button" disabled><span aria-hidden="true">↷</span> REDO</button>
-            </div>
             <button id="clearFxButton" class="tool-button danger-soft" type="button">CLEAR FX</button>
+            <button id="startOver" class="tool-button danger-soft" type="button">START OVER</button>
           </div>
 
           <section class="saved-compositions" aria-labelledby="savedCompositionsTitle">

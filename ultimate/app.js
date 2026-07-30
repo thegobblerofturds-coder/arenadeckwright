@@ -5,7 +5,7 @@
   const DEFAULT_NAME = 'Your Deck Name';
   const STORAGE_KEY = 'turdgobbler-colourifier-ultimate-v2';
   const LEGACY_STORAGE_KEY = 'turdgobbler-deckwright-v7';
-  const MAX_COLOURS = 7;
+  const MAX_COLOURS = Math.floor(Logic.LIMIT / 6);
   const MAX_HISTORY = 50;
   const MANA_ORDER = ['W', 'U', 'B', 'R', 'G'];
   const MANA = {
@@ -92,12 +92,20 @@
     {key: 'mark', label: 'HIGHLIGHT', hint: 'MARK COLOUR', code: '<mark=#FFFF0080>', global: null, value: '#FFFF0080'},
     {key: 'alpha', label: 'ALPHA', hint: 'TEXT OPACITY', code: '<alpha=#80>', global: null, value: '#80'}
   ];
+  const FX_GROUPS = [
+    {key: 'lettering', label: 'LETTERING', icon: 'Aa', effects: ['bold', 'italic', 'underline', 'strike']},
+    {key: 'scale', label: 'SCALE', icon: '↕', effects: ['sup', 'sub', 'size']},
+    {key: 'motion', label: 'MOTION', icon: '↝', effects: ['rotate', 'voffset', 'pos']},
+    {key: 'spacing', label: 'SPACING', icon: '↔', effects: ['cspace', 'mspace', 'space', 'br']},
+    {key: 'finish', label: 'FINISH', icon: '✦', effects: ['mark', 'alpha']}
+  ];
   const EFFECT_BY_KEY = Object.fromEntries(EFFECTS.map((effect) => [effect.key, effect]));
   const $ = (id) => document.getElementById(id);
   const els = {
     instructionsButton: $('instructionsButton'), instructionsPanel: $('instructionsPanel'),
     deckName: $('deckName'), startOver: $('startOver'),
-    copyButton: $('copyButton'), copyLabel: $('copyLabel'), outputPreview: $('outputPreview'),
+    copyButton: $('copyButton'), copyLabel: $('copyLabel'), previewCopyButton: $('previewCopyButton'),
+    outputPreview: $('outputPreview'),
     budgetTotal: $('budgetTotal'), budgetText: $('budgetText'), budgetColour: $('budgetColour'),
     budgetFx: $('budgetFx'), outputStatus: $('outputStatus'), colourCount: $('colourCount'),
     effectCount: $('effectCount'), spriteCount: $('spriteCount'), megaTube: $('megaTube'),
@@ -107,7 +115,7 @@
     tubeNameCanvas: $('tubeNameCanvas'),
     dropGuide: $('dropGuide'), dropMagnifier: $('dropMagnifier'),
     dropMagnifierGlyph: $('dropMagnifierGlyph'), dropMagnifierLabel: $('dropMagnifierLabel'),
-    undoButton: $('undoButton'), redoButton: $('redoButton'),
+    undoButton: $('undoButton'), redoButton: $('redoButton'), forceGradient: $('forceGradient'),
     clearFxButton: $('clearFxButton'), tubeStatus: $('tubeStatus'), layerInspector: $('layerInspector'),
     colourPicker: $('colourPicker'), colourHex: $('colourHex'), addCustomColour: $('addCustomColour'),
     colourWheel: $('colourWheel'), wheelCursor: $('wheelCursor'),
@@ -115,13 +123,17 @@
     savedPalettes: $('savedPalettes'),
     colourSources: $('colourSources'), recentColours: $('recentColours'),
     effectSources: $('effectSources'), recentEffects: $('recentEffects'), spriteSources: $('spriteSources'),
+    fxCategories: $('fxCategories'), activeFxGroupLabel: $('activeFxGroupLabel'),
     wubrgComposer: $('wubrgComposer'), wubrgIdentity: $('wubrgIdentity'), wubrgOrder: $('wubrgOrder'),
     clearWubrg: $('clearWubrg'), wubrgContext: $('wubrgContext'),
     wubrgResults: $('wubrgResults'), colourPresets: $('colourPresets'), stylePresets: $('stylePresets'),
+    activePresetSectionLabel: $('activePresetSectionLabel'),
     colourLayerBubble: $('colourLayerBubble'), fxLayerBubble: $('fxLayerBubble'),
+    spriteLayerBubble: $('spriteLayerBubble'),
     sourceLibrary: $('sourceLibrary'), choiceCard: $('choiceCard'),
     pendingChoiceBanner: $('pendingChoiceBanner'), pendingChoiceTitle: $('pendingChoiceTitle'),
     saveComposition: $('saveComposition'), savedCompositions: $('savedCompositions'),
+    presetSavedCompositions: $('presetSavedCompositions'),
     toast: $('toast')
   };
 
@@ -134,6 +146,8 @@
   let pendingLayerOffset = null;
   let pendingLayerPosition = null;
   let pendingLayerCategory = null;
+  let activeFxGroup = 'lettering';
+  let activePresetSection = 'colour';
   let state = createDefaultState();
 
   function uid(prefix) {
@@ -566,6 +580,31 @@
     return `linear-gradient(90deg,${stops.map((stop) => `${stop.colour} ${(stop.position * 100).toFixed(2)}%`).join(',')})`;
   }
 
+  function allowableGradientStops(build = currentBuild) {
+    if (!build || state.colours.length < 2) return 0;
+    const budgetStops = Math.floor((Logic.LIMIT - build.breakdown.text - build.breakdown.fx) / 6);
+    return Math.max(0, Math.min(MAX_COLOURS, Math.max(1, build.text.length || 1), budgetStops));
+  }
+
+  function forceGradient() {
+    const count = allowableGradientStops();
+    if (state.colours.length < 2) {
+      announce('Add at least two colours before forcing a gradient', true);
+      return;
+    }
+    if (count < 2) {
+      announce('The Arena character budget cannot fit a gradient', true);
+      return;
+    }
+    const sourceStops = state.colours.slice().sort((left, right) => left.position - right.position);
+    const blended = Logic.sampleGradientStops(sourceStops, count);
+    mutate(() => {
+      state.colours = makeColours(blended);
+      state.wubrg = [];
+      state.selected = null;
+    }, `Smooth ${count}-stage gradient created`);
+  }
+
   function renderOutput() {
     const build = compile();
     const fittedSize = Math.max(13, 22 - Math.max(0, state.name.length - 18) * .28);
@@ -577,6 +616,7 @@
     els.budgetTotal.textContent = String(build.rawLength);
     const over = build.overLimit;
     els.copyButton.disabled = !build.raw;
+    els.previewCopyButton.disabled = !build.raw;
     els.copyButton.classList.toggle('over-budget', over);
     els.megaTube.classList.toggle('preset-previewing', Boolean(previewOverride));
     els.megaTube.style.setProperty('--budget-progress', `${Math.min(100, build.rawLength / build.limit * 100)}%`);
@@ -584,7 +624,13 @@
     els.outputStatus.textContent = over
       ? `${build.rawLength - build.limit} OVER ARENA LIMIT`
       : `${build.limit - build.rawLength} CHARACTERS FREE · ${build.colourStages}/${build.requestedColourStages} COLOURS COMPILED`;
-    els.copyLabel.textContent = over ? 'COPY ANYWAY' : 'COPY NAME';
+    els.copyLabel.textContent = over ? 'COPY ANYWAY' : 'COPY';
+    els.forceGradient.disabled = state.colours.length < 2 || allowableGradientStops(build) < 2;
+    els.forceGradient.title = state.colours.length < 2
+      ? 'Add at least two colours first'
+      : els.forceGradient.disabled
+        ? 'The Arena character budget cannot fit two colour stages'
+        : `Blend into ${allowableGradientStops(build)} colour stages`;
     if (build.unsupported.length) els.outputStatus.textContent += ' · CHECK UNSUPPORTED GLYPHS';
   }
 
@@ -729,11 +775,15 @@
   }
 
   function renderCaret() {
+    const pendingLabel = pendingLayerCategory === 'colours' ? 'COLOUR POINT'
+      : pendingLayerCategory === 'sprites' ? 'SPRITE BUBBLE'
+        : 'FX BUBBLE';
+    const pendingChoice = pendingLayerCategory === 'colours' ? 'CHOOSE A COLOUR'
+      : pendingLayerCategory === 'sprites' ? 'CHOOSE A SPRITE'
+        : 'CHOOSE AN EFFECT';
     els.tubeStatus.textContent = pendingLayerOffset !== null
-      ? pendingLayerCategory === 'colours'
-        ? `COLOUR POINT ${Math.round((pendingLayerPosition ?? colourCaretPosition()) * 100)}% LOCKED · CHOOSE A COLOUR`
-        : `FX BUBBLE ${Math.round((pendingLayerPosition ?? positionFromOffset(pendingLayerOffset)) * 100)}% · COMPILES AT TEXT POSITION ${pendingLayerOffset}`
-      : `COLOUR + FX MOVE FREELY · GUIDE LINES SHOW THE COMPILED TEXT POSITION`;
+      ? `${pendingLabel} ${Math.round((pendingLayerPosition ?? positionFromOffset(pendingLayerOffset)) * 100)}% LOCKED · ${pendingChoice}`
+      : `COLOUR + FX + SPRITE MOVE FREELY · GUIDE LINES SHOW THE COMPILED TEXT POSITION`;
     els.megaTube.classList.toggle('layer-pending', pendingLayerOffset !== null);
     if (pendingLayerCategory) els.megaTube.dataset.pendingCategory = pendingLayerCategory;
     else delete els.megaTube.dataset.pendingCategory;
@@ -1033,13 +1083,14 @@
   function inspectorHeader(kicker, title, code = '') {
     const header = document.createElement('header');
     header.innerHTML = `<span><small>${kicker}</small><b>${title}</b></span>${code ? `<code>${code.replaceAll('<', '&lt;').replaceAll('>', '&gt;')}</code>` : ''}`;
-    const close = document.createElement('button');
-    close.type = 'button';
-    close.className = 'inspector-close';
-    close.textContent = '×';
-    close.setAttribute('aria-label', 'Close layer inspector');
-    close.addEventListener('click', clearSelection);
-    header.appendChild(close);
+    const done = document.createElement('button');
+    done.type = 'button';
+    done.className = 'inspector-done';
+    done.textContent = '✓';
+    done.title = 'Done editing';
+    done.setAttribute('aria-label', 'Done editing this layer');
+    done.addEventListener('click', clearSelection);
+    header.appendChild(done);
     return header;
   }
 
@@ -1055,7 +1106,12 @@
   function openSelectedChoices() {
     if (!state.selected) return;
     renderSources();
-    setActiveTab(state.selected.kind === 'colour' ? 'colours' : 'effects');
+    if (state.selected.kind === 'colour') {
+      setActiveTab('colours');
+      return;
+    }
+    const selectedEvent = state.events.find((event) => event.id === state.selected.id);
+    setActiveTab(selectedEvent?.type === 'sprite' ? 'sprites' : 'effects');
   }
 
   function renderColourInspector(stop) {
@@ -1258,7 +1314,7 @@
     const actions = document.createElement('div');
     actions.className = 'inspector-actions';
     actions.append(
-      actionButton(event.type === 'sprite' ? 'CHANGE SPRITE / FX' : 'CHANGE FX', 'more-choices-button', openSelectedChoices),
+      actionButton(event.type === 'sprite' ? 'CHANGE SPRITE' : 'CHANGE FX', 'more-choices-button', openSelectedChoices),
       actionButton('DUPLICATE', 'quiet-button', () => duplicateEvent(event.id)),
       actionButton('DELETE', 'delete-button', () => removeEvent(event.id))
     );
@@ -1372,20 +1428,21 @@
     )));
     pendingLayerCategory = category;
     state.selected = null;
-    els.pendingChoiceTitle.textContent = category === 'colours' ? 'CHOOSE A COLOUR' : 'CHOOSE AN EFFECT OR SPRITE';
+    const isColour = category === 'colours';
+    const isSprite = category === 'sprites';
+    const sourceName = isColour ? 'Colour' : isSprite ? 'Sprite' : 'FX';
+    const choiceName = isColour ? 'colour' : isSprite ? 'sprite' : 'effect';
+    els.pendingChoiceTitle.textContent = `CHOOSE A ${choiceName.toUpperCase()}`;
     const detail = els.pendingChoiceBanner.querySelector('small');
     if (detail) {
-      detail.textContent = category === 'colours'
-        ? `The Colour bubble is waiting at ${Math.round(pendingLayerPosition * 100)}%. Choose a colour to place it.`
-        : `The FX bubble is waiting at ${Math.round(pendingLayerPosition * 100)}%. Choose an effect or sprite to place it.`;
+      detail.textContent = `The ${sourceName} bubble is waiting at ${Math.round(pendingLayerPosition * 100)}%. Choose a ${choiceName} to place it.`;
     }
     renderInspector();
     setCaret(safeOffset, false);
     setActiveTab(category);
-    const label = category === 'colours' ? 'colour' : 'effect or sprite';
-    announce(category === 'colours'
-      ? `Colour point locked at ${Math.round(pendingLayerPosition * 100)}% — choose a ${label}`
-      : `FX bubble locked at ${Math.round(pendingLayerPosition * 100)}% — it compiles at text position ${safeOffset}`);
+    announce(isColour
+      ? `Colour point locked at ${Math.round(pendingLayerPosition * 100)}% — choose a colour`
+      : `${sourceName} bubble locked at ${Math.round(pendingLayerPosition * 100)}% — it compiles at text position ${safeOffset}`);
   }
 
   function cancelPendingLayer() {
@@ -1441,7 +1498,10 @@
       setActiveTab(null);
       return;
     }
-    announce(`Drag the ${payload.kind === 'colour' ? 'Colour' : 'FX'} bubble onto the name first`, true);
+    const sourceName = payload.kind === 'colour' ? 'Colour'
+      : payload.event?.type === 'sprite' ? 'Sprite'
+        : 'FX';
+    announce(`Drag the ${sourceName} bubble onto the name first`, true);
   }
 
   function insertPayload(payload, offset = state.caret, position = null) {
@@ -1502,6 +1562,9 @@
   }
 
   function enableReservoirDrag(element, payload) {
+    const sourceName = payload.category === 'colours' ? 'Colour'
+      : payload.category === 'sprites' ? 'Sprite'
+        : 'FX';
     element.addEventListener('keydown', (event) => {
       if (!['Enter', ' '].includes(event.key)) return;
       event.preventDefault();
@@ -1579,7 +1642,7 @@
         if (finishEvent.pointerId !== event.pointerId) return;
         cleanup();
         if (!moved) {
-          announce(`Drag the ${payload.category === 'colours' ? 'Colour' : 'FX'} bubble onto the name`);
+          announce(`Drag the ${sourceName} bubble onto the name`);
           return;
         }
         const bounds = els.tubeTrack.getBoundingClientRect();
@@ -1821,13 +1884,13 @@
     });
   }
 
-  function renderSavedCompositions() {
-    els.savedCompositions.replaceChildren();
+  function renderCompositionList(container) {
+    container.replaceChildren();
     if (!state.savedCompositions.length) {
       const empty = document.createElement('p');
       empty.className = 'empty-saved';
       empty.textContent = 'NO SAVED PRESETS YET';
-      els.savedCompositions.appendChild(empty);
+      container.appendChild(empty);
       return;
     }
     state.savedCompositions.forEach((entry, index) => {
@@ -1866,8 +1929,13 @@
         announce(`${entry.name} deleted`);
       });
       row.append(load, remove);
-      els.savedCompositions.appendChild(row);
+      container.appendChild(row);
     });
+  }
+
+  function renderSavedCompositions() {
+    renderCompositionList(els.savedCompositions);
+    renderCompositionList(els.presetSavedCompositions);
   }
 
   function saveCurrentComposition() {
@@ -1918,10 +1986,11 @@
 
   function renderRecentEffects() {
     els.recentEffects.replaceChildren();
-    const available = state.selected?.kind !== 'global' && state.recentEffects.length;
+    const recentFx = state.recentEffects.filter((entry) => entry.payload.event.type !== 'sprite');
+    const available = state.selected?.kind !== 'global' && recentFx.length;
     els.recentEffects.hidden = !available;
     if (!available) return;
-    state.recentEffects.forEach((entry) => {
+    recentFx.forEach((entry) => {
       const button = document.createElement('button');
       button.type = 'button';
       button.className = 'recent-choice';
@@ -1977,10 +2046,29 @@
   }
 
   function renderEffectSources() {
+    const group = FX_GROUPS.find((candidate) => candidate.key === activeFxGroup) || FX_GROUPS[0];
+    activeFxGroup = group.key;
+    els.activeFxGroupLabel.textContent = group.label;
+    els.fxCategories.replaceChildren();
+    FX_GROUPS.forEach((candidate, index) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'fx-category';
+      button.dataset.orbitIndex = String(index);
+      button.classList.toggle('selected', candidate.key === group.key);
+      button.setAttribute('aria-pressed', String(candidate.key === group.key));
+      button.innerHTML = `<i aria-hidden="true">${candidate.icon}</i><span>${candidate.label}</span>`;
+      button.addEventListener('click', () => {
+        activeFxGroup = candidate.key;
+        renderEffectSources();
+      });
+      els.fxCategories.appendChild(button);
+    });
     els.effectSources.replaceChildren();
     renderRecentEffects();
-    EFFECTS.forEach((effect) => {
-      if (effect.wholeName) return;
+    group.effects.forEach((key) => {
+      const effect = EFFECT_BY_KEY[key];
+      if (!effect) return;
       const card = document.createElement('div');
       card.className = `effect-source-card source-${effect.key}`;
       const payload = effectPayload(effect.key);
@@ -2143,10 +2231,29 @@
       }, `${preset.name} layered onto the live name`));
       els.stylePresets.appendChild(button);
     });
+    setPresetSection(activePresetSection);
+  }
+
+  function setPresetSection(name) {
+    const valid = ['colour', 'special', 'saved'];
+    activePresetSection = valid.includes(name) ? name : 'colour';
+    document.querySelectorAll('[data-preset-section]').forEach((button) => {
+      const active = button.dataset.presetSection === activePresetSection;
+      button.setAttribute('aria-selected', String(active));
+      button.classList.toggle('selected', active);
+    });
+    document.querySelectorAll('[data-preset-view]').forEach((view) => {
+      view.hidden = view.dataset.presetView !== activePresetSection;
+    });
+    els.activePresetSectionLabel.textContent = activePresetSection === 'special'
+      ? 'SPECIAL'
+      : activePresetSection === 'saved'
+        ? 'SAVED'
+        : 'COLOUR';
   }
 
   function setActiveTab(name, focus = false) {
-    const valid = ['colours', 'effects', 'wubrg', 'presets'];
+    const valid = ['colours', 'effects', 'sprites', 'wubrg', 'presets'];
     const nextTab = valid.includes(name) ? name : null;
     const changed = state.activeTab !== nextTab;
     state.activeTab = nextTab;
@@ -2166,7 +2273,7 @@
       state.activeTab &&
       pendingLayerOffset === null &&
       state.selected &&
-      ['colours', 'effects'].includes(state.activeTab)
+      ['colours', 'effects', 'sprites'].includes(state.activeTab)
     );
     els.sourceLibrary.classList.toggle('pending-choice', pendingChoice);
     els.sourceLibrary.classList.toggle('refining-choice', refiningChoice);
@@ -2212,7 +2319,27 @@
     setActiveTab(state.activeTab);
   }
 
-  async function copyText(text, label = 'Copied') {
+  function playCopySail(source = els.copyButton) {
+    const bounds = source?.getBoundingClientRect?.() || {
+      left: window.innerWidth / 2, width: 0, top: window.innerHeight / 2
+    };
+    const sail = document.createElement('span');
+    sail.className = 'copy-sail';
+    sail.setAttribute('aria-hidden', 'true');
+    sail.style.left = `${bounds.left + bounds.width / 2}px`;
+    sail.style.top = `${bounds.top}px`;
+    Array.from('COPIED!').forEach((letter, index, letters) => {
+      const glyph = document.createElement('i');
+      glyph.textContent = letter;
+      glyph.style.color = Logic.colourAtPosition(state.colours, letters.length === 1 ? .5 : index / (letters.length - 1));
+      glyph.style.setProperty('--sail-delay', `${index * 35}ms`);
+      sail.appendChild(glyph);
+    });
+    document.body.appendChild(sail);
+    setTimeout(() => sail.remove(), 1450);
+  }
+
+  async function copyText(text, label = 'Copied', source = els.copyButton) {
     if (!text) return;
     try {
       await navigator.clipboard.writeText(text);
@@ -2226,7 +2353,16 @@
       document.execCommand('copy');
       textarea.remove();
     }
+    playCopySail(source);
     announce(label);
+  }
+
+  function copyCurrentName(source) {
+    return copyText(
+      currentBuild?.raw,
+      currentBuild?.overLimit ? 'Copied — Arena may truncate it' : 'Arena name copied',
+      source
+    );
   }
 
   function syncCaretFromInput() {
@@ -2364,9 +2500,14 @@
       const recentEffects = state.recentEffects;
       state = {...fresh, activeTab, favourites, savedCompositions, recentColours, recentEffects};
     }, 'Started over — Undo is available'));
-    els.copyButton.addEventListener('click', () => copyText(currentBuild?.raw, currentBuild?.overLimit ? 'Copied — Arena may truncate it' : 'Arena name copied'));
+    els.copyButton.addEventListener('click', () => copyCurrentName(els.copyButton));
+    els.previewCopyButton.addEventListener('click', (event) => {
+      event.stopPropagation();
+      copyCurrentName(els.previewCopyButton);
+    });
     els.undoButton.addEventListener('click', undo);
     els.redoButton.addEventListener('click', redo);
+    els.forceGradient.addEventListener('click', forceGradient);
     els.clearFxButton.addEventListener('click', () => mutate(() => {
       state.formatting = {bold: false, italic: false, underline: false, strike: false};
       state.effects = Logic.normaliseEffects({});
@@ -2451,10 +2592,15 @@
         }, `${EFFECT_BY_KEY[key].label} ${removing ? 'off' : 'on'} for the whole name`);
       });
     });
+    document.querySelectorAll('[data-preset-section]').forEach((button) => {
+      button.addEventListener('click', () => setPresetSection(button.dataset.presetSection));
+    });
     const colourReservoirPayload = {kind: 'reservoir', category: 'colours'};
     const fxReservoirPayload = {kind: 'reservoir', category: 'effects'};
+    const spriteReservoirPayload = {kind: 'reservoir', category: 'sprites'};
     enableReservoirDrag(els.colourLayerBubble, colourReservoirPayload);
     enableReservoirDrag(els.fxLayerBubble, fxReservoirPayload);
+    enableReservoirDrag(els.spriteLayerBubble, spriteReservoirPayload);
     document.querySelectorAll('[data-tab]').forEach((tab) => {
       tab.addEventListener('click', () => {
         cancelPendingLayer();
@@ -2531,7 +2677,7 @@
       }
       if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
         event.preventDefault();
-        copyText(currentBuild?.raw, 'Arena name copied');
+        copyCurrentName(els.copyButton);
       }
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'z' && !event.shiftKey) {
         event.preventDefault();
