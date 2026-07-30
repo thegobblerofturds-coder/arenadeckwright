@@ -73,7 +73,8 @@ so compiler correctness does not require a fixed visual bubble.
 - Budget-trimmed colour bubbles remain visible as ghosts instead of silently
   disappearing.
 - Colour, FX, and Sprite creation bubbles are paired directly under the tube.
-- Dragging shows a magnified colour percentage or text position.
+- Dragging shows a plain qualitative colour position or an exact FX text
+  position; user-facing tube percentages are removed.
 - Coincident FX remain independent clickable bubbles. Collision spacing fans
   them apart and perspective guides lead back to their shared anchor.
 - Colour and FX tokens share one cross-type collision pass. Both have continuous

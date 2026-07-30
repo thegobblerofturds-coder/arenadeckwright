@@ -191,6 +191,32 @@ The Ultimate development source was rebuilt around one editing surface.
 - Paired Undo and Redo beside WUBRG and Presets. Moved destructive Start Over
   into More.
 
+### Ultimate v6.6 focused global tools
+
+- Changed the main Arena export action into a bright green `✓ FINISHED`
+  control while preserving the smaller Copy control directly on the black
+  display and the sailing `COPIED!` confirmation.
+- Gave Force Gradient a full-spectrum surface and placed Start Over directly
+  beside Undo and Redo.
+- Promoted WUBRG and Presets to the same prominent viewport-level sheet used to
+  finish a new layer drop. Later Colour, FX, and Sprite refinement remains
+  compact.
+- Removed user-facing tube-position percentages. Dragging and editing now use
+  plain Left, Centre, and Right language while preserving exact internal
+  positions.
+- Added the full circular colour model to selected-colour refinement as a
+  compact wheel. Both compact and full wheels now have a live thumb-preview
+  tile and hex readout.
+- Removed WUBRG Clear. Pips toggle independently and the selected identity
+  button cycles its colour order. Four-colour identities display as
+  `4 COLOUR (HISTORICAL NAME)`.
+- Increased every FX demonstration to four times its former scale.
+- Replaced the decorative Presets centre with a small root marker that becomes
+  a red Back button inside a collection. Preset choices themselves occupy the
+  orbit, with paging when necessary.
+- Nested Save Current, Load, Rename, and confirmed Delete inside Saved Presets
+  and removed the obsolete saved-preset list from More.
+
 ### Removed from the product surface
 
 - Alternate/prismatic duplicate name view.
@@ -207,5 +233,5 @@ reduced-motion support, and fan-content notice remain.
 
 ## Release status
 
-The v6.5 interface is the `/ultimate/` release in both website mirrors as of
+The v6.6 interface is the `/ultimate/` release in both website mirrors as of
 2026-07-30. `/colour/` remains Version 6 and Version Lite remains shelved.

@@ -10,9 +10,9 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="manifest" href="site.webmanifest">
   <title>TurdGobbler's Deck Name Colourifier — Ultimate Version</title>
-  <link rel="stylesheet" href="styles.css?v=ultimate-6.5">
+  <link rel="stylesheet" href="styles.css?v=ultimate-6.6">
   <script src="logic.js?v=ultimate-3.0" defer></script>
-  <script src="app.js?v=ultimate-6.5" defer></script>
+  <script src="app.js?v=ultimate-6.6" defer></script>
 </head>
 <body>
   <main class="app-shell">
@@ -27,7 +27,7 @@
       <p><b>ADD</b> Drag Colour, FX, or Sprite anywhere onto the black tube, then choose what it becomes.</p>
       <p><b>EDIT</b> Tap a placed bubble. Drag it to move; its guide line shows Arena’s insertion point.</p>
       <p><b>DELETE</b> Drag a placed bubble into the red bar that appears directly below the tube.</p>
-      <p><b>BUILD</b> WUBRG applies immediately. Presets and Undo stay close; Start Over and saved looks live under More.</p>
+      <p><b>BUILD</b> WUBRG and Presets open as focused global tools. Undo, Redo, and Start Over stay together; saved looks live inside Presets.</p>
     </section>
 
     <section class="studio" aria-label="Ultimate deck-name editor">
@@ -41,7 +41,7 @@
             <div class="copy-field">
               <span>ARENA EXPORT</span>
               <button id="copyButton" class="copy-button" type="button" aria-describedby="outputStatus">
-                <b id="copyLabel">COPY</b><small>TO ARENA</small>
+                <b id="copyLabel">✓ FINISHED</b><small>COPY TO ARENA</small>
               </button>
             </div>
           </div>
@@ -98,6 +98,7 @@
               <div class="persistent-actions" role="group" aria-label="Editing actions">
                 <button id="undoButton" class="tool-button" type="button" disabled><span aria-hidden="true">↶</span> UNDO</button>
                 <button id="redoButton" class="tool-button" type="button" disabled><span aria-hidden="true">↷</span> REDO</button>
+                <button id="startOver" class="tool-button danger-soft" type="button">START OVER</button>
               </div>
             </div>
           </div>
@@ -122,9 +123,14 @@
               </header>
               <div class="colour-lab">
                 <div class="colour-wheel-control">
-                  <div class="colour-wheel-wrap">
-                    <canvas id="colourWheel" width="240" height="240" role="img" aria-label="Circular colour selector. Drag to choose colour, brightness, and saturation."></canvas>
-                    <i id="wheelCursor" aria-hidden="true"></i>
+                  <div class="colour-wheel-row">
+                    <div class="colour-wheel-wrap">
+                      <canvas id="colourWheel" width="240" height="240" role="img" aria-label="Circular colour selector. Drag to choose colour, brightness, and saturation."></canvas>
+                      <i id="wheelCursor" aria-hidden="true"></i>
+                    </div>
+                    <output id="colourWheelPreview" class="colour-wheel-preview" aria-live="polite">
+                      <i aria-hidden="true"></i><small>THUMB PREVIEW</small><b id="colourWheelPreviewHex">#C94BFF</b>
+                    </output>
                   </div>
                   <span>DRAG THE COLOUR DISC</span>
                 </div>
@@ -178,7 +184,6 @@
               <div id="wubrgComposer" class="wubrg-composer" role="group" aria-label="Build an ordered WUBRG identity"></div>
               <div class="wubrg-readout">
                 <div><small>IDENTITY</small><b id="wubrgIdentity">CHOOSE COLOURS</b><span id="wubrgOrder">—</span></div>
-                <button id="clearWubrg" class="quiet-button" type="button" disabled>CLEAR</button>
               </div>
               <p id="wubrgContext" class="wubrg-context">SELECT PIPS · COLOURS APPLY IMMEDIATELY</p>
               <div id="wubrgResults" class="wubrg-preset-rail" aria-label="Matching WUBRG identities"></div>
@@ -189,24 +194,17 @@
                 <span><small>PRESETS</small><b>CHOOSE A COLLECTION</b></span>
                 <button type="button" data-close-panel aria-label="Close Presets">×</button>
               </header>
-              <div class="preset-orbit" role="tablist" aria-label="Preset collections">
-                <button type="button" role="tab" data-preset-section="colour" aria-selected="true"><i aria-hidden="true">◒</i><b>COLOUR</b><small>PALETTES</small></button>
-                <button type="button" role="tab" data-preset-section="special" aria-selected="false"><i aria-hidden="true">✦</i><b>SPECIAL</b><small>COLOUR + FX</small></button>
-                <button type="button" role="tab" data-preset-section="saved" aria-selected="false"><i aria-hidden="true">★</i><b>SAVED</b><small>THIS DEVICE</small></button>
-                <div class="preset-orbit-centre" aria-hidden="true"><small>PRESET</small><b id="activePresetSectionLabel">COLOUR</b></div>
+              <div id="presetOrbit" class="preset-orbit" aria-label="Nested preset menu">
+                <div id="presetOrbitItems" class="preset-orbit-items" role="group" aria-label="Preset choices"></div>
+                <div id="presetOrbitCentre" class="preset-orbit-centre" aria-hidden="true"><small>CHOOSE</small><b>PRESET</b></div>
+                <button id="presetBackButton" class="preset-back-button" type="button" hidden><span aria-hidden="true">←</span><b>BACK</b></button>
               </div>
-              <section class="preset-choice-view" data-preset-view="colour" aria-labelledby="colourPresetTitle">
-                <h3 id="colourPresetTitle">COLOUR PRESETS</h3>
-                <div id="colourPresets" class="preset-grid colour-preset-grid" aria-label="Colour presets"></div>
-              </section>
-              <section class="preset-choice-view" data-preset-view="special" aria-labelledby="combinedPresetTitle" hidden>
-                <h3 id="combinedPresetTitle">SPECIAL PRESETS</h3>
-                <div id="stylePresets" class="preset-grid style-preset-grid" aria-label="Special presets"></div>
-              </section>
-              <section class="preset-choice-view" data-preset-view="saved" aria-labelledby="savedPresetPickerTitle" hidden>
-                <h3 id="savedPresetPickerTitle">SAVED PRESETS</h3>
-                <div id="presetSavedCompositions" class="saved-composition-list preset-saved-compositions"></div>
-              </section>
+              <div id="presetRenameEditor" class="preset-rename-editor" hidden>
+                <label for="presetRenameInput"><span>PRESET NAME</span><input id="presetRenameInput" type="text" maxlength="48" autocomplete="off"></label>
+                <button id="presetRenameSave" type="button">SAVE NAME</button>
+                <button id="presetRenameCancel" class="quiet-button" type="button">CANCEL</button>
+              </div>
+              <p id="presetOrbitStatus" class="preset-orbit-status" aria-live="polite">CHOOSE A COLLECTION</p>
             </section>
           </div>
         </div>
@@ -232,16 +230,7 @@
 
           <div class="tube-actions">
             <button id="clearFxButton" class="tool-button danger-soft" type="button">CLEAR FX</button>
-            <button id="startOver" class="tool-button danger-soft" type="button">START OVER</button>
           </div>
-
-          <section class="saved-compositions" aria-labelledby="savedCompositionsTitle">
-            <header>
-              <span><small>THIS DEVICE</small><b id="savedCompositionsTitle">SAVED PRESETS</b></span>
-              <button id="saveComposition" type="button">SAVE CURRENT</button>
-            </header>
-            <div id="savedCompositions" class="saved-composition-list"></div>
-          </section>
         </div>
       </details>
     </section>

@@ -119,21 +119,23 @@
     clearFxButton: $('clearFxButton'), tubeStatus: $('tubeStatus'), layerInspector: $('layerInspector'),
     colourPicker: $('colourPicker'), colourHex: $('colourHex'), addCustomColour: $('addCustomColour'),
     colourWheel: $('colourWheel'), wheelCursor: $('wheelCursor'),
+    colourWheelPreview: $('colourWheelPreview'), colourWheelPreviewHex: $('colourWheelPreviewHex'),
     rotateColours: $('rotateColours'), flipColours: $('flipColours'), savePalette: $('savePalette'),
     savedPalettes: $('savedPalettes'),
     colourSources: $('colourSources'), recentColours: $('recentColours'),
     effectSources: $('effectSources'), recentEffects: $('recentEffects'), spriteSources: $('spriteSources'),
     fxCategories: $('fxCategories'), activeFxGroupLabel: $('activeFxGroupLabel'),
     wubrgComposer: $('wubrgComposer'), wubrgIdentity: $('wubrgIdentity'), wubrgOrder: $('wubrgOrder'),
-    clearWubrg: $('clearWubrg'), wubrgContext: $('wubrgContext'),
-    wubrgResults: $('wubrgResults'), colourPresets: $('colourPresets'), stylePresets: $('stylePresets'),
-    activePresetSectionLabel: $('activePresetSectionLabel'),
+    wubrgContext: $('wubrgContext'), wubrgResults: $('wubrgResults'),
+    presetOrbit: $('presetOrbit'), presetOrbitItems: $('presetOrbitItems'),
+    presetOrbitCentre: $('presetOrbitCentre'), presetBackButton: $('presetBackButton'),
+    presetRenameEditor: $('presetRenameEditor'), presetRenameInput: $('presetRenameInput'),
+    presetRenameSave: $('presetRenameSave'), presetRenameCancel: $('presetRenameCancel'),
+    presetOrbitStatus: $('presetOrbitStatus'),
     colourLayerBubble: $('colourLayerBubble'), fxLayerBubble: $('fxLayerBubble'),
     spriteLayerBubble: $('spriteLayerBubble'),
     sourceLibrary: $('sourceLibrary'), choiceCard: $('choiceCard'),
     pendingChoiceBanner: $('pendingChoiceBanner'), pendingChoiceTitle: $('pendingChoiceTitle'),
-    saveComposition: $('saveComposition'), savedCompositions: $('savedCompositions'),
-    presetSavedCompositions: $('presetSavedCompositions'),
     toast: $('toast')
   };
 
@@ -147,7 +149,9 @@
   let pendingLayerPosition = null;
   let pendingLayerCategory = null;
   let activeFxGroup = 'lettering';
-  let activePresetSection = 'colour';
+  let presetMenuLevel = 'root';
+  let presetMenuPage = 0;
+  let selectedSavedPresetId = null;
   let state = createDefaultState();
 
   function uid(prefix) {
@@ -371,6 +375,8 @@
 
   function identityName(codes) {
     const key = canonicalIdentity(codes);
+    if (key.length === 4) return `4 COLOUR (${IDENTITY_NAMES[key] || key})`;
+    if (key.length === 5) return '5 COLOUR';
     return IDENTITY_NAMES[key] || (key ? `${key} IDENTITY` : 'CHOOSE COLOURS');
   }
 
@@ -624,7 +630,7 @@
     els.outputStatus.textContent = over
       ? `${build.rawLength - build.limit} OVER ARENA LIMIT`
       : `${build.limit - build.rawLength} CHARACTERS FREE · ${build.colourStages}/${build.requestedColourStages} COLOURS COMPILED`;
-    els.copyLabel.textContent = over ? 'COPY ANYWAY' : 'COPY';
+    els.copyLabel.textContent = over ? 'COPY ANYWAY' : '✓ FINISHED';
     els.forceGradient.disabled = state.colours.length < 2 || allowableGradientStops(build) < 2;
     els.forceGradient.title = state.colours.length < 2
       ? 'Add at least two colours first'
@@ -650,6 +656,15 @@
 
   function positionFromOffset(offset) {
     return state.name.length ? Math.max(0, Math.min(1, offset / state.name.length)) : 0;
+  }
+
+  function tubePositionLabel(value) {
+    const position = Math.max(0, Math.min(1, Number(value) || 0));
+    if (position <= .08) return 'LEFT EDGE';
+    if (position < .4) return 'LEFT';
+    if (position <= .6) return 'CENTRE';
+    if (position < .92) return 'RIGHT';
+    return 'RIGHT EDGE';
   }
 
   function colourPositionFromOffset(offset) {
@@ -782,7 +797,7 @@
       : pendingLayerCategory === 'sprites' ? 'CHOOSE A SPRITE'
         : 'CHOOSE AN EFFECT';
     els.tubeStatus.textContent = pendingLayerOffset !== null
-      ? `${pendingLabel} ${Math.round((pendingLayerPosition ?? positionFromOffset(pendingLayerOffset)) * 100)}% LOCKED · ${pendingChoice}`
+      ? `${pendingLabel} LOCKED · ${pendingChoice}`
       : `COLOUR + FX + SPRITE MOVE FREELY · GUIDE LINES SHOW THE COMPILED TEXT POSITION`;
     els.megaTube.classList.toggle('layer-pending', pendingLayerOffset !== null);
     if (pendingLayerCategory) els.megaTube.dataset.pendingCategory = pendingLayerCategory;
@@ -1010,7 +1025,7 @@
       button.innerHTML = `<span>${key === 'br' ? '↵' : (EFFECT_BY_KEY[key]?.label || key).slice(0, 3)}</span>`;
     }
     button.setAttribute('role', 'slider');
-    button.setAttribute('aria-label', `${eventLabel(event)} bubble at ${Math.round((event.position ?? positionFromOffset(event.offset)) * 100)} percent, compiled at text position ${event.offset}. Drag to move; press Enter to edit.`);
+    button.setAttribute('aria-label', `${eventLabel(event)} bubble near the ${tubePositionLabel(event.position ?? positionFromOffset(event.offset)).toLowerCase()}, compiled at text position ${event.offset}. Drag to move; press Enter to edit.`);
     button.setAttribute('aria-valuemin', '0');
     button.setAttribute('aria-valuemax', '100');
     button.setAttribute('aria-valuenow', String(Math.round((event.position ?? positionFromOffset(event.offset)) * 100)));
@@ -1114,32 +1129,102 @@
     setActiveTab(selectedEvent?.type === 'sprite' ? 'sprites' : 'effects');
   }
 
+  function createMiniColourWheel(stop, hexInput) {
+    const editor = document.createElement('div');
+    editor.className = 'mini-colour-editor';
+    const wheelWrap = document.createElement('div');
+    wheelWrap.className = 'mini-colour-wheel-wrap';
+    const canvas = document.createElement('canvas');
+    canvas.width = 160;
+    canvas.height = 160;
+    canvas.className = 'mini-colour-wheel';
+    canvas.setAttribute('role', 'img');
+    canvas.setAttribute('aria-label', 'Compact circular colour selector. Drag to change the selected colour.');
+    const cursor = document.createElement('i');
+    cursor.className = 'mini-wheel-cursor';
+    cursor.setAttribute('aria-hidden', 'true');
+    wheelWrap.append(canvas, cursor);
+    const preview = document.createElement('output');
+    preview.className = 'mini-colour-preview';
+    preview.setAttribute('aria-live', 'polite');
+    const swatch = document.createElement('i');
+    swatch.setAttribute('aria-hidden', 'true');
+    const previewLabel = document.createElement('small');
+    previewLabel.textContent = 'THUMB PREVIEW';
+    const previewHex = document.createElement('b');
+    preview.append(swatch, previewLabel, previewHex);
+    editor.append(wheelWrap, preview);
+    drawColourWheel(canvas);
+    positionWheelCursor(stop.colour, cursor);
+    updateColourPreview(preview, previewHex, stop.colour);
+
+    let before = null;
+    let changed = false;
+    const applyPoint = (event) => {
+      const colour = colourFromWheelEvent(canvas, event);
+      stop.colour = colour;
+      state.wubrg = [];
+      state.selected = {kind: 'colour', id: stop.id};
+      hexInput.value = colour;
+      positionWheelCursor(colour, cursor);
+      updateColourPreview(preview, previewHex, colour);
+      previewOverride = null;
+      changed = true;
+      persist();
+      renderOutput();
+      renderTube();
+    };
+    const finish = (event) => {
+      if (!before || String(event.pointerId) !== canvas.dataset.pointerId) return;
+      const finalColour = stop.colour;
+      const didChange = changed;
+      try { canvas.releasePointerCapture(event.pointerId); } catch (_) {}
+      if (didChange) {
+        history.push(before);
+        if (history.length > MAX_HISTORY) history.shift();
+        future = [];
+      }
+      before = null;
+      delete canvas.dataset.pointerId;
+      normaliseState();
+      persist();
+      renderAll();
+      if (didChange) announce(`Colour changed to ${finalColour}`);
+    };
+    canvas.addEventListener('pointerdown', (event) => {
+      event.preventDefault();
+      before = snapshot();
+      changed = false;
+      canvas.dataset.pointerId = String(event.pointerId);
+      try { canvas.setPointerCapture(event.pointerId); } catch (_) {}
+      applyPoint(event);
+    });
+    canvas.addEventListener('pointermove', (event) => {
+      if (String(event.pointerId) !== canvas.dataset.pointerId) return;
+      event.preventDefault();
+      applyPoint(event);
+    });
+    canvas.addEventListener('pointerup', finish);
+    canvas.addEventListener('pointercancel', (event) => {
+      if (!before || String(event.pointerId) !== canvas.dataset.pointerId) return;
+      restoreSnapshot(before);
+      before = null;
+      delete canvas.dataset.pointerId;
+      renderAll();
+    });
+    return editor;
+  }
+
   function renderColourInspector(stop) {
-    const currentPercent = Math.round(stop.position * 100);
-    els.layerInspector.replaceChildren(inspectorHeader('COLOUR', stop.colour, `${currentPercent}% ACROSS TUBE`));
+    const currentPosition = Math.round(stop.position * 100);
+    els.layerInspector.replaceChildren(inspectorHeader('COLOUR', stop.colour, 'DRAG TO POSITION'));
     const body = document.createElement('div');
-    body.className = 'inspector-controls';
-    const picker = document.createElement('input');
-    picker.type = 'color';
-    picker.value = stop.colour;
-    picker.setAttribute('aria-label', 'Selected colour');
+    body.className = 'inspector-controls colour-inspector-controls';
     const hex = document.createElement('input');
     hex.type = 'text';
     hex.value = stop.colour;
     hex.maxLength = 7;
     hex.setAttribute('aria-label', 'Selected colour hex code');
-    const applyColour = (value) => {
-      const clean = normaliseHex(value);
-      if (!clean) return;
-      mutate(() => {
-        stop.colour = clean;
-        state.selected = {kind: 'colour', id: stop.id};
-      }, `Colour changed to ${clean}`);
-    };
-    picker.addEventListener('change', () => {
-      hex.value = picker.value.toUpperCase();
-      applyColour(picker.value);
-    });
     hex.addEventListener('change', () => {
       const clean = normaliseHex(hex.value);
       if (!clean) {
@@ -1147,25 +1232,27 @@
         announce('Use a six-digit hex colour', true);
         return;
       }
-      applyColour(clean);
-    });
-    const fields = document.createElement('div');
-    fields.className = 'inspector-fields';
-    const compactColour = labelledControl('COLOUR', picker);
-    compactColour.classList.add('compact-colour-swatch');
-    fields.append(
-      compactColour,
-      labelledControl('HEX', hex),
-      draggableRange('TUBE POSITION', currentPercent, 0, 100, 1, (percent) => {
-        stop.position = percent / 100;
+      mutate(() => {
+        stop.colour = clean;
         state.wubrg = [];
         state.selected = {kind: 'colour', id: stop.id};
-      }, (percent) => `Colour moved to ${percent}%`, (percent) => `${percent}%`)
+      }, `Colour changed to ${clean}`);
+    });
+    const fields = document.createElement('div');
+    fields.className = 'inspector-fields colour-inspector-fields';
+    fields.append(
+      createMiniColourWheel(stop, hex),
+      labelledControl('HEX', hex),
+      draggableRange('TUBE POSITION', currentPosition, 0, 100, 1, (position) => {
+        stop.position = position / 100;
+        state.wubrg = [];
+        state.selected = {kind: 'colour', id: stop.id};
+      }, () => `Colour moved to the ${tubePositionLabel(stop.position)}`, (position) => tubePositionLabel(position / 100))
     );
     const actions = document.createElement('div');
     actions.className = 'inspector-actions';
     actions.append(
-      actionButton('CHANGE COLOUR', 'more-choices-button', openSelectedChoices),
+      actionButton('OPEN FULL WHEEL', 'more-choices-button', openSelectedChoices),
       actionButton('DUPLICATE', 'quiet-button', () => duplicateColour(stop.id)),
       actionButton('DELETE', 'delete-button', () => removeColour(stop.id))
     );
@@ -1308,8 +1395,8 @@
         event.offset = offsetFromPosition(event.position);
         state.selected = {kind: 'event', id: event.id};
       },
-      (percent) => `${eventLabel(event)} bubble moved to ${percent}%`,
-      (percent) => `${percent}%`
+      () => `${eventLabel(event)} bubble moved to the ${tubePositionLabel(event.position)}`,
+      (position) => tubePositionLabel(position / 100)
     ));
     const actions = document.createElement('div');
     actions.className = 'inspector-actions';
@@ -1347,7 +1434,7 @@
     const canUseColour = pendingLayerCategory === 'colours' || selected?.kind === 'colour';
     els.addCustomColour.disabled = !canUseColour;
     els.addCustomColour.textContent = pendingLayerCategory === 'colours'
-      ? `USE AT ${Math.round((pendingLayerPosition ?? colourCaretPosition()) * 100)}%`
+      ? 'USE COLOUR HERE'
       : selected?.kind === 'colour'
         ? 'APPLY TO SELECTED'
         : 'DROP COLOUR FIRST';
@@ -1435,14 +1522,14 @@
     els.pendingChoiceTitle.textContent = `CHOOSE A ${choiceName.toUpperCase()}`;
     const detail = els.pendingChoiceBanner.querySelector('small');
     if (detail) {
-      detail.textContent = `The ${sourceName} bubble is waiting at ${Math.round(pendingLayerPosition * 100)}%. Choose a ${choiceName} to place it.`;
+      detail.textContent = `The ${sourceName} bubble is waiting in the tube. Choose a ${choiceName} to place it.`;
     }
     renderInspector();
     setCaret(safeOffset, false);
     setActiveTab(category);
     announce(isColour
-      ? `Colour point locked at ${Math.round(pendingLayerPosition * 100)}% — choose a colour`
-      : `${sourceName} bubble locked at ${Math.round(pendingLayerPosition * 100)}% — it compiles at text position ${safeOffset}`);
+      ? 'Colour point locked — choose a colour'
+      : `${sourceName} bubble locked — it compiles at text position ${safeOffset}`);
   }
 
   function cancelPendingLayer() {
@@ -1702,8 +1789,8 @@
     return {hue, saturation, lightness};
   }
 
-  function wheelColourAt(x, y) {
-    const radius = els.colourWheel.width / 2;
+  function wheelColourAt(x, y, diameter = els.colourWheel.width) {
+    const radius = diameter / 2;
     const dx = x - radius;
     const dy = y - radius;
     const distance = Math.min(1, Math.hypot(dx, dy) / radius);
@@ -1715,8 +1802,7 @@
     return hslToHex(hue, 1, Math.max(0, .5 * (1 - (distance - .72) / .28)));
   }
 
-  function drawColourWheel() {
-    const canvas = els.colourWheel;
+  function drawColourWheel(canvas = els.colourWheel) {
     const context = canvas.getContext('2d', {alpha: true});
     const image = context.createImageData(canvas.width, canvas.height);
     const radius = canvas.width / 2;
@@ -1728,7 +1814,7 @@
           image.data[index + 3] = 0;
           continue;
         }
-        const colour = wheelColourAt(x, y);
+        const colour = wheelColourAt(x, y, canvas.width);
         image.data[index] = Number.parseInt(colour.slice(1, 3), 16);
         image.data[index + 1] = Number.parseInt(colour.slice(3, 5), 16);
         image.data[index + 2] = Number.parseInt(colour.slice(5, 7), 16);
@@ -1738,15 +1824,37 @@
     context.putImageData(image, 0, 0);
   }
 
-  function positionWheelCursor(colour) {
+  function positionWheelCursor(colour, cursor = els.wheelCursor) {
     const hsl = hexToHsl(colour);
     const distance = hsl.lightness < .5
       ? .72 + (1 - hsl.lightness / .5) * .28
       : Math.min(.72, Math.max(hsl.saturation, (1 - hsl.lightness) * 2) * .72);
     const radians = hsl.hue * Math.PI / 180;
-    els.wheelCursor.style.left = `${50 + Math.cos(radians) * distance * 50}%`;
-    els.wheelCursor.style.top = `${50 + Math.sin(radians) * distance * 50}%`;
-    els.wheelCursor.style.setProperty('--cursor-colour', colour);
+    cursor.style.left = `${50 + Math.cos(radians) * distance * 50}%`;
+    cursor.style.top = `${50 + Math.sin(radians) * distance * 50}%`;
+    cursor.style.setProperty('--cursor-colour', colour);
+  }
+
+  function colourFromWheelEvent(canvas, event) {
+    const bounds = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / Math.max(1, bounds.width);
+    const scaleY = canvas.height / Math.max(1, bounds.height);
+    const radius = canvas.width / 2;
+    let x = (event.clientX - bounds.left) * scaleX;
+    let y = (event.clientY - bounds.top) * scaleY;
+    const dx = x - radius;
+    const dy = y - radius;
+    const distance = Math.hypot(dx, dy);
+    if (distance > radius) {
+      x = radius + dx / distance * radius;
+      y = radius + dy / distance * radius;
+    }
+    return wheelColourAt(x, y, canvas.width);
+  }
+
+  function updateColourPreview(output, hexOutput, colour) {
+    output.style.setProperty('--preview-colour', colour);
+    hexOutput.textContent = colour;
   }
 
   function setColourDraft(colour) {
@@ -1755,6 +1863,7 @@
     els.colourHex.value = clean;
     els.colourPicker.value = clean;
     positionWheelCursor(clean);
+    updateColourPreview(els.colourWheelPreview, els.colourWheelPreviewHex, clean);
     return true;
   }
 
@@ -1884,58 +1993,22 @@
     });
   }
 
-  function renderCompositionList(container) {
-    container.replaceChildren();
-    if (!state.savedCompositions.length) {
-      const empty = document.createElement('p');
-      empty.className = 'empty-saved';
-      empty.textContent = 'NO SAVED PRESETS YET';
-      container.appendChild(empty);
-      return;
-    }
-    state.savedCompositions.forEach((entry, index) => {
-      const row = document.createElement('div');
-      row.className = 'saved-composition';
-      const load = document.createElement('button');
-      load.type = 'button';
-      load.className = 'load-composition';
-      const colours = entry.composition.colours?.map((stop) => stop.colour).filter(Logic.validHex) || ['#FFFFFF'];
-      const fxCount = entry.composition.events?.length || 0;
-      load.innerHTML = `<i style="background:${gradientFromColours(colours)}"></i><span><b>${escapeHtml(entry.name)}</b><small>${colours.length} COLOURS · ${fxCount} POSITIONED FX</small></span><em>LOAD</em>`;
-      load.addEventListener('click', () => mutate(() => {
-        const favourites = state.favourites;
-        const savedCompositions = state.savedCompositions;
-        const recentColours = state.recentColours;
-        const recentEffects = state.recentEffects;
-        Object.assign(state, clone(entry.composition), {
-          favourites,
-          savedCompositions,
-          recentColours,
-          recentEffects,
-          selected: null,
-          activeTab: null,
-          wubrg: []
-        });
-      }, `${entry.name} loaded`));
-      const remove = document.createElement('button');
-      remove.type = 'button';
-      remove.className = 'remove-saved';
-      remove.textContent = '×';
-      remove.setAttribute('aria-label', `Delete saved preset ${entry.name}`);
-      remove.addEventListener('click', () => {
-        state.savedCompositions.splice(index, 1);
-        persist();
-        renderSavedCompositions();
-        announce(`${entry.name} deleted`);
+  function loadSavedComposition(entry) {
+    mutate(() => {
+      const favourites = state.favourites;
+      const savedCompositions = state.savedCompositions;
+      const recentColours = state.recentColours;
+      const recentEffects = state.recentEffects;
+      Object.assign(state, clone(entry.composition), {
+        favourites,
+        savedCompositions,
+        recentColours,
+        recentEffects,
+        selected: null,
+        activeTab: null,
+        wubrg: []
       });
-      row.append(load, remove);
-      container.appendChild(row);
-    });
-  }
-
-  function renderSavedCompositions() {
-    renderCompositionList(els.savedCompositions);
-    renderCompositionList(els.presetSavedCompositions);
+    }, `${entry.name} loaded`);
   }
 
   function saveCurrentComposition() {
@@ -1951,7 +2024,9 @@
     state.savedCompositions.unshift({id: uid('saved'), name, composition});
     state.savedCompositions = state.savedCompositions.slice(0, 12);
     persist();
-    renderSavedCompositions();
+    presetMenuLevel = 'saved';
+    presetMenuPage = 0;
+    renderPresetMenu();
     announce('Complete preset saved on this device');
   }
 
@@ -2138,8 +2213,14 @@
     });
     els.wubrgIdentity.textContent = identityName(state.wubrg);
     els.wubrgOrder.textContent = state.wubrg.length ? state.wubrg.join(' → ') : '—';
-    els.clearWubrg.disabled = !state.wubrg.length;
     renderWubrgResults();
+  }
+
+  function wubrgRecipeName(recipe) {
+    const identity = canonicalIdentity(recipe.codes);
+    if (recipe.codes.length === 4) return `4 COLOUR (${IDENTITY_NAMES[identity] || identity})`;
+    if (recipe.codes.length === 5) return '5 COLOUR';
+    return recipe.name;
   }
 
   function applyWubrgRecipe(recipe) {
@@ -2153,7 +2234,7 @@
       state.colours = makeColours(nextCodes.map((code) => MANA[code].colour));
       state.selected = null;
       state.activeTab = 'wubrg';
-    }, sameIdentity ? `${recipe.name} order rotated` : `${recipe.name} applied`);
+    }, sameIdentity ? `${wubrgRecipeName(recipe)} colours cycled` : `${wubrgRecipeName(recipe)} applied`);
   }
 
   function renderWubrgResults() {
@@ -2165,11 +2246,11 @@
     }
     let recipes = identityRecipes().filter((recipe) => required.every((code) => recipe.codes.includes(code)));
     if (required.length >= 4) {
-      recipes = [{key: canonicalIdentity(required), name: required.length === 4 ? 'FOUR COLOUR' : 'FIVE COLOUR', codes: required.slice()}];
+      recipes = [{key: canonicalIdentity(required), name: identityName(required), codes: required.slice()}];
     } else {
       recipes = recipes.slice(0, 12);
     }
-    els.wubrgContext.textContent = `${recipes.length} MATCHING ${recipes.length === 1 ? 'IDENTITY' : 'IDENTITIES'} · TAP THE ACTIVE ONE TO ROTATE`;
+    els.wubrgContext.textContent = `${recipes.length} MATCHING ${recipes.length === 1 ? 'IDENTITY' : 'IDENTITIES'} · TAP THE ACTIVE ONE TO CYCLE COLOURS`;
     recipes.forEach((recipe) => {
       const button = document.createElement('button');
       button.type = 'button';
@@ -2178,7 +2259,7 @@
       button.className = 'wubrg-quick-preset';
       button.classList.toggle('selected', selected);
       button.style.setProperty('--preset', gradientFromColours(recipe.codes.map((code) => MANA[code].colour)));
-      button.innerHTML = `<b>${recipe.name}</b><span>${selected ? `${state.wubrg.join(' → ')} · ROTATE` : recipe.codes.join(' / ')}</span>`;
+      button.innerHTML = `<b>${wubrgRecipeName(recipe)}</b><span>${selected ? `CYCLE COLOURS · ${state.wubrg.join(' → ')}` : recipe.codes.join(' / ')}</span>`;
       attachPresetPreview(button, () => previewColours(recipe.codes.map((code) => MANA[code].colour)));
       button.addEventListener('click', () => applyWubrgRecipe(recipe));
       els.wubrgResults.appendChild(button);
@@ -2190,66 +2271,192 @@
     return `linear-gradient(90deg,${colours.map((colour, index) => `${colour} ${index / (colours.length - 1) * 100}%`).join(',')})`;
   }
 
-  function renderPresets() {
-    els.colourPresets.replaceChildren();
-    COLOUR_PRESETS.forEach((preset) => {
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = 'preset-card colour-preset-card';
-      button.innerHTML = `<span class="preset-gradient" style="background:${gradientFromColours(preset.colours)}"></span><span><b>${preset.name}</b><small>${preset.note} · ${preset.colours.length} COLOURS</small></span><em>APPLY</em>`;
-      attachPresetPreview(button, () => previewColours(preset.colours));
-      button.addEventListener('click', () => applyColourRecipe(preset.colours, preset.name));
-      els.colourPresets.appendChild(button);
-    });
-    els.stylePresets.replaceChildren();
-    STYLE_PRESETS.forEach((preset) => {
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = `preset-card style-preset-card preset-${preset.id}`;
-      const sampleStyle = [];
-      if (preset.formatting.italic) sampleStyle.push('font-style:italic');
-      if (preset.formatting.underline) sampleStyle.push('text-decoration:underline');
-      if (preset.formatting.strike) sampleStyle.push('text-decoration:line-through');
-      if (preset.effects.rotate?.enabled) sampleStyle.push(`transform:rotate(${preset.effects.rotate.value}deg)`);
-      if (preset.effects.size?.enabled) sampleStyle.push(`font-size:${Math.min(25, Number(preset.effects.size.value) + 5)}px`);
-      if (preset.colours) sampleStyle.push(`background:${gradientFromColours(preset.colours)}`, 'color:transparent', 'background-clip:text');
-      button.innerHTML = `<span class="style-sample" style="${sampleStyle.join(';')}">${preset.sample}</span><span><b>${preset.name}</b><small>${preset.note}</small></span><em>APPLY</em>`;
-      attachPresetPreview(button, () => previewStyle(preset));
-      button.addEventListener('click', () => mutate(() => {
-        state.formatting = {bold: false, italic: false, underline: false, strike: false, ...clone(preset.formatting)};
-        state.effects = Logic.normaliseEffects(clone(preset.effects));
-        if (preset.colours) {
-          state.colours = makeColours(preset.colours);
-          state.wubrg = [];
-        }
-        state.events = [
-          ...state.events.filter((event) => event.type === 'sprite'),
-          ...styledPresetEvents(preset)
-        ];
-        state.selected = null;
-        state.activeTab = null;
-      }, `${preset.name} layered onto the live name`));
-      els.stylePresets.appendChild(button);
-    });
-    setPresetSection(activePresetSection);
+  function applySpecialPreset(preset) {
+    mutate(() => {
+      state.formatting = {bold: false, italic: false, underline: false, strike: false, ...clone(preset.formatting)};
+      state.effects = Logic.normaliseEffects(clone(preset.effects));
+      if (preset.colours) {
+        state.colours = makeColours(preset.colours);
+        state.wubrg = [];
+      }
+      state.events = [
+        ...state.events.filter((event) => event.type === 'sprite'),
+        ...styledPresetEvents(preset)
+      ];
+      state.selected = null;
+      state.activeTab = null;
+    }, `${preset.name} layered onto the live name`);
   }
 
-  function setPresetSection(name) {
-    const valid = ['colour', 'special', 'saved'];
-    activePresetSection = valid.includes(name) ? name : 'colour';
-    document.querySelectorAll('[data-preset-section]').forEach((button) => {
-      const active = button.dataset.presetSection === activePresetSection;
-      button.setAttribute('aria-selected', String(active));
-      button.classList.toggle('selected', active);
+  function setPresetMenu(level, options = {}) {
+    presetMenuLevel = level;
+    if (options.resetPage !== false) presetMenuPage = 0;
+    if (options.savedId !== undefined) selectedSavedPresetId = options.savedId;
+    clearPreview();
+    renderPresetMenu();
+  }
+
+  function presetBack() {
+    if (['colour', 'special', 'saved'].includes(presetMenuLevel)) {
+      setPresetMenu('root');
+      return;
+    }
+    if (['rename', 'deleteConfirm'].includes(presetMenuLevel)) {
+      setPresetMenu('savedActions', {savedId: selectedSavedPresetId});
+      return;
+    }
+    if (presetMenuLevel === 'savedActions') setPresetMenu('saved');
+  }
+
+  function appendPresetOrbitButton({label, note = '', icon = '', className = '', gradient = '', action, preview}) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = `preset-orbit-option ${className}`.trim();
+    if (gradient) button.style.setProperty('--preset-orbit-fill', gradient);
+    button.innerHTML = `${icon ? `<i aria-hidden="true">${icon}</i>` : ''}<b>${escapeHtml(label)}</b>${note ? `<small>${escapeHtml(note)}</small>` : ''}`;
+    if (preview) attachPresetPreview(button, preview);
+    button.addEventListener('click', action);
+    els.presetOrbitItems.appendChild(button);
+    return button;
+  }
+
+  function appendPresetPage(items, makeButton, pageSize = 5) {
+    const pageCount = Math.max(1, Math.ceil(items.length / pageSize));
+    presetMenuPage = ((presetMenuPage % pageCount) + pageCount) % pageCount;
+    items.slice(presetMenuPage * pageSize, presetMenuPage * pageSize + pageSize).forEach(makeButton);
+    if (pageCount > 1) {
+      appendPresetOrbitButton({
+        label: 'MORE',
+        note: `${presetMenuPage + 1} / ${pageCount}`,
+        icon: '→',
+        className: 'preset-more-option',
+        action: () => {
+          presetMenuPage = (presetMenuPage + 1) % pageCount;
+          renderPresetMenu();
+        }
+      });
+    }
+  }
+
+  function positionPresetOrbitButtons() {
+    const buttons = Array.from(els.presetOrbitItems.children);
+    const count = buttons.length;
+    buttons.forEach((button, index) => {
+      const angle = (-90 + index * 360 / Math.max(1, count)) * Math.PI / 180;
+      button.style.left = `${50 + Math.cos(angle) * 35}%`;
+      button.style.top = `${50 + Math.sin(angle) * 38}%`;
     });
-    document.querySelectorAll('[data-preset-view]').forEach((view) => {
-      view.hidden = view.dataset.presetView !== activePresetSection;
-    });
-    els.activePresetSectionLabel.textContent = activePresetSection === 'special'
-      ? 'SPECIAL'
-      : activePresetSection === 'saved'
-        ? 'SAVED'
-        : 'COLOUR';
+  }
+
+  function selectedSavedPreset() {
+    return state.savedCompositions.find((entry) => entry.id === selectedSavedPresetId) || null;
+  }
+
+  function savePresetRename() {
+    const saved = selectedSavedPreset();
+    if (!saved) {
+      setPresetMenu('saved');
+      return;
+    }
+    const nextName = els.presetRenameInput.value.trim().slice(0, 48);
+    if (!nextName) {
+      announce('Give the saved preset a name', true);
+      els.presetRenameInput.focus();
+      return;
+    }
+    saved.name = nextName;
+    persist();
+    setPresetMenu('savedActions', {savedId: saved.id});
+    announce(`Saved preset renamed to ${nextName}`);
+  }
+
+  function renderPresetMenu() {
+    els.presetOrbitItems.replaceChildren();
+    const atRoot = presetMenuLevel === 'root';
+    els.presetOrbitCentre.hidden = !atRoot;
+    els.presetBackButton.hidden = atRoot;
+    els.presetRenameEditor.hidden = presetMenuLevel !== 'rename';
+    els.presetOrbit.classList.toggle('nested', !atRoot);
+    els.presetOrbit.dataset.level = presetMenuLevel;
+
+    if (atRoot) {
+      els.presetOrbitStatus.textContent = 'CHOOSE A COLLECTION';
+      appendPresetOrbitButton({label: 'COLOUR', note: `${COLOUR_PRESETS.length} PALETTES`, icon: '◒', action: () => setPresetMenu('colour')});
+      appendPresetOrbitButton({label: 'SPECIAL', note: `${STYLE_PRESETS.length} LOOKS`, icon: '✦', action: () => setPresetMenu('special')});
+      appendPresetOrbitButton({label: 'SAVED', note: `${state.savedCompositions.length} ON DEVICE`, icon: '★', action: () => setPresetMenu('saved')});
+    } else if (presetMenuLevel === 'colour') {
+      els.presetOrbitStatus.textContent = 'COLOUR PRESETS · TAP TO APPLY';
+      appendPresetPage(COLOUR_PRESETS, (preset) => appendPresetOrbitButton({
+        label: preset.name,
+        note: preset.note,
+        gradient: gradientFromColours(preset.colours),
+        action: () => applyColourRecipe(preset.colours, preset.name),
+        preview: () => previewColours(preset.colours)
+      }));
+    } else if (presetMenuLevel === 'special') {
+      els.presetOrbitStatus.textContent = 'SPECIAL PRESETS · TAP TO APPLY';
+      appendPresetPage(STYLE_PRESETS, (preset) => appendPresetOrbitButton({
+        label: preset.name,
+        note: preset.note,
+        icon: preset.sample,
+        gradient: gradientFromColours(preset.colours || ['#FFFFFF']),
+        action: () => applySpecialPreset(preset),
+        preview: () => previewStyle(preset)
+      }), 6);
+    } else if (presetMenuLevel === 'saved') {
+      els.presetOrbitStatus.textContent = state.savedCompositions.length
+        ? 'SAVED PRESETS · TAP ONE TO MANAGE IT'
+        : 'SAVE THE CURRENT COMPLETE LOOK TO BEGIN';
+      const savedItems = [{kind: 'save'}, ...state.savedCompositions.map((entry) => ({kind: 'entry', entry}))];
+      appendPresetPage(savedItems, (item) => {
+        if (item.kind === 'save') {
+          appendPresetOrbitButton({label: 'SAVE CURRENT', note: 'COMPLETE LOOK', icon: '+', className: 'preset-save-option', action: saveCurrentComposition});
+          return;
+        }
+        const colours = item.entry.composition.colours?.map((stop) => stop.colour).filter(Logic.validHex) || ['#FFFFFF'];
+        appendPresetOrbitButton({
+          label: item.entry.name,
+          note: 'LOAD · RENAME · DELETE',
+          gradient: gradientFromColours(colours),
+          action: () => setPresetMenu('savedActions', {savedId: item.entry.id})
+        });
+      });
+    } else {
+      const saved = selectedSavedPreset();
+      if (!saved) {
+        presetMenuLevel = 'saved';
+        renderPresetMenu();
+        return;
+      }
+      if (presetMenuLevel === 'savedActions') {
+        els.presetOrbitStatus.textContent = saved.name;
+        appendPresetOrbitButton({label: 'LOAD', note: 'RESTORE EVERYTHING', icon: '↳', action: () => loadSavedComposition(saved)});
+        appendPresetOrbitButton({label: 'RENAME', note: 'CHANGE ITS LABEL', icon: '✎', action: () => {
+          presetMenuLevel = 'rename';
+          renderPresetMenu();
+          els.presetRenameInput.value = saved.name;
+          requestAnimationFrame(() => els.presetRenameInput.focus());
+        }});
+        appendPresetOrbitButton({label: 'DELETE', note: 'REMOVE FROM DEVICE', icon: '×', className: 'preset-delete-option', action: () => setPresetMenu('deleteConfirm', {savedId: saved.id})});
+      } else if (presetMenuLevel === 'rename') {
+        els.presetOrbitStatus.textContent = `RENAMING ${saved.name}`;
+      } else if (presetMenuLevel === 'deleteConfirm') {
+        els.presetOrbitStatus.textContent = `DELETE ${saved.name}?`;
+        appendPresetOrbitButton({label: 'YES, DELETE', note: 'CANNOT BE UNDONE', icon: '×', className: 'preset-delete-option', action: () => {
+          state.savedCompositions = state.savedCompositions.filter((entry) => entry.id !== saved.id);
+          persist();
+          selectedSavedPresetId = null;
+          setPresetMenu('saved');
+          announce(`${saved.name} deleted`);
+        }});
+        appendPresetOrbitButton({label: 'KEEP IT', note: 'GO BACK', icon: '✓', action: () => setPresetMenu('savedActions', {savedId: saved.id})});
+      }
+    }
+    positionPresetOrbitButtons();
+  }
+
+  function renderPresets() {
+    renderPresetMenu();
   }
 
   function setActiveTab(name, focus = false) {
@@ -2269,6 +2476,10 @@
       panel.hidden = panel.dataset.panel !== state.activeTab;
     });
     const pendingChoice = Boolean(state.activeTab && pendingLayerOffset !== null);
+    const globalChoice = Boolean(
+      pendingLayerOffset === null &&
+      ['wubrg', 'presets'].includes(state.activeTab)
+    );
     const refiningChoice = Boolean(
       state.activeTab &&
       pendingLayerOffset === null &&
@@ -2276,13 +2487,15 @@
       ['colours', 'effects', 'sprites'].includes(state.activeTab)
     );
     els.sourceLibrary.classList.toggle('pending-choice', pendingChoice);
+    els.sourceLibrary.classList.toggle('global-choice', globalChoice);
     els.sourceLibrary.classList.toggle('refining-choice', refiningChoice);
     els.pendingChoiceBanner.hidden = !pendingChoice;
-    document.body.classList.toggle('layer-choice-open', pendingChoice);
-    if (pendingChoice) {
+    document.body.classList.toggle('layer-choice-open', pendingChoice || globalChoice);
+    if (pendingChoice || globalChoice) {
       els.choiceCard.setAttribute('role', 'dialog');
       els.choiceCard.setAttribute('aria-modal', 'true');
-      els.choiceCard.setAttribute('aria-labelledby', 'pendingChoiceTitle');
+      if (pendingChoice) els.choiceCard.setAttribute('aria-labelledby', 'pendingChoiceTitle');
+      else els.choiceCard.removeAttribute('aria-labelledby');
     } else {
       els.choiceCard.setAttribute('role', 'region');
       els.choiceCard.removeAttribute('aria-modal');
@@ -2290,10 +2503,16 @@
     }
     els.sourceLibrary.hidden = !state.activeTab;
     if (state.activeTab && changed) {
+      if (state.activeTab === 'presets') {
+        presetMenuLevel = 'root';
+        presetMenuPage = 0;
+        selectedSavedPresetId = null;
+        renderPresetMenu();
+      }
       requestAnimationFrame(() => {
         const panel = document.querySelector(`[data-panel="${state.activeTab}"]`);
         if (panel) panel.scrollTop = 0;
-        if (pendingChoice) els.choiceCard.focus({preventScroll: true});
+        if (pendingChoice || globalChoice) els.choiceCard.focus({preventScroll: true});
       });
     }
     persist();
@@ -2315,7 +2534,7 @@
     renderInspector();
     renderSources();
     renderSavedPalettes();
-    renderSavedCompositions();
+    renderPresetMenu();
     setActiveTab(state.activeTab);
   }
 
@@ -2431,9 +2650,8 @@
   function showDropMagnifier(target, offset, clientX, colourPosition = null) {
     const safeOffset = Math.max(0, Math.min(state.name.length, Number(offset) || 0));
     const isColour = colourPosition !== null;
-    const percent = isColour ? Math.round(colourPosition * 100) : null;
     const glyph = isColour
-      ? `${percent}%`
+      ? '●'
       : safeOffset >= state.name.length
         ? 'END'
         : state.name[safeOffset] === ' '
@@ -2444,11 +2662,7 @@
     els.dropMagnifier.style.left = `${left}px`;
     els.dropMagnifierGlyph.textContent = glyph;
     els.dropMagnifierLabel.textContent = isColour
-      ? percent === 0
-        ? 'LEFT EDGE'
-        : percent === 100
-          ? 'RIGHT EDGE'
-          : 'COLOUR POINT'
+      ? tubePositionLabel(colourPosition)
       : safeOffset >= state.name.length
         ? `END · POSITION ${safeOffset}`
         : `BEFORE ${state.name[safeOffset] === ' ' ? 'SPACE' : state.name[safeOffset]} · POSITION ${safeOffset}`;
@@ -2461,20 +2675,7 @@
   }
 
   function selectWheelPoint(event) {
-    const bounds = els.colourWheel.getBoundingClientRect();
-    const scaleX = els.colourWheel.width / Math.max(1, bounds.width);
-    const scaleY = els.colourWheel.height / Math.max(1, bounds.height);
-    const radius = els.colourWheel.width / 2;
-    let x = (event.clientX - bounds.left) * scaleX;
-    let y = (event.clientY - bounds.top) * scaleY;
-    const dx = x - radius;
-    const dy = y - radius;
-    const distance = Math.hypot(dx, dy);
-    if (distance > radius) {
-      x = radius + dx / distance * radius;
-      y = radius + dy / distance * radius;
-    }
-    setColourDraft(wheelColourAt(x, y));
+    setColourDraft(colourFromWheelEvent(els.colourWheel, event));
   }
 
   function installEvents() {
@@ -2529,6 +2730,7 @@
       if (clean) {
         els.colourPicker.value = clean;
         positionWheelCursor(clean);
+        updateColourPreview(els.colourWheelPreview, els.colourWheelPreviewHex, clean);
       }
     });
     els.colourHex.addEventListener('change', () => {
@@ -2576,12 +2778,6 @@
       renderSavedPalettes();
       announce('Palette saved on this device');
     });
-    els.clearWubrg.addEventListener('click', () => {
-      state.wubrg = [];
-      persist();
-      renderWubrg();
-    });
-    els.saveComposition.addEventListener('click', saveCurrentComposition);
     document.querySelectorAll('[data-global-toggle]').forEach((button) => {
       button.addEventListener('click', () => {
         const key = button.dataset.globalToggle;
@@ -2592,8 +2788,13 @@
         }, `${EFFECT_BY_KEY[key].label} ${removing ? 'off' : 'on'} for the whole name`);
       });
     });
-    document.querySelectorAll('[data-preset-section]').forEach((button) => {
-      button.addEventListener('click', () => setPresetSection(button.dataset.presetSection));
+    els.presetBackButton.addEventListener('click', presetBack);
+    els.presetRenameSave.addEventListener('click', savePresetRename);
+    els.presetRenameCancel.addEventListener('click', () => setPresetMenu('savedActions', {savedId: selectedSavedPresetId}));
+    els.presetRenameInput.addEventListener('keydown', (event) => {
+      if (event.key !== 'Enter') return;
+      event.preventDefault();
+      savePresetRename();
     });
     const colourReservoirPayload = {kind: 'reservoir', category: 'colours'};
     const fxReservoirPayload = {kind: 'reservoir', category: 'effects'};
@@ -2669,6 +2870,8 @@
           cancelPendingLayer();
           setActiveTab(null);
           announce('New layer cancelled');
+        } else if (state.activeTab === 'presets' && presetMenuLevel !== 'root') {
+          presetBack();
         } else if (state.activeTab) {
           setActiveTab(null);
         } else if (state.selected) {

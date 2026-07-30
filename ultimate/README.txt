@@ -1,7 +1,7 @@
 TURDGOBBLER'S DECK NAME COLOURIFIER — ULTIMATE VERSION
 
 STATUS
-This folder is the active Ultimate source. The v6.5 progressive-picker interface
+This folder is the active Ultimate source. The v6.6 focused-global-tools interface
 is the release published at /ultimate/ on 2026-07-30.
 Version 6 remains the standard /colour/ release and Version Lite remains
 shelved.
@@ -43,13 +43,14 @@ THE ONE-TUBE MODEL
   spacing keeps them accessible, and guide lines point back to their exact
   text anchors.
 - Selecting a layer never draws decoration across the affected letters.
-- Undo and Redo stay permanently visible. More contains Start Over, budget
-  details, Clear FX, and complete saved presets.
+- Undo, Redo, and Start Over stay together. More contains budget details and
+  Clear FX.
 
 THE TWO PRESET LAUNCHERS
 1. WUBRG applies Magic colour identities immediately as pips are selected.
-2. PRESETS first opens Colour, Special, and Saved collections, then shows only
-   the chosen set of recipes.
+2. PRESETS opens a prominent global sheet, then nests Colour, Special, and
+   Saved collections around a small centre. Inside a collection the centre
+   becomes a red Back button.
 
 WUBRG and colour recipes replace only the colour layer. Combined Presets replace
 the current non-sprite FX so every named look is deterministic while preserving
@@ -59,21 +60,24 @@ Matrix Glitch, and Upside Down combine Arena-supported tags and colours.
 COLOUR + EFFECT + SPRITE SOURCES
 - The Layer Dock has exactly three draggable creation points, paired directly
   beneath the tube: Colour, FX, and Sprite.
-- A Colour drop locks an exact edge-to-edge percentage; an FX drop locks a text
+- A Colour drop locks an exact edge-to-edge point; an FX drop locks a text
   position before opening the matching picker.
 - The three bubbles sit directly beside the Mega Tube and remain reachable on
   narrow mobile screens.
 - The colour picker offers the wheel, hex, swatches, and saved palettes. The FX
   picker uses five circular families before showing a few positioned effects.
   Sprites have their own focused picker.
+- Both the full colour wheel and the compact wheel inside a selected colour’s
+  editing bay have a live thumb-preview tile and hex readout.
 - The V6 circular colour disc is the primary mobile picker: white at its centre,
   full colour through the middle, and a dark outer ring. The native mobile
   colour swatch is hidden.
-- The drop magnifier shows either an exact colour percentage or an FX text
-  position. Both bubble types move continuously to the absolute tube edges.
+- The drop magnifier shows a plain Left/Centre/Right colour position or an FX
+  text position. User-facing tube-position percentages are intentionally hidden.
 - All Caps and Small Caps are direct whole-name toggles. Bold, Italic,
   Underline, Strike, Superscript, Subscript, Size, Spacing, Rotate, and Offset
   are normal positioned FX choices.
+- FX demonstrations render at four times their former scale.
 - Dragging an existing layer creates a floating copy that follows the pointer
   and reveals a full-width red delete bar directly below the tube.
 - The four most recently used colours and positioned effects appear first.
@@ -106,8 +110,12 @@ PREVIEW + PRIVACY
   state.
 - Presets preview directly on the live name before commit.
 - Selecting a layer highlights only its own rail bubble, never the name text.
-- Saved Presets in More capture the full deck name, colours, whole-name
-  toggles, positioned FX, and sprites on this device.
+- Saved Presets capture the full deck name, colours, whole-name toggles,
+  positioned FX, and sprites on this device. Save, Load, Rename, and Delete are
+  nested inside the Saved collection.
+- The WUBRG panel has no Clear button. Tapping pips toggles them; tapping the
+  active identity cycles its colour order. Four-colour identities use
+  `4 COLOUR (HISTORICAL NAME)` labels.
 - The preview uses the local Beleren font and extracted sprite crops.
 - Browser geometry is an approximation of Unity/TextMesh Pro; the raw compiler
   and character accounting are authoritative.
