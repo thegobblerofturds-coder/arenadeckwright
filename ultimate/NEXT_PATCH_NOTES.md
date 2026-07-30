@@ -217,6 +217,23 @@ The Ultimate development source was rebuilt around one editing surface.
 - Nested Save Current, Load, Rename, and confirmed Delete inside Saved Presets
   and removed the obsolete saved-preset list from More.
 
+### Ultimate v6.7 unobstructed nested tools
+
+- Replaced the combined FX category-and-card screen with one progressive
+  circular menu. Motion, Text, Transform, and Visual open one family at a time;
+  the centre becomes a red Back button and samples shrink to fit the orbit.
+- Moved WUBRG and Presets out of the viewport-covering sheet. Both now open
+  below the Mega Tube with a pinned, exact-black live-result shelf, so global
+  choices never hide the final deck name.
+- Removed WUBRG’s redundant Identity readout and promoted the matching,
+  colour-cycling identity rail into its place.
+- Changed Presets into an explicit trial flow. Each preset stages a live
+  preview, Keep commits it, Cancel restores the current design, and clicking
+  away keeps the visible result. Undo remains available after commit.
+- Made sprites inherit meaningful active visual and transform FX, including
+  size, rotation, offsets, spacing, highlight, and alpha. Same-position FX
+  serialize before a sprite so Arena receives the intended order.
+
 ### Removed from the product surface
 
 - Alternate/prismatic duplicate name view.
@@ -233,5 +250,5 @@ reduced-motion support, and fan-content notice remain.
 
 ## Release status
 
-The v6.6 interface is the `/ultimate/` release in both website mirrors as of
+The v6.7 interface is the `/ultimate/` release in both website mirrors as of
 2026-07-30. `/colour/` remains Version 6 and Version Lite remains shelved.

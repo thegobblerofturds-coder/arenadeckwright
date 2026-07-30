@@ -93,11 +93,10 @@
     {key: 'alpha', label: 'ALPHA', hint: 'TEXT OPACITY', code: '<alpha=#80>', global: null, value: '#80'}
   ];
   const FX_GROUPS = [
-    {key: 'lettering', label: 'LETTERING', icon: 'Aa', effects: ['bold', 'italic', 'underline', 'strike']},
-    {key: 'scale', label: 'SCALE', icon: '↕', effects: ['sup', 'sub', 'size']},
-    {key: 'motion', label: 'MOTION', icon: '↝', effects: ['rotate', 'voffset', 'pos']},
-    {key: 'spacing', label: 'SPACING', icon: '↔', effects: ['cspace', 'mspace', 'space', 'br']},
-    {key: 'finish', label: 'FINISH', icon: '✦', effects: ['mark', 'alpha']}
+    {key: 'motion', label: 'MOTION', icon: '↝', note: 'MOVE AND OFFSET', effects: ['voffset', 'pos', 'space', 'br']},
+    {key: 'text', label: 'TEXT', icon: 'Aa', note: 'LETTER TREATMENT', effects: ['bold', 'italic', 'underline', 'strike']},
+    {key: 'transform', label: 'TRANSFORM', icon: '↻', note: 'SHAPE AND SCALE', effects: ['size', 'rotate', 'sup', 'sub', 'cspace']},
+    {key: 'visual', label: 'VISUAL', icon: '✦', note: 'FINISH AND WIDTH', effects: ['mark', 'alpha', 'mspace']}
   ];
   const EFFECT_BY_KEY = Object.fromEntries(EFFECTS.map((effect) => [effect.key, effect]));
   const $ = (id) => document.getElementById(id);
@@ -123,18 +122,21 @@
     rotateColours: $('rotateColours'), flipColours: $('flipColours'), savePalette: $('savePalette'),
     savedPalettes: $('savedPalettes'),
     colourSources: $('colourSources'), recentColours: $('recentColours'),
-    effectSources: $('effectSources'), recentEffects: $('recentEffects'), spriteSources: $('spriteSources'),
-    fxCategories: $('fxCategories'), activeFxGroupLabel: $('activeFxGroupLabel'),
-    wubrgComposer: $('wubrgComposer'), wubrgIdentity: $('wubrgIdentity'), wubrgOrder: $('wubrgOrder'),
+    effectSources: $('effectSources'), spriteSources: $('spriteSources'),
+    fxOrbit: $('fxOrbit'), fxOrbitCentre: $('fxOrbitCentre'), fxBackButton: $('fxBackButton'),
+    fxOrbitStatus: $('fxOrbitStatus'),
+    wubrgComposer: $('wubrgComposer'),
     wubrgContext: $('wubrgContext'), wubrgResults: $('wubrgResults'),
     presetOrbit: $('presetOrbit'), presetOrbitItems: $('presetOrbitItems'),
     presetOrbitCentre: $('presetOrbitCentre'), presetBackButton: $('presetBackButton'),
     presetRenameEditor: $('presetRenameEditor'), presetRenameInput: $('presetRenameInput'),
     presetRenameSave: $('presetRenameSave'), presetRenameCancel: $('presetRenameCancel'),
-    presetOrbitStatus: $('presetOrbitStatus'),
+    presetOrbitStatus: $('presetOrbitStatus'), presetPreviewActions: $('presetPreviewActions'),
+    presetKeepButton: $('presetKeepButton'), presetCancelButton: $('presetCancelButton'),
     colourLayerBubble: $('colourLayerBubble'), fxLayerBubble: $('fxLayerBubble'),
     spriteLayerBubble: $('spriteLayerBubble'),
     sourceLibrary: $('sourceLibrary'), choiceCard: $('choiceCard'),
+    globalPreviewShelf: $('globalPreviewShelf'), globalOutputPreview: $('globalOutputPreview'),
     pendingChoiceBanner: $('pendingChoiceBanner'), pendingChoiceTitle: $('pendingChoiceTitle'),
     toast: $('toast')
   };
@@ -148,10 +150,12 @@
   let pendingLayerOffset = null;
   let pendingLayerPosition = null;
   let pendingLayerCategory = null;
-  let activeFxGroup = 'lettering';
+  let fxMenuLevel = 'root';
+  let fxMenuPage = 0;
   let presetMenuLevel = 'root';
   let presetMenuPage = 0;
   let selectedSavedPresetId = null;
+  let stagedPreset = null;
   let state = createDefaultState();
 
   function uid(prefix) {
@@ -534,13 +538,41 @@
     if (transforms.length) glyph.style.transform = transforms.join(' ');
   }
 
-  function renderPreview(build) {
-    els.outputPreview.replaceChildren();
+  function applySpriteStyles(sprite, preview) {
+    if (Number.isFinite(preview.size)) {
+      const size = Math.max(12, Math.min(72, preview.size * 2.1));
+      sprite.style.width = `${size}px`;
+      sprite.style.height = `${size}px`;
+      sprite.style.marginBottom = `${Math.max(-15, -size * .24)}px`;
+    }
+    if (Number.isFinite(preview.cspace)) {
+      sprite.style.marginRight = `${Math.max(-8, Math.min(18, preview.cspace * .3))}px`;
+    }
+    if (preview.mspace) sprite.style.minWidth = preview.mspace;
+    if (preview.mark) {
+      sprite.style.backgroundColor = preview.mark;
+      sprite.style.boxShadow = `0 0 0 3px ${preview.mark}`;
+    }
+    sprite.style.opacity = String(Math.max(0, Math.min(1, preview.alpha)));
+    if (Number.isFinite(preview.pendingPos)) {
+      sprite.style.marginLeft = `${Math.max(0, Math.min(80, preview.pendingPos * .15))}px`;
+      preview.pendingPos = null;
+    }
+    const transforms = [];
+    if (Number.isFinite(preview.voffset)) transforms.push(`translateY(${-Math.max(-18, Math.min(18, preview.voffset * .45))}px)`);
+    if (preview.sup) transforms.push('translateY(-.38em)', 'scale(.75)');
+    if (preview.sub) transforms.push('translateY(.3em)', 'scale(.75)');
+    if (Number.isFinite(preview.rotate)) transforms.push(`rotate(${Math.max(-180, Math.min(180, preview.rotate))}deg)`);
+    if (transforms.length) sprite.style.transform = transforms.join(' ');
+  }
+
+  function renderPreview(build, container = els.outputPreview) {
+    container.replaceChildren();
     if (!build.text && !build.inlineEvents.length) {
       const empty = document.createElement('span');
       empty.className = 'preview-empty';
       empty.textContent = 'TYPE A DECK NAME';
-      els.outputPreview.appendChild(empty);
+      container.appendChild(empty);
       return;
     }
     const preview = initialPreviewState();
@@ -552,14 +584,15 @@
     for (let offset = 0; offset <= build.text.length; offset += 1) {
       (eventsAt.get(offset) || []).forEach((event) => {
         if (event.type === 'br') {
-          els.outputPreview.appendChild(document.createElement('br'));
+          container.appendChild(document.createElement('br'));
         } else if (event.type === 'sprite') {
           const sprite = document.createElement('i');
           sprite.className = 'preview-sprite';
           sprite.dataset.dropOffset = String(offset);
           sprite.style.backgroundImage = `var(--arena-sprite-${event.value})`;
           sprite.setAttribute('aria-label', `Sprite ${event.value} at position ${offset}`);
-          els.outputPreview.appendChild(sprite);
+          applySpriteStyles(sprite, preview);
+          container.appendChild(sprite);
         } else {
           applyPreviewTag(preview, event.code);
         }
@@ -571,13 +604,13 @@
       glyph.dataset.dropOffset = String(offset);
       glyph.textContent = build.text[offset];
       applyGlyphStyles(glyph, preview);
-      els.outputPreview.appendChild(glyph);
+      container.appendChild(glyph);
     }
     const endTarget = document.createElement('span');
     endTarget.className = 'preview-end-target';
     endTarget.dataset.dropOffset = String(build.text.length);
     endTarget.setAttribute('aria-label', `End of name, position ${build.text.length}`);
-    els.outputPreview.appendChild(endTarget);
+    container.appendChild(endTarget);
   }
 
   function gradientCss() {
@@ -616,6 +649,7 @@
     const fittedSize = Math.max(13, 22 - Math.max(0, state.name.length - 18) * .28);
     els.tubeNameCanvas.style.setProperty('--name-size', `${fittedSize.toFixed(1)}px`);
     renderPreview(build);
+    renderPreview(build, els.globalOutputPreview);
     els.budgetText.textContent = String(build.breakdown.text);
     els.budgetColour.textContent = String(build.breakdown.colour);
     els.budgetFx.textContent = String(build.breakdown.fx);
@@ -1901,6 +1935,77 @@
     });
   }
 
+  function previewComposition(entry) {
+    const composition = entry?.composition;
+    if (!composition) return;
+    setPreview({
+      colours: clone(composition.colours),
+      formatting: clone(composition.formatting),
+      effects: clone(composition.effects),
+      events: clone(composition.events)
+    });
+  }
+
+  function stageColourPreset(preset) {
+    stagedPreset = {kind: 'colour', key: `colour:${preset.name}`, label: preset.name, colours: clone(preset.colours)};
+    previewColours(preset.colours);
+    renderPresetMenu();
+  }
+
+  function stageSpecialPreset(preset) {
+    stagedPreset = {kind: 'special', key: `special:${preset.id}`, label: preset.name, presetId: preset.id};
+    previewStyle(preset);
+    renderPresetMenu();
+  }
+
+  function stageSavedPreset(entry) {
+    stagedPreset = {kind: 'saved', key: `saved:${entry.id}`, label: entry.name, savedId: entry.id};
+    previewComposition(entry);
+    renderPresetMenu();
+  }
+
+  function keepStagedPreset() {
+    const selection = stagedPreset;
+    stagedPreset = null;
+    if (!selection) {
+      clearPreview();
+      setActiveTab(null);
+      return;
+    }
+    if (selection.kind === 'colour') {
+      applyColourRecipe(selection.colours, selection.label);
+      return;
+    }
+    if (selection.kind === 'special') {
+      const preset = STYLE_PRESETS.find((candidate) => candidate.id === selection.presetId);
+      if (preset) applySpecialPreset(preset);
+      else {
+        clearPreview();
+        setActiveTab(null);
+      }
+      return;
+    }
+    const saved = state.savedCompositions.find((entry) => entry.id === selection.savedId);
+    if (saved) loadSavedComposition(saved);
+    else {
+      clearPreview();
+      setActiveTab(null);
+    }
+  }
+
+  function cancelPresetPreview() {
+    const hadPreview = Boolean(stagedPreset);
+    stagedPreset = null;
+    clearPreview();
+    setActiveTab(null);
+    if (hadPreview) announce('Preset preview cancelled');
+  }
+
+  function closePresetMenu({keep = true} = {}) {
+    if (keep) keepStagedPreset();
+    else cancelPresetPreview();
+  }
+
   function styledPresetEvents(preset) {
     const length = state.name.length;
     const offset = (fraction) => Math.max(0, Math.min(length, Math.round(length * fraction)));
@@ -2059,22 +2164,6 @@
     });
   }
 
-  function renderRecentEffects() {
-    els.recentEffects.replaceChildren();
-    const recentFx = state.recentEffects.filter((entry) => entry.payload.event.type !== 'sprite');
-    const available = state.selected?.kind !== 'global' && recentFx.length;
-    els.recentEffects.hidden = !available;
-    if (!available) return;
-    recentFx.forEach((entry) => {
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = 'recent-choice';
-      button.innerHTML = `<span>${entry.label}</span><code>${entry.payload.event.code || `SPRITE ${entry.payload.event.value}`}</code>`;
-      button.addEventListener('click', () => selectSourcePayload(clone(entry.payload), entry.label));
-      els.recentEffects.appendChild(button);
-    });
-  }
-
   function renderColourSources() {
     els.colourSources.replaceChildren();
     renderRecentColours();
@@ -2120,46 +2209,85 @@
     container.appendChild(example);
   }
 
-  function renderEffectSources() {
-    const group = FX_GROUPS.find((candidate) => candidate.key === activeFxGroup) || FX_GROUPS[0];
-    activeFxGroup = group.key;
-    els.activeFxGroupLabel.textContent = group.label;
-    els.fxCategories.replaceChildren();
-    FX_GROUPS.forEach((candidate, index) => {
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = 'fx-category';
-      button.dataset.orbitIndex = String(index);
-      button.classList.toggle('selected', candidate.key === group.key);
-      button.setAttribute('aria-pressed', String(candidate.key === group.key));
-      button.innerHTML = `<i aria-hidden="true">${candidate.icon}</i><span>${candidate.label}</span>`;
-      button.addEventListener('click', () => {
-        activeFxGroup = candidate.key;
-        renderEffectSources();
-      });
-      els.fxCategories.appendChild(button);
+  function setFxMenu(level) {
+    fxMenuLevel = level;
+    fxMenuPage = 0;
+    renderEffectSources();
+  }
+
+  function appendFxOrbitButton({label, note = '', icon = '', className = '', action, effectKey = ''}) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = `fx-orbit-option ${className}`.trim();
+    button.innerHTML = `${icon ? `<i aria-hidden="true">${icon}</i>` : ''}<span><b>${escapeHtml(label)}</b>${note ? `<small>${escapeHtml(note)}</small>` : ''}</span>`;
+    if (effectKey) renderFxExample(button, effectKey);
+    button.addEventListener('click', action);
+    els.effectSources.appendChild(button);
+    return button;
+  }
+
+  function positionFxOrbitButtons() {
+    const buttons = Array.from(els.effectSources.children);
+    const count = buttons.length;
+    buttons.forEach((button, index) => {
+      const angle = (-90 + index * 360 / Math.max(1, count)) * Math.PI / 180;
+      button.style.left = `${50 + Math.cos(angle) * 35}%`;
+      button.style.top = `${50 + Math.sin(angle) * 38}%`;
     });
-    els.effectSources.replaceChildren();
-    renderRecentEffects();
-    group.effects.forEach((key) => {
-      const effect = EFFECT_BY_KEY[key];
-      if (!effect) return;
-      const card = document.createElement('div');
-      card.className = `effect-source-card source-${effect.key}`;
+  }
+
+  function appendFxPage(keys, pageSize = 5) {
+    const effects = keys.map((key) => EFFECT_BY_KEY[key]).filter(Boolean);
+    const pageCount = Math.max(1, Math.ceil(effects.length / pageSize));
+    fxMenuPage = ((fxMenuPage % pageCount) + pageCount) % pageCount;
+    effects.slice(fxMenuPage * pageSize, fxMenuPage * pageSize + pageSize).forEach((effect) => {
       const payload = effectPayload(effect.key);
-      const place = document.createElement('button');
-      place.type = 'button';
-      place.className = 'effect-source';
-      place.disabled = !payload;
-      place.innerHTML = `<span><b>${effect.label}</b><small>PLACE AT THIS POSITION</small><code>${effect.code}</code></span>`;
-      renderFxExample(place, effect.key);
-      place.setAttribute('aria-label', `Choose ${effect.label} for the current position.`);
-      if (payload) {
-        place.addEventListener('click', () => selectSourcePayload(effectPayload(effect.key), effect.label));
-      }
-      card.appendChild(place);
-      els.effectSources.appendChild(card);
+      appendFxOrbitButton({
+        label: effect.label,
+        note: effect.hint,
+        effectKey: effect.key,
+        className: `source-${effect.key}`,
+        action: () => {
+          if (payload) selectSourcePayload(effectPayload(effect.key), effect.label);
+        }
+      }).disabled = !payload;
     });
+    if (pageCount > 1) {
+      appendFxOrbitButton({
+        label: 'MORE',
+        note: `${fxMenuPage + 1} / ${pageCount}`,
+        icon: '→',
+        className: 'fx-more-option',
+        action: () => {
+          fxMenuPage = (fxMenuPage + 1) % pageCount;
+          renderEffectSources();
+        }
+      });
+    }
+  }
+
+  function renderEffectSources() {
+    els.effectSources.replaceChildren();
+    const atRoot = fxMenuLevel === 'root';
+    const group = FX_GROUPS.find((candidate) => candidate.key === fxMenuLevel);
+    if (!atRoot && !group) fxMenuLevel = 'root';
+    els.fxOrbitCentre.hidden = fxMenuLevel !== 'root';
+    els.fxBackButton.hidden = fxMenuLevel === 'root';
+    els.fxOrbit.classList.toggle('nested', fxMenuLevel !== 'root');
+    els.fxOrbit.dataset.level = fxMenuLevel;
+    if (fxMenuLevel === 'root') {
+      els.fxOrbitStatus.textContent = 'CHOOSE AN FX FAMILY';
+      FX_GROUPS.forEach((candidate) => appendFxOrbitButton({
+        label: candidate.label,
+        note: candidate.note,
+        icon: candidate.icon,
+        action: () => setFxMenu(candidate.key)
+      }));
+    } else {
+      els.fxOrbitStatus.textContent = `${group.label} FX · CHOOSE ONE`;
+      appendFxPage(group.effects);
+    }
+    positionFxOrbitButtons();
   }
 
   function renderSpriteSources() {
@@ -2211,8 +2339,6 @@
       });
       els.wubrgComposer.appendChild(button);
     });
-    els.wubrgIdentity.textContent = identityName(state.wubrg);
-    els.wubrgOrder.textContent = state.wubrg.length ? state.wubrg.join(' → ') : '—';
     renderWubrgResults();
   }
 
@@ -2240,6 +2366,7 @@
   function renderWubrgResults() {
     els.wubrgResults.replaceChildren();
     const required = Array.from(new Set(state.wubrg));
+    els.wubrgResults.hidden = !required.length;
     if (!required.length) {
       els.wubrgContext.textContent = 'SELECT PIPS · COLOURS APPLY IMMEDIATELY';
       return;
@@ -2292,7 +2419,6 @@
     presetMenuLevel = level;
     if (options.resetPage !== false) presetMenuPage = 0;
     if (options.savedId !== undefined) selectedSavedPresetId = options.savedId;
-    clearPreview();
     renderPresetMenu();
   }
 
@@ -2308,13 +2434,14 @@
     if (presetMenuLevel === 'savedActions') setPresetMenu('saved');
   }
 
-  function appendPresetOrbitButton({label, note = '', icon = '', className = '', gradient = '', action, preview}) {
+  function appendPresetOrbitButton({label, note = '', icon = '', className = '', gradient = '', action, selected = false}) {
     const button = document.createElement('button');
     button.type = 'button';
     button.className = `preset-orbit-option ${className}`.trim();
+    button.classList.toggle('selected', selected);
+    button.setAttribute('aria-pressed', String(selected));
     if (gradient) button.style.setProperty('--preset-orbit-fill', gradient);
     button.innerHTML = `${icon ? `<i aria-hidden="true">${icon}</i>` : ''}<b>${escapeHtml(label)}</b>${note ? `<small>${escapeHtml(note)}</small>` : ''}`;
-    if (preview) attachPresetPreview(button, preview);
     button.addEventListener('click', action);
     els.presetOrbitItems.appendChild(button);
     return button;
@@ -2378,6 +2505,10 @@
     els.presetRenameEditor.hidden = presetMenuLevel !== 'rename';
     els.presetOrbit.classList.toggle('nested', !atRoot);
     els.presetOrbit.dataset.level = presetMenuLevel;
+    els.presetPreviewActions.hidden = !stagedPreset;
+    els.presetKeepButton.innerHTML = stagedPreset
+      ? `<span aria-hidden="true">✓</span> KEEP ${escapeHtml(stagedPreset.label)}`
+      : '<span aria-hidden="true">✓</span> KEEP THIS LOOK';
 
     if (atRoot) {
       els.presetOrbitStatus.textContent = 'CHOOSE A COLLECTION';
@@ -2390,8 +2521,8 @@
         label: preset.name,
         note: preset.note,
         gradient: gradientFromColours(preset.colours),
-        action: () => applyColourRecipe(preset.colours, preset.name),
-        preview: () => previewColours(preset.colours)
+        selected: stagedPreset?.key === `colour:${preset.name}`,
+        action: () => stageColourPreset(preset)
       }));
     } else if (presetMenuLevel === 'special') {
       els.presetOrbitStatus.textContent = 'SPECIAL PRESETS · TAP TO APPLY';
@@ -2400,8 +2531,8 @@
         note: preset.note,
         icon: preset.sample,
         gradient: gradientFromColours(preset.colours || ['#FFFFFF']),
-        action: () => applySpecialPreset(preset),
-        preview: () => previewStyle(preset)
+        selected: stagedPreset?.key === `special:${preset.id}`,
+        action: () => stageSpecialPreset(preset)
       }), 6);
     } else if (presetMenuLevel === 'saved') {
       els.presetOrbitStatus.textContent = state.savedCompositions.length
@@ -2418,7 +2549,11 @@
           label: item.entry.name,
           note: 'LOAD · RENAME · DELETE',
           gradient: gradientFromColours(colours),
-          action: () => setPresetMenu('savedActions', {savedId: item.entry.id})
+          selected: stagedPreset?.key === `saved:${item.entry.id}`,
+          action: () => {
+            stageSavedPreset(item.entry);
+            setPresetMenu('savedActions', {savedId: item.entry.id});
+          }
         });
       });
     } else {
@@ -2430,7 +2565,13 @@
       }
       if (presetMenuLevel === 'savedActions') {
         els.presetOrbitStatus.textContent = saved.name;
-        appendPresetOrbitButton({label: 'LOAD', note: 'RESTORE EVERYTHING', icon: '↳', action: () => loadSavedComposition(saved)});
+        appendPresetOrbitButton({
+          label: 'PREVIEW',
+          note: 'THEN KEEP TO LOAD',
+          icon: '↳',
+          selected: stagedPreset?.key === `saved:${saved.id}`,
+          action: () => stageSavedPreset(saved)
+        });
         appendPresetOrbitButton({label: 'RENAME', note: 'CHANGE ITS LABEL', icon: '✎', action: () => {
           presetMenuLevel = 'rename';
           renderPresetMenu();
@@ -2490,12 +2631,12 @@
     els.sourceLibrary.classList.toggle('global-choice', globalChoice);
     els.sourceLibrary.classList.toggle('refining-choice', refiningChoice);
     els.pendingChoiceBanner.hidden = !pendingChoice;
-    document.body.classList.toggle('layer-choice-open', pendingChoice || globalChoice);
-    if (pendingChoice || globalChoice) {
+    els.globalPreviewShelf.hidden = !globalChoice;
+    document.body.classList.toggle('layer-choice-open', pendingChoice);
+    if (pendingChoice) {
       els.choiceCard.setAttribute('role', 'dialog');
       els.choiceCard.setAttribute('aria-modal', 'true');
-      if (pendingChoice) els.choiceCard.setAttribute('aria-labelledby', 'pendingChoiceTitle');
-      else els.choiceCard.removeAttribute('aria-labelledby');
+      els.choiceCard.setAttribute('aria-labelledby', 'pendingChoiceTitle');
     } else {
       els.choiceCard.setAttribute('role', 'region');
       els.choiceCard.removeAttribute('aria-modal');
@@ -2507,12 +2648,19 @@
         presetMenuLevel = 'root';
         presetMenuPage = 0;
         selectedSavedPresetId = null;
+        stagedPreset = null;
+        clearPreview();
         renderPresetMenu();
+      }
+      if (state.activeTab === 'effects') {
+        fxMenuLevel = 'root';
+        fxMenuPage = 0;
+        renderEffectSources();
       }
       requestAnimationFrame(() => {
         const panel = document.querySelector(`[data-panel="${state.activeTab}"]`);
         if (panel) panel.scrollTop = 0;
-        if (pendingChoice || globalChoice) els.choiceCard.focus({preventScroll: true});
+        if (pendingChoice) els.choiceCard.focus({preventScroll: true});
       });
     }
     persist();
@@ -2789,6 +2937,8 @@
       });
     });
     els.presetBackButton.addEventListener('click', presetBack);
+    els.presetKeepButton.addEventListener('click', keepStagedPreset);
+    els.presetCancelButton.addEventListener('click', cancelPresetPreview);
     els.presetRenameSave.addEventListener('click', savePresetRename);
     els.presetRenameCancel.addEventListener('click', () => setPresetMenu('savedActions', {savedId: selectedSavedPresetId}));
     els.presetRenameInput.addEventListener('keydown', (event) => {
@@ -2796,6 +2946,7 @@
       event.preventDefault();
       savePresetRename();
     });
+    els.fxBackButton.addEventListener('click', () => setFxMenu('root'));
     const colourReservoirPayload = {kind: 'reservoir', category: 'colours'};
     const fxReservoirPayload = {kind: 'reservoir', category: 'effects'};
     const spriteReservoirPayload = {kind: 'reservoir', category: 'sprites'};
@@ -2807,7 +2958,14 @@
         cancelPendingLayer();
         state.selected = null;
         renderInspector();
-        setActiveTab(state.activeTab === tab.dataset.tab ? null : tab.dataset.tab);
+        const currentTab = state.activeTab;
+        const nextTab = currentTab === tab.dataset.tab ? null : tab.dataset.tab;
+        if (currentTab === 'presets') {
+          closePresetMenu({keep: true});
+          if (nextTab && nextTab !== 'presets') setActiveTab(nextTab);
+          return;
+        }
+        setActiveTab(nextTab);
       });
       tab.addEventListener('keydown', (event) => {
         if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
@@ -2817,23 +2975,35 @@
         const next = event.key === 'Home' ? 0
           : event.key === 'End' ? tabs.length - 1
             : (current + (event.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
-        setActiveTab(tabs[next].dataset.tab, true);
+        const nextTab = tabs[next].dataset.tab;
+        if (state.activeTab === 'presets' && nextTab !== 'presets') {
+          closePresetMenu({keep: true});
+        }
+        setActiveTab(nextTab, true);
       });
     });
     document.querySelectorAll('[data-close-panel]').forEach((button) => {
       button.addEventListener('click', () => {
         cancelPendingLayer();
-        setActiveTab(null);
+        if (state.activeTab === 'presets') closePresetMenu({keep: true});
+        else setActiveTab(null);
       });
     });
     document.querySelectorAll('[data-close-context]').forEach((button) => {
       button.addEventListener('click', () => {
         cancelPendingLayer();
         state.selected = null;
-        setActiveTab(null);
+        if (state.activeTab === 'presets') closePresetMenu({keep: true});
+        else setActiveTab(null);
         renderInspector();
       });
     });
+    document.addEventListener('pointerdown', (event) => {
+      if (pendingLayerOffset !== null || !['presets', 'wubrg'].includes(state.activeTab)) return;
+      if (els.sourceLibrary.contains(event.target) || event.target.closest('[data-tab]')) return;
+      if (state.activeTab === 'presets') closePresetMenu({keep: true});
+      else setActiveTab(null);
+    }, true);
     els.tubeNameCanvas.addEventListener('click', (event) => {
       const offset = offsetFromCanvasEvent(event);
       setCaret(offset, false);
@@ -2872,6 +3042,10 @@
           announce('New layer cancelled');
         } else if (state.activeTab === 'presets' && presetMenuLevel !== 'root') {
           presetBack();
+        } else if (state.activeTab === 'presets') {
+          cancelPresetPreview();
+        } else if (state.activeTab === 'effects' && fxMenuLevel !== 'root') {
+          setFxMenu('root');
         } else if (state.activeTab) {
           setActiveTab(null);
         } else if (state.selected) {

@@ -10,9 +10,9 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="manifest" href="site.webmanifest">
   <title>TurdGobbler's Deck Name Colourifier — Ultimate Version</title>
-  <link rel="stylesheet" href="styles.css?v=ultimate-6.6">
+  <link rel="stylesheet" href="styles.css?v=ultimate-6.7">
   <script src="logic.js?v=ultimate-3.0" defer></script>
-  <script src="app.js?v=ultimate-6.6" defer></script>
+  <script src="app.js?v=ultimate-6.7" defer></script>
 </head>
 <body>
   <main class="app-shell">
@@ -115,6 +115,10 @@
             <b id="pendingChoiceTitle">CHOOSE A COLOUR</b>
             <small>The bubble is waiting for this choice.</small>
           </div>
+          <div id="globalPreviewShelf" class="global-preview-shelf" hidden>
+            <small>LIVE RESULT</small>
+            <span id="globalOutputPreview" class="global-output-preview" aria-live="polite"></span>
+          </div>
           <div class="library-panels">
             <section id="panelColours" class="library-panel" role="tabpanel" aria-label="Colour context menu" data-panel="colours" hidden>
               <header class="panel-head">
@@ -158,13 +162,13 @@
                 <span><small>FX</small><b>CHOOSE AN EFFECT</b></span>
                 <button type="button" data-close-panel aria-label="Close Effect menu">×</button>
               </header>
-              <p class="panel-note">Choose a family, then one focused effect. Whole-name transformations live beside the source bubbles.</p>
-              <div id="recentEffects" class="recent-choices" aria-label="Recently used effects" hidden></div>
-              <div class="fx-orbit" role="group" aria-label="Effect families">
-                <div id="fxCategories" class="fx-categories"></div>
-                <div class="fx-orbit-centre" aria-hidden="true"><small>FX FAMILY</small><b id="activeFxGroupLabel">LETTERING</b></div>
+              <p class="panel-note">Choose one family, then one effect. Whole-name transformations stay beside the source bubbles.</p>
+              <div id="fxOrbit" class="fx-orbit" role="group" aria-label="Nested effect menu">
+                <div id="effectSources" class="fx-orbit-items" role="group" aria-label="Arena effect choices"></div>
+                <div id="fxOrbitCentre" class="fx-orbit-centre" aria-hidden="true"><small>CHOOSE</small><b>FX</b></div>
+                <button id="fxBackButton" class="fx-back-button" type="button" hidden><span aria-hidden="true">←</span><b>BACK</b></button>
               </div>
-              <div id="effectSources" class="effect-sources" role="group" aria-label="Arena effect choices"></div>
+              <p id="fxOrbitStatus" class="fx-orbit-status" aria-live="polite">CHOOSE AN FX FAMILY</p>
             </section>
 
             <section id="panelSprites" class="library-panel" role="tabpanel" aria-label="Sprite context menu" data-panel="sprites" hidden>
@@ -182,11 +186,8 @@
                 <button type="button" data-close-panel aria-label="Close WUBRG Engine">×</button>
               </header>
               <div id="wubrgComposer" class="wubrg-composer" role="group" aria-label="Build an ordered WUBRG identity"></div>
-              <div class="wubrg-readout">
-                <div><small>IDENTITY</small><b id="wubrgIdentity">CHOOSE COLOURS</b><span id="wubrgOrder">—</span></div>
-              </div>
+              <div id="wubrgResults" class="wubrg-preset-rail" aria-label="Matching WUBRG identities" hidden></div>
               <p id="wubrgContext" class="wubrg-context">SELECT PIPS · COLOURS APPLY IMMEDIATELY</p>
-              <div id="wubrgResults" class="wubrg-preset-rail" aria-label="Matching WUBRG identities"></div>
             </section>
 
             <section id="panelPresets" class="library-panel preset-panel" role="tabpanel" aria-labelledby="tabPresets" data-panel="presets" hidden>
@@ -194,6 +195,10 @@
                 <span><small>PRESETS</small><b>CHOOSE A COLLECTION</b></span>
                 <button type="button" data-close-panel aria-label="Close Presets">×</button>
               </header>
+              <div id="presetPreviewActions" class="preset-preview-actions" hidden>
+                <button id="presetCancelButton" class="preset-cancel-button" type="button">CANCEL</button>
+                <button id="presetKeepButton" class="preset-keep-button" type="button"><span aria-hidden="true">✓</span> KEEP THIS LOOK</button>
+              </div>
               <div id="presetOrbit" class="preset-orbit" aria-label="Nested preset menu">
                 <div id="presetOrbitItems" class="preset-orbit-items" role="group" aria-label="Preset choices"></div>
                 <div id="presetOrbitCentre" class="preset-orbit-centre" aria-hidden="true"><small>CHOOSE</small><b>PRESET</b></div>

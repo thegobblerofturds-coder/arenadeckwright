@@ -84,7 +84,8 @@ so compiler correctness does not require a fixed visual bubble.
   is hidden during normal editing.
 - Layer selection is expressed on the layer token only. The rendered name no
   longer receives a purple affected-range underline.
-- Recent Colour and positioned-FX choices are stored locally and shown first.
+- Recent Colour choices are stored locally and shown first. FX use a one-level-
+  at-a-time Motion/Text/Transform/Visual menu instead of a second recent strip.
 - Mobile sheets use a bounded flex scroller with momentum touch scrolling.
 - Unfinished reservoir drops now use a modal completion sheet; quiet inline
   panels are reserved for refining an already placed layer.

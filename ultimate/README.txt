@@ -1,7 +1,7 @@
 TURDGOBBLER'S DECK NAME COLOURIFIER — ULTIMATE VERSION
 
 STATUS
-This folder is the active Ultimate source. The v6.6 focused-global-tools interface
+This folder is the active Ultimate source. The v6.7 unobstructed-global-tools interface
 is the release published at /ultimate/ on 2026-07-30.
 Version 6 remains the standard /colour/ release and Version Lite remains
 shelved.
@@ -21,8 +21,8 @@ QUICK START
 
 THE ONE-TUBE MODEL
 - The live deck name is the canvas. An unfinished Colour or FX drop opens a
-  deliberately prominent completion sheet. Later refinement, WUBRG, and Preset
-  choices use a quieter bounded panel below the tube.
+  deliberately prominent completion sheet. Later refinement stays compact;
+  WUBRG and Presets open below the tube with a pinned, exact-black live result.
 - The Mega Tube is the only positioned editor. The name stays above one shared
   horizontal rail for colour, positioned FX, and sprites.
 - Global whole-name styles stay inside the top edge of the same black tube.
@@ -48,9 +48,10 @@ THE ONE-TUBE MODEL
 
 THE TWO PRESET LAUNCHERS
 1. WUBRG applies Magic colour identities immediately as pips are selected.
-2. PRESETS opens a prominent global sheet, then nests Colour, Special, and
-   Saved collections around a small centre. Inside a collection the centre
-   becomes a red Back button.
+2. PRESETS opens below the tube, then nests Colour, Special, and Saved
+   collections around a small centre. Inside a collection the centre becomes
+   a red Back button. Tapping a look previews it; Keep commits it, Cancel
+   restores the current look, and clicking away keeps the visible preview.
 
 WUBRG and colour recipes replace only the colour layer. Combined Presets replace
 the current non-sprite FX so every named look is deterministic while preserving
@@ -65,7 +66,8 @@ COLOUR + EFFECT + SPRITE SOURCES
 - The three bubbles sit directly beside the Mega Tube and remain reachable on
   narrow mobile screens.
 - The colour picker offers the wheel, hex, swatches, and saved palettes. The FX
-  picker uses five circular families before showing a few positioned effects.
+  picker nests Motion, Text, Transform, and Visual families around one circle;
+  choosing a family replaces it with only that family’s compact effect samples.
   Sprites have their own focused picker.
 - Both the full colour wheel and the compact wheel inside a selected colour’s
   editing bay have a live thumb-preview tile and hex readout.
@@ -77,16 +79,19 @@ COLOUR + EFFECT + SPRITE SOURCES
 - All Caps and Small Caps are direct whole-name toggles. Bold, Italic,
   Underline, Strike, Superscript, Subscript, Size, Spacing, Rotate, and Offset
   are normal positioned FX choices.
-- FX demonstrations render at four times their former scale.
+- FX demonstrations are sized to fit their nested circular buttons.
 - Dragging an existing layer creates a floating copy that follows the pointer
   and reveals a full-width red delete bar directly below the tube.
-- The four most recently used colours and positioned effects appear first.
+- The four most recently used colours appear first.
 - Rotate, flip, save, reapply, and delete browser-local palettes.
 - Global or positioned italic, underline, strike, sup, sub, size, character
   spacing, rotation, vertical offset, and horizontal position.
 - Global ALL CAPS costs zero tag characters.
 - Positioned line break, mono spacing, spacing, highlight, and alpha effects.
 - Arena sprites 0 through 15 are kept in their own Sprite picker.
+- Sprites inherit meaningful active FX such as size, rotation, offsets,
+  spacing, highlight, and alpha alongside the surrounding text. Text-only
+  lettering effects remain on text.
 - Force Gradient samples every chosen colour into as many smooth Arena colour
   stages as the 64-character budget and deck-name length can support.
 - Copy is available both beside the name input and on the live black display;
@@ -108,14 +113,16 @@ ULTIMATE COMPILER
 PREVIEW + PRIVACY
 - The live name canvas uses a fully opaque black background in every interaction
   state.
-- Presets preview directly on the live name before commit.
+- Presets preview on the pinned live result before commit. Keep confirms the
+  staged look, Cancel restores the prior look, and clicking away keeps it.
 - Selecting a layer highlights only its own rail bubble, never the name text.
 - Saved Presets capture the full deck name, colours, whole-name toggles,
   positioned FX, and sprites on this device. Save, Load, Rename, and Delete are
   nested inside the Saved collection.
 - The WUBRG panel has no Clear button. Tapping pips toggles them; tapping the
   active identity cycles its colour order. Four-colour identities use
-  `4 COLOUR (HISTORICAL NAME)` labels.
+  `4 COLOUR (HISTORICAL NAME)` labels. Matching identities replace the old
+  redundant Identity readout.
 - The preview uses the local Beleren font and extracted sprite crops.
 - Browser geometry is an approximation of Unity/TextMesh Pro; the raw compiler
   and character accounting are authoritative.

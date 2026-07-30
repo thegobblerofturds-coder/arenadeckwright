@@ -350,6 +350,7 @@
 
   function normaliseInlineEvents(events, textLength = Infinity) {
     const maximum = Number.isFinite(textLength) ? Math.max(0, textLength) : Number.MAX_SAFE_INTEGER;
+    const eventPriority = (event) => event.type === 'tag' ? 0 : event.type === 'sprite' ? 1 : 2;
     return (Array.isArray(events) ? events : [])
       .map((event, index) => {
         const code = inlineEventCode(event);
@@ -358,7 +359,7 @@
         return {...event, offset, code, sequence: Number.isFinite(Number(event.sequence)) ? Number(event.sequence) : index};
       })
       .filter(Boolean)
-      .sort((left, right) => left.offset - right.offset || left.sequence - right.sequence);
+      .sort((left, right) => left.offset - right.offset || eventPriority(left) - eventPriority(right) || left.sequence - right.sequence);
   }
 
   function insertInlineEvent(events, event, offset) {
