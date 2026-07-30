@@ -10,9 +10,9 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="manifest" href="site.webmanifest">
   <title>TurdGobbler's Deck Name Colourifier — Ultimate Version</title>
-  <link rel="stylesheet" href="styles.css?v=ultimate-7.3">
+  <link rel="stylesheet" href="styles.css?v=ultimate-7.4">
   <script src="logic.js?v=ultimate-3.0" defer></script>
-  <script src="app.js?v=ultimate-7.3" defer></script>
+  <script src="app.js?v=ultimate-7.4" defer></script>
 </head>
 <body>
   <main class="app-shell">
@@ -110,6 +110,10 @@
           <div id="pendingChoiceBanner" class="pending-choice-banner" role="status" hidden>
             <b id="pendingChoiceTitle">PICK A COLOUR TO PLACE THIS BUBBLE</b>
           </div>
+          <div id="pendingChoiceActions" class="choice-confirm-actions" hidden>
+            <button id="pendingChoiceConfirm" class="preset-keep-button" type="button"><span aria-hidden="true">✓</span> ADD THIS COLOUR</button>
+            <button id="pendingChoiceCancel" class="preset-cancel-button" type="button">CANCEL</button>
+          </div>
           <div class="library-panels">
             <section id="panelColours" class="library-panel" role="tabpanel" aria-label="Colour context menu" data-panel="colours" hidden>
               <header class="panel-head">
@@ -171,13 +175,16 @@
             </section>
 
             <section id="panelWubrg" class="library-panel preset-panel" role="tabpanel" aria-labelledby="tabWubrg" data-panel="wubrg" hidden>
-              <header class="panel-head">
-                <span><small>PRESET</small><b>WUBRG ENGINE</b></span>
-                <button type="button" data-close-panel aria-label="Close WUBRG Engine">×</button>
+              <header class="panel-head wubrg-panel-head">
+                <span><b>WUBRG ENGINE</b></span>
               </header>
+              <div class="choice-confirm-actions wubrg-confirm-actions">
+                <button id="wubrgKeepButton" class="preset-keep-button" type="button"><span aria-hidden="true">✓</span> KEEP WUBRG</button>
+                <button id="wubrgCancelButton" class="preset-cancel-button" type="button">CANCEL</button>
+              </div>
               <div id="wubrgComposer" class="wubrg-composer" role="group" aria-label="Build an ordered WUBRG identity"></div>
               <div id="wubrgResults" class="wubrg-preset-rail" aria-label="Matching WUBRG identities" hidden></div>
-              <p id="wubrgContext" class="wubrg-context">SELECT PIPS · COLOURS APPLY IMMEDIATELY</p>
+              <p id="wubrgContext" class="wubrg-context">CHOOSE MANA COLOURS, THEN KEEP</p>
             </section>
 
             <section id="panelPresets" class="library-panel preset-panel" role="tabpanel" aria-labelledby="tabPresets" data-panel="presets" hidden>

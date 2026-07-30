@@ -13,8 +13,9 @@ QUICK START
 4. Drag Colour, FX, or Sprite anywhere across the tube. Colour uses that exact
    point; FX and Sprite compile at the text insertion point shown by the guide
    line. Keyboard users can place any source bubble with Enter or Space.
-5. Finish the drop in the prominent full-screen chooser. The bubble is not
-   placed until an exact colour, effect, or sprite is chosen.
+5. Finish the drop in the prominent full-screen chooser. Colour stays staged
+   until the green top confirmation is pressed; FX and Sprite land after an
+   exact choice is made.
 6. Drag any bubble on the shared rail to reposition it, or click it to inspect
    and change it.
 7. Click Copy, then paste into Magic: The Gathering Arena.
@@ -48,8 +49,10 @@ THE ONE-TUBE MODEL
   Clear FX.
 
 THE TWO PRESET LAUNCHERS
-1. WUBRG applies Magic colour identities immediately as pips are selected.
-   Three-, four-, and five-colour identities divide the deck-name letters
+1. WUBRG previews Magic colour identities live as pips are selected, then keeps
+   or cancels the whole session from the top action bar. Stable compact rows
+   keep two-, three-, and four/five-colour identities from jumping as the
+   selection changes. Multi-colour identities divide the deck-name letters
    evenly by default and rebalance when the name changes.
 2. PRESETS opens below the tube, then nests Colour, Special, and Saved
    collections around a small centre. Inside a collection the centre becomes

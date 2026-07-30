@@ -126,6 +126,7 @@
     fxOrbitStatus: $('fxOrbitStatus'),
     wubrgComposer: $('wubrgComposer'),
     wubrgContext: $('wubrgContext'), wubrgResults: $('wubrgResults'),
+    wubrgKeepButton: $('wubrgKeepButton'), wubrgCancelButton: $('wubrgCancelButton'),
     presetOrbit: $('presetOrbit'), presetOrbitItems: $('presetOrbitItems'),
     presetOrbitCentre: $('presetOrbitCentre'), presetBackButton: $('presetBackButton'),
     presetRenameEditor: $('presetRenameEditor'), presetRenameInput: $('presetRenameInput'),
@@ -136,6 +137,8 @@
     spriteLayerBubble: $('spriteLayerBubble'),
     sourceLibrary: $('sourceLibrary'), choiceCard: $('choiceCard'),
     pendingChoiceBanner: $('pendingChoiceBanner'), pendingChoiceTitle: $('pendingChoiceTitle'),
+    pendingChoiceActions: $('pendingChoiceActions'),
+    pendingChoiceConfirm: $('pendingChoiceConfirm'), pendingChoiceCancel: $('pendingChoiceCancel'),
     toast: $('toast')
   };
 
@@ -148,6 +151,9 @@
   let pendingLayerOffset = null;
   let pendingLayerPosition = null;
   let pendingLayerCategory = null;
+  let pendingSourcePayload = null;
+  let pendingSourceLabel = '';
+  let wubrgSession = null;
   let fxMenuLevel = 'root';
   let fxMenuPage = 0;
   let presetMenuLevel = 'root';
@@ -811,7 +817,7 @@
     const endX = targetBounds.left + targetWidth * laneRatio - canvasBounds.left;
     const targetBottom = targetBounds.bottom - canvasBounds.top;
     const railTop = els.tubeLayerRail.getBoundingClientRect().top - canvasBounds.top;
-    const endY = Math.min(startY - 6, targetBottom + 8, railTop - 12);
+    const endY = Math.min(startY - 30, targetBottom + 6, railTop - 18);
     const deltaX = endX - startX;
     const deltaY = endY - startY;
     const length = Math.hypot(deltaX, deltaY);
@@ -1660,7 +1666,16 @@
     const isSprite = category === 'sprites';
     const sourceName = isColour ? 'Colour' : isSprite ? 'Sprite' : 'FX';
     const choiceName = isColour ? 'COLOUR' : isSprite ? 'SPRITE' : 'EFFECT';
+    pendingSourcePayload = null;
+    pendingSourceLabel = '';
+    if (isColour) {
+      const colour = normaliseHex(els.colourHex.value) || '#C94BFF';
+      pendingSourcePayload = {kind: 'colour', colour};
+      pendingSourceLabel = colour;
+      setColourDraft(colour);
+    }
     els.pendingChoiceTitle.textContent = `PICK ${isSprite || isColour ? 'A' : 'AN'} ${choiceName} TO PLACE THIS BUBBLE`;
+    renderPendingChoiceActions();
     renderInspector();
     setCaret(safeOffset, false);
     setActiveTab(category);
@@ -1669,11 +1684,50 @@
       : `${sourceName} bubble locked — choose ${isSprite ? 'a sprite' : 'an effect'}`);
   }
 
+  function renderPendingChoiceActions() {
+    const isPendingColour = pendingLayerOffset !== null && pendingLayerCategory === 'colours';
+    els.pendingChoiceActions.hidden = !isPendingColour;
+    if (!isPendingColour) return;
+    const colour = normaliseHex(pendingSourcePayload?.colour) || normaliseHex(els.colourHex.value) || '#C94BFF';
+    els.pendingChoiceConfirm.style.setProperty('--confirm-colour', colour);
+    els.pendingChoiceConfirm.innerHTML = `<span aria-hidden="true">✓</span> ADD ${colour}`;
+  }
+
+  function stagePendingColour(payload, label) {
+    const colour = normaliseHex(payload?.colour);
+    if (!colour) return false;
+    pendingSourcePayload = {kind: 'colour', colour};
+    pendingSourceLabel = label || colour;
+    setColourDraft(colour);
+    renderPendingChoiceActions();
+    return true;
+  }
+
+  function confirmPendingColour() {
+    if (pendingLayerOffset === null || pendingLayerCategory !== 'colours') return;
+    const payload = pendingSourcePayload || {
+      kind: 'colour',
+      colour: normaliseHex(els.colourHex.value) || '#C94BFF'
+    };
+    const label = pendingSourceLabel || payload.colour;
+    const offset = pendingLayerOffset;
+    const position = pendingLayerPosition;
+    rememberSourcePayload(payload, label);
+    cancelPendingLayer();
+    state.activeTab = null;
+    placePayloadAtOffset(payload, offset, position);
+    setActiveTab(null);
+    els.tubeNameCanvas.scrollIntoView?.({block: 'nearest', behavior: 'smooth'});
+  }
+
   function cancelPendingLayer() {
     pendingLayerOffset = null;
     pendingLayerPosition = null;
     pendingLayerCategory = null;
+    pendingSourcePayload = null;
+    pendingSourceLabel = '';
     els.pendingChoiceBanner.hidden = true;
+    els.pendingChoiceActions.hidden = true;
     els.sourceLibrary.classList.remove('pending-choice');
     document.body.classList.remove('layer-choice-open');
     renderCaret();
@@ -1681,6 +1735,10 @@
 
   function selectSourcePayload(payload, label) {
     if (pendingLayerOffset !== null) {
+      if (pendingLayerCategory === 'colours' && payload?.kind === 'colour') {
+        stagePendingColour(payload, label);
+        return;
+      }
       const offset = pendingLayerOffset;
       const position = pendingLayerPosition;
       rememberSourcePayload(payload, label);
@@ -2424,6 +2482,69 @@
     }, `${label} replaced the colour layer`);
   }
 
+  function beginWubrgSession() {
+    if (wubrgSession) return;
+    wubrgSession = {
+      saved: snapshot(),
+      history: history.map(clone),
+      future: future.map(clone),
+      dirty: false
+    };
+  }
+
+  function markWubrgSessionDirty() {
+    if (!wubrgSession) beginWubrgSession();
+    wubrgSession.dirty = true;
+  }
+
+  function confirmWubrgSession({quiet = false} = {}) {
+    if (!wubrgSession) {
+      setActiveTab(null);
+      return;
+    }
+    const session = wubrgSession;
+    wubrgSession = null;
+    history = session.history;
+    future = session.dirty ? [] : session.future;
+    if (session.dirty) {
+      history.push(session.saved);
+      if (history.length > MAX_HISTORY) history.shift();
+    }
+    state.activeTab = null;
+    persist();
+    renderAll();
+    if (!quiet && session.dirty) announce('WUBRG colours kept');
+  }
+
+  function cancelWubrgSession() {
+    if (!wubrgSession) {
+      setActiveTab(null);
+      return;
+    }
+    const session = wubrgSession;
+    wubrgSession = null;
+    history = session.history;
+    future = session.future;
+    restoreSnapshot(session.saved);
+    state.activeTab = null;
+    previewOverride = null;
+    persist();
+    renderAll();
+    announce('WUBRG changes cancelled');
+  }
+
+  function playManaSail(source, code) {
+    const bounds = source.getBoundingClientRect();
+    const sail = document.createElement('span');
+    sail.className = `mana-sail mana-sail-${code.toLowerCase()}`;
+    sail.setAttribute('aria-hidden', 'true');
+    sail.textContent = code;
+    sail.style.left = `${bounds.left + bounds.width / 2}px`;
+    sail.style.top = `${bounds.top + bounds.height / 2}px`;
+    document.body.appendChild(sail);
+    sail.addEventListener('animationend', () => sail.remove(), {once: true});
+  }
+
   function renderWubrg() {
     els.wubrgComposer.replaceChildren();
     MANA_ORDER.forEach((code) => {
@@ -2436,6 +2557,9 @@
       button.setAttribute('aria-label', `${MANA[code].name}${selectedIndex >= 0 ? `, position ${selectedIndex + 1}` : ''}`);
       button.innerHTML = `<b>${code}</b><span>${selectedIndex >= 0 ? selectedIndex + 1 : MANA[code].name}</span>`;
       button.addEventListener('click', () => {
+        const removing = state.wubrg.includes(code);
+        playManaSail(button, code);
+        markWubrgSessionDirty();
         mutate(() => {
           const current = state.wubrg.indexOf(code);
           if (current >= 0) state.wubrg.splice(current, 1);
@@ -2448,10 +2572,16 @@
           }
           state.selected = null;
           state.activeTab = 'wubrg';
-        }, state.wubrg.includes(code) ? `${MANA[code].name} removed` : `${MANA[code].name} added`);
+        }, removing ? `${MANA[code].name} removed` : `${MANA[code].name} added`);
       });
       els.wubrgComposer.appendChild(button);
     });
+    if (!state.wubrg.length) {
+      const prompt = document.createElement('small');
+      prompt.className = 'wubrg-empty-prompt';
+      prompt.textContent = 'SELECT A COLOUR';
+      els.wubrgComposer.appendChild(prompt);
+    }
     renderWubrgResults();
   }
 
@@ -2468,6 +2598,7 @@
     const nextCodes = sameIdentity
       ? [...state.wubrg.slice(1), state.wubrg[0]]
       : recipe.codes.slice();
+    markWubrgSessionDirty();
     mutate(() => {
       state.wubrg = nextCodes;
       state.colours = makeEvenWubrgColours(nextCodes.map((code) => MANA[code].colour), state.name.length);
@@ -2479,27 +2610,33 @@
   function renderWubrgResults() {
     els.wubrgResults.replaceChildren();
     const required = Array.from(new Set(state.wubrg));
-    els.wubrgResults.hidden = !required.length;
-    if (!required.length) {
-      els.wubrgContext.textContent = 'SELECT PIPS · COLOURS APPLY IMMEDIATELY';
-      return;
-    }
-    let recipes = identityRecipes().filter((recipe) => required.every((code) => recipe.codes.includes(code)));
+    els.wubrgResults.hidden = false;
+    let recipes = required.length
+      ? identityRecipes().filter((recipe) => required.every((code) => recipe.codes.includes(code)))
+      : [];
     if (required.length >= 4) {
       recipes = [{key: canonicalIdentity(required), name: identityName(required), codes: required.slice()}];
     }
-    els.wubrgContext.textContent = `${recipes.length} MATCHING ${recipes.length === 1 ? 'IDENTITY' : 'IDENTITIES'} · TAP THE ACTIVE ONE TO CYCLE COLOURS`;
+    els.wubrgContext.textContent = required.length
+      ? `${recipes.length} MATCHING ${recipes.length === 1 ? 'IDENTITY' : 'IDENTITIES'} · TAP THE ACTIVE ONE TO CYCLE`
+      : 'CHOOSE MANA COLOURS, THEN KEEP';
     [
       {label: '2 COLOUR', matches: recipes.filter((recipe) => recipe.codes.length === 2)},
       {label: '3 COLOUR', matches: recipes.filter((recipe) => recipe.codes.length === 3)},
       {label: '4 / 5 COLOUR', matches: recipes.filter((recipe) => recipe.codes.length >= 4)}
-    ].filter((group) => group.matches.length).forEach((group) => {
+    ].forEach((group) => {
       const section = document.createElement('section');
       section.className = 'wubrg-recipe-group';
       const label = document.createElement('small');
       label.textContent = group.label;
       const row = document.createElement('div');
       row.className = 'wubrg-recipe-row';
+      if (!group.matches.length) {
+        const empty = document.createElement('span');
+        empty.className = 'wubrg-empty-row';
+        empty.textContent = '—';
+        row.appendChild(empty);
+      }
       group.matches.forEach((recipe) => {
         const button = document.createElement('button');
         button.type = 'button';
@@ -2507,6 +2644,7 @@
           && canonicalIdentity(state.wubrg) === canonicalIdentity(recipe.codes);
         button.className = 'wubrg-quick-preset';
         button.classList.toggle('selected', selected);
+        button.title = wubrgRecipeName(recipe);
         button.style.setProperty('--preset', gradientFromColours(recipe.codes.map((code) => MANA[code].colour)));
         button.innerHTML = `<b>${wubrgRecipeName(recipe)}</b><span>${selected ? `CYCLE COLOURS · ${state.wubrg.join(' → ')}` : recipe.codes.join(' / ')}</span>`;
         attachPresetPreview(button, () => previewEvenWubrgColours(recipe.codes.map((code) => MANA[code].colour)));
@@ -2748,6 +2886,7 @@
     const valid = ['colours', 'effects', 'sprites', 'wubrg', 'presets'];
     const nextTab = valid.includes(name) ? name : null;
     const changed = state.activeTab !== nextTab;
+    if (nextTab === 'wubrg' && changed && !wubrgSession) beginWubrgSession();
     state.activeTab = nextTab;
     const tabs = Array.from(document.querySelectorAll('[data-tab]'));
     const activePresetTab = tabs.some((tab) => tab.dataset.tab === state.activeTab);
@@ -2775,6 +2914,7 @@
     els.sourceLibrary.classList.toggle('global-choice', globalChoice);
     els.sourceLibrary.classList.toggle('refining-choice', refiningChoice);
     els.pendingChoiceBanner.hidden = !pendingChoice;
+    renderPendingChoiceActions();
     document.body.classList.toggle('layer-choice-open', pendingChoice);
     if (pendingChoice) {
       els.choiceCard.setAttribute('role', 'dialog');
@@ -2944,7 +3084,13 @@
   }
 
   function selectWheelPoint(event) {
-    setColourDraft(colourFromWheelEvent(els.colourWheel, event));
+    const colour = colourFromWheelEvent(els.colourWheel, event);
+    setColourDraft(colour);
+    if (pendingLayerCategory === 'colours') {
+      pendingSourcePayload = {kind: 'colour', colour};
+      pendingSourceLabel = colour;
+      renderPendingChoiceActions();
+    }
   }
 
   function installEvents() {
@@ -2988,7 +3134,15 @@
       }
       selectSourcePayload({kind: 'colour', colour}, colour);
     });
-    els.colourPicker.addEventListener('input', () => setColourDraft(els.colourPicker.value));
+    els.colourPicker.addEventListener('input', () => {
+      const colour = normaliseHex(els.colourPicker.value);
+      setColourDraft(colour);
+      if (pendingLayerCategory === 'colours') {
+        pendingSourcePayload = {kind: 'colour', colour};
+        pendingSourceLabel = colour;
+        renderPendingChoiceActions();
+      }
+    });
     els.colourHex.addEventListener('input', () => {
       els.colourHex.value = els.colourHex.value.toUpperCase();
       const clean = normaliseHex(els.colourHex.value);
@@ -2996,6 +3150,11 @@
         els.colourPicker.value = clean;
         positionWheelCursor(clean);
         updateColourPreview(els.colourWheelPreview, els.colourWheelPreviewHex, clean);
+        if (pendingLayerCategory === 'colours') {
+          pendingSourcePayload = {kind: 'colour', colour: clean};
+          pendingSourceLabel = clean;
+          renderPendingChoiceActions();
+        }
       }
     });
     els.colourHex.addEventListener('change', () => {
@@ -3056,6 +3215,14 @@
     els.presetBackButton.addEventListener('click', presetBack);
     els.presetKeepButton.addEventListener('click', keepStagedPreset);
     els.presetCancelButton.addEventListener('click', cancelPresetPreview);
+    els.pendingChoiceConfirm.addEventListener('click', confirmPendingColour);
+    els.pendingChoiceCancel.addEventListener('click', () => {
+      cancelPendingLayer();
+      setActiveTab(null);
+      announce('New colour cancelled');
+    });
+    els.wubrgKeepButton.addEventListener('click', () => confirmWubrgSession());
+    els.wubrgCancelButton.addEventListener('click', cancelWubrgSession);
     els.presetRenameSave.addEventListener('click', savePresetRename);
     els.presetRenameCancel.addEventListener('click', () => setPresetMenu('savedActions', {savedId: selectedSavedPresetId}));
     els.presetRenameInput.addEventListener('keydown', (event) => {
@@ -3077,11 +3244,23 @@
         renderInspector();
         const currentTab = state.activeTab;
         const nextTab = currentTab === tab.dataset.tab ? null : tab.dataset.tab;
-        if (currentTab === 'presets') {
-          closePresetMenu({keep: true});
-          if (nextTab && nextTab !== 'presets') setActiveTab(nextTab);
+        if (currentTab === 'wubrg') {
+          confirmWubrgSession({quiet: Boolean(nextTab)});
+          if (nextTab) {
+            if (nextTab === 'wubrg') beginWubrgSession();
+            setActiveTab(nextTab);
+          }
           return;
         }
+        if (currentTab === 'presets') {
+          closePresetMenu({keep: true});
+          if (nextTab && nextTab !== 'presets') {
+            if (nextTab === 'wubrg') beginWubrgSession();
+            setActiveTab(nextTab);
+          }
+          return;
+        }
+        if (nextTab === 'wubrg') beginWubrgSession();
         setActiveTab(nextTab);
       });
       tab.addEventListener('keydown', (event) => {
@@ -3096,6 +3275,10 @@
         if (state.activeTab === 'presets' && nextTab !== 'presets') {
           closePresetMenu({keep: true});
         }
+        if (state.activeTab === 'wubrg' && nextTab !== 'wubrg') {
+          confirmWubrgSession({quiet: true});
+        }
+        if (nextTab === 'wubrg') beginWubrgSession();
         setActiveTab(nextTab, true);
       });
     });
@@ -3119,7 +3302,7 @@
       if (pendingLayerOffset !== null || !['presets', 'wubrg'].includes(state.activeTab)) return;
       if (els.sourceLibrary.contains(event.target) || event.target.closest('[data-tab]')) return;
       if (state.activeTab === 'presets') closePresetMenu({keep: true});
-      else setActiveTab(null);
+      else confirmWubrgSession({quiet: true});
     }, true);
     els.tubeTrack.addEventListener('keydown', (event) => {
       if (!['ArrowLeft', 'ArrowRight', 'Home', 'End', 'Enter'].includes(event.key)) return;
@@ -3154,6 +3337,8 @@
           presetBack();
         } else if (state.activeTab === 'presets') {
           cancelPresetPreview();
+        } else if (state.activeTab === 'wubrg') {
+          cancelWubrgSession();
         } else if (state.activeTab === 'effects' && fxMenuLevel !== 'root') {
           setFxMenu('root');
         } else if (state.activeTab) {
