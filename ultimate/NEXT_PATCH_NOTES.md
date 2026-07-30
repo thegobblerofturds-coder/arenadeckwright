@@ -245,6 +245,19 @@ The Ultimate development source was rebuilt around one editing surface.
 - Reduced the Colour placement copy to one short instruction and removed the
   duplicate wheel and panel directions.
 
+### Ultimate v6.9 even WUBRG and mobile tool shelf
+
+- Changed WUBRG’s default positions from endpoint stops to true equal letter
+  ranges. Three-, four-, and five-colour identities now divide the deck name
+  evenly and rebalance when the typed name changes.
+- On mobile, hid the redundant Copy button inside the black result and moved
+  WUBRG and Presets into a compact vertical pair beside a shortened tube.
+- Changed mobile WUBRG and Presets into a bounded bottom sheet sized to rise
+  into view while leaving the final black deck-name result visible above it.
+- Removed the remaining backdrop blur from panel headers and preset
+  confirmation controls, and reduced the placement scrim so Colour and FX
+  choices keep the final product visible.
+
 ### Removed from the product surface
 
 - Alternate/prismatic duplicate name view.
@@ -261,5 +274,5 @@ reduced-motion support, and fan-content notice remain.
 
 ## Release status
 
-The v6.8 interface is the `/ultimate/` release in both website mirrors as of
+The v6.9 interface is the `/ultimate/` release in both website mirrors as of
 2026-07-30. `/colour/` remains Version 6 and Version Lite remains shelved.

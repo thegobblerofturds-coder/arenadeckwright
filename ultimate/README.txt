@@ -1,7 +1,7 @@
 TURDGOBBLER'S DECK NAME COLOURIFIER — ULTIMATE VERSION
 
 STATUS
-This folder is the active Ultimate source. The v6.8 supported-effects cleanup
+This folder is the active Ultimate source. The v6.9 mobile global-tool layout
 is the release published at /ultimate/ on 2026-07-30.
 Version 6 remains the standard /colour/ release and Version Lite remains
 shelved.
@@ -48,6 +48,8 @@ THE ONE-TUBE MODEL
 
 THE TWO PRESET LAUNCHERS
 1. WUBRG applies Magic colour identities immediately as pips are selected.
+   Three-, four-, and five-colour identities divide the deck-name letters
+   evenly by default and rebalance when the name changes.
 2. PRESETS opens below the tube, then nests Colour, Special, and Saved
    collections around a small centre. Inside a collection the centre becomes
    a red Back button. Tapping a look previews it; Keep commits it, Cancel
@@ -114,6 +116,9 @@ ULTIMATE COMPILER
 PREVIEW + PRIVACY
 - The live name canvas uses a fully opaque black background in every interaction
   state.
+- Mobile places WUBRG and Presets beside a shortened black tube. Their bounded
+  bottom sheet rises beneath the still-visible result instead of beginning
+  below the rest of the editor; the redundant display Copy is hidden there.
 - Presets preview on the pinned live result before commit. Keep confirms the
   staged look, Cancel restores the prior look, and clicking away keeps it.
 - Selecting a layer highlights only its own rail bubble, never the name text.

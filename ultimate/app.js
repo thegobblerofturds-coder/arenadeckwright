@@ -170,6 +170,21 @@
     }));
   }
 
+  function makeEvenWubrgColours(colours, textLength = DEFAULT_NAME.length) {
+    const source = colours.length ? colours : ['#FFFFFF'];
+    const length = Math.max(0, Math.floor(Number(textLength) || 0));
+    const denominator = Math.max(1, length - 1);
+    return source.slice(0, MAX_COLOURS).map((colour, index) => ({
+      id: uid('colour'),
+      colour: colour.toUpperCase(),
+      position: source.length === 1
+        ? .5
+        : length > 1
+          ? Math.floor(index * length / source.length) / denominator
+          : index / source.length
+    }));
+  }
+
   function createDefaultState() {
     return {
       name: DEFAULT_NAME,
@@ -1918,6 +1933,10 @@
     });
   }
 
+  function previewEvenWubrgColours(colours) {
+    setPreview({colours: makeEvenWubrgColours(colours, state.name.length)});
+  }
+
   function previewStyle(preset) {
     const sprites = state.events.filter((event) => event.type === 'sprite');
     setPreview({
@@ -2323,7 +2342,10 @@
           if (current >= 0) state.wubrg.splice(current, 1);
           else if (state.wubrg.length < 5) state.wubrg.push(code);
           if (state.wubrg.length) {
-            state.colours = makeColours(state.wubrg.map((manaCode) => MANA[manaCode].colour));
+            state.colours = makeEvenWubrgColours(
+              state.wubrg.map((manaCode) => MANA[manaCode].colour),
+              state.name.length
+            );
           }
           state.selected = null;
           state.activeTab = 'wubrg';
@@ -2349,7 +2371,7 @@
       : recipe.codes.slice();
     mutate(() => {
       state.wubrg = nextCodes;
-      state.colours = makeColours(nextCodes.map((code) => MANA[code].colour));
+      state.colours = makeEvenWubrgColours(nextCodes.map((code) => MANA[code].colour), state.name.length);
       state.selected = null;
       state.activeTab = 'wubrg';
     }, sameIdentity ? `${wubrgRecipeName(recipe)} colours cycled` : `${wubrgRecipeName(recipe)} applied`);
@@ -2379,7 +2401,7 @@
       button.classList.toggle('selected', selected);
       button.style.setProperty('--preset', gradientFromColours(recipe.codes.map((code) => MANA[code].colour)));
       button.innerHTML = `<b>${wubrgRecipeName(recipe)}</b><span>${selected ? `CYCLE COLOURS · ${state.wubrg.join(' → ')}` : recipe.codes.join(' / ')}</span>`;
-      attachPresetPreview(button, () => previewColours(recipe.codes.map((code) => MANA[code].colour)));
+      attachPresetPreview(button, () => previewEvenWubrgColours(recipe.codes.map((code) => MANA[code].colour)));
       button.addEventListener('click', () => applyWubrgRecipe(recipe));
       els.wubrgResults.appendChild(button);
     });
@@ -2742,6 +2764,12 @@
     }
     state.events = Logic.rebaseInlineEvents(state.events, previous, next);
     state.name = next;
+    if (state.wubrg.length) {
+      state.colours = makeEvenWubrgColours(
+        state.wubrg.map((code) => MANA[code].colour),
+        next.length
+      );
+    }
     state.caret = els.deckName.selectionStart ?? next.length;
     normaliseState();
     persist();
