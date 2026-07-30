@@ -10,9 +10,9 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="manifest" href="site.webmanifest">
   <title>TurdGobbler's Deck Name Colourifier — Ultimate Version</title>
-  <link rel="stylesheet" href="styles.css?v=ultimate-3.1">
+  <link rel="stylesheet" href="styles.css?v=ultimate-3.2">
   <script src="logic.js?v=ultimate-3.0" defer></script>
-  <script src="app.js?v=ultimate-3.0" defer></script>
+  <script src="app.js?v=ultimate-3.2" defer></script>
 </head>
 <body>
   <main class="app-shell">
@@ -91,7 +91,7 @@
           <button id="clearFxButton" class="tool-button danger-soft" type="button">CLEAR FX</button>
         </div>
 
-        <aside id="layerInspector" class="layer-inspector" aria-live="polite">
+        <aside id="layerInspector" class="layer-inspector" aria-live="polite" hidden>
           <div class="inspector-empty">
             <span>SELECT A BUBBLE</span>
             <p>The name stays visible while you edit its colour, effect, sprite, or position.</p>
@@ -103,9 +103,9 @@
         <div class="section-heading source-heading">
           <div>
             <span class="step-number">02</span>
-            <h2 id="libraryTitle">DRAG-IN SOURCES</h2>
+            <h2 id="libraryTitle">ADD TO THE NAME</h2>
           </div>
-          <span class="library-hint">DRAG TO A LETTER · TAP SOURCE, THEN LETTER</span>
+          <span class="library-hint">TAP, THEN CHOOSE A LETTER · OR DRAG DIRECTLY</span>
         </div>
 
         <div class="source-orbs" role="tablist" aria-label="Editing sources and presets">
@@ -130,7 +130,7 @@
               <div class="custom-colour">
                 <label for="colourPicker"><span>PICK</span><input id="colourPicker" type="color" value="#C94BFF"></label>
                 <label for="colourHex"><span>HEX</span><input id="colourHex" type="text" value="#C94BFF" maxlength="7" autocomplete="off" autocapitalize="characters" spellcheck="false"></label>
-                <button id="addCustomColour" type="button">ADD AT CARET</button>
+                <button id="addCustomColour" type="button">PLACE ON NAME</button>
                 <button id="applyCustomColour" class="quiet-button" type="button" disabled>APPLY TO SELECTED</button>
               </div>
               <div class="palette-tools" role="group" aria-label="Current palette tools">
@@ -151,7 +151,7 @@
               <span><small>EFFECT MENU</small><b>CLICK GLOBALLY OR DRAG TO A LETTER</b></span>
               <button type="button" data-close-panel aria-label="Close Effect menu">×</button>
             </header>
-            <p class="panel-note">Every card previews the effect. Click a global-capable effect to style the whole name; drag it to start at one character. SMALL CAPS remains experimental.</p>
+            <p class="panel-note">Use APPLY ALL for the whole name. Tap the main card and then a letter—or drag it directly—to begin an effect at that character. SMALL CAPS remains experimental.</p>
             <div id="effectSources" class="effect-sources" role="group" aria-label="Arena effect sources"></div>
             <details class="sprite-submenu">
               <summary><span><small>INLINE MENU</small><b>ARENA SPRITES 0–15</b></span><i aria-hidden="true">+</i></summary>

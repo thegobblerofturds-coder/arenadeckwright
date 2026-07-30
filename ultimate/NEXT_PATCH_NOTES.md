@@ -31,6 +31,20 @@ The Ultimate development source was rebuilt around one editing surface.
 - Selected-character highlighting and budget-trimmed colour ghosts.
 - Undo and Redo for every material editing action.
 
+### Streamlined after hands-on feedback
+
+- Reduced the persistent editor height so the name, both layer lanes, history,
+  and budget fit together more comfortably.
+- Replaced oversized source bubbles with a compact five-item source dock.
+- Kept desktop tool panels at a stable height with their own scrolling rather
+  than making the page jump as menus change.
+- Removed the empty inspector placeholder; the contextual editor appears only
+  after a layer is selected and now has a direct close control.
+- Mobile source menus collapse automatically after arming a colour, effect, or
+  sprite so the next required tap—the target character—is immediately visible.
+- Simplified effect instructions around the two real actions: APPLY ALL or
+  place from a character.
+
 ### Removed from the product surface
 
 - Alternate/prismatic duplicate name view.

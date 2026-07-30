@@ -633,6 +633,14 @@
     renderInspector();
   }
 
+  function clearSelection() {
+    state.selected = null;
+    persist();
+    renderOutput();
+    renderTube();
+    renderInspector();
+  }
+
   function beginTokenDrag(event, options) {
     if (event.button !== 0) return;
     event.stopPropagation();
@@ -836,6 +844,13 @@
   function inspectorHeader(kicker, title, code = '') {
     const header = document.createElement('header');
     header.innerHTML = `<span><small>${kicker}</small><b>${title}</b></span>${code ? `<code>${code.replaceAll('<', '&lt;').replaceAll('>', '&gt;')}</code>` : ''}`;
+    const close = document.createElement('button');
+    close.type = 'button';
+    close.className = 'inspector-close';
+    close.textContent = '×';
+    close.setAttribute('aria-label', 'Close layer inspector');
+    close.addEventListener('click', clearSelection);
+    header.appendChild(close);
     return header;
   }
 
@@ -1077,8 +1092,9 @@
   function renderInspector() {
     const selected = state.selected;
     els.applyCustomColour.disabled = selected?.kind !== 'colour';
+    els.layerInspector.hidden = !selected;
     if (!selected) {
-      els.layerInspector.innerHTML = '<div class="inspector-empty"><span>SELECT A BUBBLE</span><p>Edit, duplicate, or delete a colour, effect, or sprite layer here.</p></div>';
+      els.layerInspector.replaceChildren();
       return;
     }
     if (selected.kind === 'colour') {
@@ -1197,6 +1213,7 @@
     armedPayload = clone(payload);
     armedLabel = label;
     renderCaret();
+    if (window.matchMedia?.('(max-width: 900px)').matches) setActiveTab(null);
     els.tubeNameCanvas.scrollIntoView?.({block: 'nearest', behavior: 'smooth'});
     announce(`${label} ready — tap a letter in the live name`);
   }
@@ -1478,7 +1495,7 @@
       place.type = 'button';
       place.className = 'effect-source';
       place.disabled = !payload;
-      place.innerHTML = `<span><b>${effect.label}</b><small>${payload ? 'PLACE FROM A LETTER' : 'WHOLE NAME ONLY'}</small><code>${effect.code || 'Aa→AA'}</code></span>`;
+      place.innerHTML = `<span><b>${effect.label}</b><small>${payload ? 'TAP OR DRAG TO PLACE' : 'WHOLE NAME ONLY'}</small><code>${effect.code || 'Aa→AA'}</code></span>`;
       renderFxExample(place, effect.key);
       place.setAttribute('aria-label', payload
         ? `Place ${effect.label} from a character. Click then choose a letter, or drag to the live name.`
@@ -1493,7 +1510,7 @@
         toggle.type = 'button';
         toggle.className = 'global-effect-toggle';
         toggle.setAttribute('aria-pressed', String(globalEnabled(effect.key)));
-        toggle.innerHTML = `<span>WHOLE NAME</span><b>${globalEnabled(effect.key) ? 'ON' : 'OFF'}</b>`;
+        toggle.innerHTML = `<span>APPLY ALL</span><b>${globalEnabled(effect.key) ? 'ON' : 'OFF'}</b>`;
         toggle.addEventListener('click', () => {
           const removing = globalEnabled(effect.key);
           mutate(() => {
@@ -1514,7 +1531,7 @@
       button.type = 'button';
       button.className = 'sprite-source';
       button.innerHTML = `<i style="background-image:var(--arena-sprite-${sprite})"></i><span>${sprite}</span>`;
-      button.setAttribute('aria-label', `Arena sprite ${sprite}. Click to add at caret or drag into the Mega Tube.`);
+      button.setAttribute('aria-label', `Arena sprite ${sprite}. Tap then choose a character, or drag it into the live name.`);
       const payload = {kind: 'event', event: {type: 'sprite', value: sprite}};
       button.addEventListener('click', () => armPlacement(payload, `SPRITE ${sprite}`));
       enableSourceDrag(button, payload);
@@ -1969,9 +1986,15 @@
       if (payload) insertPayload(payload, offsetFromPosition(position), position);
     });
     document.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape' && armedPayload) {
-        clearArmedPlacement();
-        announce('Placement cancelled');
+      if (event.key === 'Escape') {
+        if (armedPayload) {
+          clearArmedPlacement();
+          announce('Placement cancelled');
+        } else if (state.activeTab) {
+          setActiveTab(null);
+        } else if (state.selected) {
+          clearSelection();
+        }
       }
       if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
         event.preventDefault();
