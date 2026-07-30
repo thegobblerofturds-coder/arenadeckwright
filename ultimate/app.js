@@ -53,22 +53,22 @@
     },
     {
       id: 'bubbles', name: 'BUBBLES', note: 'BOUNCING SIZE + VERTICAL WAVES', sample: 'OoO',
-      colours: ['#73F2FF', '#85B8FF', '#D694FF', '#FFB4E6'],
-      formatting: {}, effects: {cspace: {enabled: true, value: 2}}, pattern: 'bubbles'
+      colours: ['#73F2FF', '#FFB4E6'],
+      formatting: {}, effects: {size: {enabled: true, value: 10}, cspace: {enabled: true, value: 1}}, pattern: 'bubbles'
     },
     {
-      id: 'drift-away', name: 'DRIFT AWAY', note: 'SHRINK, RISE, FADE, AND SPACE OUT', sample: 'drift',
+      id: 'drift-away', name: 'DRIFT AWAY', note: 'SHRINK, RISE, AND SPACE OUT', sample: 'drift',
       colours: ['#F4FBFF', '#9CDBFF', '#848BFF'],
       formatting: {italic: true}, effects: {cspace: {enabled: true, value: 2}}, pattern: 'drift'
     },
     {
       id: 'matrix-glitch', name: 'MATRIX GLITCH', note: 'MATRIX GREEN + STAGGERED GLITCH', sample: '0101',
-      colours: ['#073B1B', '#00A846', '#00FF66', '#C8FFD9'],
+      colours: ['#073B1B', '#00FF66', '#C8FFD9'],
       formatting: {}, effects: {allCaps: true, cspace: {enabled: true, value: 1}}, pattern: 'glitch'
     },
     {
       id: 'upside-down', name: 'UPSIDE DOWN', note: '180° ROTATION + VOID COLOUR', sample: 'ɐuǝɹ∀',
-      colours: ['#B9FFEE', '#56D7D2', '#7A5CFF', '#D384FF'],
+      colours: ['#B9FFEE', '#56D7D2', '#D384FF'],
       formatting: {}, effects: {rotate: {enabled: true, value: 180}, cspace: {enabled: true, value: 1}}
     }
   ];
@@ -112,6 +112,7 @@
     wubrgComposer: $('wubrgComposer'), wubrgIdentity: $('wubrgIdentity'), wubrgOrder: $('wubrgOrder'),
     applyWubrg: $('applyWubrg'), clearWubrg: $('clearWubrg'), wubrgSearch: $('wubrgSearch'),
     wubrgResults: $('wubrgResults'), colourPresets: $('colourPresets'), stylePresets: $('stylePresets'),
+    colourLayerBubble: $('colourLayerBubble'), fxLayerBubble: $('fxLayerBubble'),
     rawCode: $('rawCode'), copyRawCode: $('copyRawCode'), toast: $('toast')
   };
 
@@ -124,6 +125,8 @@
   let previewOverride = null;
   let armedPayload = null;
   let armedLabel = '';
+  let pendingLayerOffset = null;
+  let pendingLayerCategory = null;
   let state = createDefaultState();
 
   function uid(prefix) {
@@ -601,10 +604,15 @@
 
   function renderCaret() {
     els.caretReadout.textContent = `CARET ${state.caret} / ${state.name.length}`;
-    els.tubeStatus.textContent = armedPayload
-      ? `${armedLabel} READY · TAP A LETTER OR THE END SLOT · ESC TO CANCEL`
-      : `ACTIVE CARET ${state.caret} · DRAG TO A LETTER OR OPEN A SOURCE MENU`;
+    els.tubeStatus.textContent = pendingLayerOffset !== null
+      ? `POSITION ${pendingLayerOffset} LOCKED · CHOOSE ${pendingLayerCategory === 'colours' ? 'A COLOUR' : 'AN EFFECT OR SPRITE'}`
+      : armedPayload
+        ? `${armedLabel} READY · TAP A LETTER OR THE END SLOT · ESC TO CANCEL`
+        : `ACTIVE CARET ${state.caret} · DRAG COLOUR OR FX INTO THE NAME`;
     els.megaTube.classList.toggle('placement-armed', Boolean(armedPayload));
+    els.megaTube.classList.toggle('layer-pending', pendingLayerOffset !== null);
+    if (pendingLayerCategory) els.megaTube.dataset.pendingCategory = pendingLayerCategory;
+    else delete els.megaTube.dataset.pendingCategory;
   }
 
   function renderTicks() {
@@ -1161,8 +1169,44 @@
     }, 'Colour layer duplicated');
   }
 
+  function beginLayerSelection(category, offset) {
+    const safeOffset = Math.max(0, Math.min(state.name.length, Math.round(offset)));
+    pendingLayerOffset = safeOffset;
+    pendingLayerCategory = category;
+    setCaret(safeOffset, false);
+    setActiveTab(category);
+    const label = category === 'colours' ? 'colour' : 'effect or sprite';
+    requestAnimationFrame(() => {
+      document.querySelector(`[data-panel="${category}"]`)?.scrollIntoView({block: 'nearest', behavior: 'smooth'});
+    });
+    announce(`Position locked at caret ${safeOffset} — choose a ${label}`);
+  }
+
+  function cancelPendingLayer() {
+    pendingLayerOffset = null;
+    pendingLayerCategory = null;
+    renderCaret();
+  }
+
+  function selectSourcePayload(payload, label) {
+    if (pendingLayerOffset !== null) {
+      const offset = pendingLayerOffset;
+      cancelPendingLayer();
+      state.activeTab = null;
+      placePayloadAtOffset(payload, offset);
+      setActiveTab(null);
+      els.tubeNameCanvas.scrollIntoView?.({block: 'nearest', behavior: 'smooth'});
+      return;
+    }
+    armPlacement(payload, label);
+  }
+
   function insertPayload(payload, offset = state.caret, position = null) {
     if (!payload) return;
+    if (payload.kind === 'reservoir') {
+      beginLayerSelection(payload.category, offset);
+      return;
+    }
     if (payload.kind === 'colour') {
       addColour(payload.colour, position ?? colourCaretPosition());
       return;
@@ -1236,10 +1280,15 @@
         event.preventDefault();
         return;
       }
+      if (payload.kind !== 'reservoir' && pendingLayerOffset !== null) cancelPendingLayer();
       dragPayload = payload;
       event.dataTransfer.effectAllowed = 'copy';
       event.dataTransfer.setData('application/x-ultimate-layer', JSON.stringify(payload));
-      event.dataTransfer.setData('text/plain', payload.kind === 'colour' ? payload.colour : 'Arena effect');
+      event.dataTransfer.setData('text/plain', payload.kind === 'colour'
+        ? payload.colour
+        : payload.kind === 'reservoir'
+          ? `New ${payload.category === 'colours' ? 'colour' : 'effect'} layer`
+          : 'Arena effect');
       element.classList.add('dragging');
       els.megaTube.classList.add('source-dragging');
     });
@@ -1373,21 +1422,14 @@
       codes.forEach((code) => steps.push({offset: offset(fraction), code}));
     };
     if (preset.pattern === 'bubbles') {
-      push(0, '<size=10>', '<voffset=0>');
-      push(.2, '<size=18>', '<voffset=-6>');
-      push(.4, '<size=12>', '<voffset=4>');
-      push(.6, '<size=20>', '<voffset=-8>');
-      push(.8, '<size=11>', '<voffset=3>');
+      push(.34, '<size=18>');
+      push(.68, '<size=11>');
     } else if (preset.pattern === 'drift') {
-      push(0, '<size=19>', '<voffset=0>', '<alpha=#FF>');
-      push(.33, '<size=15>', '<voffset=3>', '<alpha=#CC>');
-      push(.66, '<size=11>', '<voffset=7>', '<alpha=#88>');
-      push(.84, '<size=7>', '<voffset=12>', '<alpha=#55>');
+      push(.48, '<size=11>');
+      push(.72, '<voffset=7>');
     } else if (preset.pattern === 'glitch') {
-      push(0, '<rotate=-6>', '<voffset=-1>');
-      push(.25, '<rotate=8>', '<voffset=4>');
-      push(.5, '<rotate=-9>', '<voffset=-5>');
-      push(.75, '<rotate=5>', '<voffset=2>');
+      push(.42, '<rotate=-7>');
+      push(.7, '<voffset=3>');
     }
     return steps.map((step, index) => ({
       id: `styled-${preset.id}-${index}`,
@@ -1448,7 +1490,7 @@
       button.className = 'colour-source';
       button.style.setProperty('--source-colour', colour);
       button.innerHTML = `<i></i><span><b>${name}</b><code>${colour}</code></span>`;
-      button.addEventListener('click', () => armPlacement({kind: 'colour', colour}, name));
+      button.addEventListener('click', () => selectSourcePayload({kind: 'colour', colour}, name));
       enableSourceDrag(button, {kind: 'colour', colour});
       els.colourSources.appendChild(button);
     });
@@ -1501,7 +1543,7 @@
         ? `Place ${effect.label} from a character. Click then choose a letter, or drag to the live name.`
         : `${effect.label} is available for the whole name.`);
       if (payload) {
-        place.addEventListener('click', () => armPlacement(effectPayload(effect.key), effect.label));
+        place.addEventListener('click', () => selectSourcePayload(effectPayload(effect.key), effect.label));
         enableSourceDrag(place, () => effectPayload(effect.key));
       }
       card.appendChild(place);
@@ -1513,10 +1555,16 @@
         toggle.innerHTML = `<span>APPLY ALL</span><b>${globalEnabled(effect.key) ? 'ON' : 'OFF'}</b>`;
         toggle.addEventListener('click', () => {
           const removing = globalEnabled(effect.key);
+          const placedFromReservoir = pendingLayerOffset !== null;
+          if (placedFromReservoir) {
+            cancelPendingLayer();
+            state.activeTab = null;
+          }
           mutate(() => {
             toggleGlobal(effect.key);
             state.selected = globalEnabled(effect.key) ? {kind: 'global', id: effect.key} : null;
           }, `${effect.label} ${removing ? 'removed from' : 'applied to'} the whole name`);
+          if (placedFromReservoir) setActiveTab(null);
         });
         card.appendChild(toggle);
       }
@@ -1533,7 +1581,7 @@
       button.innerHTML = `<i style="background-image:var(--arena-sprite-${sprite})"></i><span>${sprite}</span>`;
       button.setAttribute('aria-label', `Arena sprite ${sprite}. Tap then choose a character, or drag it into the live name.`);
       const payload = {kind: 'event', event: {type: 'sprite', value: sprite}};
-      button.addEventListener('click', () => armPlacement(payload, `SPRITE ${sprite}`));
+      button.addEventListener('click', () => selectSourcePayload(payload, `SPRITE ${sprite}`));
       enableSourceDrag(button, payload);
       els.spriteSources.appendChild(button);
     });
@@ -1655,10 +1703,12 @@
   function setActiveTab(name, focus = false) {
     const valid = ['colours', 'effects', 'wubrg', 'colour-presets', 'style-presets'];
     state.activeTab = valid.includes(name) ? name : null;
-    document.querySelectorAll('[data-tab]').forEach((tab) => {
+    const tabs = Array.from(document.querySelectorAll('[data-tab]'));
+    const activePresetTab = tabs.some((tab) => tab.dataset.tab === state.activeTab);
+    tabs.forEach((tab) => {
       const active = tab.dataset.tab === state.activeTab;
       tab.setAttribute('aria-selected', String(active));
-      tab.tabIndex = state.activeTab ? (active ? 0 : -1) : 0;
+      tab.tabIndex = activePresetTab ? (active ? 0 : -1) : 0;
       if (active && focus) tab.focus();
     });
     document.querySelectorAll('[data-panel]').forEach((panel) => {
@@ -1815,7 +1865,7 @@
         announce('Use a six-digit hex colour', true);
         return;
       }
-      armPlacement({kind: 'colour', colour}, colour);
+      selectSourcePayload({kind: 'colour', colour}, colour);
     });
     els.applyCustomColour.addEventListener('click', () => {
       const stop = state.selected?.kind === 'colour'
@@ -1892,8 +1942,28 @@
       renderWubrg();
     });
     els.wubrgSearch.addEventListener('input', renderWubrgResults);
+    const colourReservoirPayload = {kind: 'reservoir', category: 'colours'};
+    const fxReservoirPayload = {kind: 'reservoir', category: 'effects'};
+    const armReservoir = (payload, label) => {
+      cancelPendingLayer();
+      setActiveTab(null);
+      armPlacement(payload, label);
+    };
+    els.colourLayerBubble.addEventListener('click', () => armReservoir(colourReservoirPayload, 'COLOUR LAYER'));
+    els.fxLayerBubble.addEventListener('click', () => armReservoir(fxReservoirPayload, 'FX LAYER'));
+    enableSourceDrag(els.colourLayerBubble, colourReservoirPayload);
+    enableSourceDrag(els.fxLayerBubble, fxReservoirPayload);
+    [els.colourLayerBubble, els.fxLayerBubble].forEach((bubble) => {
+      bubble.addEventListener('dragstart', () => {
+        cancelPendingLayer();
+        setActiveTab(null);
+      });
+    });
     document.querySelectorAll('[data-tab]').forEach((tab) => {
-      tab.addEventListener('click', () => setActiveTab(state.activeTab === tab.dataset.tab ? null : tab.dataset.tab));
+      tab.addEventListener('click', () => {
+        cancelPendingLayer();
+        setActiveTab(state.activeTab === tab.dataset.tab ? null : tab.dataset.tab);
+      });
       tab.addEventListener('keydown', (event) => {
         if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
         event.preventDefault();
@@ -1906,7 +1976,10 @@
       });
     });
     document.querySelectorAll('[data-close-panel]').forEach((button) => {
-      button.addEventListener('click', () => setActiveTab(null));
+      button.addEventListener('click', () => {
+        cancelPendingLayer();
+        setActiveTab(null);
+      });
     });
     els.tubeNameCanvas.addEventListener('click', (event) => {
       const offset = offsetFromCanvasEvent(event);
@@ -1987,7 +2060,11 @@
     });
     document.addEventListener('keydown', (event) => {
       if (event.key === 'Escape') {
-        if (armedPayload) {
+        if (pendingLayerOffset !== null) {
+          cancelPendingLayer();
+          setActiveTab(null);
+          announce('New layer cancelled');
+        } else if (armedPayload) {
           clearArmedPlacement();
           announce('Placement cancelled');
         } else if (state.activeTab) {

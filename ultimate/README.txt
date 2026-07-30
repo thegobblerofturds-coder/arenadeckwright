@@ -9,11 +9,13 @@ QUICK START
 1. Keep every file in this folder together.
 2. Open index.html in a modern browser.
 3. Type a deck name.
-4. Tap a source and then a character in the live name, or drag a source directly
-   onto that character.
-5. Use the FX lane above the name and the colour lane below it to reposition or
+4. Drag the Colour or FX reservoir onto a character—or tap a reservoir and then
+   tap the character.
+5. Choose the exact colour, effect, or sprite from the submenu that opens at
+   that locked position.
+6. Use the FX lane above the name and the colour lane below it to reposition or
    inspect layers.
-6. Click Copy Name, then paste into Magic: The Gathering Arena.
+7. Click Copy Name, then paste into Magic: The Gathering Arena.
 
 THE ONE-TUBE MODEL
 - The live deck name is the canvas and remains visible beside every source menu
@@ -24,8 +26,8 @@ THE ONE-TUBE MODEL
 - Global effects appear as chips above both lanes.
 - Every colour bubble, including bubble 1 and a single remaining bubble, is
   freely movable by pointer and keyboard.
-- Click a rendered character to move the active caret. On touch, tap a source
-  and then a rendered character or the end slot.
+- Click a rendered character to move the active caret. On touch, tap Colour or
+  FX and then a rendered character or the end slot.
 - Desktop dragging resolves against actual rendered character geometry.
 - Positioned bubbles support Arrow keys, Shift+Arrow, Page Up/Down, Home, End,
   Delete, and Backspace.
@@ -44,6 +46,10 @@ sprites. Ice Rainbow and Sunset are colour-led; Bubbles, Drift Away, Matrix
 Glitch, and Upside Down combine Arena-supported tags and colours.
 
 COLOUR + EFFECT SOURCES
+- The Layer Dock has exactly two draggable creation points: Colour and FX.
+- Dropping one locks its character position before opening the matching picker.
+- The colour picker offers the wheel, hex, swatches, and saved palettes. The FX
+  picker offers whole-name or positioned effects and all sprites.
 - Full colour wheel, custom hex input, native colour picker, and fast swatches.
 - Rotate, flip, save, reapply, and delete browser-local palettes.
 - Global or positioned italic, underline, strike, sup, sub, size, character
@@ -51,6 +57,9 @@ COLOUR + EFFECT SOURCES
 - Global ALL CAPS costs zero tag characters.
 - Positioned line break, mono spacing, spacing, highlight, and alpha effects.
 - Arena sprites 0 through 15 are kept in a submenu inside Effects.
+- The Bubbles, Drift Away, Matrix Glitch, and Upside Down recipes use compact
+  tag combinations that fit the default deck name within Arena's 64-character
+  budget.
 
 ULTIMATE COMPILER
 - Arena's raw deck-name limit is 64 characters.

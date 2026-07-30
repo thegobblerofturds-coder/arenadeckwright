@@ -45,6 +45,21 @@ The Ultimate development source was rebuilt around one editing surface.
 - Simplified effect instructions around the two real actions: APPLY ALL or
   place from a character.
 
+### Two-reservoir layer dock
+
+- Replaced the five creation buttons with two draggable reservoirs: Colour and
+  FX.
+- Dropping either reservoir anywhere on the live name locks that exact caret
+  and opens only its matching submenu.
+- Choosing a swatch, custom colour, effect, or sprite commits it to the locked
+  position and closes the picker.
+- Tapping a reservoir and then a character provides the same flow on touch.
+- WUBRG, Colour Presets, and Stylized Presets remain as a separate compact
+  three-item shelf.
+- Reauthored Bubbles, Drift Away, Matrix Glitch, and Upside Down with fewer
+  high-impact tags. Every stylized preset now fits `Your Deck Name` at or below
+  Arena's 64-character limit.
+
 ### Removed from the product surface
 
 - Alternate/prismatic duplicate name view.

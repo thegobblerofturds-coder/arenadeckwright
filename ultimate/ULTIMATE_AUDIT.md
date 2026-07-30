@@ -51,7 +51,11 @@ so compiler correctness does not require a fixed visual bubble.
 - The separate preview/control relationship was collapsed: the rendered deck
   name is now the character-aware drop surface.
 - FX bubbles sit directly above the name and colour bubbles directly below it.
-- Compact source orbs open one menu at a time and close when tapped again.
+- Two compact typed reservoirs replace the previous five source-orb controls.
+- The final dock reduces direct creation to two typed reservoirs—Colour and
+  FX—while keeping the three preset systems separate.
+- A reservoir drop stores the exact caret first; the subsequent picker choice
+  commits to that stored position.
 - Desktop uses a sticky editor/source split so name changes stay visible while
   browsing tools.
 - Touch uses source-then-character placement; desktop drag resolves to actual
@@ -67,14 +71,16 @@ so compiler correctness does not require a fixed visual bubble.
 ## Stylized preset shelf
 
 - Ice Rainbow and Sunset provide compact colour-led recipes.
-- Bubbles combines changing size and vertical offset into a wave.
-- Drift Away progressively shrinks, rises, spaces, and fades the name.
-- Matrix Glitch combines matrix greens, all caps, spacing, alternating rotation,
-  and vertical jitter.
+- Bubbles uses one base size and two compact size changes.
+- Drift Away uses one shrink and one rise point plus global spacing.
+- Matrix Glitch combines matrix greens, all caps, spacing, one rotation change,
+  and one vertical jump.
 - Upside Down uses a whole-name 180-degree rotation with a void/ice palette.
 - Recipe-generated inline events carry their own source marker. Applying another
   stylized preset removes only the previous recipe events and preserves effects
   and sprites the user placed manually.
+- All six recipes compile the default `Your Deck Name` within the 64-character
+  Arena limit.
 
 ## Research translated into product decisions
 

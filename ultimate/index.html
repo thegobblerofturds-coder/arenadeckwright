@@ -10,9 +10,9 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="manifest" href="site.webmanifest">
   <title>TurdGobbler's Deck Name Colourifier — Ultimate Version</title>
-  <link rel="stylesheet" href="styles.css?v=ultimate-3.2">
+  <link rel="stylesheet" href="styles.css?v=ultimate-4.0">
   <script src="logic.js?v=ultimate-3.0" defer></script>
-  <script src="app.js?v=ultimate-3.2" defer></script>
+  <script src="app.js?v=ultimate-4.0" defer></script>
 </head>
 <body>
   <main class="app-shell">
@@ -103,23 +103,34 @@
         <div class="section-heading source-heading">
           <div>
             <span class="step-number">02</span>
-            <h2 id="libraryTitle">ADD TO THE NAME</h2>
+            <h2 id="libraryTitle">LAYER DOCK</h2>
           </div>
-          <span class="library-hint">TAP, THEN CHOOSE A LETTER · OR DRAG DIRECTLY</span>
+          <span class="library-hint">ONE BUBBLE CREATES EVERY COLOUR, EFFECT, OR SPRITE</span>
         </div>
 
-        <div class="source-orbs" role="tablist" aria-label="Editing sources and presets">
-          <button id="tabColours" class="source-orb orb-colour" type="button" role="tab" aria-selected="false" aria-controls="panelColours" data-tab="colours"><i>+</i><span><small>ADD</small>COLOUR</span></button>
-          <button id="tabEffects" class="source-orb orb-effect" type="button" role="tab" aria-selected="false" aria-controls="panelEffects" data-tab="effects"><i>+</i><span><small>ADD</small>EFFECT</span></button>
-          <button id="tabWubrg" class="source-orb orb-wubrg" type="button" role="tab" aria-selected="false" aria-controls="panelWubrg" data-tab="wubrg"><i>W</i><span><small>PRESET 1</small>WUBRG</span></button>
-          <button id="tabColourPresets" class="source-orb orb-palette" type="button" role="tab" aria-selected="false" aria-controls="panelColourPresets" data-tab="colour-presets"><i>◒</i><span><small>PRESET 2</small>COLOURS</span></button>
-          <button id="tabStylePresets" class="source-orb orb-style" type="button" role="tab" aria-selected="false" aria-controls="panelStylePresets" data-tab="style-presets"><i>Aa</i><span><small>PRESET 3</small>STYLIZED</span></button>
+        <div class="layer-reservoirs" aria-label="Drag a colour or FX layer into the Mega Tube">
+          <button id="colourLayerBubble" class="reservoir-bubble colour-reservoir" type="button" aria-describedby="layerReservoirHelp">
+            <i aria-hidden="true">+</i>
+            <span><small>DRAG OR TAP</small>COLOUR</span>
+          </button>
+          <button id="fxLayerBubble" class="reservoir-bubble fx-reservoir" type="button" aria-describedby="layerReservoirHelp">
+            <i aria-hidden="true">FX</i>
+            <span><small>DRAG OR TAP</small>EFFECT</span>
+          </button>
+          <p id="layerReservoirHelp">Drop either bubble anywhere on the name. Release, then choose the exact colour, effect, or sprite for that position.</p>
+        </div>
+
+        <div class="preset-shelf-label"><span>PRESETS</span><small>WUBRG, COLOUR, OR STYLIZED</small></div>
+        <div id="presetHub" class="preset-hub" role="tablist" aria-label="Preset systems">
+          <button id="tabWubrg" type="button" role="tab" aria-selected="false" aria-controls="panelWubrg" data-tab="wubrg"><i>W</i><span><small>PRESET 1</small>WUBRG</span></button>
+          <button id="tabColourPresets" type="button" role="tab" aria-selected="false" aria-controls="panelColourPresets" data-tab="colour-presets"><i>◒</i><span><small>PRESET 2</small>COLOURS</span></button>
+          <button id="tabStylePresets" type="button" role="tab" aria-selected="false" aria-controls="panelStylePresets" data-tab="style-presets"><i>Aa</i><span><small>PRESET 3</small>STYLIZED</span></button>
         </div>
 
         <div class="library-panels">
-          <section id="panelColours" class="library-panel" role="tabpanel" aria-labelledby="tabColours" data-panel="colours" hidden>
+          <section id="panelColours" class="library-panel" role="tabpanel" aria-label="Choose a colour for the dropped layer" data-panel="colours" hidden>
             <header class="panel-head">
-              <span><small>COLOUR MENU</small><b>MAKE, SAVE, OR DRAG A COLOUR</b></span>
+              <span><small>COLOUR MENU</small><b>CHOOSE OR MAKE THE COLOUR</b></span>
               <button type="button" data-close-panel aria-label="Close Colour menu">×</button>
             </header>
             <div class="colour-lab">
@@ -146,16 +157,16 @@
             </section>
           </section>
 
-          <section id="panelEffects" class="library-panel" role="tabpanel" aria-labelledby="tabEffects" data-panel="effects" hidden>
+          <section id="panelEffects" class="library-panel" role="tabpanel" aria-label="Choose an effect or sprite for the dropped layer" data-panel="effects" hidden>
             <header class="panel-head">
-              <span><small>EFFECT MENU</small><b>CLICK GLOBALLY OR DRAG TO A LETTER</b></span>
+              <span><small>EFFECT MENU</small><b>CHOOSE THE FX OR APPLY IT EVERYWHERE</b></span>
               <button type="button" data-close-panel aria-label="Close Effect menu">×</button>
             </header>
             <p class="panel-note">Use APPLY ALL for the whole name. Tap the main card and then a letter—or drag it directly—to begin an effect at that character. SMALL CAPS remains experimental.</p>
             <div id="effectSources" class="effect-sources" role="group" aria-label="Arena effect sources"></div>
             <details class="sprite-submenu">
               <summary><span><small>INLINE MENU</small><b>ARENA SPRITES 0–15</b></span><i aria-hidden="true">+</i></summary>
-              <p>Click a face at the active caret, or drag it between letters.</p>
+              <p>Choose a face for the locked position, or drag it directly between letters.</p>
               <div id="spriteSources" class="sprite-sources" role="group" aria-label="Arena sprite sources"></div>
             </details>
           </section>
