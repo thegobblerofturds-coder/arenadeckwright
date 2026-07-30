@@ -56,10 +56,10 @@ so compiler correctness does not require a fixed visual bubble.
   FX—while keeping the three preset systems separate.
 - A reservoir drop stores the exact caret first; the subsequent picker choice
   commits to that stored position.
-- Desktop uses a sticky editor/source split so name changes stay visible while
-  browsing tools.
-- Touch uses source-then-character placement; desktop drag resolves to actual
-  glyph geometry instead of an approximate full-width rail.
+- Source libraries no longer occupy permanent layout space. A bubble drop,
+  placed-layer click, or preset launcher opens one contextual overlay.
+- Mouse, pen, and touch use the same drag gesture, resolved against actual glyph
+  geometry instead of an approximate full-width rail.
 - Full colour-wheel editing, palette rotation/flip, and saved palettes returned
   without restoring duplicate editing surfaces.
 - Preset hover/focus previews are temporary and compile through the same exact
@@ -100,9 +100,11 @@ so compiler correctness does not require a fixed visual bubble.
   expected copy/move semantics, and Undo. Ultimate highlights the tube and drop
   position and records each completed edit in history.
   https://developer.apple.com/design/human-interface-guidelines/drag-and-drop
-- WCAG 2.2 requires a simple pointer alternative to dragging. Every draggable
-  source also works by click at the active caret, and every tube layer has
-  keyboard movement and an inspector.
+- WCAG 2.2 recommends a simple pointer alternative to dragging. The product
+  intentionally removed pointer click-then-place after usability feedback;
+  focused source bubbles still place at the active caret with Enter or Space,
+  and every tube layer has keyboard movement and an inspector. A single-pointer
+  creation alternative remains an explicit accessibility tradeoff to revisit.
   https://www.w3.org/WAI/WCAG22/Understanding/dragging-movements.html
 - The WAI-ARIA slider pattern defines Arrow, Home, End, and optional Page
   movement plus value semantics. Colour and positioned FX bubbles implement
@@ -123,8 +125,8 @@ Only the compiler turns these domains into one raw Arena string.
 
 - Bubble 1 and a single colour remain movable after normalization.
 - Arena output still starts with a colour tag.
-- Source drag and source-then-character tap paths insert the same structured
-  payload at the same caret.
+- Colour and FX source bubbles share one pointer-drag path across mouse, pen,
+  and touch; keyboard placement commits through the same structured payload.
 - WUBRG/colour recipes cannot remove effects or sprites.
 - Stylized recipes cannot remove manually positioned effects or sprites.
 - Every positioned bubble is a keyboard-operable slider.

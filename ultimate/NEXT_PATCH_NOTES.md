@@ -16,10 +16,11 @@ The Ultimate development source was rebuilt around one editing surface.
 ### Rebuilt
 
 - One Mega Tube with the live deck name as its permanent editing canvas.
-- Exact character-aware desktop drops plus tap-source, tap-character placement.
+- Exact character-aware mouse, pen, and touch drops.
 - Separate visual lanes for positioned FX above and colours below the name.
 - One inspector for colour, FX, sprite, and global-style layers.
-- Collapsible colour and effect source menus.
+- Contextual colour and effect overlays that appear only after a bubble drop or
+  placed-layer selection.
 - Full wheel, hex input, swatches, rotate, flip, and saved palettes.
 - Three isolated preset systems: WUBRG, Colour Presets, and Stylized Presets.
 - Layer-safe preset application: colour recipes do not reset effects; style
@@ -36,14 +37,14 @@ The Ultimate development source was rebuilt around one editing surface.
 - Reduced the persistent editor height so the name, both layer lanes, history,
   and budget fit together more comfortably.
 - Replaced oversized source bubbles with a compact five-item source dock.
-- Kept desktop tool panels at a stable height with their own scrolling rather
-  than making the page jump as menus change.
+- Moved tool panels into a stable contextual overlay with its own scrolling so
+  opening a menu does not reflow the editor.
 - Removed the empty inspector placeholder; the contextual editor appears only
   after a layer is selected and now has a direct close control.
-- Mobile source menus collapse automatically after arming a colour, effect, or
-  sprite so the next required tap—the target character—is immediately visible.
-- Simplified effect instructions around the two real actions: APPLY ALL or
-  place from a character.
+- Removed source-then-character arming. Pointer creation is now one direct drag
+  from either side bubble into the live name.
+- Simplified effect instructions around the two real actions: choose for the
+  dropped position or APPLY ALL.
 
 ### Two-reservoir layer dock
 
@@ -53,12 +54,24 @@ The Ultimate development source was rebuilt around one editing surface.
   and opens only its matching submenu.
 - Choosing a swatch, custom colour, effect, or sprite commits it to the locked
   position and closes the picker.
-- Tapping a reservoir and then a character provides the same flow on touch.
+- The same pointer-drag flow now handles mouse, pen, and touch. Enter or Space
+  places a focused reservoir at the active caret for keyboard access.
 - WUBRG, Colour Presets, and Stylized Presets remain as a separate compact
   three-item shelf.
 - Reauthored Bubbles, Drift Away, Matrix Glitch, and Upside Down with fewer
   high-impact tags. Every stylized preset now fits `Your Deck Name` at or below
   Arena's 64-character limit.
+
+### Context-only chrome
+
+- Kept one Colour bubble on the left and one FX bubble on the right of the Mega
+  Tube; there is no persistent source dock.
+- Clicking a placed colour, effect, sprite, or global style reopens its matching
+  menu with the layer inspector attached.
+- WUBRG, Colour Presets, and Stylized Presets are three tiny launchers below the
+  tube and expand into the same compact overlay.
+- Budget details, history, Clear FX, Start Over, and raw Arena code now live
+  behind one `•••` More disclosure.
 
 ### Removed from the product surface
 

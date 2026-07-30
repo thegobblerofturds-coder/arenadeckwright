@@ -4,15 +4,15 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#07090d">
-  <meta name="description" content="The Ultimate Version of TurdGobbler's Arena deck-name colourifier: edit the live name inside one layered Mega Tube.">
+  <meta name="description" content="TurdGobbler's Ultimate Arena deck-name colourifier: one live Mega Tube with drag-in Colour and FX layers.">
   <link rel="icon" href="favicon.ico" sizes="any">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="manifest" href="site.webmanifest">
   <title>TurdGobbler's Deck Name Colourifier — Ultimate Version</title>
-  <link rel="stylesheet" href="styles.css?v=ultimate-4.0">
+  <link rel="stylesheet" href="styles.css?v=ultimate-5.0">
   <script src="logic.js?v=ultimate-3.0" defer></script>
-  <script src="app.js?v=ultimate-4.0" defer></script>
+  <script src="app.js?v=ultimate-5.0" defer></script>
 </head>
 <body>
   <main class="app-shell">
@@ -26,195 +26,178 @@
 
     <section class="studio" aria-label="Ultimate deck-name editor">
       <section class="tube-workbench" aria-labelledby="tubeTitle">
-        <div class="section-heading tube-heading">
-          <div>
-            <span class="step-number">01</span>
-            <h2 id="tubeTitle">LIVE MEGA TUBE</h2>
-          </div>
-          <div class="layer-legend" aria-label="Mega Tube layers">
-            <span><i class="legend-colour"></i> COLOUR <b id="colourCount">0</b></span>
-            <span><i class="legend-effect"></i> FX <b id="effectCount">0</b></span>
-            <span><i class="legend-sprite"></i> SPRITE <b id="spriteCount">0</b></span>
-          </div>
+        <div class="compact-title">
+          <h2 id="tubeTitle">LIVE MEGA TUBE</h2>
+          <span>DRAG A SIDE BUBBLE INTO THE NAME</span>
         </div>
 
         <div id="megaTube" class="mega-tube" role="group" aria-label="Live layered Mega Tube editor">
           <div class="tube-input-row">
             <label class="name-field" for="deckName">
-              <span>NAME INPUT</span>
+              <span>DECK NAME</span>
               <input id="deckName" type="text" value="Your Deck Name" autocomplete="off" autocapitalize="off" spellcheck="false" aria-describedby="caretReadout outputStatus">
               <small id="caretReadout">CARET 14 / 14</small>
             </label>
             <button id="copyButton" class="copy-button" type="button" aria-describedby="outputStatus">
               <b id="copyLabel">COPY</b><small>FOR ARENA</small>
             </button>
-            <button id="startOver" class="quiet-button start-over" type="button">START OVER</button>
-          </div>
-
-          <div class="tube-meta">
-            <div class="tube-budget" role="status" aria-live="polite" aria-label="Arena 64-character budget">
-              <strong id="budgetTotal">0</strong><span>/64</span>
-              <i></i>
-              <small>TEXT <b id="budgetText">0</b></small>
-              <small>COLOUR <b id="budgetColour">0</b></small>
-              <small>FX <b id="budgetFx">0</b></small>
-            </div>
-            <p id="outputStatus">READY</p>
           </div>
 
           <div id="tubeGlobals" class="tube-globals" aria-label="Whole-name style layers"></div>
 
-          <div class="tube-lane-label lane-fx-label">FX</div>
-          <div class="tube-lane-label lane-colour-label">COLOUR</div>
-          <div id="tubeTrack" class="tube-track" tabindex="0" role="group" aria-label="Mega Tube. Click the live name to choose a character position.">
-            <div id="tubeFxLayer" class="tube-layer tube-fx-layer"></div>
+          <div class="tube-shell">
+            <button id="colourLayerBubble" class="side-bubble colour-reservoir" type="button" aria-label="Drag Colour onto the name. Keyboard: place at the active caret." aria-describedby="dragHelp">
+              <i aria-hidden="true">+</i><span>COLOUR</span>
+            </button>
 
-            <div id="tubeNameCanvas" class="tube-name-canvas" aria-label="Live Arena name and character drop surface">
-              <span class="canvas-kicker">LIVE ARENA NAME</span>
-              <span id="outputPreview" class="output-preview"></span>
-              <span id="characterTargets" class="character-targets" aria-hidden="true"></span>
+            <div class="tube-lane-label lane-fx-label">FX</div>
+            <div class="tube-lane-label lane-colour-label">COLOUR</div>
+            <div id="tubeTrack" class="tube-track" tabindex="0" role="group" aria-label="Mega Tube. Drag Colour or FX onto any character.">
+              <div id="tubeFxLayer" class="tube-layer tube-fx-layer"></div>
+
+              <div id="tubeNameCanvas" class="tube-name-canvas" aria-label="Live Arena name and character drop surface">
+                <span class="canvas-kicker">LIVE ARENA NAME</span>
+                <span id="outputPreview" class="output-preview"></span>
+                <span id="characterTargets" class="character-targets" aria-hidden="true"></span>
+              </div>
+
+              <div id="tubeFill" class="tube-fill" aria-hidden="true"></div>
+              <div id="tubeTicks" class="tube-ticks" aria-hidden="true"></div>
+              <div id="tubeColourLayer" class="tube-layer tube-colour-layer"></div>
+              <div id="dropGuide" class="drop-guide" aria-hidden="true"></div>
             </div>
 
-            <div id="tubeFill" class="tube-fill" aria-hidden="true"></div>
-            <div id="tubeTicks" class="tube-ticks" aria-hidden="true"></div>
-            <div id="tubeColourLayer" class="tube-layer tube-colour-layer"></div>
-            <div id="dropGuide" class="drop-guide" aria-hidden="true"></div>
+            <button id="fxLayerBubble" class="side-bubble fx-reservoir" type="button" aria-label="Drag Effect onto the name. Keyboard: place at the active caret." aria-describedby="dragHelp">
+              <i aria-hidden="true">FX</i><span>EFFECT</span>
+            </button>
+          </div>
+
+          <p id="dragHelp" class="drag-help">DRAG COLOUR OR FX INTO THE NAME · TAP A PLACED LAYER TO EDIT IT</p>
+          <span id="tubeStatus" class="tube-status" role="status" aria-live="polite">DRAG A SIDE BUBBLE ONTO A LETTER</span>
+
+          <div id="presetHub" class="preset-hub" role="tablist" aria-label="Preset menus">
+            <button id="tabWubrg" type="button" role="tab" aria-selected="false" aria-controls="panelWubrg" data-tab="wubrg"><i>W</i><span>WUBRG</span></button>
+            <button id="tabColourPresets" type="button" role="tab" aria-selected="false" aria-controls="panelColourPresets" data-tab="colour-presets"><i>◒</i><span>COLOUR</span></button>
+            <button id="tabStylePresets" type="button" role="tab" aria-selected="false" aria-controls="panelStylePresets" data-tab="style-presets"><i>Aa</i><span>STYLE</span></button>
           </div>
         </div>
 
-        <div class="tube-actions">
-          <div class="history-actions">
-            <button id="undoButton" class="tool-button" type="button" disabled><span aria-hidden="true">↶</span> UNDO</button>
-            <button id="redoButton" class="tool-button" type="button" disabled><span aria-hidden="true">↷</span> REDO</button>
-          </div>
-          <span id="tubeStatus" class="tube-status" role="status" aria-live="polite">CLICK A LETTER TO SET THE ACTIVE CARET</span>
-          <button id="clearFxButton" class="tool-button danger-soft" type="button">CLEAR FX</button>
-        </div>
+        <details id="moreMenu" class="more-menu">
+          <summary><span>•••</span><b>MORE</b><small><strong id="budgetTotal">0</strong>/64</small></summary>
+          <div class="more-menu-body">
+            <div class="tube-meta">
+              <div class="tube-budget" role="status" aria-live="polite" aria-label="Arena 64-character budget">
+                <small>TEXT <b id="budgetText">0</b></small>
+                <small>COLOUR <b id="budgetColour">0</b></small>
+                <small>FX <b id="budgetFx">0</b></small>
+              </div>
+              <p id="outputStatus">READY</p>
+            </div>
 
-        <aside id="layerInspector" class="layer-inspector" aria-live="polite" hidden>
-          <div class="inspector-empty">
-            <span>SELECT A BUBBLE</span>
-            <p>The name stays visible while you edit its colour, effect, sprite, or position.</p>
+            <div class="layer-legend" aria-label="Current layers">
+              <span><i class="legend-colour"></i> COLOUR <b id="colourCount">0</b></span>
+              <span><i class="legend-effect"></i> FX <b id="effectCount">0</b></span>
+              <span><i class="legend-sprite"></i> SPRITE <b id="spriteCount">0</b></span>
+            </div>
+
+            <div class="tube-actions">
+              <div class="history-actions">
+                <button id="undoButton" class="tool-button" type="button" disabled><span aria-hidden="true">↶</span> UNDO</button>
+                <button id="redoButton" class="tool-button" type="button" disabled><span aria-hidden="true">↷</span> REDO</button>
+              </div>
+              <button id="clearFxButton" class="tool-button danger-soft" type="button">CLEAR FX</button>
+              <button id="startOver" class="tool-button danger-soft" type="button">START OVER</button>
+            </div>
+
+            <div class="raw-drawer-body">
+              <label for="rawCode">RAW ARENA CODE</label>
+              <textarea id="rawCode" rows="3" readonly spellcheck="false" aria-label="Generated Arena code"></textarea>
+              <button id="copyRawCode" type="button">COPY RAW CODE</button>
+            </div>
           </div>
-        </aside>
+        </details>
       </section>
 
-      <section class="source-library" aria-labelledby="libraryTitle">
-        <div class="section-heading source-heading">
-          <div>
-            <span class="step-number">02</span>
-            <h2 id="libraryTitle">LAYER DOCK</h2>
-          </div>
-          <span class="library-hint">ONE BUBBLE CREATES EVERY COLOUR, EFFECT, OR SPRITE</span>
-        </div>
+      <section id="sourceLibrary" class="source-library" aria-label="Context menu" hidden>
+        <button class="context-scrim" type="button" data-close-context aria-label="Close context menu"></button>
+        <div class="context-card" role="dialog" aria-modal="true" aria-label="Layer or preset menu">
+          <aside id="layerInspector" class="layer-inspector" aria-live="polite" hidden></aside>
 
-        <div class="layer-reservoirs" aria-label="Drag a colour or FX layer into the Mega Tube">
-          <button id="colourLayerBubble" class="reservoir-bubble colour-reservoir" type="button" aria-describedby="layerReservoirHelp">
-            <i aria-hidden="true">+</i>
-            <span><small>DRAG OR TAP</small>COLOUR</span>
-          </button>
-          <button id="fxLayerBubble" class="reservoir-bubble fx-reservoir" type="button" aria-describedby="layerReservoirHelp">
-            <i aria-hidden="true">FX</i>
-            <span><small>DRAG OR TAP</small>EFFECT</span>
-          </button>
-          <p id="layerReservoirHelp">Drop either bubble anywhere on the name. Release, then choose the exact colour, effect, or sprite for that position.</p>
-        </div>
-
-        <div class="preset-shelf-label"><span>PRESETS</span><small>WUBRG, COLOUR, OR STYLIZED</small></div>
-        <div id="presetHub" class="preset-hub" role="tablist" aria-label="Preset systems">
-          <button id="tabWubrg" type="button" role="tab" aria-selected="false" aria-controls="panelWubrg" data-tab="wubrg"><i>W</i><span><small>PRESET 1</small>WUBRG</span></button>
-          <button id="tabColourPresets" type="button" role="tab" aria-selected="false" aria-controls="panelColourPresets" data-tab="colour-presets"><i>◒</i><span><small>PRESET 2</small>COLOURS</span></button>
-          <button id="tabStylePresets" type="button" role="tab" aria-selected="false" aria-controls="panelStylePresets" data-tab="style-presets"><i>Aa</i><span><small>PRESET 3</small>STYLIZED</span></button>
-        </div>
-
-        <div class="library-panels">
-          <section id="panelColours" class="library-panel" role="tabpanel" aria-label="Choose a colour for the dropped layer" data-panel="colours" hidden>
-            <header class="panel-head">
-              <span><small>COLOUR MENU</small><b>CHOOSE OR MAKE THE COLOUR</b></span>
-              <button type="button" data-close-panel aria-label="Close Colour menu">×</button>
-            </header>
-            <div class="colour-lab">
-              <div class="colour-wheel-wrap">
-                <canvas id="colourWheel" width="240" height="240" role="img" aria-label="Full colour wheel. Drag to choose a colour."></canvas>
-                <i id="wheelCursor" aria-hidden="true"></i>
+          <div class="library-panels">
+            <section id="panelColours" class="library-panel" role="tabpanel" aria-label="Colour context menu" data-panel="colours" hidden>
+              <header class="panel-head">
+                <span><small>COLOUR</small><b>CHOOSE OR MAKE A COLOUR</b></span>
+                <button type="button" data-close-panel aria-label="Close Colour menu">×</button>
+              </header>
+              <div class="colour-lab">
+                <div class="colour-wheel-wrap">
+                  <canvas id="colourWheel" width="240" height="240" role="img" aria-label="Full colour wheel. Drag to choose a colour."></canvas>
+                  <i id="wheelCursor" aria-hidden="true"></i>
+                </div>
+                <div class="custom-colour">
+                  <label for="colourPicker"><span>PICK</span><input id="colourPicker" type="color" value="#C94BFF"></label>
+                  <label for="colourHex"><span>HEX</span><input id="colourHex" type="text" value="#C94BFF" maxlength="7" autocomplete="off" autocapitalize="characters" spellcheck="false"></label>
+                  <button id="addCustomColour" type="button">USE COLOUR</button>
+                </div>
               </div>
-              <div class="custom-colour">
-                <label for="colourPicker"><span>PICK</span><input id="colourPicker" type="color" value="#C94BFF"></label>
-                <label for="colourHex"><span>HEX</span><input id="colourHex" type="text" value="#C94BFF" maxlength="7" autocomplete="off" autocapitalize="characters" spellcheck="false"></label>
-                <button id="addCustomColour" type="button">PLACE ON NAME</button>
-                <button id="applyCustomColour" class="quiet-button" type="button" disabled>APPLY TO SELECTED</button>
-              </div>
-              <div class="palette-tools" role="group" aria-label="Current palette tools">
-                <button id="rotateColours" type="button"><b>↻</b><span>ROTATE</span></button>
-                <button id="flipColours" type="button"><b>⇄</b><span>FLIP</span></button>
-                <button id="savePalette" type="button"><b>☆</b><span>SAVE PALETTE</span></button>
-              </div>
-            </div>
-            <div id="colourSources" class="colour-sources" role="group" aria-label="Colour sources"></div>
-            <section class="saved-palette-section" aria-labelledby="savedPaletteTitle">
-              <h3 id="savedPaletteTitle">SAVED PALETTES</h3>
-              <div id="savedPalettes" class="saved-palettes"></div>
+              <div id="colourSources" class="colour-sources" role="group" aria-label="Colour choices"></div>
+              <details class="context-submenu">
+                <summary>PALETTE TOOLS</summary>
+                <div class="palette-tools" role="group" aria-label="Current palette tools">
+                  <button id="rotateColours" type="button"><b>↻</b><span>ROTATE</span></button>
+                  <button id="flipColours" type="button"><b>⇄</b><span>FLIP</span></button>
+                  <button id="savePalette" type="button"><b>☆</b><span>SAVE</span></button>
+                </div>
+                <div id="savedPalettes" class="saved-palettes"></div>
+              </details>
             </section>
-          </section>
 
-          <section id="panelEffects" class="library-panel" role="tabpanel" aria-label="Choose an effect or sprite for the dropped layer" data-panel="effects" hidden>
-            <header class="panel-head">
-              <span><small>EFFECT MENU</small><b>CHOOSE THE FX OR APPLY IT EVERYWHERE</b></span>
-              <button type="button" data-close-panel aria-label="Close Effect menu">×</button>
-            </header>
-            <p class="panel-note">Use APPLY ALL for the whole name. Tap the main card and then a letter—or drag it directly—to begin an effect at that character. SMALL CAPS remains experimental.</p>
-            <div id="effectSources" class="effect-sources" role="group" aria-label="Arena effect sources"></div>
-            <details class="sprite-submenu">
-              <summary><span><small>INLINE MENU</small><b>ARENA SPRITES 0–15</b></span><i aria-hidden="true">+</i></summary>
-              <p>Choose a face for the locked position, or drag it directly between letters.</p>
-              <div id="spriteSources" class="sprite-sources" role="group" aria-label="Arena sprite sources"></div>
-            </details>
-          </section>
+            <section id="panelEffects" class="library-panel" role="tabpanel" aria-label="FX context menu" data-panel="effects" hidden>
+              <header class="panel-head">
+                <span><small>FX</small><b>CHOOSE AN EFFECT OR SPRITE</b></span>
+                <button type="button" data-close-panel aria-label="Close Effect menu">×</button>
+              </header>
+              <p class="panel-note">Choose the card to use at the dropped position. APPLY ALL styles the whole name.</p>
+              <div id="effectSources" class="effect-sources" role="group" aria-label="Arena effect choices"></div>
+              <details class="sprite-submenu">
+                <summary><span><small>INLINE</small><b>SPRITES 0–15</b></span><i aria-hidden="true">+</i></summary>
+                <div id="spriteSources" class="sprite-sources" role="group" aria-label="Arena sprite choices"></div>
+              </details>
+            </section>
 
-          <section id="panelWubrg" class="library-panel preset-panel" role="tabpanel" aria-labelledby="tabWubrg" data-panel="wubrg" hidden>
-            <header class="panel-head">
-              <span><small>PRESET SYSTEM 1</small><b>WUBRG ENGINE</b></span>
-              <button type="button" data-close-panel aria-label="Close WUBRG Engine">×</button>
-            </header>
-            <p class="panel-note">Build an ordered identity or search guilds, shards, wedges, and five-colour recipes. Hover or focus a recipe to preview it on the live name.</p>
-            <div id="wubrgComposer" class="wubrg-composer" role="group" aria-label="Build an ordered WUBRG identity"></div>
-            <div class="wubrg-readout">
-              <div><small>IDENTITY</small><b id="wubrgIdentity">CHOOSE COLOURS</b><span id="wubrgOrder">—</span></div>
-              <button id="applyWubrg" type="button" disabled>APPLY COLOUR LAYER</button>
-              <button id="clearWubrg" class="quiet-button" type="button" disabled>CLEAR</button>
-            </div>
-            <label class="preset-search" for="wubrgSearch"><span>SEARCH IDENTITIES</span><input id="wubrgSearch" type="search" placeholder="Try Izzet, WUB, five…" autocomplete="off"></label>
-            <div id="wubrgResults" class="preset-grid" aria-label="WUBRG identity results"></div>
-          </section>
+            <section id="panelWubrg" class="library-panel preset-panel" role="tabpanel" aria-labelledby="tabWubrg" data-panel="wubrg" hidden>
+              <header class="panel-head">
+                <span><small>PRESET</small><b>WUBRG ENGINE</b></span>
+                <button type="button" data-close-panel aria-label="Close WUBRG Engine">×</button>
+              </header>
+              <div id="wubrgComposer" class="wubrg-composer" role="group" aria-label="Build an ordered WUBRG identity"></div>
+              <div class="wubrg-readout">
+                <div><small>IDENTITY</small><b id="wubrgIdentity">CHOOSE COLOURS</b><span id="wubrgOrder">—</span></div>
+                <button id="applyWubrg" type="button" disabled>APPLY</button>
+                <button id="clearWubrg" class="quiet-button" type="button" disabled>CLEAR</button>
+              </div>
+              <label class="preset-search" for="wubrgSearch"><span>SEARCH</span><input id="wubrgSearch" type="search" placeholder="Izzet, WUB, five…" autocomplete="off"></label>
+              <div id="wubrgResults" class="preset-grid" aria-label="WUBRG identity results"></div>
+            </section>
 
-          <section id="panelColourPresets" class="library-panel preset-panel" role="tabpanel" aria-labelledby="tabColourPresets" data-panel="colour-presets" hidden>
-            <header class="panel-head">
-              <span><small>PRESET SYSTEM 2</small><b>COLOUR PRESETS</b></span>
-              <button type="button" data-close-panel aria-label="Close Colour Presets">×</button>
-            </header>
-            <p class="panel-note">Hover or focus to preview without changing your work. Apply replaces only colours; style, positioned FX, and sprites remain layered.</p>
-            <div id="colourPresets" class="preset-grid colour-preset-grid" aria-label="Colour presets"></div>
-          </section>
+            <section id="panelColourPresets" class="library-panel preset-panel" role="tabpanel" aria-labelledby="tabColourPresets" data-panel="colour-presets" hidden>
+              <header class="panel-head">
+                <span><small>PRESET</small><b>COLOUR PRESETS</b></span>
+                <button type="button" data-close-panel aria-label="Close Colour Presets">×</button>
+              </header>
+              <div id="colourPresets" class="preset-grid colour-preset-grid" aria-label="Colour presets"></div>
+            </section>
 
-          <section id="panelStylePresets" class="library-panel preset-panel" role="tabpanel" aria-labelledby="tabStylePresets" data-panel="style-presets" hidden>
-            <header class="panel-head">
-              <span><small>PRESET SYSTEM 3</small><b>STYLIZED PRESETS</b></span>
-              <button type="button" data-close-panel aria-label="Close Stylized Presets">×</button>
-            </header>
-            <p class="panel-note">A small shelf of colour-and-FX recipes. Hover or focus to preview on the live name. Apply replaces the previous stylized recipe while preserving effects and sprites you placed yourself.</p>
-            <div id="stylePresets" class="preset-grid style-preset-grid" aria-label="Stylized presets"></div>
-          </section>
+            <section id="panelStylePresets" class="library-panel preset-panel" role="tabpanel" aria-labelledby="tabStylePresets" data-panel="style-presets" hidden>
+              <header class="panel-head">
+                <span><small>PRESET</small><b>STYLIZED PRESETS</b></span>
+                <button type="button" data-close-panel aria-label="Close Stylized Presets">×</button>
+              </header>
+              <div id="stylePresets" class="preset-grid style-preset-grid" aria-label="Stylized presets"></div>
+            </section>
+          </div>
         </div>
       </section>
-
-      <details class="raw-drawer">
-        <summary><span><small>ADVANCED</small><b>RAW ARENA CODE</b></span><i aria-hidden="true">+</i></summary>
-        <div class="raw-drawer-body">
-          <textarea id="rawCode" rows="4" readonly spellcheck="false" aria-label="Generated Arena code"></textarea>
-          <button id="copyRawCode" type="button">COPY RAW CODE</button>
-          <p>Generated locally. Arena allows 64 raw characters; colour tags cost six characters each.</p>
-        </div>
-      </details>
     </section>
 
     <footer>
