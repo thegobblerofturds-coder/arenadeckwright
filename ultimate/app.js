@@ -102,7 +102,7 @@
   const els = {
     instructionsButton: $('instructionsButton'), instructionsPanel: $('instructionsPanel'),
     deckName: $('deckName'), startOver: $('startOver'),
-    previewCopyButton: $('previewCopyButton'),
+    copyButton: $('copyButton'), copyLabel: $('copyLabel'),
     outputPreview: $('outputPreview'),
     budgetTotal: $('budgetTotal'), budgetText: $('budgetText'), budgetColour: $('budgetColour'),
     budgetFx: $('budgetFx'), outputStatus: $('outputStatus'), colourCount: $('colourCount'),
@@ -155,9 +155,42 @@
   let selectedSavedPresetId = null;
   let stagedPreset = null;
   let state = createDefaultState();
+  const spriteAssets = new Map();
 
   function uid(prefix) {
     return `${prefix}-${Date.now().toString(36)}-${nextId++}`;
+  }
+
+  function applySpriteAssetState(element, status) {
+    if (!element) return;
+    element.classList.toggle('sprite-loading', status === 'loading');
+    element.classList.toggle('sprite-loaded', status === 'loaded');
+    element.classList.toggle('sprite-error', status === 'error');
+  }
+
+  function watchSpriteAsset(element, sprite) {
+    const key = Number(sprite);
+    let record = spriteAssets.get(key);
+    if (!record) {
+      const image = new Image();
+      record = {status: 'loading', promise: null};
+      record.promise = new Promise((resolve) => {
+        image.addEventListener('load', () => {
+          record.status = 'loaded';
+          resolve('loaded');
+        }, {once: true});
+        image.addEventListener('error', () => {
+          record.status = 'error';
+          resolve('error');
+        }, {once: true});
+      });
+      image.src = `assets/sprites/${key}.png`;
+      spriteAssets.set(key, record);
+    }
+    applySpriteAssetState(element, record.status);
+    record.promise.then((status) => {
+      if (element.isConnected) applySpriteAssetState(element, status);
+    });
   }
 
   function makeColours(colours) {
@@ -605,6 +638,7 @@
           sprite.setAttribute('aria-label', `Sprite ${event.value} at position ${offset}`);
           applySpriteStyles(sprite, preview);
           container.appendChild(sprite);
+          watchSpriteAsset(sprite, event.value);
         } else {
           applyPreviewTag(preview, event.code);
         }
@@ -666,13 +700,15 @@
     els.budgetFx.textContent = String(build.breakdown.fx);
     els.budgetTotal.textContent = String(build.rawLength);
     const over = build.overLimit;
-    els.previewCopyButton.disabled = !build.raw;
+    els.copyButton.disabled = !build.raw;
+    els.copyButton.classList.toggle('over-budget', over);
     els.megaTube.classList.toggle('preset-previewing', Boolean(previewOverride));
     els.megaTube.style.setProperty('--budget-progress', `${Math.min(100, build.rawLength / build.limit * 100)}%`);
     els.outputStatus.classList.toggle('error', over);
     els.outputStatus.textContent = over
       ? `${build.rawLength - build.limit} OVER ARENA LIMIT`
       : `${build.limit - build.rawLength} CHARACTERS FREE · ${build.colourStages}/${build.requestedColourStages} COLOURS COMPILED`;
+    els.copyLabel.textContent = over ? 'COPY ANYWAY' : '✓ FINISHED';
     els.forceGradient.disabled = state.colours.length < 2 || allowableGradientStops(build) < 2;
     els.forceGradient.title = state.colours.length < 2
       ? 'Add at least two colours first'
@@ -770,9 +806,12 @@
     const tokenBounds = entry.token.getBoundingClientRect();
     const startX = tokenBounds.left + tokenBounds.width / 2 - canvasBounds.left;
     const startY = tokenBounds.top - canvasBounds.top + 2;
-    const endX = targetBounds.left - canvasBounds.left - 5;
+    const targetWidth = Math.max(8, targetBounds.right - targetBounds.left);
     const laneRatio = (laneIndex + 1) / (laneCount + 1);
-    const endY = targetBounds.top + (targetBounds.bottom - targetBounds.top) * laneRatio - canvasBounds.top;
+    const endX = targetBounds.left + targetWidth * laneRatio - canvasBounds.left;
+    const targetBottom = targetBounds.bottom - canvasBounds.top;
+    const railTop = els.tubeLayerRail.getBoundingClientRect().top - canvasBounds.top;
+    const endY = Math.min(startY - 6, Math.max(targetBottom + 7, railTop - 10));
     const deltaX = endX - startX;
     const deltaY = endY - startY;
     const length = Math.hypot(deltaX, deltaY);
@@ -788,9 +827,9 @@
     if (selected) {
       const bracket = document.createElement('b');
       bracket.className = `anchor-bracket guide-${entry.kind}`;
-      bracket.style.left = `${(endX + 3).toFixed(1)}px`;
-      bracket.style.top = `${(targetBounds.top - canvasBounds.top - 2).toFixed(1)}px`;
-      bracket.style.height = `${Math.max(16, targetBounds.bottom - targetBounds.top + 4).toFixed(1)}px`;
+      bracket.style.left = `${(targetBounds.left - canvasBounds.left - 2).toFixed(1)}px`;
+      bracket.style.top = `${(targetBottom + 3).toFixed(1)}px`;
+      bracket.style.width = `${Math.max(12, targetWidth + 4).toFixed(1)}px`;
       els.tubeLayerGuides.appendChild(bracket);
     }
   }
@@ -934,6 +973,11 @@
     if (label) label.textContent = available ? 'DROP TO DELETE' : 'KEEP ONE COLOUR';
   }
 
+  function setLayerDragFocus(active) {
+    document.body.classList.toggle('layer-drag-active', Boolean(active));
+    els.megaTube.classList.toggle('drag-focus', Boolean(active));
+  }
+
   function beginTokenDrag(event, options) {
     if (event.button !== 0) return;
     event.stopPropagation();
@@ -959,6 +1003,7 @@
         dragGhost.setAttribute('aria-hidden', 'true');
         document.body.appendChild(dragGhost);
         els.megaTube.classList.add('dragging-layer');
+        setLayerDragFocus(true);
         setTrashZone(true, false, options.canRemove !== false);
       }
       dragGhost.style.left = `${moveEvent.clientX}px`;
@@ -1002,6 +1047,7 @@
       dragGhost?.remove();
       target.classList.remove('dragging');
       els.megaTube.classList.remove('dragging-layer');
+      setLayerDragFocus(false);
       setTrashZone(false);
       els.dropGuide.classList.remove('visible');
       setCentreMarker(null, false);
@@ -1114,6 +1160,7 @@
     button.classList.toggle('selected', state.selected?.kind === 'event' && state.selected.id === event.id);
     if (event.type === 'sprite') {
       button.innerHTML = `<i style="background-image:var(--arena-sprite-${event.value})"></i>`;
+      watchSpriteAsset(button.querySelector('i'), event.value);
     } else {
       button.innerHTML = `<span>${key === 'br' ? '↵' : (EFFECT_BY_KEY[key]?.label || key).slice(0, 3)}</span>`;
     }
@@ -1771,6 +1818,7 @@
           document.body.appendChild(ghost);
           element.classList.add('dragging');
           els.megaTube.classList.add('source-dragging');
+          setLayerDragFocus(true);
         }
         ghost.style.left = `${moveEvent.clientX}px`;
         ghost.style.top = `${moveEvent.clientY}px`;
@@ -1810,6 +1858,7 @@
         ghost?.remove();
         element.classList.remove('dragging');
         els.megaTube.classList.remove('source-dragging', 'drop-ready');
+        setLayerDragFocus(false);
         showCanvasDropTarget(null);
         setCentreMarker(null, false);
         els.dropGuide.classList.remove('visible');
@@ -2359,6 +2408,7 @@
       const payload = {kind: 'event', event: {type: 'sprite', value: sprite}};
       button.addEventListener('click', () => selectSourcePayload(payload, `SPRITE ${sprite}`));
       els.spriteSources.appendChild(button);
+      watchSpriteAsset(button.querySelector('i'), sprite);
     });
   }
 
@@ -2400,11 +2450,6 @@
       });
       els.wubrgComposer.appendChild(button);
     });
-    const core = document.createElement('span');
-    core.className = 'mana-orbit-core';
-    core.setAttribute('aria-hidden', 'true');
-    core.innerHTML = '<i></i><i></i><i></i><i></i><i></i><b>WUBRG</b>';
-    els.wubrgComposer.appendChild(core);
     renderWubrgResults();
   }
 
@@ -2666,12 +2711,23 @@
     renderPresetMenu();
   }
 
-  function positionGlobalChoicePanel() {
-    if (els.sourceLibrary.hidden || !els.sourceLibrary.classList.contains('global-choice')) return;
-    const nameBounds = els.outputPreview.getBoundingClientRect();
-    const minimumPanelHeight = Math.min(330, window.innerHeight * .62);
-    const top = Math.max(76, Math.min(window.innerHeight - minimumPanelHeight, nameBounds.bottom + 8));
-    els.sourceLibrary.style.setProperty('--global-panel-top', `${Math.round(top)}px`);
+  function positionChoicePanel() {
+    if (els.sourceLibrary.hidden) return;
+    if (els.sourceLibrary.classList.contains('global-choice')) {
+      const nameBounds = els.outputPreview.getBoundingClientRect();
+      const minimumPanelHeight = Math.min(330, window.innerHeight * .62);
+      const top = Math.max(76, Math.min(window.innerHeight - minimumPanelHeight, nameBounds.bottom + 8));
+      els.sourceLibrary.style.setProperty('--global-panel-top', `${Math.round(top)}px`);
+      return;
+    }
+    if (!els.sourceLibrary.classList.contains('refining-choice')) return;
+    const selectedId = state.selected?.id;
+    const token = Array.from(els.tubeLayerRail.querySelectorAll('.tube-token'))
+      .find((candidate) => candidate.dataset.layerId === selectedId);
+    const targetBounds = token?.getBoundingClientRect() || els.tubeTrack.getBoundingClientRect();
+    const minimumPanelHeight = Math.min(300, window.innerHeight * .56);
+    const top = Math.max(68, Math.min(window.innerHeight - minimumPanelHeight, targetBounds.bottom + 9));
+    els.sourceLibrary.style.setProperty('--context-panel-top', `${Math.round(top)}px`);
   }
 
   function setActiveTab(name, focus = false) {
@@ -2716,7 +2772,7 @@
       els.choiceCard.removeAttribute('aria-labelledby');
     }
     els.sourceLibrary.hidden = !state.activeTab;
-    if (globalChoice) requestAnimationFrame(positionGlobalChoicePanel);
+    if (globalChoice || refiningChoice) requestAnimationFrame(positionChoicePanel);
     if (state.activeTab && changed) {
       if (state.activeTab === 'presets') {
         presetMenuLevel = 'root';
@@ -2760,7 +2816,7 @@
     setActiveTab(state.activeTab);
   }
 
-  function playCopySail(source = els.previewCopyButton) {
+  function playCopySail(source = els.copyButton) {
     const bounds = source?.getBoundingClientRect?.() || {
       left: window.innerWidth / 2, width: 0, top: window.innerHeight / 2
     };
@@ -2780,7 +2836,7 @@
     setTimeout(() => sail.remove(), 1450);
   }
 
-  async function copyText(text, label = 'Copied', source = els.previewCopyButton) {
+  async function copyText(text, label = 'Copied', source = els.copyButton) {
     if (!text) return;
     try {
       await navigator.clipboard.writeText(text);
@@ -2900,10 +2956,7 @@
       const recentEffects = state.recentEffects;
       state = {...fresh, activeTab, favourites, savedCompositions, recentColours, recentEffects};
     }, 'Started over — Undo is available'));
-    els.previewCopyButton.addEventListener('click', (event) => {
-      event.stopPropagation();
-      copyCurrentName(els.previewCopyButton);
-    });
+    els.copyButton.addEventListener('click', () => copyCurrentName(els.copyButton));
     els.undoButton.addEventListener('click', undo);
     els.redoButton.addEventListener('click', redo);
     els.forceGradient.addEventListener('click', forceGradient);
@@ -3068,7 +3121,7 @@
     });
     window.addEventListener('resize', () => requestAnimationFrame(() => {
       layoutRailTokens();
-      positionGlobalChoicePanel();
+      positionChoicePanel();
     }));
     document.fonts?.ready?.then(() => {
       renderOutput();
@@ -3097,7 +3150,7 @@
       }
       if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
         event.preventDefault();
-        copyCurrentName(els.previewCopyButton);
+        copyCurrentName(els.copyButton);
       }
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'z' && !event.shiftKey) {
         event.preventDefault();
