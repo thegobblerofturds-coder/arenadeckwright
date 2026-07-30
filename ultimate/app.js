@@ -73,7 +73,6 @@
     }
   ];
   const EFFECTS = [
-    {key: 'bold', label: 'BOLD', hint: 'HEAVIER TEXT', code: '<b>'},
     {key: 'italic', label: 'ITALIC', hint: 'SLANT TEXT', code: '<i>'},
     {key: 'underline', label: 'UNDERLINE', hint: 'LINE BELOW', code: '<u>'},
     {key: 'strike', label: 'STRIKE', hint: 'LINE THROUGH', code: '<s>'},
@@ -94,7 +93,7 @@
   ];
   const FX_GROUPS = [
     {key: 'motion', label: 'MOTION', icon: '↝', note: 'MOVE AND OFFSET', effects: ['voffset', 'pos', 'space', 'br']},
-    {key: 'text', label: 'TEXT', icon: 'Aa', note: 'LETTER TREATMENT', effects: ['bold', 'italic', 'underline', 'strike']},
+    {key: 'text', label: 'TEXT', icon: 'Aa', note: 'LETTER TREATMENT', effects: ['italic', 'underline', 'strike']},
     {key: 'transform', label: 'TRANSFORM', icon: '↻', note: 'SHAPE AND SCALE', effects: ['size', 'rotate', 'sup', 'sub', 'cspace']},
     {key: 'visual', label: 'VISUAL', icon: '✦', note: 'FINISH AND WIDTH', effects: ['mark', 'alpha', 'mspace']}
   ];
@@ -175,7 +174,7 @@
     return {
       name: DEFAULT_NAME,
       colours: makeColours([MANA.U.colour, MANA.R.colour, MANA.G.colour]),
-      formatting: {bold: false, italic: false, underline: false, strike: false},
+      formatting: {italic: false, underline: false, strike: false},
       effects: Logic.normaliseEffects({}),
       events: [],
       caret: DEFAULT_NAME.length,
@@ -234,13 +233,14 @@
       .sort((left, right) => left.position - right.position);
     state.colours = (colours.length ? colours : makeColours(['#FFFFFF'])).slice(0, MAX_COLOURS);
     state.formatting = {
-      bold: false,
       italic: Boolean(state.formatting?.italic),
       underline: Boolean(state.formatting?.underline),
       strike: Boolean(state.formatting?.strike)
     };
     state.effects = Logic.normaliseEffects(state.effects || {});
-    state.events = Logic.normaliseInlineEvents(state.events, state.name.length).map((event) => ({
+    state.events = Logic.normaliseInlineEvents(state.events, state.name.length)
+      .filter((event) => !(event.type === 'tag' && String(event.code).toLowerCase() === '<b>'))
+      .map((event) => ({
       ...event,
       id: event.id || uid('event'),
       position: Number.isFinite(Number(event.position))
@@ -398,7 +398,7 @@
     const definition = EFFECT_BY_KEY[key];
     if (!definition || definition.inline === false) return null;
     if (key === 'br') return {kind: 'event', event: {type: 'br'}};
-    if (['bold', 'italic', 'underline', 'strike', 'sup', 'sub'].includes(key)) {
+    if (['italic', 'underline', 'strike', 'sup', 'sub'].includes(key)) {
       return {kind: 'event', event: {type: 'tag', code: definition.code}};
     }
     if (['size', 'cspace', 'rotate', 'voffset', 'pos'].includes(key)) {
@@ -416,7 +416,7 @@
     if (event.type === 'br') return 'br';
     const match = String(event.code || '').match(/^<([a-z]+)(?:=|>)/i);
     if (!match) return 'fx';
-    return {b: 'bold', i: 'italic', u: 'underline', s: 'strike'}[match[1].toLowerCase()] || match[1].toLowerCase();
+    return {i: 'italic', u: 'underline', s: 'strike'}[match[1].toLowerCase()] || match[1].toLowerCase();
   }
 
   function eventLabel(event) {
@@ -472,7 +472,6 @@
 
   function initialPreviewState(source = effectiveState()) {
     return {
-      bold: source.formatting.bold,
       italic: source.formatting.italic,
       underline: source.formatting.underline,
       strike: source.formatting.strike,
@@ -491,10 +490,9 @@
   }
 
   function applyPreviewTag(preview, code) {
-    const simple = String(code).match(/^<(b|i|u|s|sup|sub|smallcaps)>$/i);
+    const simple = String(code).match(/^<(i|u|s|sup|sub|smallcaps)>$/i);
     if (simple) {
       const key = simple[1].toLowerCase();
-      if (key === 'b') preview.bold = true;
       if (key === 'i') preview.italic = true;
       if (key === 'u') preview.underline = true;
       if (key === 's') preview.strike = true;
@@ -516,7 +514,6 @@
 
   function applyGlyphStyles(glyph, preview) {
     glyph.style.color = glyph.dataset.colour;
-    if (preview.bold) glyph.style.fontWeight = '900';
     if (preview.italic) glyph.style.fontStyle = 'italic';
     const decorations = [preview.underline && 'underline', preview.strike && 'line-through'].filter(Boolean);
     if (decorations.length) glyph.style.textDecoration = decorations.join(' ');
@@ -1552,12 +1549,8 @@
     const isColour = category === 'colours';
     const isSprite = category === 'sprites';
     const sourceName = isColour ? 'Colour' : isSprite ? 'Sprite' : 'FX';
-    const choiceName = isColour ? 'colour' : isSprite ? 'sprite' : 'effect';
-    els.pendingChoiceTitle.textContent = `CHOOSE A ${choiceName.toUpperCase()}`;
-    const detail = els.pendingChoiceBanner.querySelector('small');
-    if (detail) {
-      detail.textContent = `The ${sourceName} bubble is waiting in the tube. Choose a ${choiceName} to place it.`;
-    }
+    const choiceName = isColour ? 'COLOUR' : isSprite ? 'SPRITE' : 'EFFECT';
+    els.pendingChoiceTitle.textContent = `PICK ${isSprite || isColour ? 'A' : 'AN'} ${choiceName} TO PLACE THIS BUBBLE`;
     renderInspector();
     setCaret(safeOffset, false);
     setActiveTab(category);
@@ -1929,7 +1922,7 @@
     const sprites = state.events.filter((event) => event.type === 'sprite');
     setPreview({
       colours: preset.colours ? makeColours(preset.colours) : state.colours,
-      formatting: {bold: false, italic: false, underline: false, strike: false, ...clone(preset.formatting)},
+      formatting: {italic: false, underline: false, strike: false, ...clone(preset.formatting)},
       effects: Logic.normaliseEffects(clone(preset.effects)),
       events: [...sprites, ...styledPresetEvents(preset)]
     });
@@ -2190,7 +2183,7 @@
     };
     if (key === 'size') example.append(letter('A', 'small'), letter('A', 'large'));
     else if (key === 'cspace') example.append(letter('A A A', 'wide'));
-    else if (key === 'rotate') example.append(letter('A', 'tilt-left'), letter('A', 'tilt-right'));
+    else if (key === 'rotate') example.append(letter('Aa', 'upside-down'));
     else if (key === 'voffset') example.append(letter('A', 'low'), letter('A', 'high'));
     else if (key === 'pos') example.append(letter('A', 'positioned'));
     else if (key === 'sup') example.append(letter('A'), letter('A', 'sup'));
@@ -2200,7 +2193,6 @@
     else if (key === 'space') example.append(letter('A'), letter('A', 'spaced'));
     else if (key === 'mark') example.append(letter('Aa', 'marked'));
     else if (key === 'alpha') example.append(letter('Aa', 'faded'));
-    else if (key === 'bold') example.append(letter('Aa', 'bold'));
     else if (key === 'italic') example.append(letter('Aa', 'italic'));
     else if (key === 'underline') example.append(letter('Aa', 'underline'));
     else if (key === 'strike') example.append(letter('Aa', 'strike'));
@@ -2400,7 +2392,7 @@
 
   function applySpecialPreset(preset) {
     mutate(() => {
-      state.formatting = {bold: false, italic: false, underline: false, strike: false, ...clone(preset.formatting)};
+      state.formatting = {italic: false, underline: false, strike: false, ...clone(preset.formatting)};
       state.effects = Logic.normaliseEffects(clone(preset.effects));
       if (preset.colours) {
         state.colours = makeColours(preset.colours);
@@ -2858,7 +2850,7 @@
     els.redoButton.addEventListener('click', redo);
     els.forceGradient.addEventListener('click', forceGradient);
     els.clearFxButton.addEventListener('click', () => mutate(() => {
-      state.formatting = {bold: false, italic: false, underline: false, strike: false};
+      state.formatting = {italic: false, underline: false, strike: false};
       state.effects = Logic.normaliseEffects({});
       state.events = state.events.filter((event) => event.type === 'sprite');
       state.selected = null;

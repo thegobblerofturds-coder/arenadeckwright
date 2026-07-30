@@ -234,6 +234,17 @@ The Ultimate development source was rebuilt around one editing surface.
   size, rotation, offsets, spacing, highlight, and alpha. Same-position FX
   serialize before a sprite so Arena receives the intended order.
 
+### Ultimate v6.8 supported-effects cleanup
+
+- Removed Bold from the FX catalogue, compiler, preview, and restored legacy
+  state because Arena no longer displays the `<b>` tag.
+- Replaced the ambiguous two-letter Rotate demonstration with one upside-down
+  `Aa` sample.
+- Removed the placement sheet’s background blur and lightened its scrim so the
+  final deck name remains visible while an effect is chosen.
+- Reduced the Colour placement copy to one short instruction and removed the
+  duplicate wheel and panel directions.
+
 ### Removed from the product surface
 
 - Alternate/prismatic duplicate name view.
@@ -250,5 +261,5 @@ reduced-motion support, and fan-content notice remain.
 
 ## Release status
 
-The v6.7 interface is the `/ultimate/` release in both website mirrors as of
+The v6.8 interface is the `/ultimate/` release in both website mirrors as of
 2026-07-30. `/colour/` remains Version 6 and Version Lite remains shelved.

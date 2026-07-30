@@ -1,7 +1,7 @@
 TURDGOBBLER'S DECK NAME COLOURIFIER — ULTIMATE VERSION
 
 STATUS
-This folder is the active Ultimate source. The v6.7 unobstructed-global-tools interface
+This folder is the active Ultimate source. The v6.8 supported-effects cleanup
 is the release published at /ultimate/ on 2026-07-30.
 Version 6 remains the standard /colour/ release and Version Lite remains
 shelved.
@@ -76,9 +76,10 @@ COLOUR + EFFECT + SPRITE SOURCES
   colour swatch is hidden.
 - The drop magnifier shows a plain Left/Centre/Right colour position or an FX
   text position. User-facing tube-position percentages are intentionally hidden.
-- All Caps and Small Caps are direct whole-name toggles. Bold, Italic,
-  Underline, Strike, Superscript, Subscript, Size, Spacing, Rotate, and Offset
-  are normal positioned FX choices.
+- All Caps and Small Caps are direct whole-name toggles. Italic, Underline,
+  Strike, Superscript, Subscript, Size, Spacing, Rotate, and Offset are normal
+  positioned FX choices. Bold is intentionally absent because Arena no longer
+  displays its tag.
 - FX demonstrations are sized to fit their nested circular buttons.
 - Dragging an existing layer creates a floating copy that follows the pointer
   and reveals a full-width red delete bar directly below the tube.

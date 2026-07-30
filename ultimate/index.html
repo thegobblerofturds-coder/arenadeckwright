@@ -10,9 +10,9 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="manifest" href="site.webmanifest">
   <title>TurdGobbler's Deck Name Colourifier — Ultimate Version</title>
-  <link rel="stylesheet" href="styles.css?v=ultimate-6.7">
+  <link rel="stylesheet" href="styles.css?v=ultimate-6.8">
   <script src="logic.js?v=ultimate-3.0" defer></script>
-  <script src="app.js?v=ultimate-6.7" defer></script>
+  <script src="app.js?v=ultimate-6.8" defer></script>
 </head>
 <body>
   <main class="app-shell">
@@ -111,9 +111,7 @@
       <section id="sourceLibrary" class="source-library" aria-label="Editor choices" hidden>
         <div id="choiceCard" class="context-card" role="region" aria-label="Layer or preset choices" tabindex="-1">
           <div id="pendingChoiceBanner" class="pending-choice-banner" role="status" hidden>
-            <span>FINISH PLACING THIS LAYER</span>
-            <b id="pendingChoiceTitle">CHOOSE A COLOUR</b>
-            <small>The bubble is waiting for this choice.</small>
+            <b id="pendingChoiceTitle">PICK A COLOUR TO PLACE THIS BUBBLE</b>
           </div>
           <div id="globalPreviewShelf" class="global-preview-shelf" hidden>
             <small>LIVE RESULT</small>
@@ -122,7 +120,7 @@
           <div class="library-panels">
             <section id="panelColours" class="library-panel" role="tabpanel" aria-label="Colour context menu" data-panel="colours" hidden>
               <header class="panel-head">
-                <span><small>COLOUR</small><b>CHOOSE OR MAKE A COLOUR</b></span>
+                <span><small>COLOUR</small></span>
                 <button type="button" data-close-panel aria-label="Close Colour menu">×</button>
               </header>
               <div class="colour-lab">
@@ -136,7 +134,6 @@
                       <i aria-hidden="true"></i><small>THUMB PREVIEW</small><b id="colourWheelPreviewHex">#C94BFF</b>
                     </output>
                   </div>
-                  <span>DRAG THE COLOUR DISC</span>
                 </div>
                 <div class="custom-colour">
                   <label class="native-colour-input" for="colourPicker"><span>DEVICE PICKER</span><input id="colourPicker" type="color" value="#C94BFF"></label>

@@ -9,7 +9,7 @@
   const NUMERIC_EFFECT_DEFAULTS = Object.freeze({size: 10, cspace: 5, rotate: 15, voffset: 5, pos: 40});
   const NUMERIC_EFFECT_LIMITS = Object.freeze({size: Object.freeze({minimum: 5, maximum: 29})});
   const GLOBAL_EFFECT_ORDER = Object.freeze([
-    'sup', 'sub', 'bold', 'italic', 'underline', 'strike', 'smallCaps',
+      'sup', 'sub', 'italic', 'underline', 'strike', 'smallCaps',
     'size', 'cspace', 'rotate', 'voffset', 'pos'
   ]);
   const ARENA_TAG_REGISTRY = Object.freeze({
@@ -21,7 +21,7 @@
       'smallcaps', 'allcaps', 'lowercase', 'indent', 'line-indent', 'line-height',
       'margin', 'width', 'nobr', 'closing-reset'
     ]),
-    noOp: Object.freeze(['font-weight', 'sprite-tint']),
+    noOp: Object.freeze(['b', 'font-weight', 'sprite-tint']),
     unsafe: Object.freeze(['font', 'font-material'])
   });
   const validHex = (value) => /^#[0-9a-f]{6}$/i.test(String(value));
@@ -37,7 +37,6 @@
 
   function formatPrefix(formatting = {}) {
     return [
-      formatting.bold && '<b>',
       formatting.italic && '<i>',
       formatting.underline && '<u>',
       formatting.strike && '<s>'
@@ -318,7 +317,6 @@
     const codes = {
       sup: fx.sup && '<sup>',
       sub: fx.sub && '<sub>',
-      bold: formatting.bold && '<b>',
       italic: formatting.italic && '<i>',
       underline: formatting.underline && '<u>',
       strike: formatting.strike && '<s>',
@@ -343,6 +341,7 @@
     }
     if (event.type === 'tag') {
       const code = String(event.code || '');
+      if (code.toLowerCase() === '<b>') return '';
       return /^<[^<>]+>$/.test(code) ? code : '';
     }
     return '';
