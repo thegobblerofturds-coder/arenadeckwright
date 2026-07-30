@@ -1,31 +1,46 @@
-# Ultimate Version - Patch Record
+# Ultimate Version — local rebuild record
 
-These notes were collected before implementation and applied together on 2026-07-25.
+## 2026-07-29: one Mega Tube
 
-## Ultimate route update - 2026-07-29
+The Ultimate development source was rebuilt around one editing surface.
 
-- Made the entire clickable Arena Mirror/copy stage fully opaque black across all themes, hover/pressed feedback, and the alternate prismatic layout.
-- Kept palette glow and chrome outside the black comparison stage so Arena colour and rich-text effects are not visually tinted by the tool itself.
-- Added source and browser-level regression coverage for the black-background contract.
-- Published the full-featured edition separately as the Ultimate Version at `/ultimate/`; Version 6 remains the standard `/colour/` release.
+### Fixed
 
-## Implemented
+- Removed the hidden normalization rule that forced the leftmost colour back to
+  zero after every interaction.
+- Bubble 1 and a single remaining colour bubble now retain their requested
+  positions.
+- Arena serialization still emits the required start-of-name colour while the
+  visual bubble remains free.
 
-1. SIZE is clamped consistently in the drawer, picker, compiler, and preview to the Arena-tested useful range of `5-29`. The control calls out `5`, `10`, `20`, and `29`.
-2. Compiled FX sequence numbers use a fixed, centred, tabular-number container at desktop and laptop densities.
-3. The generic FX source can be dragged into the Mega Tube before its effect is chosen. The drop position is retained while the picker is open.
-4. One generic FX source remains visible in the default state. Click/tap inserts at the active caret; drag/drop places first and chooses second.
-5. The temporary dropped bubble is dashed, labelled `FX`, excluded from raw code, the budget, and serializer numbering, and removed on cancellation.
-6. Drop, choose, and adjust commit as one Undo action.
-7. Every FX picker choice has an unnumbered miniature visual example, including per-letter rotation and the real review sprite artwork.
-8. Picker card numbers such as `01` and `02` were removed.
-9. Sprite/emote click, tap, keyboard, and drag/drop behavior is preserved. Compiler regression coverage now checks every sprite ID from `0` through `15`.
-10. Focus mode begins at the dropped caret and expands to the chosen effect's affected range after selection.
-11. A separate approximate `VISUAL WIDTH WATCH/RISK` indicator measures browser-rendered geometry without changing the exact `TOTAL/64` raw-code accounting.
-12. Colour bubble 1 is movable again by pointer and keyboard. Dragging it past another colour reorders which colour owns the required start-of-name tag.
+### Rebuilt
 
-## Still awaiting Arena measurements
+- One Mega Tube with separate visual lanes for colours and positioned FX.
+- One inspector for colour, FX, sprite, and global-style layers.
+- Colour and effect source trays with drag-to-place and click-at-caret behavior.
+- Three isolated preset systems: WUBRG, Colour Presets, and Style Presets.
+- Layer-safe preset application: colour recipes do not reset effects; style
+  recipes do not reset colours, positioned FX, or sprites.
+- WUBRG identity search across one- through five-colour identities.
+- Sprite submenu inside the Effects source panel.
+- Undo and Redo for every material editing action.
 
-The maximum reliably visible deck-name geometry in Arena remains unknown. Do not turn the browser width indicator into an Arena hard limit until tests record the raw-code length, visible glyph count, SIZE, character spacing, sprites, and line breaks at the disappearance threshold.
+### Removed from the product surface
 
-The browser preview remains an approximation of Unity/TextMesh Pro geometry. Arena is authoritative.
+- Alternate/prismatic duplicate name view.
+- Separate inline-event timeline and duplicate FX drawer.
+- Separate palette drawer, quick-palette strip, and MTG station.
+- Modal two-stage FX picker and colour-wheel modal.
+- Candidate-probe Arena Lab and unsafe font/material probe UI.
+- Retired timeline renderer and the accumulated compatibility branches tied to
+  those surfaces.
+
+The exact compiler, 64-character budget, opaque-black Arena Mirror, verified
+effects, sprite mapping, local font, copy fallback, raw-code view, offline
+operation, reduced-motion support, and fan-content notice remain.
+
+## Release status
+
+This is a local Ultimate development build. It has not replaced the currently
+published `/ultimate/` route. `/colour/` remains Version 6 and Version Lite
+remains shelved.
