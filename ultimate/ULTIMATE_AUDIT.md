@@ -94,9 +94,9 @@ so compiler correctness does not require a fixed visual bubble.
 - Matrix Glitch combines matrix greens, all caps, spacing, one rotation change,
   and one vertical jump.
 - Upside Down uses a whole-name 180-degree rotation with a void/ice palette.
-- Recipe-generated inline events carry their own source marker. Applying another
-  stylized preset removes only the previous recipe events and preserves effects
-  and sprites the user placed manually.
+- Recipe-generated inline events carry their own source marker. Applying a
+  combined preset replaces all prior non-sprite FX so the named result is
+  predictable, while preserving sprites as inline content.
 - All six recipes compile the default `Your Deck Name` within the 64-character
   Arena limit.
 

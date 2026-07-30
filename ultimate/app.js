@@ -95,6 +95,7 @@
   const EFFECT_BY_KEY = Object.fromEntries(EFFECTS.map((effect) => [effect.key, effect]));
   const $ = (id) => document.getElementById(id);
   const els = {
+    instructionsButton: $('instructionsButton'), instructionsPanel: $('instructionsPanel'),
     deckName: $('deckName'), startOver: $('startOver'),
     copyButton: $('copyButton'), copyLabel: $('copyLabel'), outputPreview: $('outputPreview'),
     budgetTotal: $('budgetTotal'), budgetText: $('budgetText'), budgetColour: $('budgetColour'),
@@ -668,19 +669,33 @@
     const available = Math.max(1, railBounds.width - edge * 2);
     const gap = Math.min(35, available / Math.max(1, tokens.length - 1));
     const dense = gap < 27;
-    let previous = edge - gap;
+    const maximum = railBounds.width - edge;
     tokens.forEach((entry) => {
-      entry.resolved = Math.max(entry.desired, previous + gap);
-      previous = entry.resolved;
+      entry.resolved = Math.max(edge, Math.min(maximum, entry.desired));
+      entry.pinned = entry.token.classList.contains('selected') || entry.token.classList.contains('dragging');
     });
-    const overflow = Math.max(0, tokens.at(-1).resolved - (railBounds.width - edge));
-    if (overflow) tokens.forEach((entry) => { entry.resolved -= overflow; });
-    for (let index = tokens.length - 2; index >= 0; index -= 1) {
-      tokens[index].resolved = Math.min(tokens[index].resolved, tokens[index + 1].resolved - gap);
+    for (let pass = 0; pass < Math.max(8, tokens.length * 3); pass += 1) {
+      let changed = false;
+      for (let index = 0; index < tokens.length - 1; index += 1) {
+        const left = tokens[index];
+        const right = tokens[index + 1];
+        const overlap = gap - (right.resolved - left.resolved);
+        if (overlap <= .1) continue;
+        changed = true;
+        if (left.pinned && !right.pinned) {
+          right.resolved += overlap;
+        } else if (right.pinned && !left.pinned) {
+          left.resolved -= overlap;
+        } else {
+          left.resolved -= overlap / 2;
+          right.resolved += overlap / 2;
+        }
+        left.resolved = Math.max(edge, Math.min(maximum, left.resolved));
+        right.resolved = Math.max(edge, Math.min(maximum, right.resolved));
+      }
+      if (!changed) break;
     }
-    const underflow = Math.max(0, edge - tokens[0].resolved);
     tokens.forEach((entry) => {
-      entry.resolved += underflow;
       entry.token.classList.toggle('dense', dense);
       entry.token.style.left = `${entry.resolved.toFixed(1)}px`;
       addAnchorGuide(entry.resolved, entry.anchor, entry.kind);
@@ -754,17 +769,27 @@
     const startX = event.clientX;
     const startY = event.clientY;
     let moved = false;
+    let dragGhost = null;
     const target = event.currentTarget;
     try { target.setPointerCapture(event.pointerId); } catch (_) {}
     const move = (moveEvent) => {
       if (moveEvent.pointerId !== event.pointerId) return;
+      moveEvent.preventDefault();
       if (!moved && Math.hypot(moveEvent.clientX - startX, moveEvent.clientY - startY) < 4) return;
       if (!moved) {
         moved = true;
         target.classList.add('dragging');
+        dragGhost = target.cloneNode(true);
+        dragGhost.removeAttribute('id');
+        dragGhost.classList.remove('selected', 'dragging');
+        dragGhost.classList.add('layer-drag-ghost');
+        dragGhost.setAttribute('aria-hidden', 'true');
+        document.body.appendChild(dragGhost);
         els.megaTube.classList.add('dragging-layer');
         setTrashZone(true, false, options.canRemove !== false);
       }
+      dragGhost.style.left = `${moveEvent.clientX}px`;
+      dragGhost.style.top = `${moveEvent.clientY}px`;
       const overTrash = pointerInside(els.trashDropZone, moveEvent.clientX, moveEvent.clientY);
       setTrashZone(true, overTrash, options.canRemove !== false);
       if (overTrash) {
@@ -781,7 +806,10 @@
           ? Number(snapTarget.dataset.dropOffset)
           : offsetFromPosition(tubePosition(moveEvent.clientX));
       options.update(position, offset);
-      target.style.left = `${railXFromColourPosition(position).toFixed(1)}px`;
+      target.dataset.visualPosition = String(position);
+      if (options.kind === 'colour') target.dataset.anchorPosition = String(position);
+      else target.dataset.anchorOffset = String(offset);
+      layoutRailTokens();
       showCanvasDropTarget(snapTarget);
       showDropMagnifier(snapTarget, offset, moveEvent.clientX, options.kind === 'colour' ? position : null);
       renderOutput();
@@ -790,10 +818,11 @@
     const finish = (finishEvent, cancelled = false) => {
       if (finishEvent.pointerId !== event.pointerId) return;
       const deleteRequested = moved && pointerInside(els.trashDropZone, finishEvent.clientX, finishEvent.clientY);
-      target.removeEventListener('pointermove', move);
-      target.removeEventListener('pointerup', finish);
-      target.removeEventListener('pointercancel', cancel);
+      document.removeEventListener('pointermove', move);
+      document.removeEventListener('pointerup', finish);
+      document.removeEventListener('pointercancel', cancel);
       try { if (target.hasPointerCapture(event.pointerId)) target.releasePointerCapture(event.pointerId); } catch (_) {}
+      dragGhost?.remove();
       target.classList.remove('dragging');
       els.megaTube.classList.remove('dragging-layer');
       setTrashZone(false);
@@ -830,9 +859,9 @@
       renderAll();
     };
     const cancel = (cancelEvent) => finish(cancelEvent, true);
-    target.addEventListener('pointermove', move);
-    target.addEventListener('pointerup', finish);
-    target.addEventListener('pointercancel', cancel);
+    document.addEventListener('pointermove', move, {passive: false});
+    document.addEventListener('pointerup', finish);
+    document.addEventListener('pointercancel', cancel);
   }
 
   function colourToken(stop, index, compiling = true) {
@@ -857,7 +886,7 @@
       kind: 'colour',
       update: (position) => { stop.position = position; },
       select: () => selectLayer('colour', stop.id),
-      finish: () => { state.selected = {kind: 'colour', id: stop.id}; },
+      finish: () => { state.selected = null; },
       canRemove: state.colours.length > 1,
       remove: () => {
         if (state.colours.length <= 1) return false;
@@ -922,7 +951,7 @@
         event.offset = offset;
       },
       select: () => selectLayer('event', event.id),
-      finish: () => { state.selected = {kind: 'event', id: event.id}; },
+      finish: () => { state.selected = null; },
       canRemove: true,
       remove: () => {
         state.events = state.events.filter((candidate) => candidate.id !== event.id);
@@ -1057,7 +1086,7 @@
     const actions = document.createElement('div');
     actions.className = 'inspector-actions';
     actions.append(
-      actionButton('MORE COLOURS', 'more-choices-button', openSelectedChoices),
+      actionButton('CHANGE COLOUR', 'more-choices-button', openSelectedChoices),
       actionButton('DUPLICATE', 'quiet-button', () => duplicateColour(stop.id)),
       actionButton('DELETE', 'delete-button', () => removeColour(stop.id))
     );
@@ -1137,6 +1166,12 @@
       }, `${definition.label} updated`));
       fields.appendChild(labelledControl('VALUE', value));
     }
+    if (event.type !== 'sprite' && !fields.children.length) {
+      const note = document.createElement('p');
+      note.className = 'inspector-note';
+      note.textContent = 'ACTIVE FROM THIS POINT TO THE END OF THE NAME';
+      fields.appendChild(note);
+    }
     const visualPercent = Math.round((event.position ?? positionFromOffset(event.offset)) * 100);
     fields.appendChild(positionStepper(visualPercent, 100, (percent) => mutate(() => {
       event.position = percent / 100;
@@ -1146,7 +1181,7 @@
     const actions = document.createElement('div');
     actions.className = 'inspector-actions';
     actions.append(
-      actionButton(event.type === 'sprite' ? 'MORE SPRITES / FX' : 'MORE FX', 'more-choices-button', openSelectedChoices),
+      actionButton(event.type === 'sprite' ? 'CHANGE SPRITE / FX' : 'CHANGE FX', 'more-choices-button', openSelectedChoices),
       actionButton('DUPLICATE', 'quiet-button', () => duplicateEvent(event.id)),
       actionButton('DELETE', 'delete-button', () => removeEvent(event.id))
     );
@@ -1219,7 +1254,7 @@
     const newStop = {id: uid('colour'), colour: clean, position: Math.max(0, Math.min(1, position))};
     mutate(() => {
       state.colours.push(newStop);
-      state.selected = {kind: 'colour', id: newStop.id};
+      state.selected = null;
       state.wubrg = [];
     }, `${clean} added`);
   }
@@ -1341,7 +1376,7 @@
     };
     mutate(() => {
       state.events.push(event);
-      state.selected = {kind: 'event', id: event.id};
+      state.selected = null;
     }, `${eventLabel(event)} layered at position ${event.offset}`);
   }
 
@@ -1399,6 +1434,7 @@
       try { element.setPointerCapture(event.pointerId); } catch (_) {}
       const move = (moveEvent) => {
         if (moveEvent.pointerId !== event.pointerId) return;
+        moveEvent.preventDefault();
         if (!moved && Math.hypot(moveEvent.clientX - startX, moveEvent.clientY - startY) < 5) return;
         if (!moved) {
           moved = true;
@@ -1441,9 +1477,9 @@
         els.megaTube.classList.add('drop-ready');
       };
       const cleanup = () => {
-        element.removeEventListener('pointermove', move);
-        element.removeEventListener('pointerup', finish);
-        element.removeEventListener('pointercancel', cancel);
+        document.removeEventListener('pointermove', move);
+        document.removeEventListener('pointerup', finish);
+        document.removeEventListener('pointercancel', cancel);
         try { if (element.hasPointerCapture(event.pointerId)) element.releasePointerCapture(event.pointerId); } catch (_) {}
         ghost?.remove();
         element.classList.remove('dragging');
@@ -1480,9 +1516,9 @@
         if (cancelEvent.pointerId !== event.pointerId) return;
         cleanup();
       };
-      element.addEventListener('pointermove', move);
-      element.addEventListener('pointerup', finish);
-      element.addEventListener('pointercancel', cancel);
+      document.addEventListener('pointermove', move, {passive: false});
+      document.addEventListener('pointerup', finish);
+      document.addEventListener('pointercancel', cancel);
     });
   }
 
@@ -1591,12 +1627,12 @@
   }
 
   function previewStyle(preset) {
-    const manualEvents = state.events.filter((event) => event.source !== 'stylized-preset');
+    const sprites = state.events.filter((event) => event.type === 'sprite');
     setPreview({
       colours: preset.colours ? makeColours(preset.colours) : state.colours,
       formatting: {bold: false, italic: false, underline: false, strike: false, ...clone(preset.formatting)},
       effects: Logic.normaliseEffects(clone(preset.effects)),
-      events: [...manualEvents, ...styledPresetEvents(preset)]
+      events: [...sprites, ...styledPresetEvents(preset)]
     });
   }
 
@@ -2006,7 +2042,7 @@
           state.wubrg = [];
         }
         state.events = [
-          ...state.events.filter((event) => event.source !== 'stylized-preset'),
+          ...state.events.filter((event) => event.type === 'sprite'),
           ...styledPresetEvents(preset)
         ];
         state.selected = null;
@@ -2192,6 +2228,16 @@
   }
 
   function installEvents() {
+    const setInstructionsOpen = (open) => {
+      els.instructionsPanel.hidden = !open;
+      els.instructionsButton.setAttribute('aria-expanded', String(open));
+    };
+    els.instructionsButton.addEventListener('click', () => {
+      setInstructionsOpen(els.instructionsPanel.hidden);
+    });
+    document.querySelectorAll('[data-close-instructions]').forEach((button) => {
+      button.addEventListener('click', () => setInstructionsOpen(false));
+    });
     els.deckName.addEventListener('input', handleNameInput);
     ['click', 'keyup', 'select', 'focus'].forEach((type) => els.deckName.addEventListener(type, syncCaretFromInput));
     els.deckName.addEventListener('blur', () => { delete els.deckName.dataset.editing; });
@@ -2356,7 +2402,10 @@
     });
     document.addEventListener('keydown', (event) => {
       if (event.key === 'Escape') {
-        if (pendingLayerOffset !== null) {
+        if (!els.instructionsPanel.hidden) {
+          setInstructionsOpen(false);
+          els.instructionsButton.focus({preventScroll: true});
+        } else if (pendingLayerOffset !== null) {
           cancelPendingLayer();
           setActiveTab(null);
           announce('New layer cancelled');

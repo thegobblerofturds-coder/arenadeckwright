@@ -1,7 +1,7 @@
 TURDGOBBLER'S DECK NAME COLOURIFIER — ULTIMATE VERSION
 
 STATUS
-This folder is the active Ultimate source. The v6.2 continuous-rail interface
+This folder is the active Ultimate source. The v6.3 touch-repaired interface
 is the release published at /ultimate/ on 2026-07-30.
 Version 6 remains the standard /colour/ release and Version Lite remains
 shelved.
@@ -32,8 +32,9 @@ THE ONE-TUBE MODEL
   separate compiled text offset, made explicit by its anchor guide.
 - Positioned bubbles support Arrow keys, Shift+Arrow, Page Up/Down, Home, End,
   Delete, and Backspace.
-- Selecting one tube layer opens a compact nearby editor. More Colours or More
-  FX opens the full contextual menu only when needed.
+- Dropping or moving a layer leaves the editor closed. Tapping a placed bubble
+  opens its compact nearby editor; Change Colour or Change FX opens the full
+  contextual menu only when needed.
 - Effects sharing one character remain separate clickable bubbles. Collision
   spacing keeps them accessible, and guide lines point back to their exact
   text anchors.
@@ -47,9 +48,9 @@ THE TWO PRESET LAUNCHERS
    looks.
 
 WUBRG and colour recipes replace only the colour layer. Combined Presets replace
-the previous combined recipe while preserving manually positioned effects and
-sprites. Ice Rainbow and Sunset are colour-led; Bubbles, Drift Away, Matrix
-Glitch, and Upside Down combine Arena-supported tags and colours.
+the current non-sprite FX so every named look is deterministic while preserving
+inline sprites. Ice Rainbow and Sunset are colour-led; Bubbles, Drift Away,
+Matrix Glitch, and Upside Down combine Arena-supported tags and colours.
 
 COLOUR + EFFECT SOURCES
 - The Layer Dock has exactly two draggable creation points, paired directly
@@ -66,8 +67,8 @@ COLOUR + EFFECT SOURCES
 - All Caps and Small Caps are direct whole-name toggles. Bold, Italic,
   Underline, Strike, Superscript, Subscript, Size, Spacing, Rotate, and Offset
   are normal positioned FX choices.
-- Dragging an existing layer reveals a red delete target. It lights up when the
-  layer can be released there.
+- Dragging an existing layer creates a floating copy that follows the pointer
+  and reveals a full-width red delete bar directly below the tube.
 - The four most recently used colours and positioned effects appear first.
 - Rotate, flip, save, reapply, and delete browser-local palettes.
 - Global or positioned italic, underline, strike, sup, sub, size, character

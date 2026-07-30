@@ -139,6 +139,22 @@ The Ultimate development source was rebuilt around one editing surface.
   that restore the name, colours, whole-name toggles, positioned FX, and
   sprites.
 
+### Ultimate v6.3 mobile interaction repair
+
+- Moved source-bubble and placed-layer pointer tracking to the document so
+  mobile drags continue after the finger leaves the original button.
+- Added a floating copy of an existing layer during movement; it follows the
+  finger all the way into the red delete bar directly under the tube.
+- Made the active dragged layer drive one symmetric collision pass, so FX can
+  displace Colour and Colour can displace FX.
+- Stopped opening the layer editor after a drop or drag. It is hidden by
+  default and opens only when a placed bubble is tapped.
+- Made combined presets deterministic: each replaces prior non-sprite FX while
+  preserving sprites. Drift Away is unchanged; Matrix can no longer inherit a
+  stray manual underline.
+- Gated the short instructions behind the header Instructions button and moved
+  More to the bottom of the editor.
+
 ### Removed from the product surface
 
 - Alternate/prismatic duplicate name view.
@@ -155,5 +171,5 @@ reduced-motion support, and fan-content notice remain.
 
 ## Release status
 
-The v6.2 interface is the `/ultimate/` release in both website mirrors as of
+The v6.3 interface is the `/ultimate/` release in both website mirrors as of
 2026-07-30. `/colour/` remains Version 6 and Version Lite remains shelved.
