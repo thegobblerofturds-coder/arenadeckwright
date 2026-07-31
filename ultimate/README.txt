@@ -2,7 +2,7 @@ TURDGOBBLER'S DECK NAME COLOURIFIER — ULTIMATE VERSION
 
 STATUS
 This folder is the active Ultimate source. The current published build is
-ultimate-7.8.
+ultimate-7.9.
 Version 6 remains the standard /colour/ release and Version Lite remains
 shelved.
 
@@ -54,8 +54,9 @@ THE TWO PRESET LAUNCHERS
    keep two-, three-, and four/five-colour identities from jumping as the
    selection changes. Multi-colour identities divide the deck-name letters
    evenly by default and rebalance when the name changes.
-2. PRESETS opens below the tube with Colour above, Special on the left, and
-   Saved on the right. Colour contains Ice, Prismatic, Sunset Relic, and Toxic
+2. PRESETS opens below the tube in one lifted upper arc: Special on the left,
+   Colour high in the middle, and Saved on the right. Colour contains Ice,
+   Prismatic, Sunset Relic, and Toxic
    Foil. Special contains Upside Down, Bubbles, Drift Away, and Matrix Glitch.
    Every submenu uses the same four-choice upper arc. Saved provides four fixed
    complete-look slots that can be previewed, renamed, deleted, or saved over.

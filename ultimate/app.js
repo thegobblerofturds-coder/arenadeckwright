@@ -2753,7 +2753,7 @@
   function positionPresetOrbitButtons() {
     const buttons = Array.from(els.presetOrbitItems.children);
     const count = buttons.length;
-    const upperArc = !['root', 'rename'].includes(presetMenuLevel) && count <= 4;
+    const upperArc = presetMenuLevel !== 'rename' && count <= 4;
     buttons.forEach((button, index) => {
       const angle = (upperArc
         ? count === 1 ? -90 : -155 + index * 130 / (count - 1)
@@ -2800,9 +2800,9 @@
 
     if (atRoot) {
       els.presetOrbitStatus.textContent = 'CHOOSE A COLLECTION';
+      appendPresetOrbitButton({label: 'SPECIAL', note: `${STYLE_PRESETS.length} LOOKS`, icon: '✦', action: () => setPresetMenu('special')});
       appendPresetOrbitButton({label: 'COLOUR', note: `${COLOUR_PRESETS.length} PALETTES`, icon: '◒', action: () => setPresetMenu('colour')});
       appendPresetOrbitButton({label: 'SAVED', note: `${state.savedCompositions.length} / 4 SLOTS`, icon: '★', action: () => setPresetMenu('saved')});
-      appendPresetOrbitButton({label: 'SPECIAL', note: `${STYLE_PRESETS.length} LOOKS`, icon: '✦', action: () => setPresetMenu('special')});
     } else if (presetMenuLevel === 'colour') {
       els.presetOrbitStatus.textContent = 'COLOUR PRESETS · TAP TO APPLY';
       COLOUR_PRESETS.forEach((preset) => appendPresetOrbitButton({

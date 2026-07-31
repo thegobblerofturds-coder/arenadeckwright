@@ -1,5 +1,12 @@
 # Ultimate Version — name-canvas rebuild record
 
+## Ultimate 7.9 refinement — published 2026-07-30
+
+- Lifted the three Presets collections into the same compact upper arc as their
+  submenus: Special left, Colour high in the middle, and Saved right.
+- Shortened the root orbit and moved its centre marker beneath the arc so
+  Special and Saved no longer sink toward the bottom of the panel.
+
 ## Ultimate 7.8 refinement — published 2026-07-30
 
 - Lifted Colour bubbles float independently during a drag, so edge movement
