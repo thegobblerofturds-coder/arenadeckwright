@@ -350,16 +350,35 @@
 
   function normaliseInlineEvents(events, textLength = Infinity) {
     const maximum = Number.isFinite(textLength) ? Math.max(0, textLength) : Number.MAX_SAFE_INTEGER;
-    const eventPriority = (event) => event.type === 'tag' ? 0 : event.type === 'sprite' ? 1 : 2;
-    return (Array.isArray(events) ? events : [])
+    const normalised = (Array.isArray(events) ? events : [])
       .map((event, index) => {
         const code = inlineEventCode(event);
         if (!code) return null;
         const offset = Math.max(0, Math.min(maximum, Math.floor(Number(event.offset) || 0)));
         return {...event, offset, code, sequence: Number.isFinite(Number(event.sequence)) ? Number(event.sequence) : index};
       })
-      .filter(Boolean)
-      .sort((left, right) => left.offset - right.offset || eventPriority(left) - eventPriority(right) || left.sequence - right.sequence);
+      .filter(Boolean);
+    const spritesByOffset = new Map();
+    normalised.forEach((event) => {
+      if (event.type !== 'sprite') return;
+      if (!spritesByOffset.has(event.offset)) spritesByOffset.set(event.offset, []);
+      spritesByOffset.get(event.offset).push(event);
+    });
+    spritesByOffset.forEach((sprites) => sprites.sort((left, right) => left.sequence - right.sequence));
+    const eventPriority = (event) => {
+      const sprites = spritesByOffset.get(event.offset) || [];
+      if (event.type === 'sprite') return sprites.indexOf(event) * 2 + 1;
+      if (event.type === 'tag') {
+        const targetIndex = sprites.findIndex((sprite) => sprite.id && sprite.id === event.beforeSpriteId);
+        return targetIndex >= 0 ? targetIndex * 2 : sprites.length * 2;
+      }
+      return sprites.length * 2 + 1;
+    };
+    return normalised.sort((left, right) => (
+      left.offset - right.offset ||
+      eventPriority(left) - eventPriority(right) ||
+      left.sequence - right.sequence
+    ));
   }
 
   function insertInlineEvent(events, event, offset) {

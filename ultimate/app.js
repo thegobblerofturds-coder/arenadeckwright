@@ -9,11 +9,11 @@
   const MAX_HISTORY = 50;
   const MANA_ORDER = ['W', 'U', 'B', 'R', 'G'];
   const MANA = {
-    W: {name: 'White', colour: '#F4E7C4'},
-    U: {name: 'Blue', colour: '#2684FF'},
-    B: {name: 'Black', colour: '#6B4777'},
-    R: {name: 'Red', colour: '#E34832'},
-    G: {name: 'Green', colour: '#39A96B'}
+    W: {name: 'White', colour: '#F4E7C4', symbol: '☀'},
+    U: {name: 'Blue', colour: '#2684FF', symbol: '💧'},
+    B: {name: 'Black', colour: '#6B4777', symbol: '☠'},
+    R: {name: 'Red', colour: '#E34832', symbol: '🔥'},
+    G: {name: 'Green', colour: '#39A96B', symbol: '🍃'}
   };
   const IDENTITY_NAMES = {
     W: 'MONO-WHITE', U: 'MONO-BLUE', B: 'MONO-BLACK', R: 'MONO-RED', G: 'MONO-GREEN',
@@ -151,6 +151,7 @@
   let pendingLayerOffset = null;
   let pendingLayerPosition = null;
   let pendingLayerCategory = null;
+  let pendingLayerBeforeSpriteId = '';
   let pendingSourcePayload = null;
   let pendingSourceLabel = '';
   let wubrgSession = null;
@@ -301,6 +302,16 @@
           ? event.offset / state.name.length
           : 0
     }));
+    const spriteBoundaries = new Set(
+      state.events
+        .filter((event) => event.type === 'sprite' && event.id)
+        .map((event) => `${event.offset}:${event.id}`)
+    );
+    state.events.forEach((event) => {
+      if (event.type === 'tag' && event.beforeSpriteId && !spriteBoundaries.has(`${event.offset}:${event.beforeSpriteId}`)) {
+        delete event.beforeSpriteId;
+      }
+    });
     state.wubrg = Array.isArray(state.wubrg)
       ? state.wubrg.filter((code, index, source) => MANA[code] && source.indexOf(code) === index).slice(0, 5)
       : [];
@@ -783,15 +794,12 @@
     let targets = [];
     if (entry.anchorTarget === 'sprite') {
       const sprite = Array.from(els.outputPreview.querySelectorAll('.preview-sprite'))
-        .find((candidate) => candidate.dataset.eventId === entry.layerId);
+        .find((candidate) => candidate.dataset.eventId === entry.anchorSpriteId);
       if (sprite) targets = [sprite];
     } else {
       const textTarget = els.outputPreview.querySelector(
         `.preview-glyph[data-drop-offset="${offset}"], .preview-end-target[data-drop-offset="${offset}"]`
       );
-      if (entry.kind === 'effect') {
-        targets = Array.from(els.outputPreview.querySelectorAll(`.preview-sprite[data-drop-offset="${offset}"]`));
-      }
       if (textTarget) targets.push(textTarget);
     }
     if (!targets.length) return null;
@@ -859,6 +867,7 @@
           sourceIndex,
           layerId: token.dataset.layerId || '',
           anchorTarget: token.dataset.anchorTarget || 'text',
+          anchorSpriteId: token.dataset.anchorSpriteId || '',
           anchorOffset: Number(token.dataset.anchorOffset || 0),
           pinned: token.classList.contains('dragging')
         };
@@ -906,7 +915,7 @@
     ordered.forEach((entry) => {
       entry.token.classList.toggle('dense', dense);
       entry.token.style.left = `${entry.resolved.toFixed(1)}px`;
-      const key = entry.anchorTarget === 'sprite' ? `sprite:${entry.layerId}` : `offset:${entry.anchorOffset}`;
+      const key = entry.anchorTarget === 'sprite' ? `sprite:${entry.anchorSpriteId}` : `offset:${entry.anchorOffset}`;
       if (!guideGroups.has(key)) guideGroups.set(key, []);
       guideGroups.get(key).push(entry);
     });
@@ -1028,7 +1037,7 @@
         : snapTarget
           ? Number(snapTarget.dataset.dropOffset)
           : offsetFromPosition(tubePosition(moveEvent.clientX));
-      options.update(position, offset);
+      options.update(position, offset, snapTarget);
       target.dataset.visualPosition = String(position);
       if (options.kind === 'colour') {
         target.dataset.anchorPosition = String(position);
@@ -1037,9 +1046,9 @@
         target.dataset.anchorOffset = String(offset);
       }
       layoutRailTokens();
-      showCanvasDropTarget(snapTarget);
       setCentreMarker(position, true);
       renderOutput();
+      showCanvasDropTarget(refreshedCanvasTarget(snapTarget), options.targetKind);
       els.tubeFill.style.background = gradientCss();
     };
     const finish = (finishEvent, cancelled = false) => {
@@ -1158,7 +1167,8 @@
     button.className = `tube-token effect-token token-${key}`;
     if (event.type === 'sprite') button.classList.add('sprite-token');
     button.dataset.layerKind = event.type === 'sprite' ? 'sprite' : 'effect';
-    button.dataset.anchorTarget = event.type === 'sprite' ? 'sprite' : 'text';
+    button.dataset.anchorTarget = event.type === 'sprite' || event.beforeSpriteId ? 'sprite' : 'text';
+    button.dataset.anchorSpriteId = event.type === 'sprite' ? event.id : event.beforeSpriteId || '';
     button.dataset.anchorOffset = String(event.offset);
     button.dataset.visualPosition = String(event.position ?? positionFromOffset(event.offset));
     button.dataset.layerId = event.id;
@@ -1176,9 +1186,15 @@
     button.setAttribute('aria-valuenow', String(Math.round((event.position ?? positionFromOffset(event.offset)) * 100)));
     button.addEventListener('pointerdown', (pointerEvent) => beginTokenDrag(pointerEvent, {
       kind: 'event',
-      update: (position, offset) => {
+      targetKind: event.type === 'sprite' ? 'sprite' : 'effect',
+      update: (position, offset, snapTarget) => {
         event.position = position;
         event.offset = offset;
+        if (event.type !== 'sprite') {
+          const beforeSpriteId = spriteBoundaryId(snapTarget);
+          if (beforeSpriteId) event.beforeSpriteId = beforeSpriteId;
+          else delete event.beforeSpriteId;
+        }
       },
       select: () => selectLayer('event', event.id),
       finish: () => { state.selected = null; },
@@ -1208,6 +1224,7 @@
         else if (keyEvent.key === 'End') event.position = 1;
         else event.position = Math.max(0, Math.min(1, (event.position ?? positionFromOffset(event.offset)) + direction * step / 100));
         event.offset = offsetFromPosition(event.position);
+        if (event.type !== 'sprite') delete event.beforeSpriteId;
         state.selected = {kind: 'event', id: event.id};
       }, `Moved ${eventLabel(event)}`);
       requestAnimationFrame(() => document.querySelector(`[data-layer-id="${event.id}"]`)?.focus());
@@ -1657,13 +1674,14 @@
     }, 'Colour layer duplicated');
   }
 
-  function beginLayerSelection(category, offset, position = null) {
+  function beginLayerSelection(category, offset, position = null, target = null) {
     const safeOffset = Math.max(0, Math.min(state.name.length, Math.round(offset)));
     pendingLayerOffset = safeOffset;
     pendingLayerPosition = Math.max(0, Math.min(1, position ?? (
       category === 'colours' ? colourPositionFromOffset(safeOffset) : positionFromOffset(safeOffset)
     )));
     pendingLayerCategory = category;
+    pendingLayerBeforeSpriteId = category === 'effects' ? spriteBoundaryId(target) : '';
     state.selected = null;
     const isColour = category === 'colours';
     const isSprite = category === 'sprites';
@@ -1727,6 +1745,7 @@
     pendingLayerOffset = null;
     pendingLayerPosition = null;
     pendingLayerCategory = null;
+    pendingLayerBeforeSpriteId = '';
     pendingSourcePayload = null;
     pendingSourceLabel = '';
     els.pendingChoiceBanner.hidden = true;
@@ -1744,10 +1763,11 @@
       }
       const offset = pendingLayerOffset;
       const position = pendingLayerPosition;
+      const beforeSpriteId = pendingLayerBeforeSpriteId;
       rememberSourcePayload(payload, label);
       cancelPendingLayer();
       state.activeTab = null;
-      placePayloadAtOffset(payload, offset, position);
+      placePayloadAtOffset(payload, offset, position, beforeSpriteId);
       setActiveTab(null);
       els.tubeNameCanvas.scrollIntoView?.({block: 'nearest', behavior: 'smooth'});
       return;
@@ -1773,7 +1793,8 @@
         id: selected.id,
         offset: selected.offset,
         position: selected.position,
-        sequence: selected.sequence
+        sequence: selected.sequence,
+        beforeSpriteId: selected.beforeSpriteId
       };
       state.activeTab = null;
       mutate(() => {
@@ -1789,7 +1810,7 @@
     announce(`Drag the ${sourceName} bubble onto the name first`, true);
   }
 
-  function insertPayload(payload, offset = state.caret, position = null) {
+  function insertPayload(payload, offset = state.caret, position = null, beforeSpriteId = '') {
     if (!payload) return;
     if (payload.kind === 'reservoir') {
       beginLayerSelection(payload.category, offset);
@@ -1806,6 +1827,7 @@
       position: Math.max(0, Math.min(1, position ?? positionFromOffset(offset))),
       sequence: state.events.reduce((highest, item) => Math.max(highest, Number(item.sequence) || 0), 0) + 1
     };
+    if (event.type === 'tag' && beforeSpriteId) event.beforeSpriteId = beforeSpriteId;
     mutate(() => {
       state.events.push(event);
       state.selected = null;
@@ -1830,20 +1852,21 @@
       position: Math.min(1, (source.position ?? positionFromOffset(source.offset)) + .05),
       sequence: state.events.reduce((highest, item) => Math.max(highest, Number(item.sequence) || 0), 0) + 1
     };
+    delete copy.beforeSpriteId;
     mutate(() => {
       state.events.push(copy);
       state.selected = {kind: 'event', id: copy.id};
     }, `${eventLabel(copy)} duplicated`);
   }
 
-  function placePayloadAtOffset(payload, offset, position = null) {
+  function placePayloadAtOffset(payload, offset, position = null, beforeSpriteId = '') {
     if (!payload) return;
     const safeOffset = Math.max(0, Math.min(state.name.length, Math.round(offset)));
     const visualPosition = position === null
       ? payload.kind === 'colour' ? colourPositionFromOffset(safeOffset) : positionFromOffset(safeOffset)
       : Math.max(0, Math.min(1, position));
     setCaret(safeOffset, false);
-    insertPayload(payload, safeOffset, visualPosition);
+    insertPayload(payload, safeOffset, visualPosition, beforeSpriteId);
   }
 
   function enableReservoirDrag(element, payload) {
@@ -1903,7 +1926,7 @@
             ? Number(target.dataset.dropOffset)
             : offsetFromPosition(tubePosition(moveEvent.clientX));
         if (target) {
-          showCanvasDropTarget(target);
+          showCanvasDropTarget(target, payload.category === 'effects' ? 'effect' : 'sprite');
         } else {
           const canvasBounds = els.tubeNameCanvas.getBoundingClientRect();
           els.dropGuide.style.left = `${Math.max(0, Math.min(canvasBounds.width, moveEvent.clientX - canvasBounds.left))}px`;
@@ -1947,7 +1970,7 @@
           : target
             ? Number(target.dataset.dropOffset)
             : offsetFromPosition(tubePosition(finishEvent.clientX));
-        beginLayerSelection(payload.category, offset, visualPosition);
+        beginLayerSelection(payload.category, offset, visualPosition, target);
       };
       const cancel = (cancelEvent) => {
         if (cancelEvent.pointerId !== event.pointerId) return;
@@ -2262,8 +2285,8 @@
       colours: composition.colours?.map(({colour, position}) => ({colour, position})),
       formatting: composition.formatting,
       effects: composition.effects,
-      events: composition.events?.map(({type, code, value, offset, position, sequence}) => ({
-        type, code, value, offset, position, sequence
+      events: composition.events?.map(({type, code, value, offset, position, sequence, beforeSpriteId}) => ({
+        type, code, value, offset, position, sequence, beforeSpriteId
       }))
     });
   }
@@ -2524,7 +2547,7 @@
     const sail = document.createElement('span');
     sail.className = `mana-sail mana-sail-${code.toLowerCase()}`;
     sail.setAttribute('aria-hidden', 'true');
-    sail.textContent = code;
+    sail.textContent = MANA[code]?.symbol || code;
     sail.style.left = `${bounds.left + bounds.width / 2}px`;
     sail.style.top = `${bounds.top + bounds.height / 2}px`;
     document.body.appendChild(sail);
@@ -3038,6 +3061,24 @@
     return Array.from(els.outputPreview.querySelectorAll('[data-drop-offset]'));
   }
 
+  function spriteBoundaryId(target) {
+    return target?.classList?.contains('preview-sprite') ? String(target.dataset.eventId || '') : '';
+  }
+
+  function refreshedCanvasTarget(target) {
+    if (!target) return null;
+    const eventId = spriteBoundaryId(target);
+    if (eventId) {
+      return Array.from(els.outputPreview.querySelectorAll('.preview-sprite'))
+        .find((candidate) => candidate.dataset.eventId === eventId) || null;
+    }
+    const offset = String(target.dataset.dropOffset || '');
+    const selector = target.classList.contains('preview-end-target')
+      ? `.preview-end-target[data-drop-offset="${offset}"]`
+      : `.preview-glyph[data-drop-offset="${offset}"]`;
+    return els.outputPreview.querySelector(selector);
+  }
+
   function canvasTargetFromPoint(clientX, directTarget = null) {
     const direct = directTarget?.closest?.('[data-drop-offset]');
     if (direct && els.outputPreview.contains(direct)) return direct;
@@ -3051,10 +3092,15 @@
     }, null)?.candidate || null;
   }
 
-  function showCanvasDropTarget(target) {
+  function showCanvasDropTarget(target, layerKind = '') {
     els.outputPreview.querySelectorAll('.drop-hover').forEach((node) => node.classList.remove('drop-hover'));
+    els.tubeTrack.classList.remove('fx-targeting', 'fx-target-sprite', 'fx-target-text');
     if (!target) return;
     target.classList.add('drop-hover');
+    if (layerKind === 'effect') {
+      els.tubeTrack.classList.add('fx-targeting');
+      els.tubeTrack.classList.add(spriteBoundaryId(target) ? 'fx-target-sprite' : 'fx-target-text');
+    }
     const targetBounds = target.getBoundingClientRect();
     const trackBounds = els.tubeTrack.getBoundingClientRect();
     const x = targetBounds.left + targetBounds.width / 2 - trackBounds.left;
