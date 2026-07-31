@@ -1,5 +1,20 @@
 # Ultimate Version — name-canvas rebuild record
 
+## Ultimate 7.8 refinement — published 2026-07-30
+
+- Lifted Colour bubbles float independently during a drag, so edge movement
+  does not shove the entire packed rail. Release-time correction moves only the
+  neighbouring chain.
+- The black tube is shorter and the Mega Tube shell reaches the workbench edge.
+- Mana pictograms clear in just over half a second.
+- Colour keeps Ice, Prismatic, Sunset Relic, and Toxic Foil. Special is restored
+  on the left with Upside Down, Bubbles, Drift Away, and Matrix Glitch.
+- Saved is four fixed slots, arranged two per side of the same upper arc, with
+  Preview, Save Over, Rename, and Delete actions for filled slots.
+- Desktop mana pictograms now have a forced `650ms` cleanup deadline; reduced
+  motion hides them entirely, so no stalled animation can leave one stranded.
+- Instructions has a prismatic animated button treatment.
+
 ## 2026-07-29: one live-name Mega Tube
 
 The Ultimate development source was rebuilt around one editing surface.
@@ -289,5 +304,5 @@ reduced-motion support, and fan-content notice remain.
 
 ## Release status
 
-The v7.0 interface is the `/ultimate/` release in both website mirrors as of
+Ultimate `7.8` is the `/ultimate/` release in both website mirrors as of
 2026-07-30. `/colour/` remains Version 6 and Version Lite remains shelved.

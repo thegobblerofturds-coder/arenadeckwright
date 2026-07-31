@@ -31,45 +31,31 @@
     ['SILVER', '#9DA4AA'], ['INK', '#171A22'], ['BONE', '#EAD9B5']
   ];
   const COLOUR_PRESETS = [
+    {name: 'ICE', note: 'COOL FULL SPECTRUM', colours: ['#E8FDFF', '#7CEBFF', '#6D9CFF', '#B778FF', '#FF91D8', '#FFF2B6']},
     {name: 'PRISMATIC', note: 'FULL SPECTRUM', colours: ['#F03444', '#FF8A24', '#FFE14A', '#43C96B', '#25BDE5', '#4669E8', '#A447D1']},
     {name: 'SUNSET RELIC', note: 'VIOLET TO GOLD', colours: ['#45256F', '#A52E72', '#E24B4B', '#F1872B', '#FFD56A']},
-    {name: 'TOXIC FOIL', note: 'INK TO ACID', colours: ['#10190D', '#267026', '#63D42F', '#D7FF45']},
-    {name: 'VOID SIGNAL', note: 'DEEP BLUE GLOW', colours: ['#111630', '#27478C', '#3F7FE8', '#79D8FF']},
-    {name: 'BLOOD MOON', note: 'CRIMSON HEAT', colours: ['#35070E', '#8F1426', '#E34832', '#FF9B55']},
-    {name: 'AETHER MINT', note: 'COOL LUMINOUS', colours: ['#153A43', '#28A98B', '#72E2C4', '#D8FFF2']},
-    {name: 'ROYAL STATIC', note: 'PURPLE ELECTRIC', colours: ['#2A174A', '#6E36BE', '#B356F0', '#F3B4FF']},
-    {name: 'SILVER SCREEN', note: 'MONO METAL', colours: ['#282C31', '#7B8288', '#F2F3F3', '#9DA4AA', '#41464B']}
+    {name: 'TOXIC FOIL', note: 'INK TO ACID', colours: ['#10190D', '#267026', '#63D42F', '#D7FF45']}
   ];
   const STYLE_PRESETS = [
     {
-      id: 'ice-rainbow', name: 'ICE RAINBOW', note: 'FROSTED FULL-SPECTRUM COLOUR', sample: 'ICE',
-      colours: ['#E8FDFF', '#7CEBFF', '#6D9CFF', '#B778FF', '#FF91D8', '#FFF2B6'],
-      formatting: {}, effects: {}
+      id: 'upside-down', name: 'UPSIDE DOWN', note: 'ROTATED VOID LETTERING', sample: 'ɐA',
+      colours: ['#B9FFEE', '#56D7D2', '#D384FF'],
+      formatting: {}, effects: {}, startCodes: ['<rotate=180>', '<cspace=1>']
     },
     {
-      id: 'sunset', name: 'SUNSET', note: 'VIOLET, EMBER, ORANGE, GOLD', sample: 'DUSK',
-      colours: ['#482367', '#A82F68', '#ED4D4B', '#FF8C31', '#FFD66A'],
-      formatting: {}, effects: {}
-    },
-    {
-      id: 'bubbles', name: 'BUBBLES', note: 'BOUNCING SIZE + VERTICAL WAVES', sample: 'OoO',
+      id: 'bubbles', name: 'BUBBLES', note: 'BOUNCING SIZE WAVE', sample: 'OoO',
       colours: ['#73F2FF', '#FFB4E6'],
       formatting: {}, effects: {}, startCodes: ['<size=10>', '<cspace=1>'], pattern: 'bubbles'
     },
     {
-      id: 'drift-away', name: 'DRIFT AWAY', note: 'SHRINK, RISE, AND SPACE OUT', sample: 'drift',
+      id: 'drift-away', name: 'DRIFT AWAY', note: 'SHRINK, RISE, SPACE OUT', sample: 'drift',
       colours: ['#F4FBFF', '#9CDBFF', '#848BFF'],
       formatting: {}, effects: {}, startCodes: ['<i>', '<cspace=2>'], pattern: 'drift'
     },
     {
-      id: 'matrix-glitch', name: 'MATRIX GLITCH', note: 'MATRIX GREEN + STAGGERED GLITCH', sample: '0101',
+      id: 'matrix-glitch', name: 'MATRIX GLITCH', note: 'GREEN STAGGERED GLITCH', sample: '0101',
       colours: ['#073B1B', '#00FF66', '#C8FFD9'],
       formatting: {}, effects: {allCaps: true}, startCodes: ['<cspace=1>'], pattern: 'glitch'
-    },
-    {
-      id: 'upside-down', name: 'UPSIDE DOWN', note: '180° ROTATION + VOID COLOUR', sample: 'ɐuǝɹ∀',
-      colours: ['#B9FFEE', '#56D7D2', '#D384FF'],
-      formatting: {}, effects: {}, startCodes: ['<rotate=180>', '<cspace=1>']
     }
   ];
   const EFFECTS = [
@@ -157,7 +143,6 @@
   let wubrgSession = null;
   let fxMenuLevel = 'root';
   let presetMenuLevel = 'root';
-  let presetMenuPage = 0;
   let selectedSavedPresetId = null;
   let stagedPreset = null;
   let state = createDefaultState();
@@ -324,12 +309,22 @@
       }));
     state.savedCompositions = (Array.isArray(state.savedCompositions) ? state.savedCompositions : [])
       .filter((entry) => entry?.composition && Array.isArray(entry.composition.colours))
-      .slice(0, 12)
       .map((entry, index) => ({
         id: String(entry.id || uid('saved')),
         name: String(entry.name || `SAVED PRESET ${index + 1}`).slice(0, 48),
+        slot: Number.isInteger(Number(entry.slot)) ? Math.max(0, Math.min(3, Number(entry.slot))) : index,
         composition: clone(entry.composition)
-      }));
+      }))
+      .reduce((slots, entry) => {
+        let slot = entry.slot;
+        if (slots.some((saved) => saved.slot === slot)) {
+          slot = [0, 1, 2, 3].find((candidate) => !slots.some((saved) => saved.slot === candidate));
+        }
+        if (slot === undefined || slots.length >= 4) return slots;
+        slots.push({...entry, slot});
+        return slots;
+      }, [])
+      .sort((left, right) => left.slot - right.slot);
     state.recentColours = (Array.isArray(state.recentColours) ? state.recentColours : [])
       .filter(Logic.validHex)
       .map((colour) => colour.toUpperCase())
@@ -881,7 +876,8 @@
     const dragged = tokens.find((entry) => entry.pinned);
     const ordered = tokens.filter((entry) => !entry.pinned)
       .sort((left, right) => left.desired - right.desired || left.sourceIndex - right.sourceIndex);
-    if (dragged) {
+    const floatingColour = dragged?.kind === 'colour';
+    if (dragged && !floatingColour) {
       const crossingThreshold = gap / 2;
       const insertionIndex = ordered.filter((entry) => entry.desired < dragged.desired - crossingThreshold).length;
       ordered.splice(insertionIndex, 0, dragged);
@@ -889,7 +885,7 @@
     ordered.forEach((entry) => {
       entry.resolved = Math.max(edge, Math.min(maximum, entry.desired));
     });
-    if (dragged) {
+    if (dragged && !floatingColour) {
       const pinnedIndex = ordered.indexOf(dragged);
       dragged.resolved = Math.max(edge, Math.min(maximum, dragged.desired));
       for (let index = pinnedIndex - 1; index >= 0; index -= 1) {
@@ -903,13 +899,22 @@
         ordered[index].resolved = Math.max(ordered[index].resolved, ordered[index - 1].resolved + gap);
       }
     }
-    if (ordered[ordered.length - 1].resolved > maximum) {
-      const shift = ordered[ordered.length - 1].resolved - maximum;
-      ordered.forEach((entry) => { entry.resolved -= shift; });
+    if (ordered.length && ordered[ordered.length - 1].resolved > maximum) {
+      ordered[ordered.length - 1].resolved = maximum;
+      for (let index = ordered.length - 2; index >= 0; index -= 1) {
+        ordered[index].resolved = Math.min(ordered[index].resolved, ordered[index + 1].resolved - gap);
+      }
     }
-    if (ordered[0].resolved < edge) {
-      const shift = edge - ordered[0].resolved;
-      ordered.forEach((entry) => { entry.resolved += shift; });
+    if (ordered.length && ordered[0].resolved < edge) {
+      ordered[0].resolved = edge;
+      for (let index = 1; index < ordered.length; index += 1) {
+        ordered[index].resolved = Math.max(ordered[index].resolved, ordered[index - 1].resolved + gap);
+      }
+    }
+    if (floatingColour) {
+      dragged.resolved = Math.max(edge, Math.min(maximum, dragged.desired));
+      ordered.push(dragged);
+      ordered.sort((left, right) => left.resolved - right.resolved || left.sourceIndex - right.sourceIndex);
     }
     const guideGroups = new Map();
     ordered.forEach((entry) => {
@@ -2309,23 +2314,44 @@
     }, `${entry.name} loaded`);
   }
 
-  function saveCurrentComposition() {
+  function savedCompositionInSlot(slot) {
+    return state.savedCompositions.find((entry) => entry.slot === slot) || null;
+  }
+
+  function saveCurrentComposition(slot, {overwrite = false} = {}) {
+    const slotIndex = Math.max(0, Math.min(3, Math.round(Number(slot) || 0)));
+    const existing = savedCompositionInSlot(slotIndex);
+    if (existing && !overwrite) {
+      setPresetMenu('overwriteConfirm', {savedId: existing.id});
+      return;
+    }
     const composition = currentComposition();
     const signature = compositionSignature(composition);
-    if (state.savedCompositions.some((entry) => compositionSignature(entry.composition) === signature)) {
-      announce('This complete preset is already saved');
+    if (existing && compositionSignature(existing.composition) === signature) {
+      stagedPreset = null;
+      clearPreview();
+      setPresetMenu('saved');
+      announce(`Slot ${slotIndex + 1} already matches the current look`);
       return;
     }
     const baseName = state.name.trim() || 'UNTITLED';
-    const matchingNames = state.savedCompositions.filter((entry) => entry.name.startsWith(baseName)).length;
-    const name = matchingNames ? `${baseName} ${matchingNames + 1}` : baseName;
-    state.savedCompositions.unshift({id: uid('saved'), name, composition});
-    state.savedCompositions = state.savedCompositions.slice(0, 12);
+    const saved = {
+      id: existing?.id || uid('saved'),
+      name: baseName,
+      slot: slotIndex,
+      composition
+    };
+    state.savedCompositions = [
+      ...state.savedCompositions.filter((entry) => entry.slot !== slotIndex),
+      saved
+    ].sort((left, right) => left.slot - right.slot);
+    stagedPreset = null;
+    clearPreview();
     persist();
     presetMenuLevel = 'saved';
-    presetMenuPage = 0;
+    selectedSavedPresetId = null;
     renderPresetMenu();
-    announce('Complete preset saved on this device');
+    announce(`${existing ? 'Saved over' : 'Saved to'} slot ${slotIndex + 1}`);
   }
 
   function rememberSourcePayload(payload, label) {
@@ -2551,7 +2577,13 @@
     sail.style.left = `${bounds.left + bounds.width / 2}px`;
     sail.style.top = `${bounds.top + bounds.height / 2}px`;
     document.body.appendChild(sail);
-    sail.addEventListener('animationend', () => sail.remove(), {once: true});
+    let cleanupTimer = 0;
+    const removeSail = () => {
+      window.clearTimeout(cleanupTimer);
+      sail.remove();
+    };
+    sail.addEventListener('animationend', removeSail, {once: true});
+    cleanupTimer = window.setTimeout(removeSail, 650);
   }
 
   function renderWubrg() {
@@ -2689,7 +2721,6 @@
 
   function setPresetMenu(level, options = {}) {
     presetMenuLevel = level;
-    if (options.resetPage !== false) presetMenuPage = 0;
     if (options.savedId !== undefined) selectedSavedPresetId = options.savedId;
     renderPresetMenu();
   }
@@ -2699,7 +2730,7 @@
       setPresetMenu('root');
       return;
     }
-    if (['rename', 'deleteConfirm'].includes(presetMenuLevel)) {
+    if (['rename', 'deleteConfirm', 'overwriteConfirm'].includes(presetMenuLevel)) {
       setPresetMenu('savedActions', {savedId: selectedSavedPresetId});
       return;
     }
@@ -2719,31 +2750,16 @@
     return button;
   }
 
-  function appendPresetPage(items, makeButton, pageSize = 5) {
-    const pageCount = Math.max(1, Math.ceil(items.length / pageSize));
-    presetMenuPage = ((presetMenuPage % pageCount) + pageCount) % pageCount;
-    items.slice(presetMenuPage * pageSize, presetMenuPage * pageSize + pageSize).forEach(makeButton);
-    if (pageCount > 1) {
-      appendPresetOrbitButton({
-        label: 'MORE',
-        note: `${presetMenuPage + 1} / ${pageCount}`,
-        icon: '→',
-        className: 'preset-more-option',
-        action: () => {
-          presetMenuPage = (presetMenuPage + 1) % pageCount;
-          renderPresetMenu();
-        }
-      });
-    }
-  }
-
   function positionPresetOrbitButtons() {
     const buttons = Array.from(els.presetOrbitItems.children);
     const count = buttons.length;
+    const upperArc = !['root', 'rename'].includes(presetMenuLevel) && count <= 4;
     buttons.forEach((button, index) => {
-      const angle = (-90 + index * 360 / Math.max(1, count)) * Math.PI / 180;
-      button.style.left = `${50 + Math.cos(angle) * 35}%`;
-      button.style.top = `${50 + Math.sin(angle) * 38}%`;
+      const angle = (upperArc
+        ? count === 1 ? -90 : -155 + index * 130 / (count - 1)
+        : -90 + index * 360 / Math.max(1, count)) * Math.PI / 180;
+      button.style.left = `${50 + Math.cos(angle) * (upperArc ? 38 : 35)}%`;
+      button.style.top = `${(upperArc ? 72 : 50) + Math.sin(angle) * (upperArc ? 55 : 38)}%`;
     });
   }
 
@@ -2785,11 +2801,11 @@
     if (atRoot) {
       els.presetOrbitStatus.textContent = 'CHOOSE A COLLECTION';
       appendPresetOrbitButton({label: 'COLOUR', note: `${COLOUR_PRESETS.length} PALETTES`, icon: '◒', action: () => setPresetMenu('colour')});
+      appendPresetOrbitButton({label: 'SAVED', note: `${state.savedCompositions.length} / 4 SLOTS`, icon: '★', action: () => setPresetMenu('saved')});
       appendPresetOrbitButton({label: 'SPECIAL', note: `${STYLE_PRESETS.length} LOOKS`, icon: '✦', action: () => setPresetMenu('special')});
-      appendPresetOrbitButton({label: 'SAVED', note: `${state.savedCompositions.length} ON DEVICE`, icon: '★', action: () => setPresetMenu('saved')});
     } else if (presetMenuLevel === 'colour') {
       els.presetOrbitStatus.textContent = 'COLOUR PRESETS · TAP TO APPLY';
-      appendPresetPage(COLOUR_PRESETS, (preset) => appendPresetOrbitButton({
+      COLOUR_PRESETS.forEach((preset) => appendPresetOrbitButton({
         label: preset.name,
         note: preset.note,
         gradient: gradientFromColours(preset.colours),
@@ -2797,34 +2813,39 @@
         action: () => stageColourPreset(preset)
       }));
     } else if (presetMenuLevel === 'special') {
-      els.presetOrbitStatus.textContent = 'SPECIAL PRESETS · TAP TO APPLY';
-      appendPresetPage(STYLE_PRESETS, (preset) => appendPresetOrbitButton({
+      els.presetOrbitStatus.textContent = 'SPECIAL LOOKS · TAP TO PREVIEW';
+      STYLE_PRESETS.forEach((preset) => appendPresetOrbitButton({
         label: preset.name,
         note: preset.note,
         icon: preset.sample,
-        gradient: gradientFromColours(preset.colours || ['#FFFFFF']),
+        gradient: gradientFromColours(preset.colours),
         selected: stagedPreset?.key === `special:${preset.id}`,
         action: () => stageSpecialPreset(preset)
-      }), 6);
+      }));
     } else if (presetMenuLevel === 'saved') {
-      els.presetOrbitStatus.textContent = state.savedCompositions.length
-        ? 'SAVED PRESETS · TAP ONE TO MANAGE IT'
-        : 'SAVE THE CURRENT COMPLETE LOOK TO BEGIN';
-      const savedItems = [{kind: 'save'}, ...state.savedCompositions.map((entry) => ({kind: 'entry', entry}))];
-      appendPresetPage(savedItems, (item) => {
-        if (item.kind === 'save') {
-          appendPresetOrbitButton({label: 'SAVE CURRENT', note: 'COMPLETE LOOK', icon: '+', className: 'preset-save-option', action: saveCurrentComposition});
+      els.presetOrbitStatus.textContent = 'FOUR DEVICE SLOTS · TAP AN EMPTY SLOT TO SAVE';
+      [0, 1, 2, 3].forEach((slot) => {
+        const entry = savedCompositionInSlot(slot);
+        if (!entry) {
+          appendPresetOrbitButton({
+            label: `SLOT ${slot + 1}`,
+            note: 'EMPTY · SAVE HERE',
+            icon: '+',
+            className: 'preset-save-option preset-slot-empty',
+            action: () => saveCurrentComposition(slot)
+          });
           return;
         }
-        const colours = item.entry.composition.colours?.map((stop) => stop.colour).filter(Logic.validHex) || ['#FFFFFF'];
+        const colours = entry.composition.colours?.map((stop) => stop.colour).filter(Logic.validHex) || ['#FFFFFF'];
         appendPresetOrbitButton({
-          label: item.entry.name,
-          note: 'LOAD · RENAME · DELETE',
+          label: `SLOT ${slot + 1}`,
+          note: entry.name,
           gradient: gradientFromColours(colours),
-          selected: stagedPreset?.key === `saved:${item.entry.id}`,
+          selected: stagedPreset?.key === `saved:${entry.id}`,
           action: () => {
-            stageSavedPreset(item.entry);
-            setPresetMenu('savedActions', {savedId: item.entry.id});
+            stagedPreset = null;
+            clearPreview();
+            setPresetMenu('savedActions', {savedId: entry.id});
           }
         });
       });
@@ -2836,13 +2857,20 @@
         return;
       }
       if (presetMenuLevel === 'savedActions') {
-        els.presetOrbitStatus.textContent = saved.name;
+        els.presetOrbitStatus.textContent = `SLOT ${saved.slot + 1} · ${saved.name}`;
         appendPresetOrbitButton({
           label: 'PREVIEW',
           note: 'THEN KEEP TO LOAD',
           icon: '↳',
           selected: stagedPreset?.key === `saved:${saved.id}`,
           action: () => stageSavedPreset(saved)
+        });
+        appendPresetOrbitButton({
+          label: 'SAVE OVER',
+          note: 'USE CURRENT LOOK',
+          icon: '↥',
+          className: 'preset-save-option',
+          action: () => setPresetMenu('overwriteConfirm', {savedId: saved.id})
         });
         appendPresetOrbitButton({label: 'RENAME', note: 'CHANGE ITS LABEL', icon: '✎', action: () => {
           presetMenuLevel = 'rename';
@@ -2853,10 +2881,28 @@
         appendPresetOrbitButton({label: 'DELETE', note: 'REMOVE FROM DEVICE', icon: '×', className: 'preset-delete-option', action: () => setPresetMenu('deleteConfirm', {savedId: saved.id})});
       } else if (presetMenuLevel === 'rename') {
         els.presetOrbitStatus.textContent = `RENAMING ${saved.name}`;
+      } else if (presetMenuLevel === 'overwriteConfirm') {
+        els.presetOrbitStatus.textContent = `SAVE OVER SLOT ${saved.slot + 1}?`;
+        appendPresetOrbitButton({
+          label: 'KEEP OLD',
+          note: 'GO BACK',
+          icon: '×',
+          className: 'preset-cancel-option',
+          action: () => setPresetMenu('savedActions', {savedId: saved.id})
+        });
+        appendPresetOrbitButton({
+          label: 'SAVE OVER',
+          note: 'REPLACE THIS SLOT',
+          icon: '✓',
+          className: 'preset-save-option',
+          action: () => saveCurrentComposition(saved.slot, {overwrite: true})
+        });
       } else if (presetMenuLevel === 'deleteConfirm') {
         els.presetOrbitStatus.textContent = `DELETE ${saved.name}?`;
         appendPresetOrbitButton({label: 'YES, DELETE', note: 'CANNOT BE UNDONE', icon: '×', className: 'preset-delete-option', action: () => {
           state.savedCompositions = state.savedCompositions.filter((entry) => entry.id !== saved.id);
+          stagedPreset = null;
+          clearPreview();
           persist();
           selectedSavedPresetId = null;
           setPresetMenu('saved');
@@ -2939,7 +2985,6 @@
     if (state.activeTab && changed) {
       if (state.activeTab === 'presets') {
         presetMenuLevel = 'root';
-        presetMenuPage = 0;
         selectedSavedPresetId = null;
         stagedPreset = null;
         clearPreview();

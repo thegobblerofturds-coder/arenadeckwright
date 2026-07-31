@@ -1,8 +1,8 @@
 TURDGOBBLER'S DECK NAME COLOURIFIER — ULTIMATE VERSION
 
 STATUS
-This folder is the active Ultimate source. The v7.0 prismatic control layout
-is the release published at /ultimate/ on 2026-07-30.
+This folder is the active Ultimate source. The current published build is
+ultimate-7.8.
 Version 6 remains the standard /colour/ release and Version Lite remains
 shelved.
 
@@ -54,17 +54,16 @@ THE TWO PRESET LAUNCHERS
    keep two-, three-, and four/five-colour identities from jumping as the
    selection changes. Multi-colour identities divide the deck-name letters
    evenly by default and rebalance when the name changes.
-2. PRESETS opens below the tube, then nests Colour, Special, and Saved
-   collections around a small centre. Inside a collection the centre becomes
-   a red Back button. Tapping a look previews it; Keep commits it, Cancel
-   restores the current look, and clicking away keeps the visible preview.
-   Preset buttons expose their full palette as a vivid sample strip so dark
-   recipes such as Toxic Foil remain recognizable before selection.
+2. PRESETS opens below the tube with Colour above, Special on the left, and
+   Saved on the right. Colour contains Ice, Prismatic, Sunset Relic, and Toxic
+   Foil. Special contains Upside Down, Bubbles, Drift Away, and Matrix Glitch.
+   Every submenu uses the same four-choice upper arc. Saved provides four fixed
+   complete-look slots that can be previewed, renamed, deleted, or saved over.
+   Inside a collection the centre becomes a red Back button.
 
-WUBRG and colour recipes replace only the colour layer. Combined Presets replace
-the current non-sprite FX so every named look is deterministic while preserving
-inline sprites. Ice Rainbow and Sunset are colour-led; Bubbles, Drift Away,
-Matrix Glitch, and Upside Down combine Arena-supported tags and colours.
+WUBRG and Colour presets replace only the colour layer. Special replaces
+non-sprite FX predictably while preserving sprites. Saved slots capture and
+restore the complete composition.
 
 COLOUR + EFFECT + SPRITE SOURCES
 - The Layer Dock has exactly three draggable creation points, paired directly
@@ -105,9 +104,6 @@ COLOUR + EFFECT + SPRITE SOURCES
   stages as the 64-character budget and deck-name length can support.
 - Copy is available both beside the name input and on the live black display;
   successful copies raise a light, coloured COPIED! confirmation.
-- The Bubbles, Drift Away, Matrix Glitch, and Upside Down recipes use compact
-  tag combinations that fit the default deck name within Arena's 64-character
-  budget.
 
 ULTIMATE COMPILER
 - Arena's raw deck-name limit is 64 characters.

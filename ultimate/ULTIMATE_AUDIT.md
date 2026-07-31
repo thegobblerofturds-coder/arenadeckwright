@@ -95,19 +95,14 @@ so compiler correctness does not require a fixed visual bubble.
 - Dotted layer guides use rendered glyph bounds as their endpoints rather than
   terminating on the decorative gradient rail.
 
-## Stylized preset shelf
+## Current built-in preset shelf
 
-- Ice Rainbow and Sunset provide compact colour-led recipes.
-- Bubbles uses one base size and two compact size changes.
-- Drift Away uses one shrink and one rise point plus global spacing.
-- Matrix Glitch combines matrix greens, all caps, spacing, one rotation change,
-  and one vertical jump.
-- Upside Down uses a whole-name 180-degree rotation with a void/ice palette.
-- Recipe-generated inline events carry their own source marker. Applying a
-  combined preset replaces all prior non-sprite FX so the named result is
-  predictable, while preserving sprites as inline content.
-- All six recipes compile the default `Your Deck Name` within the 64-character
-  Arena limit.
+- Colour contains Ice, Prismatic, Sunset Relic, and Toxic Foil.
+- Special contains Upside Down, Bubbles, Drift Away, and Matrix Glitch.
+- Colour, Special, and the four fixed Saved slots all share the compact
+  four-choice upper arc used by FX submenus.
+- Saved slot actions are Preview, Save Over, Rename, and Delete. Overwrite and
+  Delete use explicit confirmation screens.
 
 ## Research translated into product decisions
 
@@ -157,7 +152,8 @@ Only the compiler turns these domains into one raw Arena string.
   mouse, pen, and touch; keyboard placement commits through the same structured
   payload.
 - WUBRG/colour recipes cannot remove effects or sprites.
-- Stylized recipes replace manually positioned non-sprite FX predictably while
+- Built-in colour recipes leave manually positioned FX and sprites intact.
+- Special recipes replace manually positioned non-sprite FX predictably while
   preserving sprites.
 - Every positioned bubble is a keyboard-operable slider.
 - The always-visible live name surface remains fully opaque black.
