@@ -146,7 +146,13 @@ main{width:min(1380px,calc(100% - 32px));margin:auto}
   background:linear-gradient(120deg,#18242d,#0d1118 58%,#271a35);
   box-shadow:0 5px 0 #202933,0 11px 22px #211b3042,0 1px #fff3 inset,0 0 20px #7b63f235;
 }
+.launch-ultimate small{display:inline-block;margin-left:7px;padding:4px 6px;border:1px solid #b8a4ff88;border-radius:999px;color:#dcd2ff;font:900 8px/1 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.12em;text-transform:uppercase;vertical-align:2px}
 .launch-ultimate:active{box-shadow:0 1px 0 #202933,0 0 14px #7b63f235 inset}
+.twitch-invite{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:13px;max-width:620px;margin-top:18px;padding:11px 13px;border:1px solid #8e78ba;border-radius:12px;color:#3d2b55;background:linear-gradient(120deg,#fff9,#f0e8ffcc);box-shadow:0 5px 16px #4c2c7520;text-decoration:none;transition:transform .14s,border-color .14s,box-shadow .14s}
+.twitch-invite:hover{border-color:#7044ae;box-shadow:0 7px 20px #4c2c7530;transform:translateY(-2px)}
+.twitch-label{padding:7px 8px;border-radius:7px;color:#fff;background:#7044ae;font:900 8px/1 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.11em}
+.twitch-copy{display:grid;gap:3px}.twitch-copy strong{font-size:12px}.twitch-copy small{color:#6f6278;font-size:10px;line-height:1.3}
+.twitch-handle{color:#654590;font:900 8px/1.2 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:nowrap}.twitch-handle b{font-size:12px}
 .made-with-love{
   color:#766b63;
   font:900 9px/1 ui-monospace,SFMono-Regular,Consolas,monospace;
@@ -266,6 +272,9 @@ footer{
 footer .mega-link{color:inherit;opacity:.42;text-decoration:none;transition:opacity .16s,color .16s}
 footer .mega-link:hover,footer .mega-link:focus-visible{color:#2b2723;opacity:.9;outline:none;text-decoration:underline;text-underline-offset:3px}
 footer .fan-content-notice{max-width:680px;font-size:7px;font-weight:750;line-height:1.5;letter-spacing:.04em;text-align:center}
+footer .footer-links{display:flex;align-items:center;gap:14px;white-space:nowrap}
+footer .twitch-footer-link{color:#654590;opacity:.7;text-decoration:none;transition:opacity .16s,color .16s}
+footer .twitch-footer-link:hover,footer .twitch-footer-link:focus-visible{color:#4b247d;opacity:1;outline:none;text-decoration:underline;text-underline-offset:3px}
 
 .current-showcase:focus-visible,.launch:focus-visible{
   outline:3px solid var(--cyan);
@@ -276,6 +285,7 @@ footer .fan-content-notice{max-width:680px;font-size:7px;font-weight:750;line-he
   .hero{grid-template-columns:1fr;min-height:0;padding-top:62px;text-align:center}
   .hero h1,.hook,.intro{margin-left:auto;margin-right:auto}
   .hero-actions,.trust-line,.eyebrow{justify-content:center}
+  .twitch-invite{margin-left:auto;margin-right:auto;text-align:left}
   .current-showcase{width:min(850px,100%);margin:auto}
 }
 
@@ -300,6 +310,7 @@ footer .fan-content-notice{max-width:680px;font-size:7px;font-weight:750;line-he
   .launch{width:100%}
   .hero-actions{display:block}
   .launch+.launch{margin-top:12px}
+  .twitch-invite{grid-template-columns:auto minmax(0,1fr);gap:10px}.twitch-handle{grid-column:2;white-space:normal}
   .made-with-love{display:block;margin-top:17px}
   .showcase-action{right:14px;bottom:14px;font-size:8px}
 }

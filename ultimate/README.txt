@@ -2,9 +2,13 @@ TURDGOBBLER'S DECK NAME COLOURIFIER — ULTIMATE VERSION
 
 STATUS
 This folder is the active Ultimate source. The current published build is
-ultimate-7.9.
+ultimate-7.10.
 Version 6 remains the standard /colour/ release and Version Lite remains
 shelved.
+
+The public Ultimate route is deliberately labelled PROTOTYPE while its denser
+interaction model is still being refined. A quiet footer invitation links to
+TurdGobbler's Twitch channel for hands-on feedback.
 
 QUICK START
 1. Keep every file in this folder together.

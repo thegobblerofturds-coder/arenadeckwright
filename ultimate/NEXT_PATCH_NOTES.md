@@ -1,5 +1,13 @@
 # Ultimate Version — name-canvas rebuild record
 
+## Ultimate 7.10 refinement — published 2026-08-10
+
+- Marked the unfinished Ultimate route as a Prototype without changing its
+  public title or one-tube editor identity.
+- Added a quiet, friendly Twitch feedback invitation at the bottom of the app.
+- Added a more prominent but restrained Twitch invitation to the landing page;
+  Version 6 carries the same invitation in its minimal footer.
+
 ## Ultimate 7.9 refinement — published 2026-07-30
 
 - Lifted the three Presets collections into the same compact upper arc as their
