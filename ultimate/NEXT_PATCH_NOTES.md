@@ -1,5 +1,14 @@
 # Ultimate Version — name-canvas rebuild record
 
+## Ultimate 7.12 haptic interaction pass — published 2026-08-11
+
+- Added distinct haptic signatures for presses, layer pickup, target and centre
+  locking, committed drops, success, undo/redo, errors, and deletion.
+- Added rate-limited ratchet ticks while crossing text anchors, dragging range
+  controls, and moving through either colour wheel.
+- Kept the enhancement progressive: browsers without vibration support retain
+  the complete interface without errors or new controls.
+
 ## Ultimate 7.11 progressive-disclosure prototype — published 2026-08-11
 
 - Replaced the competing creation and utility rows with one calm four-door

@@ -7,6 +7,20 @@
   const LEGACY_STORAGE_KEY = 'turdgobbler-deckwright-v7';
   const MAX_COLOURS = Math.floor(Logic.LIMIT / 6);
   const MAX_HISTORY = 50;
+  const HAPTIC_PATTERNS = Object.freeze({
+    press: 16,
+    tick: 10,
+    pluck: [18, 12, 28],
+    lock: [12, 10, 40],
+    preview: [14, 10, 20],
+    commit: [18, 14, 34],
+    undo: [32, 12, 14],
+    redo: [14, 12, 32],
+    danger: [32, 18, 32],
+    delete: [55, 22, 85],
+    error: [70, 32, 70],
+    success: [18, 14, 24, 16, 52]
+  });
   const MANA_ORDER = ['W', 'U', 'B', 'R', 'G'];
   const MANA = {
     W: {name: 'White', colour: '#F4E7C4', symbol: '☀'},
@@ -157,6 +171,7 @@
   let future = [];
   let currentBuild = null;
   let toastTimer = null;
+  let lastHapticTickAt = 0;
   let previewOverride = null;
   let pendingLayerOffset = null;
   let pendingLayerPosition = null;
@@ -253,6 +268,40 @@
 
   function clone(value) {
     return JSON.parse(JSON.stringify(value));
+  }
+
+  function haptic(pattern = 'press') {
+    if (document.visibilityState === 'hidden' || typeof navigator.vibrate !== 'function') return false;
+    const vibration = HAPTIC_PATTERNS[pattern];
+    if (vibration === undefined) return false;
+    try {
+      return navigator.vibrate(vibration);
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function hapticTick() {
+    const now = performance.now();
+    if (now - lastHapticTickAt < 45) return false;
+    lastHapticTickAt = now;
+    return haptic('tick');
+  }
+
+  function installPressHaptics() {
+    const controlFromEvent = (event) => event.target?.closest?.('button, input[type="range"], select, summary');
+    document.addEventListener('pointerdown', (event) => {
+      if (!['touch', 'pen'].includes(event.pointerType)) return;
+      const control = controlFromEvent(event);
+      if (!control || control.disabled) return;
+      haptic('press');
+    }, true);
+    document.addEventListener('click', (event) => {
+      if (event.detail !== 0) return;
+      const control = controlFromEvent(event);
+      if (!control || control.disabled) return;
+      haptic('press');
+    }, true);
   }
 
   function escapeHtml(value) {
@@ -403,7 +452,7 @@
     normaliseState();
   }
 
-  function mutate(change, message = '') {
+  function mutate(change, message = '', feedback = 'commit') {
     previewOverride = null;
     history.push(snapshot());
     if (history.length > MAX_HISTORY) history.shift();
@@ -412,6 +461,7 @@
     normaliseState();
     persist();
     renderAll();
+    if (feedback) haptic(feedback);
     if (message) announce(message);
   }
 
@@ -428,6 +478,7 @@
     Object.assign(state, libraries);
     persist();
     renderAll();
+    haptic('undo');
     announce('Undid last change');
   }
 
@@ -444,10 +495,12 @@
     Object.assign(state, libraries);
     persist();
     renderAll();
+    haptic('redo');
     announce('Redid change');
   }
 
   function announce(message, isError = false) {
+    if (isError) haptic('error');
     els.toast.textContent = message;
     els.toast.classList.toggle('error', isError);
     els.toast.classList.add('visible');
@@ -1031,6 +1084,9 @@
     const startY = event.clientY;
     let moved = false;
     let dragGhost = null;
+    let overTrashPreviously = false;
+    let lastSnapKey = '';
+    let centreLocked = false;
     const target = event.currentTarget;
     try { target.setPointerCapture(event.pointerId); } catch (_) {}
     const move = (moveEvent) => {
@@ -1049,11 +1105,14 @@
         els.megaTube.classList.add('dragging-layer');
         setLayerDragFocus(true);
         setTrashZone(true, false, options.canRemove !== false);
+        haptic('pluck');
       }
       dragGhost.style.left = `${moveEvent.clientX}px`;
       dragGhost.style.top = `${moveEvent.clientY}px`;
       const overTrash = pointerInside(els.trashDropZone, moveEvent.clientX, moveEvent.clientY);
       setTrashZone(true, overTrash, options.canRemove !== false);
+      if (overTrash !== overTrashPreviously) haptic(overTrash ? 'danger' : 'tick');
+      overTrashPreviously = overTrash;
       if (overTrash) {
         showCanvasDropTarget(null);
         setCentreMarker(null, false);
@@ -1067,6 +1126,14 @@
         : snapTarget
           ? Number(snapTarget.dataset.dropOffset)
           : offsetFromPosition(tubePosition(moveEvent.clientX));
+      const snapKey = `${options.kind}:${offset}:${spriteBoundaryId(snapTarget)}`;
+      if (snapKey !== lastSnapKey) {
+        hapticTick();
+        lastSnapKey = snapKey;
+      }
+      const centred = Math.abs(position - .5) <= .035;
+      if (centred && !centreLocked) haptic('lock');
+      centreLocked = centred;
       options.update(position, offset, snapTarget);
       target.dataset.visualPosition = String(position);
       if (options.kind === 'colour') {
@@ -1113,6 +1180,7 @@
           state.selected = null;
           normaliseState();
           persist();
+          haptic('delete');
           announce('Layer deleted');
         }
       } else {
@@ -1122,6 +1190,7 @@
         options.finish();
         normaliseState();
         persist();
+        haptic('commit');
       }
       renderAll();
     };
@@ -1355,6 +1424,7 @@
     let changed = false;
     const applyPoint = (event) => {
       const colour = colourFromWheelEvent(canvas, event);
+      if (colour !== stop.colour) hapticTick();
       stop.colour = colour;
       state.wubrg = [];
       state.selected = {kind: 'colour', id: stop.id};
@@ -1382,7 +1452,10 @@
       normaliseState();
       persist();
       renderAll();
-      if (didChange) announce(`Colour changed to ${finalColour}`);
+      if (didChange) {
+        haptic('commit');
+        announce(`Colour changed to ${finalColour}`);
+      }
     };
     canvas.addEventListener('pointerdown', (event) => {
       event.preventDefault();
@@ -1391,6 +1464,7 @@
       canvas.dataset.pointerId = String(event.pointerId);
       try { canvas.setPointerCapture(event.pointerId); } catch (_) {}
       applyPoint(event);
+      haptic('pluck');
     });
     canvas.addEventListener('pointermove', (event) => {
       if (String(event.pointerId) !== canvas.dataset.pointerId) return;
@@ -1484,6 +1558,7 @@
       readout.textContent = format(next);
     };
     let before = null;
+    let lastValue = Number(range.value);
     const begin = () => {
       if (!before) before = snapshot();
     };
@@ -1494,6 +1569,10 @@
     range.addEventListener('input', () => {
       begin();
       const next = Number(range.value);
+      if (next !== lastValue) {
+        hapticTick();
+        lastValue = next;
+      }
       apply(next);
       previewOverride = null;
       setReadout();
@@ -1511,6 +1590,7 @@
       persist();
       const next = Number(range.value);
       renderAll();
+      haptic('commit');
       announce(typeof message === 'function' ? message(next) : message);
     });
     setReadout();
@@ -1686,7 +1766,7 @@
       state.selected = null;
       state.wubrg = [];
       state.activeTab = null;
-    }, 'Colour layer deleted');
+    }, 'Colour layer deleted', 'delete');
   }
 
   function duplicateColour(id) {
@@ -1730,6 +1810,7 @@
     renderInspector();
     setCaret(safeOffset, false);
     setActiveTab(category);
+    haptic('lock');
     announce(isColour
       ? 'Colour point locked — choose a colour'
       : `${sourceName} bubble locked — choose ${isSprite ? 'a sprite' : 'an effect'}`);
@@ -1751,6 +1832,7 @@
     pendingSourceLabel = label || colour;
     setColourDraft(colour);
     renderPendingChoiceActions();
+    haptic('preview');
     return true;
   }
 
@@ -1918,7 +2000,7 @@
       state.events = state.events.filter((event) => event.id !== id);
       state.selected = null;
       state.activeTab = null;
-    }, 'Effect layer deleted');
+    }, 'Effect layer deleted', 'delete');
   }
 
   function duplicateEvent(id) {
@@ -1964,6 +2046,9 @@
       const startY = event.clientY;
       let moved = false;
       let ghost = null;
+      let insidePreviously = false;
+      let lastSnapKey = '';
+      let centreLocked = false;
       try { element.setPointerCapture(event.pointerId); } catch (_) {}
       const move = (moveEvent) => {
         if (moveEvent.pointerId !== event.pointerId) return;
@@ -1980,13 +2065,19 @@
           element.classList.add('dragging');
           els.megaTube.classList.add('source-dragging');
           setLayerDragFocus(true);
+          haptic('pluck');
         }
         ghost.style.left = `${moveEvent.clientX}px`;
         ghost.style.top = `${moveEvent.clientY}px`;
         const bounds = els.tubeTrack.getBoundingClientRect();
         const inside = moveEvent.clientX >= bounds.left && moveEvent.clientX <= bounds.right &&
           moveEvent.clientY >= bounds.top && moveEvent.clientY <= bounds.bottom;
+        const justEntered = inside && !insidePreviously;
+        if (inside !== insidePreviously) haptic(inside ? 'lock' : 'tick');
+        insidePreviously = inside;
         if (!inside) {
+          centreLocked = false;
+          lastSnapKey = '';
           showCanvasDropTarget(null);
           setCentreMarker(null, false);
           els.dropGuide.classList.remove('visible');
@@ -2001,6 +2092,14 @@
           : target
             ? Number(target.dataset.dropOffset)
             : offsetFromPosition(tubePosition(moveEvent.clientX));
+        const snapKey = `${payload.category}:${offset}:${spriteBoundaryId(target)}`;
+        if (snapKey !== lastSnapKey) {
+          if (!justEntered) hapticTick();
+          lastSnapKey = snapKey;
+        }
+        const centred = Math.abs(visualPosition - .5) <= .035;
+        if (centred && !centreLocked && !justEntered) haptic('lock');
+        centreLocked = centred;
         if (target) {
           showCanvasDropTarget(target, payload.category === 'effects' ? 'effect' : 'sprite');
         } else {
@@ -2219,18 +2318,21 @@
     stagedPreset = {kind: 'colour', key: `colour:${preset.name}`, label: preset.name, colours: clone(preset.colours)};
     previewColours(preset.colours);
     renderPresetMenu();
+    haptic('preview');
   }
 
   function stageSpecialPreset(preset) {
     stagedPreset = {kind: 'special', key: `special:${preset.id}`, label: preset.name, presetId: preset.id};
     previewStyle(preset);
     renderPresetMenu();
+    haptic('preview');
   }
 
   function stageSavedPreset(entry) {
     stagedPreset = {kind: 'saved', key: `saved:${entry.id}`, label: entry.name, savedId: entry.id};
     previewComposition(entry);
     renderPresetMenu();
+    haptic('preview');
   }
 
   function keepStagedPreset() {
@@ -2267,7 +2369,10 @@
     stagedPreset = null;
     clearPreview();
     setActiveTab(null);
-    if (hadPreview) announce('Preset preview cancelled');
+    if (hadPreview) {
+      haptic('undo');
+      announce('Preset preview cancelled');
+    }
   }
 
   function closePresetMenu({keep = true} = {}) {
@@ -2337,6 +2442,7 @@
         state.favourites.splice(index, 1);
         persist();
         renderSavedPalettes();
+        haptic('delete');
         announce(`${entry.name} deleted`);
       });
       card.append(apply, remove);
@@ -2422,6 +2528,7 @@
     presetMenuLevel = 'saved';
     selectedSavedPresetId = null;
     renderPresetMenu();
+    haptic('success');
     announce(`${existing ? 'Saved over' : 'Saved to'} slot ${slotIndex + 1}`);
   }
 
@@ -2619,7 +2726,10 @@
     state.activeTab = null;
     persist();
     renderAll();
-    if (!quiet && session.dirty) announce('WUBRG colours kept');
+    if (!quiet && session.dirty) {
+      haptic('success');
+      announce('WUBRG colours kept');
+    }
   }
 
   function cancelWubrgSession() {
@@ -2636,6 +2746,7 @@
     previewOverride = null;
     persist();
     renderAll();
+    haptic('undo');
     announce('WUBRG changes cancelled');
   }
 
@@ -2853,6 +2964,7 @@
     saved.name = nextName;
     persist();
     setPresetMenu('savedActions', {savedId: saved.id});
+    haptic('success');
     announce(`Saved preset renamed to ${nextName}`);
   }
 
@@ -2977,6 +3089,7 @@
           persist();
           selectedSavedPresetId = null;
           setPresetMenu('saved');
+          haptic('delete');
           announce(`${saved.name} deleted`);
         }});
         appendPresetOrbitButton({label: 'KEEP IT', note: 'GO BACK', icon: '✓', action: () => setPresetMenu('savedActions', {savedId: saved.id})});
@@ -3129,6 +3242,7 @@
       document.execCommand('copy');
       textarea.remove();
     }
+    haptic('success');
     playCopySail(source);
     announce(label);
   }
@@ -3233,6 +3347,7 @@
 
   function selectWheelPoint(event) {
     const colour = colourFromWheelEvent(els.colourWheel, event);
+    if (colour !== normaliseHex(els.colourHex.value)) hapticTick();
     setColourDraft(colour);
     if (pendingLayerCategory === 'colours') {
       pendingSourcePayload = {kind: 'colour', colour};
@@ -3265,7 +3380,7 @@
         const recentColours = state.recentColours;
         const recentEffects = state.recentEffects;
         state = {...fresh, activeTab, favourites, savedCompositions, recentColours, recentEffects};
-      }, 'Started over — Undo is available');
+      }, 'Started over — Undo is available', 'delete');
     });
     els.copyButton.addEventListener('click', () => copyCurrentName(els.copyButton));
     els.undoButton.addEventListener('click', undo);
@@ -3276,7 +3391,7 @@
       state.effects = Logic.normaliseEffects({});
       state.events = state.events.filter((event) => event.type === 'sprite');
       state.selected = null;
-    }, 'All effect layers cleared; sprites preserved'));
+    }, 'All effect layers cleared; sprites preserved', 'delete'));
     els.addCustomColour.addEventListener('click', () => {
       const colour = normaliseHex(els.colourHex.value);
       if (!colour) {
@@ -3320,6 +3435,7 @@
       event.preventDefault();
       try { els.colourWheel.setPointerCapture(event.pointerId); } catch (_) {}
       selectWheelPoint(event);
+      haptic('pluck');
     });
     els.colourWheel.addEventListener('pointermove', (event) => {
       if (!els.colourWheel.hasPointerCapture?.(event.pointerId) && !event.buttons) return;
@@ -3351,6 +3467,7 @@
       state.favourites = state.favourites.slice(0, 10);
       persist();
       renderSavedPalettes();
+      haptic('success');
       announce('Palette saved on this device');
     });
     document.querySelectorAll('[data-global-toggle]').forEach((button) => {
@@ -3370,6 +3487,7 @@
     els.pendingChoiceCancel.addEventListener('click', () => {
       cancelPendingLayer();
       setActiveTab(null);
+      haptic('undo');
       announce('New colour cancelled');
     });
     els.wubrgKeepButton.addEventListener('click', () => confirmWubrgSession());
@@ -3524,6 +3642,7 @@
   renderColourSources();
   renderSpriteSources();
   renderPresets();
+  installPressHaptics();
   installEvents();
   renderAll();
 })();

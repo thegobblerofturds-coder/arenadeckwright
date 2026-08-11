@@ -2,7 +2,7 @@ TURDGOBBLER'S DECK NAME COLOURIFIER — ULTIMATE VERSION
 
 STATUS
 This folder is the active Ultimate source. The current published build is
-ultimate-7.11.
+ultimate-7.12.
 Version 6 remains the standard /colour/ release and Version Lite remains
 shelved.
 
@@ -14,6 +14,10 @@ retaining direct drag placement.
 The public Ultimate route is deliberately labelled PROTOTYPE while its denser
 interaction model is still being refined. A quiet footer invitation links to
 TurdGobbler's Twitch channel for hands-on feedback.
+
+Supported devices now add crunchy haptic feedback to presses, layer pickup,
+character and centre snapping, committed drops, copy, undo/redo, errors, and
+deletion. Browsers without the Web Vibration API continue without vibration.
 
 QUICK START
 1. Keep every file in this folder together.
