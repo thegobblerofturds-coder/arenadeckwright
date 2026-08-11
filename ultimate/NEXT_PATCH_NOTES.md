@@ -1,5 +1,14 @@
 # Ultimate Version — name-canvas rebuild record
 
+## Ultimate 7.14 confirmation-alignment pass — published 2026-08-11
+
+- Kept Add at Centre in the same first confirmation position for Colour, FX,
+  and Sprite; WUBRG now follows it only inside the Colour guide.
+- Explicitly pinned the mobile confirmation, Close, and WUBRG rows so the
+  controls cannot reflow out of alignment.
+- Removed the repeating sweep and pulsing sparkle from Instructions while
+  preserving its prismatic border, static sparkle, hover, and focus treatment.
+
 ## Ultimate 7.13 aligned utility-row pass — published 2026-08-11
 
 - Aligned a four-cell utility row directly beneath Looks, Colour, FX, and

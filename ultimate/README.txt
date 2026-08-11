@@ -2,7 +2,7 @@ TURDGOBBLER'S DECK NAME COLOURIFIER — ULTIMATE VERSION
 
 STATUS
 This folder is the active Ultimate source. The current published build is
-ultimate-7.13.
+ultimate-7.14.
 Version 6 remains the standard /colour/ release and Version Lite remains
 shelved.
 
