@@ -223,3 +223,688 @@ body.cauldron-brewing .global-cauldron{animation:cauldron-rumble .38s ease-in-ou
 @media(prefers-reduced-motion:reduce){
   .shop-atmosphere i,.stream-water i,.tube-name-canvas::before,.global-cauldron>i::before,.global-cauldron>i::after,.global-cauldron>i em,.goblin-keeper,.goblin-keeper *{animation:none!important;transition:none!important}
 }
+
+/* ========================================================================== */
+/* RIVERFRONT STOREFRONT — the sketch becomes the actual spatial interface.   */
+/* ========================================================================== */
+
+:root{
+  --store-ink:#0c0805;
+  --store-brown:#3c2111;
+  --store-walnut:#6a3a1d;
+  --store-gold:#d99f42;
+  --store-paper:#e8cd8e;
+  --store-water:#22d9df;
+  --store-violet:#b25af0;
+  --store-green:#9fca45;
+}
+
+html{background:#080503}
+body{
+  background:
+    radial-gradient(ellipse at 50% 8%,#7e4b2429,transparent 38%),
+    linear-gradient(90deg,#080503,#1a0f08 30%,#1a100a 70%,#070402)!important;
+}
+body::before{
+  z-index:-5;
+  background:
+    radial-gradient(ellipse at 50% 105%,#075c6870,transparent 40%),
+    linear-gradient(#08050300 55%,#050302dd)!important;
+}
+.shop-atmosphere{z-index:0;opacity:.62}
+.shop-atmosphere .lantern{display:none}
+.shop-atmosphere::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:radial-gradient(ellipse at 50% 38%,transparent 0 38%,#030201a8 100%);
+}
+
+.app-shell{
+  width:min(1400px,calc(100% - 26px));
+  padding:14px 18px 34px;
+}
+
+/* Hanging shop sign */
+.masthead{
+  z-index:12;
+  width:min(720px,calc(100% - 52px));
+  min-height:92px;
+  margin:0 auto -23px;
+  padding:15px 22px 13px 31px;
+  border-width:5px;
+  border-radius:8px 11px 6px 9px;
+  background:
+    linear-gradient(96deg,#4b2814,#78431f 46%,#3f2112),
+    repeating-linear-gradient(90deg,transparent 0 72px,#160b0566 73px 76px)!important;
+  box-shadow:0 9px 0 #100804,0 22px 45px #000c,inset 0 3px #d38a4055;
+  transform:rotate(-.65deg);
+}
+.masthead::before,.masthead::after{
+  top:-58px;
+  width:5px;
+  height:68px;
+  border:0;
+  border-radius:2px;
+  background:repeating-linear-gradient(#1c120b 0 6px,#604023 7px 10px);
+  box-shadow:none;
+}
+.masthead::before{left:82px}.masthead::after{right:82px}
+.brand-lockup{padding-left:62px}
+.brand-lockup h1{
+  color:#f4e3ad;
+  font-size:clamp(29px,4.2vw,52px);
+  letter-spacing:-.045em;
+  text-shadow:0 4px #160a05,2px 0 #160a05,-2px 0 #160a05,0 0 22px #b6e05d45;
+}
+.brand-lockup .brand-kicker{color:#d7ac66;font-size:8px}
+.brand-lockup .prototype-badge{background:#c99a51;box-shadow:0 4px #170b05;font-size:6px}
+.brand-prism{
+  width:44px;
+  height:55px;
+  background:radial-gradient(circle at 35% 24%,#f3ffc0,#a7d550 31%,#4b7e31 62%,#172115)!important;
+  box-shadow:inset 0 0 0 4px #d8ed7955,0 6px 0 #160a05,0 0 20px #aee65a44;
+}
+.instructions-button{
+  border-radius:5px;
+  background:linear-gradient(#ead292,#b48343);
+  box-shadow:0 5px #160a05,inset 0 2px #fff0b077;
+}
+.instructions-panel{z-index:30;margin:33px auto 14px;width:min(900px,calc(100% - 24px))}
+
+/* One illustrated room instead of a stack of dashboard cards */
+.studio{position:relative;z-index:3}
+.tube-workbench{
+  position:relative;
+  min-height:1010px;
+  overflow:hidden;
+  border:6px solid #100804;
+  border-radius:28px 24px 32px 21px;
+  background:
+    linear-gradient(180deg,#0302011a,#03020108 54%,#0202015c),
+    url("assets/art/storefront-backdrop.png") center top/cover no-repeat!important;
+  box-shadow:0 16px 0 #090402,0 36px 90px #000,inset 0 0 0 3px #9a5d2c55!important;
+}
+.tube-workbench::before{
+  content:"";
+  position:absolute;
+  z-index:0;
+  inset:0;
+  pointer-events:none;
+  background:
+    linear-gradient(90deg,#03020173,transparent 9% 89%,#03020170),
+    radial-gradient(ellipse at 51% 54%,transparent 0 48%,#02010147 100%);
+}
+.tube-workbench::after{
+  content:"OPEN AFTER DARK";
+  position:absolute;
+  z-index:2;
+  right:20px;
+  top:126px;
+  padding:8px 12px 7px;
+  border:3px solid #1a0d06;
+  border-radius:4px;
+  color:#3b210e;
+  background:#d2a65e;
+  box-shadow:0 5px #140905,0 10px 20px #0009;
+  font-size:7px;
+  font-weight:900;
+  letter-spacing:.13em;
+  transform:rotate(4deg);
+}
+.mega-tube{
+  z-index:1;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(300px,365px);
+  grid-template-rows:auto 1fr;
+  grid-template-areas:"order purse" "shop shop";
+  gap:12px 18px;
+  min-height:995px;
+  padding:44px 28px 22px;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+.mega-tube::after{top:126px!important;right:142px!important}
+
+/* Order slip and coin purse hang over the set without becoming dashboard chrome. */
+.tube-input-row{
+  grid-area:order;
+  z-index:12;
+  align-self:start;
+  grid-template-columns:minmax(0,1fr) 162px;
+  gap:9px;
+  margin:0;
+  padding:10px 11px 12px;
+  border:4px solid #1a0d06;
+  border-radius:8px 5px 10px 6px;
+  background:linear-gradient(100deg,#d7b66f,#efd89e 48%,#c99b56);
+  box-shadow:0 7px #130905,0 16px 28px #0009,inset 0 2px #fff0bd77;
+  transform:rotate(.35deg);
+}
+.name-field>span,.copy-field>span{color:#6a411f;font-size:7px;font-weight:900}
+.name-field input{
+  height:51px;
+  border:0;
+  border-bottom:3px solid #825d34;
+  border-radius:3px;
+  color:#2a180d;
+  background:#fff5cf7d;
+  box-shadow:inset 0 -1px #fff7d9,0 1px #6e4a2b;
+  font-size:20px;
+}
+.name-field input:focus{border-color:#678e36;box-shadow:0 0 0 4px #97c94938,inset 0 -1px #fff7d9}
+.copy-button{
+  height:51px;
+  border-radius:5px;
+  background:linear-gradient(#cde16c,#75983a);
+  box-shadow:0 5px #172007,0 10px 15px #0006,inset 0 2px #f1ffb277;
+}
+.character-purse{
+  grid-area:purse;
+  z-index:12;
+  align-self:start;
+  width:100%;
+  margin:0;
+  padding:8px 11px;
+  grid-template-columns:45px auto minmax(0,1fr);
+  border-radius:28px 7px 10px 28px;
+  transform:rotate(-1deg);
+}
+.character-purse::before{
+  content:"";
+  position:absolute;
+  left:42px;
+  right:12px;
+  top:-16px;
+  height:18px;
+  border-left:3px solid #1a1009;
+  border-right:3px solid #1a1009;
+}
+.coin-stack{display:none}
+
+.tube-shell{
+  grid-area:shop;
+  position:relative;
+  display:grid;
+  grid-template-columns:minmax(0,68%) minmax(250px,32%);
+  grid-template-rows:350px 270px 250px;
+  min-height:870px;
+  margin:0;
+}
+
+/* Merchandise sits directly on the illustrated shelves. */
+.focus-dock{
+  grid-column:1;
+  grid-row:1;
+  z-index:8;
+  align-self:stretch;
+  width:100%;
+  margin:0;
+  padding:33px 26px 9px 36px;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;
+}
+.focus-dock::before,.focus-dock::after{display:none}
+.focus-dock-head{
+  position:absolute;
+  z-index:5;
+  left:43px;
+  top:4px;
+  align-items:center;
+  padding:6px 10px 5px;
+  border:3px solid #180c06;
+  border-radius:4px;
+  color:#3b200e;
+  background:#d1a35a;
+  box-shadow:0 4px #140905;
+  transform:rotate(-2deg);
+}
+.focus-dock-head b{color:#35200f;font-size:10px}.focus-dock-head span>small{color:#6f3b22}
+.focus-dock-head>small{display:none}
+.primary-tools{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(105px,145px));
+  grid-template-rows:120px 118px;
+  align-items:end;
+  justify-content:start;
+  gap:11px 20px;
+  min-height:250px;
+}
+.tool-door{
+  position:relative;
+  align-self:end;
+  width:100%;
+  height:104px;
+  padding:0 5px 5px;
+  overflow:visible;
+  border:0;
+  border-radius:0;
+  color:#fff0c8;
+  background:transparent!important;
+  box-shadow:none!important;
+  filter:drop-shadow(0 7px 4px #000b);
+}
+.tool-door::before{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  left:11%;
+  right:11%;
+  bottom:0;
+  top:auto;
+  height:35px;
+  border:3px solid #180c06;
+  border-radius:5px 4px 7px 4px;
+  background:linear-gradient(#6b3d20,#3a2112);
+  box-shadow:0 5px #100704,inset 0 2px #b7793e55;
+  transform:rotate(-1deg);
+}
+.tool-door:hover,.tool-door:focus-visible{
+  transform:translateY(-7px) rotate(-1deg);
+  filter:drop-shadow(0 11px 6px #000d) brightness(1.16);
+}
+.tool-door i{
+  position:relative;
+  z-index:2;
+  display:grid;
+  place-items:center;
+  width:62px;
+  height:67px;
+  margin:0 auto -5px;
+  border:4px solid #1a0d06;
+  border-radius:48% 48% 42% 42%/26% 26% 56% 56%;
+  color:#fff3bd;
+  background:radial-gradient(circle at 35% 28%,#ffffff66,transparent 17%),linear-gradient(#7c4be0,#3a135f);
+  box-shadow:inset 0 4px #fff4c933,0 5px #100704,0 0 17px currentColor;
+  font-size:17px;
+  font-style:normal;
+}
+.tool-door i::before{
+  content:"";
+  position:absolute;
+  left:16px;
+  right:16px;
+  bottom:100%;
+  height:13px;
+  border:4px solid #1a0d06;
+  border-bottom:0;
+  border-radius:4px 4px 0 0;
+  background:#b98548;
+}
+.tool-door span,.tool-door small{position:relative;z-index:3;display:block;text-shadow:0 2px #150a05}
+.tool-door span{font-size:9px}.tool-door small{color:#d8ba7c;font-size:5px}
+.looks-door{grid-column:1;grid-row:1}.fx-reservoir{grid-column:2;grid-row:1}.sprite-reservoir{grid-column:3;grid-row:1}.colour-reservoir{grid-column:1;grid-row:2}
+.looks-door i{border-radius:7px 10px 7px 4px;background:linear-gradient(90deg,#7b2f28,#ad6141 50%,#6c291f);transform:rotate(-6deg)}
+.looks-door i::before{display:none}
+.colour-reservoir i{background:radial-gradient(circle at 35% 28%,#ffffff99,transparent 17%),linear-gradient(#4dfff0,#14736e)}
+.fx-reservoir i{background:radial-gradient(circle at 35% 28%,#ffffff88,transparent 17%),linear-gradient(#d36aff,#592471)}
+.sprite-reservoir i{border-radius:8px 8px 16px 16px;background:linear-gradient(#d69d40,#76501f)}
+.sprite-reservoir i::before{left:8px;right:8px;height:8px;border-radius:3px;background:#d3a054}
+.tool-door[aria-pressed=true],.tool-door[aria-expanded=true]{transform:translateY(-7px);filter:drop-shadow(0 10px 6px #000d) brightness(1.2)}
+
+.editor-toolbar{
+  position:absolute;
+  z-index:5;
+  left:185px;
+  right:23px;
+  bottom:2px;
+  display:grid;
+  grid-template-columns:1.35fr repeat(3,minmax(66px,1fr));
+  gap:6px;
+  margin:0;
+  padding:6px 8px 8px;
+  border:3px solid #180c06;
+  border-radius:6px;
+  background:linear-gradient(#5d351c,#321b0f);
+  box-shadow:0 5px #100704,inset 0 2px #9b633555;
+}
+.editor-toolbar>.tool-button,.persistent-actions .tool-button{min-height:36px;border-radius:5px!important}
+.editor-toolbar .tool-button b{font-size:5px}
+.tool-guide{position:absolute;z-index:20;left:30px;right:20px;bottom:5px;margin:0}
+.trash-drop-zone{position:absolute;z-index:24;left:30px;right:20px;bottom:1px}
+
+/* A real brewing station lives between the shelves and the stream. */
+.global-toggle-bar{
+  grid-column:1/-1;
+  grid-row:2;
+  z-index:9;
+  position:relative;
+  display:block;
+  width:75%;
+  height:270px;
+  margin:0 0 0 1%;
+  padding:0;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;
+}
+.global-toggle-bar>button:not(.global-cauldron){
+  position:absolute;
+  z-index:4;
+  top:74px;
+  width:90px;
+  min-height:72px;
+  padding:7px 5px;
+  border:3px solid #180c06;
+  border-radius:8px 8px 12px 7px;
+  color:#edd9a8;
+  background:linear-gradient(#704325,#3b2213);
+  box-shadow:0 5px #110704,0 10px 18px #0009,inset 0 2px #b77b4655;
+}
+.global-toggle-bar>[data-global-toggle="allCaps"]{left:2%}
+.global-toggle-bar>[data-global-toggle="smallCaps"]{left:14%}
+.global-toggle-bar>.force-gradient{left:26%;background:linear-gradient(140deg,#8f3c2d,#9d7330,#5d8739,#356f75,#644d91)}
+.global-toggle-bar>button:not(.global-cauldron):hover{transform:translateY(-4px)}
+.global-toggle-bar button[aria-pressed=true]{color:#26320f;background:linear-gradient(#d4e273,#7b9c3a)}
+.global-cauldron{
+  position:absolute;
+  z-index:7;
+  left:43%;
+  top:8px;
+  display:flex!important;
+  flex-direction:column;
+  align-items:center!important;
+  justify-content:flex-end!important;
+  width:230px;
+  height:225px;
+  padding:0 0 4px;
+  overflow:visible;
+  border:0!important;
+  color:#fff0bd!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  text-align:center!important;
+  filter:drop-shadow(0 13px 8px #000b);
+}
+.global-cauldron::before{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  left:35px;
+  right:35px;
+  bottom:25px;
+  height:38px;
+  border-radius:50%;
+  background:radial-gradient(ellipse,#fff16d 0 12%,#ff7a20 35%,#9d2112 60%,transparent 72%);
+  box-shadow:0 0 35px #ff6a24aa;
+  animation:fire-flicker .65s ease-in-out infinite alternate;
+}
+.global-cauldron>i{
+  position:absolute;
+  left:25px;
+  top:28px;
+  width:180px;
+  height:145px!important;
+  border:7px solid #100805!important;
+  border-radius:13px 13px 48% 48%!important;
+  background:
+    radial-gradient(circle at 27% 19%,#edff9c 0 5px,transparent 6px),
+    radial-gradient(circle at 65% 12%,#cfff75 0 7px,transparent 8px),
+    radial-gradient(ellipse at 50% 13%,#a7dc50 0 18%,#3e6c31 30%,#101911 32%),
+    linear-gradient(120deg,#282823,#080907 60%,#27231c)!important;
+  box-shadow:inset 0 8px #ccf16d55,inset 15px -14px #0008,0 9px #0b0503,0 0 28px #83d54a33!important;
+}
+.global-cauldron>i::before,.global-cauldron>i::after,.global-cauldron>i em{
+  bottom:88%;
+  width:18px;
+  height:61px;
+  border-width:4px;
+  border-color:#b6f270 transparent transparent;
+  filter:drop-shadow(0 0 8px #7fe54e);
+}
+.global-cauldron>i::before{left:28px}.global-cauldron>i em{left:73px}.global-cauldron>i::after{right:22px}
+.global-cauldron>span,.global-cauldron>small{
+  position:relative;
+  z-index:5;
+  padding:3px 10px;
+  border-left:2px solid #180c06;
+  border-right:2px solid #180c06;
+  color:#3a210f;
+  background:#d4a85d;
+  text-shadow:none;
+}
+.global-cauldron>span{font-size:10px}.global-cauldron>small{font-size:5px;padding-bottom:5px}
+.global-cauldron[aria-expanded=true]{filter:drop-shadow(0 13px 8px #000b) drop-shadow(0 0 20px #a8e750)}
+.global-cauldron[aria-expanded=true]>i{transform:scale(1.035)}
+.cauldron-contents{
+  position:absolute;
+  z-index:6;
+  left:2%;
+  bottom:19px;
+  width:38%;
+  min-height:70px;
+  padding:7px;
+  border:3px solid #180c06;
+  border-radius:8px 5px 10px 6px;
+  background:linear-gradient(#4e2c19,#29170d);
+  box-shadow:0 5px #100704,inset 0 2px #8b5d3455;
+  transform:rotate(1deg);
+}
+.cauldron-contents::before{
+  content:"IN THE BREW";
+  position:absolute;
+  left:8px;
+  bottom:100%;
+  padding:4px 8px;
+  border:2px solid #180c06;
+  color:#3c210e;
+  background:#c99c51;
+  font-size:5px;
+  font-weight:900;
+  letter-spacing:.12em;
+}
+body.layer-drag-active .global-cauldron::after{
+  content:"DROP CHARM HERE";
+  position:absolute;
+  inset:6px 2px 26px;
+  display:grid;
+  place-items:center;
+  border:4px dashed #d8ff86;
+  border-radius:50%;
+  color:#efffc4;
+  background:#4e7d2b33;
+  box-shadow:0 0 30px #a8ed5c88;
+  font-size:8px;
+  font-weight:900;
+  letter-spacing:.08em;
+  text-shadow:0 2px #142006;
+}
+
+/* The authoritative output is the dark river stone in the water. */
+.tube-track{
+  grid-column:1/-1;
+  grid-row:3;
+  z-index:10;
+  align-self:end;
+  height:245px;
+  margin:0 -22px -18px;
+  overflow:visible;
+  border:0;
+  border-radius:42% 35% 18% 25%/22% 26% 12% 15%;
+  background:transparent!important;
+  box-shadow:none!important;
+  transform:rotate(-.2deg);
+}
+.tube-name-canvas{
+  inset:0;
+  overflow:hidden;
+  border:0;
+  border-radius:44% 40% 20% 30%/24% 28% 17% 18%;
+  background:
+    linear-gradient(180deg,transparent 0 8%,#033b458f 28%,#087f8ccf 60%,#053740e8),
+    repeating-radial-gradient(ellipse at 50% 20%,transparent 0 35px,#9cfff01a 37px 40px,transparent 43px 78px)!important;
+  box-shadow:inset 0 14px #71f5e23d,inset 0 -30px 45px #00161d99,0 -12px 30px #0ce0e329!important;
+}
+.tube-name-canvas::before{
+  background:
+    repeating-radial-gradient(ellipse at 50% 38%,transparent 0 24px,#b0fff320 26px 29px,transparent 31px 55px),
+    linear-gradient(100deg,transparent 5%,#bafff238 18%,transparent 32%,#e0fff728 49%,transparent 63%,#8dfff03b 80%,transparent 94%)!important;
+}
+.tube-name-canvas::after{
+  left:17%;
+  right:17%;
+  top:25px;
+  height:98px;
+  border:3px solid #151714;
+  border-radius:51% 49% 47% 53%/43% 38% 62% 57%;
+  background:radial-gradient(ellipse at 48% 36%,#252922 0 12%,#11140f 48%,#050604 75%)!important;
+  box-shadow:0 12px 24px #001216cc,inset 0 -8px 15px #000,0 0 0 3px #79f3df18!important;
+}
+.shadow-rock{
+  left:17%;
+  right:17%;
+  top:25px;
+  height:98px;
+  border-radius:51% 49% 47% 53%/43% 38% 62% 57%;
+  background:#070807;
+  box-shadow:0 12px 24px #001216cc,inset 0 -8px 15px #000,0 0 0 2px #50665c44;
+}
+.output-preview{
+  left:18%;
+  right:18%;
+  top:39px;
+  height:72px;
+  font-size:var(--name-size,24px);
+  text-shadow:0 3px 2px #000,0 0 7px #000,0 0 15px #000;
+}
+.stream-copy-cue{top:130px;color:#c5fff4;font-size:7px;opacity:.9}
+.layer-rail-frame{
+  left:6%;
+  right:6%;
+  bottom:7px;
+  height:69px;
+  border:4px solid #160b06;
+  border-radius:40% 33% 18% 26%/35% 34% 23% 28%;
+  background:linear-gradient(#5c482f 0 12%,#2b2117 13% 20%,#6e634d 22% 62%,#403321 64%)!important;
+  box-shadow:0 6px #070402,inset 0 4px #b2976a44!important;
+}
+.layer-rail-frame::after{content:"RIVERBANK · DRAG WARES TO MOVE OR RETURN"}
+.tube-status{
+  position:absolute;
+  z-index:15;
+  left:50%;
+  bottom:19px;
+  transform:translateX(-50%);
+  color:#b7f7e8;
+  text-shadow:0 2px #001a1c;
+}
+.layer-inspector{position:absolute;z-index:45;left:28px;right:28px;bottom:230px;max-width:670px;margin:auto}
+
+/* Shopkeeper stands in the scene beside the pot. */
+.goblin-keeper{
+  position:absolute;
+  z-index:14;
+  display:block;
+  top:470px;
+  right:18px;
+  width:365px;
+  min-height:430px;
+  margin:0;
+  overflow:visible;
+  border:0;
+  background:transparent;
+  box-shadow:none;
+  pointer-events:none;
+}
+.goblin-keeper img{width:100%;margin:0;filter:drop-shadow(0 18px 9px #000c)}
+.goblin-speech{
+  top:-25px;
+  right:270px;
+  width:245px;
+  min-height:78px;
+  margin:0;
+  border-radius:13px 13px 4px 13px;
+  background:linear-gradient(110deg,#f0dba5,#cda65f);
+}
+.goblin-speech b{font-size:13px}
+
+.more-menu-button{
+  width:min(430px,80%);
+  min-height:48px;
+  margin:17px auto 0;
+  border-radius:6px;
+  background:linear-gradient(#d4ad66,#9e7038);
+  transform:rotate(.4deg);
+}
+footer,.fan-content-notice{width:min(1060px,100%);margin-left:auto;margin-right:auto}
+
+@keyframes fire-flicker{
+  from{transform:scaleX(.92) scaleY(.88);filter:hue-rotate(-7deg)}
+  to{transform:translateY(-3px) scaleX(1.05) scaleY(1.12);filter:hue-rotate(8deg)}
+}
+
+@media(max-width:1050px){
+  .app-shell{width:min(980px,calc(100% - 18px));padding-left:8px;padding-right:8px}
+  .mega-tube{grid-template-columns:minmax(0,1fr) 310px;padding-left:18px;padding-right:18px}
+  .tube-shell{grid-template-columns:minmax(0,72%) minmax(220px,28%)}
+  .primary-tools{grid-template-columns:repeat(3,minmax(92px,125px));column-gap:13px}
+  .goblin-keeper{top:500px;right:-8px;width:305px}
+  .goblin-speech{right:215px;width:210px}
+  .global-toggle-bar{width:78%}
+  .global-toggle-bar>button:not(.global-cauldron){width:78px}
+  .global-toggle-bar>[data-global-toggle="smallCaps"]{left:13%}
+  .global-toggle-bar>.force-gradient{left:25%}
+  .global-cauldron{left:42%;transform:scale(.92);transform-origin:50% 100%}
+}
+
+@media(max-width:760px){
+  .app-shell{width:100%;padding:8px 5px 28px}
+  .masthead{width:calc(100% - 20px);min-height:73px;margin-bottom:-14px;padding:10px 12px 9px 18px}
+  .masthead::before,.masthead::after{top:-42px;height:50px}.masthead::before{left:46px}.masthead::after{right:46px}
+  .brand-lockup{padding-left:45px}.brand-lockup h1{font-size:28px}.brand-prism{width:33px;height:43px}.brand-lockup .prototype-badge{display:none}
+  .instructions-button{min-width:86px;min-height:37px;font-size:6px}
+  .tube-workbench{min-height:1045px;border-width:4px;border-radius:18px;background-position:42% top!important;background-size:auto 100%!important}
+  .tube-workbench::after{right:8px;top:170px;font-size:5px}
+  .mega-tube{
+    grid-template-columns:1fr;
+    grid-template-rows:auto auto 1fr;
+    grid-template-areas:"purse" "order" "shop";
+    gap:8px;
+    min-height:1035px;
+    padding:27px 8px 12px;
+  }
+  .character-purse{justify-self:end;width:min(360px,92%);grid-template-columns:40px auto 1fr}
+  .tube-input-row{grid-template-columns:minmax(0,1fr) 132px;padding:8px}
+  .name-field input,.copy-button{height:46px}.name-field input{font-size:16px}
+  .tube-shell{grid-template-columns:1fr;grid-template-rows:340px 305px 245px;min-height:890px}
+  .focus-dock{grid-column:1;padding:31px 6px 7px 12px}
+  .focus-dock-head{left:16px}
+  .primary-tools{grid-template-columns:repeat(3,minmax(88px,115px));grid-template-rows:118px 114px;gap:8px 5px}
+  .tool-door{height:98px}.tool-door i{width:54px;height:60px}
+  .editor-toolbar{left:128px;right:4px;grid-template-columns:1.2fr repeat(3,minmax(48px,1fr));padding:5px;gap:4px}
+  .global-toggle-bar{width:76%;height:305px;margin-left:0}
+  .global-toggle-bar>button:not(.global-cauldron){top:68px;width:68px;min-height:65px;padding:5px 2px;font-size:6px}
+  .global-toggle-bar>[data-global-toggle="allCaps"]{left:1%}.global-toggle-bar>[data-global-toggle="smallCaps"]{left:23%}.global-toggle-bar>.force-gradient{left:45%}
+  .global-cauldron{left:29%;top:92px;transform:scale(.76);transform-origin:50% 100%}
+  .cauldron-contents{left:1%;bottom:5px;width:55%;min-height:62px}
+  .goblin-keeper{top:590px;right:-14px;width:245px;min-height:330px}
+  .goblin-speech{top:-24px;right:160px;width:185px;min-height:65px;padding:9px 10px}.goblin-speech b{font-size:10px}
+  .tube-track{height:240px;margin-left:-8px;margin-right:-8px}
+  .tube-name-canvas::after,.shadow-rock{left:7%;right:7%}.output-preview{left:8%;right:8%}
+  .layer-rail-frame{left:3%;right:3%}
+}
+
+@media(max-width:470px){
+  .masthead{align-items:center}.brand-lockup h1{font-size:23px}.brand-lockup .brand-kicker{font-size:6px}.instructions-button{min-width:70px;padding:0 4px}
+  .tube-workbench{min-height:1070px;background-position:39% top!important}
+  .mega-tube{min-height:1060px;padding-top:24px}
+  .character-purse{width:100%;grid-template-columns:34px auto 1fr;gap:5px}.purse-icon{width:31px;height:31px}.spend-summary{font-size:4px}
+  .tube-input-row{grid-template-columns:1fr;padding:7px}.copy-field{grid-template-columns:1fr}.copy-field>span{display:none}.copy-button{height:39px}
+  .tube-shell{grid-template-rows:340px 320px 236px}
+  .primary-tools{grid-template-columns:repeat(3,minmax(74px,99px));gap:8px 1px}.tool-door{height:94px}.tool-door i{width:49px;height:55px}.tool-door span{font-size:7px}.tool-door small{font-size:4px}
+  .editor-toolbar{left:105px}.editor-toolbar>.tool-button,.persistent-actions .tool-button{min-height:32px;padding:2px}.editor-toolbar .tool-button span{font-size:10px}
+  .global-toggle-bar{width:78%;height:320px}
+  .global-toggle-bar>button:not(.global-cauldron){top:58px;width:60px;min-height:61px}.global-toggle-bar>[data-global-toggle="smallCaps"]{left:25%}.global-toggle-bar>.force-gradient{left:50%}
+  .global-cauldron{left:17%;top:104px;transform:scale(.70)}
+  .cauldron-contents{bottom:4px;width:61%;min-height:59px}
+  .goblin-keeper{top:624px;right:-19px;width:210px}
+  .goblin-speech{top:-34px;right:120px;width:165px;min-height:60px}.goblin-speech small{font-size:4px}.goblin-speech b{font-size:9px}
+  .tube-track{height:233px}.tube-name-canvas::after,.shadow-rock{top:27px;height:92px}.output-preview{top:40px}.stream-copy-cue{top:127px}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .global-cauldron::before{animation:none!important}
+}
