@@ -7,6 +7,7 @@
   const LEGACY_STORAGE_KEY = 'turdgobbler-deckwright-v7';
   const MAX_COLOURS = Math.floor(Logic.LIMIT / 6);
   const MAX_HISTORY = 50;
+  const SAVED_PRESET_LEVELS = new Set(['saved', 'savedActions', 'rename', 'deleteConfirm', 'overwriteConfirm']);
   const HAPTIC_PATTERNS = Object.freeze({
     press: 16,
     tick: 10,
@@ -153,9 +154,11 @@
     presetRenameSave: $('presetRenameSave'), presetRenameCancel: $('presetRenameCancel'),
     presetOrbitStatus: $('presetOrbitStatus'), presetPreviewActions: $('presetPreviewActions'),
     presetKeepButton: $('presetKeepButton'), presetCancelButton: $('presetCancelButton'),
+    presetPanelEyebrow: $('presetPanelEyebrow'), presetPanelTitle: $('presetPanelTitle'),
+    presetPanelNote: $('presetPanelNote'),
     colourLayerBubble: $('colourLayerBubble'), fxLayerBubble: $('fxLayerBubble'),
     spriteLayerBubble: $('spriteLayerBubble'),
-    tabWubrg: $('tabWubrg'),
+    tabPresets: $('tabPresets'), tabSaved: $('tabSaved'), tabWubrg: $('tabWubrg'),
     toolGuide: $('toolGuide'), toolGuideEyebrow: $('toolGuideEyebrow'),
     toolGuideTitle: $('toolGuideTitle'), toolGuideText: $('toolGuideText'),
     toolGuideAction: $('toolGuideAction'), toolGuideClose: $('toolGuideClose'),
@@ -163,6 +166,7 @@
     pendingChoiceBanner: $('pendingChoiceBanner'), pendingChoiceTitle: $('pendingChoiceTitle'),
     pendingChoiceActions: $('pendingChoiceActions'),
     pendingChoiceConfirm: $('pendingChoiceConfirm'), pendingChoiceCancel: $('pendingChoiceCancel'),
+    moreButton: $('moreButton'), moreDialog: $('moreDialog'), moreDialogClose: $('moreDialogClose'),
     toast: $('toast')
   };
 
@@ -302,6 +306,16 @@
       if (!control || control.disabled) return;
       haptic('press');
     }, true);
+  }
+
+  function savedPresetMenuActive() {
+    return state.activeTab === 'presets' && SAVED_PRESET_LEVELS.has(presetMenuLevel);
+  }
+
+  function syncPresetLaunchers() {
+    const savedActive = savedPresetMenuActive();
+    els.tabSaved.setAttribute('aria-pressed', String(savedActive));
+    els.tabPresets.setAttribute('aria-pressed', String(state.activeTab === 'presets' && !savedActive));
   }
 
   function escapeHtml(value) {
@@ -2380,6 +2394,43 @@
     else cancelPresetPreview();
   }
 
+  function openSavedMenu() {
+    if (savedPresetMenuActive()) {
+      closePresetMenu({keep: true});
+      return;
+    }
+    cancelPendingLayer();
+    closeToolGuide();
+    state.selected = null;
+    renderInspector();
+    if (state.activeTab === 'wubrg') confirmWubrgSession({quiet: true});
+    else if (state.activeTab === 'presets') closePresetMenu({keep: true});
+    else setActiveTab(null);
+    setActiveTab('presets');
+    presetMenuLevel = 'saved';
+    selectedSavedPresetId = null;
+    stagedPreset = null;
+    clearPreview();
+    renderPresetMenu();
+    requestAnimationFrame(() => {
+      positionChoicePanel();
+      const panel = document.querySelector('[data-panel="presets"]');
+      if (panel) panel.scrollTop = 0;
+    });
+  }
+
+  function openMoreDialog() {
+    if (els.moreDialog.open) return;
+    if (typeof els.moreDialog.showModal === 'function') els.moreDialog.showModal();
+    else els.moreDialog.setAttribute('open', '');
+  }
+
+  function closeMoreDialog() {
+    if (!els.moreDialog.open) return;
+    if (typeof els.moreDialog.close === 'function') els.moreDialog.close();
+    else els.moreDialog.removeAttribute('open');
+  }
+
   function styledPresetEvents(preset) {
     const length = state.name.length;
     const offset = (fraction) => Math.max(0, Math.min(length, Math.round(length * fraction)));
@@ -2971,6 +3022,13 @@
   function renderPresetMenu() {
     els.presetOrbitItems.replaceChildren();
     const atRoot = presetMenuLevel === 'root';
+    const inSavedMenu = SAVED_PRESET_LEVELS.has(presetMenuLevel);
+    syncPresetLaunchers();
+    els.presetPanelEyebrow.textContent = inSavedMenu ? 'SAVED' : 'LOOKS';
+    els.presetPanelTitle.textContent = inSavedMenu ? 'YOUR COMPLETE LOOKS' : 'START WITH A READY-MADE STYLE';
+    els.presetPanelNote.textContent = inSavedMenu
+      ? 'Four complete-look slots stored on this device. Preview, rename, replace, or delete them here.'
+      : 'Preview a colour palette or special treatment. Your four saved looks have their own button beneath the tube.';
     els.presetOrbitCentre.hidden = !atRoot;
     els.presetBackButton.hidden = atRoot;
     els.presetRenameEditor.hidden = presetMenuLevel !== 'rename';
@@ -2985,7 +3043,6 @@
       els.presetOrbitStatus.textContent = 'CHOOSE A COLLECTION';
       appendPresetOrbitButton({label: 'SPECIAL', note: `${STYLE_PRESETS.length} LOOKS`, icon: '✦', action: () => setPresetMenu('special')});
       appendPresetOrbitButton({label: 'COLOUR', note: `${COLOUR_PRESETS.length} PALETTES`, icon: '◒', action: () => setPresetMenu('colour')});
-      appendPresetOrbitButton({label: 'SAVED', note: `${state.savedCompositions.length} / 4 SLOTS`, icon: '★', action: () => setPresetMenu('saved')});
     } else if (presetMenuLevel === 'colour') {
       els.presetOrbitStatus.textContent = 'COLOUR PRESETS · TAP TO APPLY';
       COLOUR_PRESETS.forEach((preset) => appendPresetOrbitButton({
@@ -3131,11 +3188,12 @@
     state.activeTab = nextTab;
     const tabs = Array.from(document.querySelectorAll('[data-tab]'));
     tabs.forEach((tab) => {
-      const active = tab.dataset.tab === state.activeTab;
+      const active = tab.dataset.tab === state.activeTab && !(tab === els.tabPresets && savedPresetMenuActive());
       tab.setAttribute('aria-pressed', String(active));
       tab.tabIndex = 0;
       if (active && focus) tab.focus();
     });
+    syncPresetLaunchers();
     document.querySelectorAll('[data-panel]').forEach((panel) => {
       panel.hidden = panel.dataset.panel !== state.activeTab;
     });
@@ -3367,6 +3425,15 @@
     document.querySelectorAll('[data-close-instructions]').forEach((button) => {
       button.addEventListener('click', () => setInstructionsOpen(false));
     });
+    els.moreButton.addEventListener('click', openMoreDialog);
+    els.moreDialogClose.addEventListener('click', closeMoreDialog);
+    els.moreDialog.addEventListener('click', (event) => {
+      if (event.target === els.moreDialog) closeMoreDialog();
+    });
+    els.moreDialog.addEventListener('cancel', (event) => {
+      event.preventDefault();
+      closeMoreDialog();
+    });
     els.deckName.addEventListener('input', handleNameInput);
     ['click', 'keyup', 'select', 'focus'].forEach((type) => els.deckName.addEventListener(type, syncCaretFromInput));
     els.deckName.addEventListener('blur', () => { delete els.deckName.dataset.editing; });
@@ -3508,6 +3575,7 @@
     enableReservoirDrag(els.spriteLayerBubble, spriteReservoirPayload);
     els.toolGuideAction.addEventListener('click', addGuidedLayerAtCentre);
     els.toolGuideClose.addEventListener('click', closeToolGuide);
+    els.tabSaved.addEventListener('click', openSavedMenu);
     document.querySelectorAll('[data-tab]').forEach((tab) => {
       tab.addEventListener('click', () => {
         cancelPendingLayer();
@@ -3572,7 +3640,7 @@
     });
     document.addEventListener('pointerdown', (event) => {
       if (pendingLayerOffset !== null || !['presets', 'wubrg'].includes(state.activeTab)) return;
-      if (els.sourceLibrary.contains(event.target) || event.target.closest('[data-tab]')) return;
+      if (els.sourceLibrary.contains(event.target) || event.target.closest('[data-tab], [data-open-saved]')) return;
       if (state.activeTab === 'presets') closePresetMenu({keep: true});
       else confirmWubrgSession({quiet: true});
     }, true);
@@ -3598,7 +3666,10 @@
     });
     document.addEventListener('keydown', (event) => {
       if (event.key === 'Escape') {
-        if (!els.instructionsPanel.hidden) {
+        if (els.moreDialog.open) {
+          closeMoreDialog();
+          event.preventDefault();
+        } else if (!els.instructionsPanel.hidden) {
           setInstructionsOpen(false);
           els.instructionsButton.focus({preventScroll: true});
         } else if (pendingLayerOffset !== null) {

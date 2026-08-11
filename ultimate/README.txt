@@ -2,7 +2,7 @@ TURDGOBBLER'S DECK NAME COLOURIFIER — ULTIMATE VERSION
 
 STATUS
 This folder is the active Ultimate source. The current published build is
-ultimate-7.12.
+ultimate-7.13.
 Version 6 remains the standard /colour/ release and Version Lite remains
 shelved.
 
@@ -58,12 +58,13 @@ THE ONE-TUBE MODEL
   spacing keeps them accessible, and guide lines point back to their exact
   text anchors.
 - Selecting a layer never draws decoration across the affected letters.
-- Undo and Redo appear only when useful. More contains budget details, Clear
-  FX, and Start Over.
+- A fixed four-column action row aligns beneath the four main doors: a split
+  Undo/Redo history cell, Clear FX, Start Over, and the direct Saved shortcut.
+  More opens an information-only dialog for budget and layer counts.
 
 THE FOUR PRIMARY DOORS
-1. LOOKS is the quick-start door and opens the ready-made Colour, Special, and
-   Saved collections immediately.
+1. LOOKS is the quick-start door and opens the ready-made Colour and Special
+   collections immediately.
 2. COLOUR can still be dragged directly onto the name. A tap expands a short
    explanation with Add at Centre and WUBRG as the instant mana-look route.
 3. FX can be dragged onto a letter or sprite. A tap explains the purple-letter
@@ -76,13 +77,12 @@ WUBRG previews Magic colour identities live as pips are selected, then keeps
    keep two-, three-, and four/five-colour identities from jumping as the
    selection changes. Multi-colour identities divide the deck-name letters
    evenly by default and rebalance when the name changes.
-LOOKS opens below the tube in one lifted upper arc: Special on the left,
-   Colour high in the middle, and Saved on the right. Colour contains Ice,
-   Prismatic, Sunset Relic, and Toxic
-   Foil. Special contains Upside Down, Bubbles, Drift Away, and Matrix Glitch.
-   Every submenu uses the same four-choice upper arc. Saved provides four fixed
-   complete-look slots that can be previewed, renamed, deleted, or saved over.
-   Inside a collection the centre becomes a red Back button.
+LOOKS opens below the tube with Special and Colour in one lifted upper arc.
+   Colour contains Ice, Prismatic, Sunset Relic, and Toxic Foil. Special
+   contains Upside Down, Bubbles, Drift Away, and Matrix Glitch. The direct
+   Saved button provides four fixed complete-look slots that can be previewed,
+   renamed, deleted, or saved over. Inside a collection the centre becomes a
+   red Back button.
 
 WUBRG and Colour presets replace only the colour layer. Special replaces
 non-sprite FX predictably while preserving sprites. Saved slots capture and

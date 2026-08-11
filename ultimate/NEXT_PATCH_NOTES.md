@@ -1,5 +1,14 @@
 # Ultimate Version — name-canvas rebuild record
 
+## Ultimate 7.13 aligned utility-row pass — published 2026-08-11
+
+- Aligned a four-cell utility row directly beneath Looks, Colour, FX, and
+  Sprite: split Undo/Redo history, Clear FX, Start Over, and Saved.
+- Promoted Saved to a direct launcher for its four complete-look slots and
+  removed the extra Saved step from Looks.
+- Replaced the expanding More details menu with a focused, information-only
+  dialog for the live Arena budget, layer counts, and local-only status.
+
 ## Ultimate 7.12 haptic interaction pass — published 2026-08-11
 
 - Added distinct haptic signatures for presses, layer pickup, target and centre

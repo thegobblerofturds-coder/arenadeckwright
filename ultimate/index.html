@@ -10,9 +10,9 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="manifest" href="site.webmanifest">
   <title>TurdGobbler's Deck Name Colourifier — Ultimate Version</title>
-  <link rel="stylesheet" href="styles.css?v=ultimate-7.12">
-  <script src="logic.js?v=ultimate-7.12" defer></script>
-  <script src="app.js?v=ultimate-7.12" defer></script>
+  <link rel="stylesheet" href="styles.css?v=ultimate-7.13">
+  <script src="logic.js?v=ultimate-7.13" defer></script>
+  <script src="app.js?v=ultimate-7.13" defer></script>
 </head>
 <body>
   <main class="app-shell">
@@ -30,7 +30,7 @@
       <p><b>ADD</b> Drag Colour, FX, or Sprite anywhere onto the black tube, then choose what it becomes.</p>
       <p><b>EDIT</b> Tap a placed bubble. Drag it to move; its guide lands below the affected part of the name.</p>
       <p><b>DELETE</b> Drag a placed bubble into the red bar that appears directly below the tube.</p>
-      <p><b>BUILD</b> WUBRG and Presets open as focused global tools. Undo, Redo, and Start Over stay together; saved looks live inside Presets.</p>
+      <p><b>BUILD</b> WUBRG and Looks open as focused global tools. History, Clear FX, Start Over, and Saved stay aligned beneath the four main doors.</p>
     </section>
 
     <section class="studio" aria-label="Ultimate deck-name editor">
@@ -88,6 +88,16 @@
                 </button>
               </div>
 
+              <div class="editor-toolbar" role="group" aria-label="Editing and saved-look actions">
+                <div class="persistent-actions" role="group" aria-label="History">
+                  <button id="undoButton" class="tool-button" type="button" disabled><span aria-hidden="true">↶</span><b>UNDO</b></button>
+                  <button id="redoButton" class="tool-button" type="button" disabled><span aria-hidden="true">↷</span><b>REDO</b></button>
+                </div>
+                <button id="clearFxButton" class="tool-button danger-soft" type="button"><span aria-hidden="true">×</span><b>CLEAR FX</b></button>
+                <button id="startOver" class="tool-button danger-soft" type="button"><span aria-hidden="true">↻</span><b>START OVER</b></button>
+                <button id="tabSaved" class="tool-button saved-menu-button" type="button" aria-pressed="false" aria-controls="panelPresets" data-open-saved><span aria-hidden="true">★</span><b>SAVED</b></button>
+              </div>
+
               <div id="toolGuide" class="tool-guide" aria-live="polite" hidden>
                 <div class="tool-guide-copy">
                   <small id="toolGuideEyebrow">COLOUR</small>
@@ -106,12 +116,6 @@
               </div>
             </section>
 
-            <div class="editor-toolbar">
-              <div class="persistent-actions" role="group" aria-label="Editing actions">
-                <button id="undoButton" class="tool-button" type="button" disabled><span aria-hidden="true">↶</span> UNDO</button>
-                <button id="redoButton" class="tool-button" type="button" disabled><span aria-hidden="true">↷</span> REDO</button>
-              </div>
-            </div>
           </div>
 
           <aside id="layerInspector" class="layer-inspector" aria-live="polite" hidden></aside>
@@ -201,12 +205,12 @@
               <p id="wubrgContext" class="wubrg-context">CHOOSE MANA COLOURS, THEN KEEP</p>
             </section>
 
-            <section id="panelPresets" class="library-panel preset-panel" role="tabpanel" aria-labelledby="tabPresets" data-panel="presets" hidden>
+            <section id="panelPresets" class="library-panel preset-panel" role="tabpanel" aria-labelledby="presetPanelTitle" data-panel="presets" hidden>
               <header class="panel-head">
-                <span><small>LOOKS</small><b>START WITH A READY-MADE STYLE</b></span>
+                <span><small id="presetPanelEyebrow">LOOKS</small><b id="presetPanelTitle">START WITH A READY-MADE STYLE</b></span>
                 <button type="button" data-close-panel aria-label="Close Looks">×</button>
               </header>
-              <p class="panel-note">Preview a colour palette or a special treatment, or return to one of your four saved looks.</p>
+              <p id="presetPanelNote" class="panel-note">Preview a colour palette or special treatment. Your four saved looks now have their own button beneath the tube.</p>
               <div id="presetPreviewActions" class="preset-preview-actions" hidden>
                 <button id="presetCancelButton" class="preset-cancel-button" type="button">CANCEL</button>
                 <button id="presetKeepButton" class="preset-keep-button" type="button"><span aria-hidden="true">✓</span> KEEP THIS LOOK</button>
@@ -227,30 +231,7 @@
         </div>
       </section>
 
-      <details id="moreMenu" class="more-menu">
-        <summary><span>•••</span><b>MORE</b><small><strong id="budgetTotal">0</strong>/64</small></summary>
-        <div class="more-menu-body">
-          <div class="tube-meta">
-            <div class="tube-budget" role="status" aria-live="polite" aria-label="Arena 64-character budget">
-              <small>TEXT <b id="budgetText">0</b></small>
-              <small>COLOUR <b id="budgetColour">0</b></small>
-              <small>FX <b id="budgetFx">0</b></small>
-            </div>
-            <p id="outputStatus">READY</p>
-          </div>
-
-          <div class="layer-legend" aria-label="Current layers">
-            <span><i class="legend-colour"></i> COLOUR <b id="colourCount">0</b></span>
-            <span><i class="legend-effect"></i> FX <b id="effectCount">0</b></span>
-            <span><i class="legend-sprite"></i> SPRITE <b id="spriteCount">0</b></span>
-          </div>
-
-          <div class="tube-actions">
-            <button id="clearFxButton" class="tool-button danger-soft" type="button">CLEAR FX</button>
-            <button id="startOver" class="tool-button danger-soft" type="button">START OVER</button>
-          </div>
-        </div>
-      </details>
+      <button id="moreButton" class="more-menu-button" type="button" aria-haspopup="dialog" aria-controls="moreDialog"><span aria-hidden="true">•••</span><b>MORE INFO</b></button>
     </section>
 
     <footer>
@@ -261,6 +242,35 @@
     </footer>
     <p class="fan-content-notice">TurdGobbler's Deck Name Colourifier is unofficial Fan Content permitted under the Fan Content Policy. Not approved/endorsed by Wizards. Portions of the materials used are property of Wizards of the Coast. © Wizards of the Coast LLC.</p>
   </main>
+
+  <dialog id="moreDialog" class="more-dialog" aria-labelledby="moreDialogTitle">
+    <div class="more-dialog-shell">
+      <header>
+        <span><small>LIVE READOUT</small><b id="moreDialogTitle">MORE INFO</b></span>
+        <button id="moreDialogClose" type="button" aria-label="Close More information">×</button>
+      </header>
+      <div class="more-dialog-body">
+        <section class="budget-card" aria-labelledby="budgetTitle">
+          <span><small id="budgetTitle">ARENA RAW NAME BUDGET</small><strong><b id="budgetTotal">0</b> / 64</strong></span>
+          <div class="tube-budget" role="status" aria-live="polite" aria-label="Arena 64-character budget">
+            <small>TEXT <b id="budgetText">0</b></small>
+            <small>COLOUR <b id="budgetColour">0</b></small>
+            <small>FX <b id="budgetFx">0</b></small>
+          </div>
+          <p id="outputStatus">READY</p>
+        </section>
+        <section class="layer-card" aria-labelledby="layerCountTitle">
+          <small id="layerCountTitle">CURRENT LAYERS</small>
+          <div class="layer-legend" aria-label="Current layers">
+            <span><i class="legend-colour"></i> COLOUR <b id="colourCount">0</b></span>
+            <span><i class="legend-effect"></i> FX <b id="effectCount">0</b></span>
+            <span><i class="legend-sprite"></i> SPRITE <b id="spriteCount">0</b></span>
+          </div>
+        </section>
+        <p class="local-info"><b>LOCAL ONLY</b> Your name and saved looks stay in this browser. Nothing is uploaded.</p>
+      </div>
+    </div>
+  </dialog>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 </body>
