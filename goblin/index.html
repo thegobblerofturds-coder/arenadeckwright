@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="en-CA">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#17120d">
+  <meta name="description" content="Goblin Shop is a playful, local-only Arena deck-name enchanter where every colour, effect, and sprite spends from a 64-character purse.">
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="manifest" href="site.webmanifest">
+  <title>Goblin Shop — Deck Name Enchanter</title>
+  <link rel="stylesheet" href="styles.css?v=goblin-shop-1.0">
+  <link rel="stylesheet" href="goblin-shop.css?v=goblin-shop-1.0">
+  <script src="logic.js?v=goblin-shop-1.0" defer></script>
+  <script src="app.js?v=goblin-shop-1.0" defer></script>
+  <script src="goblin-shop.js?v=goblin-shop-1.0" defer></script>
+</head>
+<body>
+  <div class="shop-atmosphere" aria-hidden="true">
+    <i class="lantern lantern-left"></i><i class="lantern lantern-right"></i>
+    <i class="hanging-herbs herbs-one"></i><i class="hanging-herbs herbs-two"></i>
+    <i class="dust-mote mote-one"></i><i class="dust-mote mote-two"></i><i class="dust-mote mote-three"></i>
+  </div>
+  <main class="app-shell">
+    <header class="masthead">
+      <div class="brand-lockup">
+        <span class="brand-kicker">TURDGOBBLER'S</span>
+        <h1>GOBLIN SHOP</h1>
+        <span class="prototype-badge">ALCHEMIST'S EDITION</span>
+        <i class="brand-prism" aria-hidden="true"></i>
+      </div>
+      <button id="instructionsButton" class="instructions-button" type="button" aria-expanded="false" aria-controls="instructionsPanel">SHOP RULES</button>
+    </header>
+    <section id="instructionsPanel" class="instructions-panel" aria-label="How to use Goblin Shop" hidden>
+      <button type="button" data-close-instructions aria-label="Close instructions">×</button>
+      <p><b>ORDER</b> Type the deck name you want enchanted. Its letters are paid for first.</p>
+      <p><b>BUY</b> Drag dye, charms, or sprites from the shelves onto an exact place beside the stream.</p>
+      <p><b>BREW</b> Put an FX charm in the cauldron to affect the entire name.</p>
+      <p><b>BUDGET</b> You own 64 character coins. Every invisible Arena tag has a real price.</p>
+      <p><b>COPY</b> Click the finished name in the clearwater stream when the goblin is done.</p>
+    </section>
+
+    <aside id="goblinKeeper" class="goblin-keeper" data-mood="idle" aria-label="Goblin shopkeeper">
+      <img src="assets/art/goblin-shopkeeper.png" alt="A cheerful goblin alchemist leaning over his shop counter">
+      <div class="goblin-speech" role="status" aria-live="polite">
+        <small>YOUR SHOPKEEPER</small>
+        <b id="goblinReaction">Bring me a deck name. I sell questionable improvements.</b>
+      </div>
+      <div class="goblin-sparks" aria-hidden="true"><i></i><i></i><i></i></div>
+    </aside>
+
+    <section class="studio" aria-label="Goblin Shop deck-name editor">
+      <section class="tube-workbench" aria-label="Goblin Shop workbench">
+        <div id="megaTube" class="mega-tube" role="group" aria-label="Live layered clearwater stream editor">
+          <section class="character-purse" aria-label="Character coin purse">
+            <span class="purse-icon" aria-hidden="true"><i></i></span>
+            <span><small>CHARACTER COINS</small><b><strong id="shopCoins">64</strong> LEFT</b></span>
+            <span id="shopSpendSummary" class="spend-summary">TEXT 0 · WARES 0</span>
+            <div class="coin-stack" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+          </section>
+          <div class="tube-input-row">
+            <label class="name-field" for="deckName">
+              <span>YOUR ORDER</span>
+              <input id="deckName" type="text" value="Your Deck Name" autocomplete="off" autocapitalize="off" spellcheck="false" aria-describedby="outputStatus">
+            </label>
+            <div class="copy-field">
+              <span>FINAL ENCHANTMENT</span>
+              <button id="copyButton" class="copy-button" type="button" aria-describedby="outputStatus">
+                <b id="copyLabel">✓ TAKE IT</b><small>COPY TO ARENA</small>
+              </button>
+            </div>
+          </div>
+
+          <div class="tube-shell">
+            <div id="tubeTrack" class="tube-track" tabindex="0" role="group" aria-label="Clearwater stream. Drag dye anywhere across the riverbank or an FX charm onto a text position.">
+              <div id="tubeNameCanvas" class="tube-name-canvas" aria-label="Live Arena name in the copyable clearwater stream">
+                <div class="stream-water" aria-hidden="true"><i></i><i></i><i></i></div>
+                <div class="shadow-rock" aria-hidden="true"></div>
+                <span id="outputPreview" class="output-preview"></span>
+                <span class="stream-copy-cue" aria-hidden="true">CLICK THE WATER TO COPY</span>
+                <div id="tubeLayerGuides" class="tube-layer-guides" aria-hidden="true"></div>
+                <div id="tubeCentreMarker" class="tube-centre-marker" aria-hidden="true"><i></i></div>
+                <div class="layer-rail-frame" aria-label="Positioned colour and effect layers">
+                  <div id="tubeFill" class="tube-fill" aria-hidden="true"></div>
+                  <div id="tubeLayerRail" class="tube-layer-rail"></div>
+                </div>
+                <div id="dropGuide" class="drop-guide" aria-hidden="true"></div>
+              </div>
+            </div>
+            <div id="globalToggleBar" class="global-toggle-bar" role="group" aria-label="Whole-name controls">
+              <button id="globalCauldron" class="global-cauldron" type="button" aria-expanded="false" aria-controls="panelEffects">
+                <i aria-hidden="true"><em></em></i><span>CAULDRON</span><small>BREW WHOLE NAME</small>
+              </button>
+              <div id="cauldronContents" class="cauldron-contents" aria-label="Whole-name enchantments"></div>
+              <button type="button" data-global-toggle="allCaps" aria-pressed="false"><i aria-hidden="true">AA</i><span>ALL CAPS</span></button>
+              <button type="button" data-global-toggle="smallCaps" aria-pressed="false"><i aria-hidden="true">Aa</i><span>SMALL CAPS</span></button>
+              <button id="forceGradient" class="force-gradient" type="button"><span>AUTO BREW</span></button>
+            </div>
+
+            <section class="focus-dock" aria-labelledby="focusDockTitle">
+              <header class="focus-dock-head">
+                <span><small>THE WARES</small><b id="focusDockTitle">BUY AN ENCHANTMENT</b></span>
+                <small>SPEND 64 CHARACTERS WISELY</small>
+              </header>
+              <div id="presetHub" class="primary-tools" role="group" aria-label="Choose how to style the deck name">
+                <button id="tabPresets" class="tool-door looks-door" type="button" aria-pressed="false" aria-controls="panelPresets" data-tab="presets">
+                  <i aria-hidden="true">✦</i><span>RECIPES</span><small>READY-MADE BREWS</small>
+                </button>
+                <button id="colourLayerBubble" class="tool-door side-bubble colour-reservoir" type="button" aria-expanded="false" aria-controls="toolGuide" aria-label="Colour. Tap for help or drag onto the name. Keyboard: place at the current text position.">
+                  <i aria-hidden="true">+</i><span>DYE</span><small>6+ COINS</small>
+                </button>
+                <button id="fxLayerBubble" class="tool-door side-bubble fx-reservoir" type="button" aria-expanded="false" aria-controls="toolGuide" aria-label="FX. Tap for help or drag onto a letter or sprite. Keyboard: place at the current text position.">
+                  <i aria-hidden="true">FX</i><span>CHARMS</span><small>3+ COINS</small>
+                </button>
+                <button id="spriteLayerBubble" class="tool-door side-bubble sprite-reservoir" type="button" aria-expanded="false" aria-controls="toolGuide" aria-label="Sprite. Tap for help or drag onto the name. Keyboard: place at the current text position.">
+                  <i aria-hidden="true">☺</i><span>SPRITES</span><small>10+ COINS</small>
+                </button>
+              </div>
+
+              <div class="editor-toolbar" role="group" aria-label="Editing and saved-look actions">
+                <div class="persistent-actions" role="group" aria-label="History">
+                  <button id="undoButton" class="tool-button" type="button" disabled><span aria-hidden="true">↶</span><b>UNDO</b></button>
+                  <button id="redoButton" class="tool-button" type="button" disabled><span aria-hidden="true">↷</span><b>REDO</b></button>
+                </div>
+                <button id="clearFxButton" class="tool-button danger-soft" type="button"><span aria-hidden="true">×</span><b>CLEAR FX</b></button>
+                <button id="startOver" class="tool-button danger-soft" type="button"><span aria-hidden="true">↻</span><b>START OVER</b></button>
+                <button id="tabSaved" class="tool-button saved-menu-button" type="button" aria-pressed="false" aria-controls="panelPresets" data-open-saved><span aria-hidden="true">★</span><b>SAVED</b></button>
+              </div>
+
+              <div id="toolGuide" class="tool-guide" aria-live="polite" hidden>
+                <div class="tool-guide-copy">
+                  <small id="toolGuideEyebrow">COLOUR</small>
+                  <b id="toolGuideTitle">ADD A COLOUR</b>
+                  <p id="toolGuideText">Drag Colour onto the exact spot you want, or add one to the middle and choose it next.</p>
+                </div>
+                <div class="tool-guide-actions">
+                  <button id="tabWubrg" class="guide-secondary" type="button" aria-pressed="false" aria-controls="panelWubrg" data-tab="wubrg" hidden><i class="mana-ring-icon" aria-hidden="true"><em></em><em></em><em></em><em></em><em></em></i><span>WUBRG</span><small>INSTANT MANA LOOK</small></button>
+                  <button id="toolGuideAction" class="guide-primary" type="button">ADD AT CENTRE</button>
+                  <button id="toolGuideClose" class="guide-close" type="button" aria-label="Close tool explanation">×</button>
+                </div>
+              </div>
+
+              <div id="trashDropZone" class="trash-drop-zone" aria-hidden="true" hidden>
+                <i aria-hidden="true">×</i><span>RETURN TO SHELF FOR REFUND</span>
+              </div>
+            </section>
+
+          </div>
+
+          <aside id="layerInspector" class="layer-inspector" aria-live="polite" hidden></aside>
+          <span id="tubeStatus" class="tube-status" role="status" aria-live="polite">SHOP OPEN</span>
+        </div>
+      </section>
+
+      <section id="sourceLibrary" class="source-library" aria-label="Editor choices" hidden>
+        <div id="choiceCard" class="context-card" role="region" aria-label="Layer or preset choices" tabindex="-1">
+          <div id="pendingChoiceBanner" class="pending-choice-banner" role="status" hidden>
+            <b id="pendingChoiceTitle">PICK A COLOUR TO PLACE THIS BUBBLE</b>
+          </div>
+          <div id="pendingChoiceActions" class="choice-confirm-actions" hidden>
+            <button id="pendingChoiceCancel" class="preset-cancel-button" type="button">CANCEL</button>
+            <button id="pendingChoiceConfirm" class="preset-keep-button" type="button"><span aria-hidden="true">✓</span> ADD THIS COLOUR</button>
+          </div>
+          <div class="library-panels">
+            <section id="panelColours" class="library-panel" role="tabpanel" aria-label="Colour context menu" data-panel="colours" hidden>
+              <header class="panel-head">
+                <span><small>DYE SHELF</small></span>
+                <button type="button" data-close-panel aria-label="Close Colour menu">×</button>
+              </header>
+              <div class="colour-lab">
+                <div class="colour-wheel-control">
+                  <div class="colour-wheel-row">
+                    <div class="colour-wheel-wrap">
+                      <canvas id="colourWheel" width="240" height="240" role="img" aria-label="Circular colour selector. Drag to choose colour, brightness, and saturation."></canvas>
+                      <i id="wheelCursor" aria-hidden="true"></i>
+                    </div>
+                    <output id="colourWheelPreview" class="colour-wheel-preview" aria-live="polite">
+                      <i aria-hidden="true"></i><small>THUMB PREVIEW</small><b id="colourWheelPreviewHex">#C94BFF</b>
+                    </output>
+                  </div>
+                </div>
+                <div class="custom-colour">
+                  <label class="native-colour-input" for="colourPicker"><span>OUTSIDE SUPPLIER</span><input id="colourPicker" type="color" value="#C94BFF"></label>
+                  <label for="colourHex"><span>HEX</span><input id="colourHex" type="text" value="#C94BFF" maxlength="7" autocomplete="off" autocapitalize="characters" spellcheck="false"></label>
+                  <button id="addCustomColour" type="button">USE COLOUR</button>
+                </div>
+              </div>
+              <div id="recentColours" class="recent-choices" aria-label="Recently used colours" hidden></div>
+              <div id="colourSources" class="colour-sources" role="group" aria-label="Colour choices"></div>
+              <details class="context-submenu">
+                <summary>DYE BENCH</summary>
+                <div class="palette-tools" role="group" aria-label="Current palette tools">
+                  <button id="rotateColours" type="button"><b>↻</b><span>ROTATE</span></button>
+                  <button id="flipColours" type="button"><b>⇄</b><span>FLIP</span></button>
+                  <button id="savePalette" type="button"><b>☆</b><span>SAVE</span></button>
+                </div>
+                <div id="savedPalettes" class="saved-palettes"></div>
+              </details>
+            </section>
+
+            <section id="panelEffects" class="library-panel" role="tabpanel" aria-label="FX context menu" data-panel="effects" hidden>
+              <header class="panel-head">
+                <span><small>CHARM SHELF</small><b>CHOOSE AN ENCHANTMENT</b></span>
+                <button type="button" data-close-panel aria-label="Close Effect menu">×</button>
+              </header>
+              <p class="panel-note">Choose one family, then one charm. Buy it for one position, or enter through the cauldron to enchant the whole name.</p>
+              <div id="fxOrbit" class="fx-orbit" role="group" aria-label="Nested effect menu">
+                <div id="effectSources" class="fx-orbit-items" role="group" aria-label="Arena effect choices"></div>
+                <div id="fxOrbitCentre" class="fx-orbit-centre" aria-hidden="true"><small>CHOOSE</small><b>FX</b></div>
+                <button id="fxBackButton" class="fx-back-button" type="button" hidden><span aria-hidden="true">←</span><b>BACK</b></button>
+              </div>
+              <p id="fxOrbitStatus" class="fx-orbit-status" aria-live="polite">CHOOSE AN FX FAMILY</p>
+            </section>
+
+            <section id="panelSprites" class="library-panel" role="tabpanel" aria-label="Sprite context menu" data-panel="sprites" hidden>
+              <header class="panel-head">
+                <span><small>CURIOS SHELF</small><b>CHOOSE A SPRITE</b></span>
+                <button type="button" data-close-panel aria-label="Close Sprite menu">×</button>
+              </header>
+              <p class="panel-note">Arena sprites are now their own layer. Pick one for the position where you dropped the Sprite bubble.</p>
+              <div id="spriteSources" class="sprite-sources standalone-sprite-sources" role="group" aria-label="Arena sprite choices"></div>
+            </section>
+
+            <section id="panelWubrg" class="library-panel preset-panel" role="tabpanel" aria-labelledby="tabWubrg" data-panel="wubrg" hidden>
+              <header class="panel-head wubrg-panel-head">
+                <span><b>WUBRG ENGINE</b></span>
+              </header>
+              <div class="choice-confirm-actions wubrg-confirm-actions">
+                <button id="wubrgCancelButton" class="preset-cancel-button" type="button">CANCEL</button>
+                <button id="wubrgKeepButton" class="preset-keep-button" type="button"><span aria-hidden="true">✓</span> KEEP WUBRG</button>
+              </div>
+              <div id="wubrgComposer" class="wubrg-composer" role="group" aria-label="Build an ordered WUBRG identity"></div>
+              <div id="wubrgResults" class="wubrg-preset-rail" aria-label="Matching WUBRG identities" hidden></div>
+              <p id="wubrgContext" class="wubrg-context">CHOOSE MANA COLOURS, THEN KEEP</p>
+            </section>
+
+            <section id="panelPresets" class="library-panel preset-panel" role="tabpanel" aria-labelledby="tabPresets tabSaved" data-panel="presets" hidden>
+              <header class="panel-head">
+                <span><small>RECIPE BOOK</small><b>START WITH A READY-MADE BREW</b></span>
+                <button type="button" data-close-panel aria-label="Close Looks">×</button>
+              </header>
+              <p class="panel-note">Preview a colour palette or special treatment. Your four saved looks now have their own button beneath the tube.</p>
+              <div id="presetPreviewActions" class="preset-preview-actions" hidden>
+                <button id="presetCancelButton" class="preset-cancel-button" type="button">CANCEL</button>
+                <button id="presetKeepButton" class="preset-keep-button" type="button"><span aria-hidden="true">✓</span> KEEP THIS LOOK</button>
+              </div>
+              <div id="presetOrbit" class="preset-orbit" aria-label="Nested preset menu">
+                <div id="presetOrbitItems" class="preset-orbit-items" role="group" aria-label="Preset choices"></div>
+                <div id="presetOrbitCentre" class="preset-orbit-centre" aria-hidden="true"><small>CHOOSE</small><b>PRESET</b></div>
+                <button id="presetBackButton" class="preset-back-button" type="button" hidden><span aria-hidden="true">←</span><b>BACK</b></button>
+              </div>
+              <div id="presetRenameEditor" class="preset-rename-editor" hidden>
+                <label for="presetRenameInput"><span>PRESET NAME</span><input id="presetRenameInput" type="text" maxlength="48" autocomplete="off"></label>
+                <button id="presetRenameCancel" class="preset-cancel-button" type="button">CANCEL</button>
+                <button id="presetRenameSave" class="preset-keep-button" type="button"><span aria-hidden="true">✓</span> SAVE NAME</button>
+              </div>
+              <p id="presetOrbitStatus" class="preset-orbit-status" aria-live="polite">CHOOSE A COLLECTION</p>
+            </section>
+          </div>
+        </div>
+      </section>
+
+      <button id="moreButton" class="more-menu-button" type="button" aria-haspopup="dialog" aria-controls="moreDialog"><span aria-hidden="true">•••</span><b>OPEN LEDGER</b></button>
+    </section>
+
+    <footer>
+      <span>LOCAL · NOTHING LEAVES THE SHOP</span>
+      <span>GOBLIN SHOP · PRIVATE REVIEW BUILD</span>
+      <a class="stream-feedback" href="https://www.twitch.tv/turdg0bbler" target="_blank" rel="noopener noreferrer">FEEDBACK? COME SAY HI ON TWITCH ↗</a>
+      <span>CTRL + ENTER · COPY</span>
+    </footer>
+    <p class="fan-content-notice">Goblin Shop is unofficial Fan Content permitted under the Fan Content Policy. Not approved/endorsed by Wizards. Portions of the materials used are property of Wizards of the Coast. © Wizards of the Coast LLC.</p>
+  </main>
+
+  <dialog id="moreDialog" class="more-dialog" aria-labelledby="moreDialogTitle">
+    <div class="more-dialog-shell">
+      <header>
+        <span><small>THE SHOPKEEPER'S BOOKS</small><b id="moreDialogTitle">CHARACTER LEDGER</b></span>
+        <button id="moreDialogClose" type="button" aria-label="Close More information">×</button>
+      </header>
+      <div class="more-dialog-body">
+        <section class="budget-card" aria-labelledby="budgetTitle">
+          <span><small id="budgetTitle">CHARACTER COINS SPENT</small><strong><b id="budgetTotal">0</b> / 64</strong></span>
+          <div class="tube-budget" role="status" aria-live="polite" aria-label="Arena 64-character budget">
+            <small>TEXT <b id="budgetText">0</b></small>
+            <small>COLOUR <b id="budgetColour">0</b></small>
+            <small>FX <b id="budgetFx">0</b></small>
+          </div>
+          <p id="outputStatus">READY</p>
+        </section>
+        <section class="layer-card" aria-labelledby="layerCountTitle">
+          <small id="layerCountTitle">CURRENT LAYERS</small>
+          <div class="layer-legend" aria-label="Current layers">
+            <span><i class="legend-colour"></i> COLOUR <b id="colourCount">0</b></span>
+            <span><i class="legend-effect"></i> FX <b id="effectCount">0</b></span>
+            <span><i class="legend-sprite"></i> SPRITE <b id="spriteCount">0</b></span>
+          </div>
+        </section>
+        <p class="local-info"><b>LOCAL ONLY</b> Your name and saved looks stay in this browser. Nothing is uploaded.</p>
+      </div>
+    </div>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
