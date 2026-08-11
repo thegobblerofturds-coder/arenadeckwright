@@ -83,6 +83,26 @@
     {key: 'transform', label: 'TRANSFORM', icon: '↻', note: 'SHAPE AND SCALE', effects: ['size', 'rotate', 'sup', 'sub']},
     {key: 'visual', label: 'VISUAL', icon: '✦', note: 'FINISH AND SPACING', effects: ['mark', 'alpha', 'cspace']}
   ];
+  const TOOL_GUIDES = {
+    colours: {
+      eyebrow: 'COLOUR',
+      title: 'ADD COLOUR WHERE YOU WANT IT',
+      copy: 'Drag Colour onto an exact spot in the name, or add one at centre and choose it next. WUBRG builds a complete mana-colour look in one go.',
+      action: 'ADD COLOUR AT CENTRE'
+    },
+    effects: {
+      eyebrow: 'FX',
+      title: 'EFFECT A LETTER OR SPRITE',
+      copy: 'Drag FX onto the target. The temporary purple guide means a letter; gold means the sprite itself. Add at centre if exact placement can wait.',
+      action: 'ADD FX AT CENTRE'
+    },
+    sprites: {
+      eyebrow: 'SPRITE',
+      title: 'DROP A SMILEY INTO THE NAME',
+      copy: 'Drag Sprite to the position where it should appear, or add one at centre and reposition its bubble afterward.',
+      action: 'ADD SPRITE AT CENTRE'
+    }
+  };
   const EFFECT_BY_KEY = Object.fromEntries(EFFECTS.map((effect) => [effect.key, effect]));
   const $ = (id) => document.getElementById(id);
   const els = {
@@ -121,6 +141,10 @@
     presetKeepButton: $('presetKeepButton'), presetCancelButton: $('presetCancelButton'),
     colourLayerBubble: $('colourLayerBubble'), fxLayerBubble: $('fxLayerBubble'),
     spriteLayerBubble: $('spriteLayerBubble'),
+    tabWubrg: $('tabWubrg'),
+    toolGuide: $('toolGuide'), toolGuideEyebrow: $('toolGuideEyebrow'),
+    toolGuideTitle: $('toolGuideTitle'), toolGuideText: $('toolGuideText'),
+    toolGuideAction: $('toolGuideAction'), toolGuideClose: $('toolGuideClose'),
     sourceLibrary: $('sourceLibrary'), choiceCard: $('choiceCard'),
     pendingChoiceBanner: $('pendingChoiceBanner'), pendingChoiceTitle: $('pendingChoiceTitle'),
     pendingChoiceActions: $('pendingChoiceActions'),
@@ -145,6 +169,7 @@
   let presetMenuLevel = 'root';
   let selectedSavedPresetId = null;
   let stagedPreset = null;
+  let activeToolGuide = null;
   let state = createDefaultState();
   const spriteAssets = new Map();
 
@@ -1760,6 +1785,55 @@
     renderCaret();
   }
 
+  function renderToolGuide() {
+    const guide = TOOL_GUIDES[activeToolGuide] || null;
+    els.toolGuide.hidden = !guide;
+    if (guide) {
+      els.toolGuide.dataset.tool = activeToolGuide;
+      els.toolGuideEyebrow.textContent = guide.eyebrow;
+      els.toolGuideTitle.textContent = guide.title;
+      els.toolGuideText.textContent = guide.copy;
+      els.toolGuideAction.textContent = guide.action;
+    } else {
+      delete els.toolGuide.dataset.tool;
+    }
+    els.tabWubrg.hidden = activeToolGuide !== 'colours';
+    [
+      [els.colourLayerBubble, 'colours'],
+      [els.fxLayerBubble, 'effects'],
+      [els.spriteLayerBubble, 'sprites']
+    ].forEach(([button, category]) => {
+      button.setAttribute('aria-expanded', String(activeToolGuide === category));
+    });
+  }
+
+  function closeToolGuide() {
+    if (!activeToolGuide) return;
+    activeToolGuide = null;
+    renderToolGuide();
+  }
+
+  function openToolGuide(category) {
+    const nextGuide = activeToolGuide === category ? null : category;
+    if (state.activeTab === 'presets') closePresetMenu({keep: true});
+    else if (state.activeTab === 'wubrg') confirmWubrgSession({quiet: true});
+    else setActiveTab(null);
+    state.selected = null;
+    renderInspector();
+    activeToolGuide = TOOL_GUIDES[nextGuide] ? nextGuide : null;
+    renderToolGuide();
+    if (activeToolGuide) {
+      requestAnimationFrame(() => els.toolGuide.scrollIntoView?.({block: 'nearest', behavior: 'smooth'}));
+    }
+  }
+
+  function addGuidedLayerAtCentre() {
+    const category = activeToolGuide;
+    if (!TOOL_GUIDES[category]) return;
+    closeToolGuide();
+    beginLayerSelection(category, Math.round(state.name.length / 2), .5);
+  }
+
   function selectSourcePayload(payload, label) {
     if (pendingLayerOffset !== null) {
       if (pendingLayerCategory === 'colours' && payload?.kind === 'colour') {
@@ -1875,9 +1949,6 @@
   }
 
   function enableReservoirDrag(element, payload) {
-    const sourceName = payload.category === 'colours' ? 'Colour'
-      : payload.category === 'sprites' ? 'Sprite'
-        : 'FX';
     element.addEventListener('keydown', (event) => {
       if (!['Enter', ' '].includes(event.key)) return;
       event.preventDefault();
@@ -1889,7 +1960,6 @@
       if (event.button !== 0) return;
       event.preventDefault();
       cancelPendingLayer();
-      setActiveTab(null);
       const startX = event.clientX;
       const startY = event.clientY;
       let moved = false;
@@ -1901,6 +1971,7 @@
         if (!moved && Math.hypot(moveEvent.clientX - startX, moveEvent.clientY - startY) < 5) return;
         if (!moved) {
           moved = true;
+          setActiveTab(null);
           ghost = element.cloneNode(true);
           ghost.removeAttribute('id');
           ghost.classList.add('reservoir-ghost');
@@ -1957,7 +2028,7 @@
         if (finishEvent.pointerId !== event.pointerId) return;
         cleanup();
         if (!moved) {
-          announce(`Drag the ${sourceName} bubble onto the name`);
+          openToolGuide(payload.category);
           return;
         }
         const bounds = els.tubeTrack.getBoundingClientRect();
@@ -2941,14 +3012,15 @@
     const valid = ['colours', 'effects', 'sprites', 'wubrg', 'presets'];
     const nextTab = valid.includes(name) ? name : null;
     const changed = state.activeTab !== nextTab;
+    activeToolGuide = null;
+    renderToolGuide();
     if (nextTab === 'wubrg' && changed && !wubrgSession) beginWubrgSession();
     state.activeTab = nextTab;
     const tabs = Array.from(document.querySelectorAll('[data-tab]'));
-    const activePresetTab = tabs.some((tab) => tab.dataset.tab === state.activeTab);
     tabs.forEach((tab) => {
       const active = tab.dataset.tab === state.activeTab;
-      tab.setAttribute('aria-selected', String(active));
-      tab.tabIndex = activePresetTab ? (active ? 0 : -1) : 0;
+      tab.setAttribute('aria-pressed', String(active));
+      tab.tabIndex = 0;
       if (active && focus) tab.focus();
     });
     document.querySelectorAll('[data-panel]').forEach((panel) => {
@@ -3183,15 +3255,18 @@
     els.deckName.addEventListener('input', handleNameInput);
     ['click', 'keyup', 'select', 'focus'].forEach((type) => els.deckName.addEventListener(type, syncCaretFromInput));
     els.deckName.addEventListener('blur', () => { delete els.deckName.dataset.editing; });
-    els.startOver.addEventListener('click', () => mutate(() => {
-      const fresh = createDefaultState();
-      const activeTab = state.activeTab;
-      const favourites = state.favourites;
-      const savedCompositions = state.savedCompositions;
-      const recentColours = state.recentColours;
-      const recentEffects = state.recentEffects;
-      state = {...fresh, activeTab, favourites, savedCompositions, recentColours, recentEffects};
-    }, 'Started over — Undo is available'));
+    els.startOver.addEventListener('click', () => {
+      closeToolGuide();
+      mutate(() => {
+        const fresh = createDefaultState();
+        const activeTab = state.activeTab;
+        const favourites = state.favourites;
+        const savedCompositions = state.savedCompositions;
+        const recentColours = state.recentColours;
+        const recentEffects = state.recentEffects;
+        state = {...fresh, activeTab, favourites, savedCompositions, recentColours, recentEffects};
+      }, 'Started over — Undo is available');
+    });
     els.copyButton.addEventListener('click', () => copyCurrentName(els.copyButton));
     els.undoButton.addEventListener('click', undo);
     els.redoButton.addEventListener('click', redo);
@@ -3313,6 +3388,8 @@
     enableReservoirDrag(els.colourLayerBubble, colourReservoirPayload);
     enableReservoirDrag(els.fxLayerBubble, fxReservoirPayload);
     enableReservoirDrag(els.spriteLayerBubble, spriteReservoirPayload);
+    els.toolGuideAction.addEventListener('click', addGuidedLayerAtCentre);
+    els.toolGuideClose.addEventListener('click', closeToolGuide);
     document.querySelectorAll('[data-tab]').forEach((tab) => {
       tab.addEventListener('click', () => {
         cancelPendingLayer();
@@ -3340,6 +3417,7 @@
         setActiveTab(nextTab);
       });
       tab.addEventListener('keydown', (event) => {
+        if (tab.getAttribute('role') !== 'tab') return;
         if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
         event.preventDefault();
         const tabs = Array.from(document.querySelectorAll('[data-tab]'));
@@ -3409,6 +3487,8 @@
           cancelPendingLayer();
           setActiveTab(null);
           announce('New layer cancelled');
+        } else if (activeToolGuide) {
+          closeToolGuide();
         } else if (state.activeTab === 'presets' && presetMenuLevel !== 'root') {
           presetBack();
         } else if (state.activeTab === 'presets') {

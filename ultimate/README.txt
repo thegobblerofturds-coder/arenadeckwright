@@ -2,9 +2,14 @@ TURDGOBBLER'S DECK NAME COLOURIFIER — ULTIMATE VERSION
 
 STATUS
 This folder is the active Ultimate source. The current published build is
-ultimate-7.10.
+ultimate-7.11.
 Version 6 remains the standard /colour/ release and Version Lite remains
 shelved.
+
+CURRENT INTERACTION PASS
+The public prototype now uses a Looks-first progressive dock. Looks is the
+quick-start route; Colour, FX, and Sprite explain themselves when tapped while
+retaining direct drag placement.
 
 The public Ultimate route is deliberately labelled PROTOTYPE while its denser
 interaction model is still being refined. A quiet footer invitation links to
@@ -27,11 +32,11 @@ QUICK START
 THE ONE-TUBE MODEL
 - The live deck name is the canvas. An unfinished Colour or FX drop opens a
   deliberately prominent completion sheet. Later refinement stays compact;
-  WUBRG and Presets open below the tube with a pinned, exact-black live result.
+  Looks and WUBRG open below the tube with a pinned, exact-black live result.
 - The Mega Tube is the only positioned editor. The name stays above one shared
   horizontal rail for colour, positioned FX, and sprites.
 - On mobile, the whole-name controls sit beside the shortened black tube while
-  WUBRG and Presets move into the dock directly below it.
+  the four-door dock stays directly below it.
 - Every colour bubble, including bubble 1 and a single remaining bubble, is
   freely movable by pointer and keyboard.
 - Clicking a rendered character silently updates the keyboard insertion point.
@@ -49,16 +54,25 @@ THE ONE-TUBE MODEL
   spacing keeps them accessible, and guide lines point back to their exact
   text anchors.
 - Selecting a layer never draws decoration across the affected letters.
-- Undo, Redo, and Start Over stay together. More contains budget details and
-  Clear FX.
+- Undo and Redo appear only when useful. More contains budget details, Clear
+  FX, and Start Over.
 
-THE TWO PRESET LAUNCHERS
-1. WUBRG previews Magic colour identities live as pips are selected, then keeps
+THE FOUR PRIMARY DOORS
+1. LOOKS is the quick-start door and opens the ready-made Colour, Special, and
+   Saved collections immediately.
+2. COLOUR can still be dragged directly onto the name. A tap expands a short
+   explanation with Add at Centre and WUBRG as the instant mana-look route.
+3. FX can be dragged onto a letter or sprite. A tap explains the purple-letter
+   and gold-sprite guides and offers Add at Centre.
+4. SPRITE can be dragged to its exact insertion point. A tap explains placement
+   and offers Add at Centre.
+
+WUBRG previews Magic colour identities live as pips are selected, then keeps
    or cancels the whole session from the top action bar. Stable compact rows
    keep two-, three-, and four/five-colour identities from jumping as the
    selection changes. Multi-colour identities divide the deck-name letters
    evenly by default and rebalance when the name changes.
-2. PRESETS opens below the tube in one lifted upper arc: Special on the left,
+LOOKS opens below the tube in one lifted upper arc: Special on the left,
    Colour high in the middle, and Saved on the right. Colour contains Ice,
    Prismatic, Sunset Relic, and Toxic
    Foil. Special contains Upside Down, Bubbles, Drift Away, and Matrix Glitch.
@@ -71,12 +85,11 @@ non-sprite FX predictably while preserving sprites. Saved slots capture and
 restore the complete composition.
 
 COLOUR + EFFECT + SPRITE SOURCES
-- The Layer Dock has exactly three draggable creation points, paired directly
-  beneath the tube: Colour, FX, and Sprite.
+- The focused dock has four clear doors, with Looks first and the three
+  draggable creation points beside it: Colour, FX, and Sprite.
 - A Colour drop locks an exact edge-to-edge point; an FX drop locks a text
   position before opening the matching picker.
-- The three bubbles sit directly beside the Mega Tube and remain reachable on
-  narrow mobile screens.
+- All four doors remain together and reachable on narrow mobile screens.
 - The colour picker offers the wheel, hex, swatches, and saved palettes. The FX
   picker nests Motion, Text, Transform, and Visual families around one circle;
   choosing a family replaces it with only that family’s compact effect samples.

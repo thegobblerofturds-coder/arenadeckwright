@@ -1,5 +1,15 @@
 # Ultimate Version — name-canvas rebuild record
 
+## Ultimate 7.11 progressive-disclosure prototype — published 2026-08-11
+
+- Replaced the competing creation and utility rows with one calm four-door
+  scan: Looks, Colour, FX, and Sprite.
+- Made Looks the first and most welcoming quick-start route.
+- A tap on Colour, FX, or Sprite now expands a concise explanation and an Add
+  at Centre action; direct drag placement remains intact.
+- Moved WUBRG behind the Colour explanation, hid Undo and Redo until available,
+  and moved Start Over into More.
+
 ## Ultimate 7.10 refinement — published 2026-08-10
 
 - Marked the unfinished Ultimate route as a Prototype without changing its

@@ -10,9 +10,9 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="manifest" href="site.webmanifest">
   <title>TurdGobbler's Deck Name Colourifier — Ultimate Version</title>
-  <link rel="stylesheet" href="styles.css?v=ultimate-7.10">
-  <script src="logic.js?v=ultimate-7.10" defer></script>
-  <script src="app.js?v=ultimate-7.10" defer></script>
+  <link rel="stylesheet" href="styles.css?v=ultimate-7.11">
+  <script src="logic.js?v=ultimate-7.11" defer></script>
+  <script src="app.js?v=ultimate-7.11" defer></script>
 </head>
 <body>
   <main class="app-shell">
@@ -68,35 +68,48 @@
               <button id="forceGradient" class="force-gradient" type="button"><span>AUTO GRADIENT</span></button>
             </div>
 
-            <div class="tube-dock">
-              <div class="source-bubbles" role="group" aria-label="Drag a new layer into the Mega Tube">
-                <button id="colourLayerBubble" class="side-bubble colour-reservoir" type="button" aria-label="Drag Colour anywhere across the tube. Keyboard: place at the current text position.">
-                  <i aria-hidden="true">+</i><span>COLOUR</span>
+            <section class="focus-dock" aria-labelledby="focusDockTitle">
+              <header class="focus-dock-head">
+                <span><small>START HERE</small><b id="focusDockTitle">CHOOSE A LOOK OR BUILD YOUR OWN</b></span>
+                <small>ONE TOOL AT A TIME</small>
+              </header>
+              <div id="presetHub" class="primary-tools" role="group" aria-label="Choose how to style the deck name">
+                <button id="tabPresets" class="tool-door looks-door" type="button" aria-pressed="false" aria-controls="panelPresets" data-tab="presets">
+                  <i aria-hidden="true">✦</i><span>LOOKS</span><small>QUICK START</small>
                 </button>
-                <button id="fxLayerBubble" class="side-bubble fx-reservoir" type="button" aria-label="Drag Effect anywhere across the tube. Keyboard: place at the current text position.">
-                  <i aria-hidden="true">FX</i><span>EFFECT</span>
+                <button id="colourLayerBubble" class="tool-door side-bubble colour-reservoir" type="button" aria-expanded="false" aria-controls="toolGuide" aria-label="Colour. Tap for help or drag onto the name. Keyboard: place at the current text position.">
+                  <i aria-hidden="true">+</i><span>COLOUR</span><small>DRAG OR TAP</small>
                 </button>
-                <button id="spriteLayerBubble" class="side-bubble sprite-reservoir" type="button" aria-label="Drag Sprite anywhere across the tube. Keyboard: place at the current text position.">
-                  <i aria-hidden="true">☺</i><span>SPRITE</span>
+                <button id="fxLayerBubble" class="tool-door side-bubble fx-reservoir" type="button" aria-expanded="false" aria-controls="toolGuide" aria-label="FX. Tap for help or drag onto a letter or sprite. Keyboard: place at the current text position.">
+                  <i aria-hidden="true">FX</i><span>FX</span><small>DRAG OR TAP</small>
                 </button>
+                <button id="spriteLayerBubble" class="tool-door side-bubble sprite-reservoir" type="button" aria-expanded="false" aria-controls="toolGuide" aria-label="Sprite. Tap for help or drag onto the name. Keyboard: place at the current text position.">
+                  <i aria-hidden="true">☺</i><span>SPRITE</span><small>DRAG OR TAP</small>
+                </button>
+              </div>
+
+              <div id="toolGuide" class="tool-guide" aria-live="polite" hidden>
+                <div class="tool-guide-copy">
+                  <small id="toolGuideEyebrow">COLOUR</small>
+                  <b id="toolGuideTitle">ADD A COLOUR</b>
+                  <p id="toolGuideText">Drag Colour onto the exact spot you want, or add one to the middle and choose it next.</p>
+                </div>
+                <div class="tool-guide-actions">
+                  <button id="tabWubrg" class="guide-secondary" type="button" aria-pressed="false" aria-controls="panelWubrg" data-tab="wubrg" hidden><i class="mana-ring-icon" aria-hidden="true"><em></em><em></em><em></em><em></em><em></em></i><span>WUBRG</span><small>INSTANT MANA LOOK</small></button>
+                  <button id="toolGuideAction" class="guide-primary" type="button">ADD AT CENTRE</button>
+                  <button id="toolGuideClose" class="guide-close" type="button" aria-label="Close tool explanation">×</button>
+                </div>
               </div>
 
               <div id="trashDropZone" class="trash-drop-zone" aria-hidden="true" hidden>
                 <i aria-hidden="true">×</i><span>DROP TO DELETE</span>
               </div>
-            </div>
+            </section>
 
             <div class="editor-toolbar">
-              <div id="presetHub" class="preset-hub" role="tablist" aria-label="Colour tools">
-                <button id="tabWubrg" type="button" role="tab" aria-selected="false" aria-controls="panelWubrg" data-tab="wubrg">
-                  <i class="mana-ring-icon" aria-hidden="true"><em></em><em></em><em></em><em></em><em></em></i><span>WUBRG</span>
-                </button>
-                <button id="tabPresets" type="button" role="tab" aria-selected="false" aria-controls="panelPresets" data-tab="presets"><i>◒</i><span>PRESETS</span></button>
-              </div>
               <div class="persistent-actions" role="group" aria-label="Editing actions">
                 <button id="undoButton" class="tool-button" type="button" disabled><span aria-hidden="true">↶</span> UNDO</button>
                 <button id="redoButton" class="tool-button" type="button" disabled><span aria-hidden="true">↷</span> REDO</button>
-                <button id="startOver" class="tool-button danger-soft" type="button">START OVER</button>
               </div>
             </div>
           </div>
@@ -190,9 +203,10 @@
 
             <section id="panelPresets" class="library-panel preset-panel" role="tabpanel" aria-labelledby="tabPresets" data-panel="presets" hidden>
               <header class="panel-head">
-                <span><small>PRESETS</small><b>CHOOSE A COLLECTION</b></span>
-                <button type="button" data-close-panel aria-label="Close Presets">×</button>
+                <span><small>LOOKS</small><b>START WITH A READY-MADE STYLE</b></span>
+                <button type="button" data-close-panel aria-label="Close Looks">×</button>
               </header>
+              <p class="panel-note">Preview a colour palette or a special treatment, or return to one of your four saved looks.</p>
               <div id="presetPreviewActions" class="preset-preview-actions" hidden>
                 <button id="presetCancelButton" class="preset-cancel-button" type="button">CANCEL</button>
                 <button id="presetKeepButton" class="preset-keep-button" type="button"><span aria-hidden="true">✓</span> KEEP THIS LOOK</button>
@@ -233,6 +247,7 @@
 
           <div class="tube-actions">
             <button id="clearFxButton" class="tool-button danger-soft" type="button">CLEAR FX</button>
+            <button id="startOver" class="tool-button danger-soft" type="button">START OVER</button>
           </div>
         </div>
       </details>
