@@ -62,7 +62,9 @@
     stopEditorTitle: $('stopEditorTitle'), stopEditorClose: $('stopEditorClose'),
     stopEditorWheel: $('stopEditorWheel'), stopEditorWheelCursor: $('stopEditorWheelCursor'),
     stopEditorPreview: $('stopEditorPreview'),
-    stopEditorHex: $('stopEditorHex'), stopEditorConfirm: $('stopEditorConfirm'),
+    stopEditorHex: $('stopEditorHex'), stopEditorHexCopy: $('stopEditorHexCopy'),
+    stopEditorHexCopyText: $('stopEditorHexCopyText'), stopEditorHexCopyStatus: $('stopEditorHexCopyStatus'),
+    stopEditorConfirm: $('stopEditorConfirm'),
     offlineDownload: $('offlineDownload')
   };
 
@@ -82,6 +84,7 @@
   let secondStopMemory = {colour: MANA.R.colour, position: 1};
   let stopEditorOpen = false;
   let editorDraftColour = null;
+  let hexCopyFeedbackTimer = null;
   let viewMode = DEFAULT_VIEW_MODE;
 
   function clone(value) {
@@ -292,6 +295,7 @@
     editorDraftColour = gradientStops[selectedStop].colour;
     els.stopEditorHex.blur();
     els.stopEditorBackdrop.classList.remove('hex-entry-active');
+    resetHexCopyFeedback();
     document.body.classList.add('stop-editor-open');
     renderGradientBar();
     renderStopEditor();
@@ -306,6 +310,7 @@
     editorDraftColour = null;
     els.stopEditorHex.blur();
     els.stopEditorBackdrop.classList.remove('hex-entry-active');
+    resetHexCopyFeedback();
     document.body.classList.remove('stop-editor-open');
     els.stopEditorBackdrop.hidden = true;
     els.stopEditorHex.classList.remove('error');
@@ -1198,16 +1203,55 @@
       if (navigator.clipboard?.writeText) { await navigator.clipboard.writeText(text); return true; }
     } catch (_) {}
     try {
+      const previousFocus = document.activeElement;
+      const scrollX = window.scrollX;
+      const scrollY = window.scrollY;
       const fallback = document.createElement('textarea');
       fallback.value = text;
       fallback.setAttribute('readonly', '');
       fallback.style.cssText = 'position:fixed;left:-9999px;top:0';
       document.body.appendChild(fallback);
+      fallback.focus({preventScroll: true});
       fallback.select();
       const copied = document.execCommand('copy');
       fallback.remove();
+      if (previousFocus instanceof HTMLElement) previousFocus.focus({preventScroll: true});
+      window.scrollTo(scrollX, scrollY);
       return copied;
     } catch (_) { return false; }
+  }
+
+  function resetHexCopyFeedback() {
+    clearTimeout(hexCopyFeedbackTimer);
+    hexCopyFeedbackTimer = null;
+    els.stopEditorHexCopy.classList.remove('copy-confirmed', 'copy-error');
+    els.stopEditorHexCopyText.textContent = 'COPY';
+    els.stopEditorHexCopyStatus.textContent = '';
+  }
+
+  function playHexCopyFeedback(message, error = false) {
+    resetHexCopyFeedback();
+    els.stopEditorHexCopy.classList.add(error ? 'copy-error' : 'copy-confirmed');
+    els.stopEditorHexCopyText.textContent = error ? 'RETRY' : 'COPIED';
+    els.stopEditorHexCopyStatus.textContent = message;
+    hexCopyFeedbackTimer = setTimeout(resetHexCopyFeedback, 1200);
+  }
+
+  async function copyEditorHex() {
+    const colour = normaliseHex(els.stopEditorHex.value);
+    if (!colour) {
+      els.stopEditorHex.classList.add('error');
+      els.stopEditorHex.setAttribute('aria-invalid', 'true');
+      playHexCopyFeedback('INVALID HEX', true);
+      haptic(18);
+      return;
+    }
+    els.stopEditorHex.classList.remove('error');
+    els.stopEditorHex.removeAttribute('aria-invalid');
+    setEditorDraft(colour);
+    const copied = await writeClipboard(colour);
+    playHexCopyFeedback(copied ? 'HEX COPIED!' : 'COPY BLOCKED', !copied);
+    haptic(copied ? 10 : 24);
   }
 
   function playFeedback(message, error = false) {
@@ -1337,6 +1381,7 @@
     closeStopEditor();
   };
   els.stopEditorHex.addEventListener('input', () => {
+    resetHexCopyFeedback();
     els.stopEditorHex.value = els.stopEditorHex.value.toUpperCase();
     els.stopEditorHex.classList.remove('error');
     els.stopEditorHex.removeAttribute('aria-invalid');
@@ -1344,6 +1389,7 @@
     if (colour) setEditorDraft(colour, false);
   });
   els.stopEditorHex.addEventListener('change', applyEditorHexDraft);
+  els.stopEditorHexCopy.addEventListener('click', copyEditorHex);
   els.stopEditorHex.addEventListener('focus', () => {
     els.stopEditorBackdrop.classList.add('hex-entry-active');
   });

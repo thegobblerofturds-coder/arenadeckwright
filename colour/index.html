@@ -10,9 +10,9 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="manifest" href="site.webmanifest">
   <title>TurdGobbler's Deck Name Colourifier &mdash; Version 6</title>
-  <link rel="stylesheet" href="styles.css?v=6.7.4-twitch-feedback">
+  <link rel="stylesheet" href="styles.css?v=6.7.5-hex-copy">
   <script src="logic.js?v=6.4.0" defer></script>
-  <script src="app.js?v=6.7.4-black-arena-background" defer></script>
+  <script src="app.js?v=6.7.5-hex-copy" defer></script>
 </head>
 <body>
   <main class="app-shell">
@@ -136,10 +136,16 @@
             <div id="stopEditorPreview" class="stop-editor-preview" aria-label="Selected colour preview">
               <i aria-hidden="true"></i>
             </div>
-            <label class="stop-editor-hex">
-              <span>HEX CODE</span>
-              <input id="stopEditorHex" type="text" value="#FFFFFF" maxlength="7" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Hex code for selected colour">
-            </label>
+            <div class="stop-editor-hex">
+              <span class="stop-editor-hex-head">
+                <label for="stopEditorHex">HEX CODE</label>
+                <output id="stopEditorHexCopyStatus" class="stop-editor-hex-copy-status" aria-live="polite"></output>
+              </span>
+              <div class="stop-editor-hex-row">
+                <input id="stopEditorHex" type="text" value="#FFFFFF" maxlength="7" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Hex code for selected colour">
+                <button id="stopEditorHexCopy" class="stop-editor-hex-copy" type="button" aria-label="Copy selected hex code"><span id="stopEditorHexCopyText">COPY</span></button>
+              </div>
+            </div>
           </div>
         </div>
       </section>
