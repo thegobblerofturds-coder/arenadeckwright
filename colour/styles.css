@@ -507,18 +507,18 @@ body.tube-dragging{overscroll-behavior:none;touch-action:none;user-select:none}
 .stop-editor header button{display:grid;place-items:center;height:44px;padding:0;border:1px solid #667983;border-radius:12px;appearance:none}
 .stop-editor-close{width:44px;color:#dff5ff;background:linear-gradient(#22313a,#080d11);box-shadow:0 2px 0 #020305,0 1px #fff2 inset;font:300 28px/1 Arial,sans-serif}
 .stop-editor-controls{display:grid;grid-template-columns:112px minmax(0,1fr);gap:12px;margin-top:14px}
-.stop-editor-picker,.stop-editor-hex{display:grid;gap:8px;color:#8da2ad;font:900 7px/1 var(--font-ui);letter-spacing:.13em}
-.stop-editor-hex-head{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0}
+.stop-editor-picker,.stop-editor-hex-head{color:#8da2ad;font:900 7px/1 var(--font-ui);letter-spacing:.13em}
+.stop-editor-hex-head{grid-area:head;display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0}
 .stop-editor-hex-copy-status{min-width:0;color:#b9f6df;text-align:right;text-shadow:0 0 9px #4affba88;white-space:nowrap}
-.stop-editor-hex-row{display:flex;align-items:center;justify-content:flex-start;gap:8px;min-width:0}
-.stop-editor-side{display:grid;grid-template-rows:46px minmax(0,1fr);gap:9px;min-width:0}
-.stop-editor-preview{display:grid;place-items:center;width:46px;height:46px;padding:4px;border:1px solid #71858f;border-radius:12px;background:repeating-linear-gradient(180deg,#ffffff05 0 1px,transparent 1px 5px),#08141a;box-shadow:0 4px 10px #0008 inset,0 0 15px color-mix(in srgb,var(--preview-colour) 38%,transparent)}
+.stop-editor-side{display:grid;grid-template-columns:46px minmax(0,1fr);grid-template-areas:"preview head" "preview input" "actions actions";align-items:end;column-gap:10px;row-gap:8px;min-width:0}
+.stop-editor-preview{grid-area:preview;display:grid;place-items:center;width:46px;height:46px;padding:4px;border:1px solid #71858f;border-radius:12px;background:repeating-linear-gradient(180deg,#ffffff05 0 1px,transparent 1px 5px),#08141a;box-shadow:0 4px 10px #0008 inset,0 0 15px color-mix(in srgb,var(--preview-colour) 38%,transparent)}
 .stop-editor-preview>i{display:block;width:36px;height:36px;border:2px solid #fff;border-radius:8px;background:var(--preview-colour);box-shadow:0 0 0 2px #080c10,0 0 13px var(--preview-colour)}
 .stop-editor-picker input{width:100%;height:68px;padding:5px;overflow:hidden;border:1px solid #b5c7d0;border-radius:15px;background:#071017;box-shadow:0 0 0 3px #06090c,0 0 20px color-mix(in srgb,var(--editor-colour) 55%,transparent);appearance:none}
 .stop-editor-picker input::-webkit-color-swatch-wrapper{padding:0}.stop-editor-picker input::-webkit-color-swatch{border:0;border-radius:10px}
-.stop-editor-hex input{flex:0 0 auto;min-width:0;width:calc(8ch + 16px);height:54px;padding:0 7px;border:1px solid #71858f;border-radius:13px;outline:0;color:#dff7ff;background:repeating-linear-gradient(180deg,#ffffff05 0 1px,transparent 1px 5px),#08141a;box-shadow:0 5px 12px #0009 inset,0 0 16px color-mix(in srgb,var(--editor-colour) 25%,transparent);font:950 clamp(17px,5.4vw,23px)/1 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:0;text-transform:uppercase}
-.stop-editor-hex input:focus{border-color:#fff;box-shadow:0 0 0 3px #0b1116,0 0 0 5px color-mix(in srgb,var(--editor-colour) 65%,#6bd5ff),0 5px 12px #0009 inset,0 0 24px color-mix(in srgb,var(--editor-colour) 48%,transparent)}
-.stop-editor-hex input.error{border-color:#ff6479;color:#fff;background:#4a111c;box-shadow:0 0 0 3px #23060c,0 0 19px #ff304c99}
+.stop-editor-hex-input{grid-area:input;min-width:0;width:calc(8ch + 16px);height:54px;padding:0 7px;border:1px solid #71858f;border-radius:13px;outline:0;color:#dff7ff;background:repeating-linear-gradient(180deg,#ffffff05 0 1px,transparent 1px 5px),#08141a;box-shadow:0 5px 12px #0009 inset,0 0 16px color-mix(in srgb,var(--editor-colour) 25%,transparent);font:950 clamp(17px,5.4vw,23px)/1 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:0;text-transform:uppercase}
+.stop-editor-hex-input:focus{border-color:#fff;box-shadow:0 0 0 3px #0b1116,0 0 0 5px color-mix(in srgb,var(--editor-colour) 65%,#6bd5ff),0 5px 12px #0009 inset,0 0 24px color-mix(in srgb,var(--editor-colour) 48%,transparent)}
+.stop-editor-hex-input.error{border-color:#ff6479;color:#fff;background:#4a111c;box-shadow:0 0 0 3px #23060c,0 0 19px #ff304c99}
+.stop-editor-hex-actions{grid-area:actions;display:flex;align-items:center;justify-content:center;gap:8px;min-width:0}
 .stop-editor-hex-action{flex:0 0 72px;width:72px;height:54px;padding:0 6px;border:1px solid #71858f;border-radius:13px;color:#dff7ff;background:linear-gradient(155deg,#22323b,#080d11 72%);box-shadow:0 3px 0 #020305,0 1px #fff2 inset,0 0 14px color-mix(in srgb,var(--editor-colour) 30%,transparent);font:950 7px/1 var(--font-ui);letter-spacing:.1em;cursor:pointer;transition:transform .1s,filter .12s,box-shadow .12s,border-color .12s}
 .stop-editor-hex-action:hover,.stop-editor-hex-action:focus-visible{border-color:#fff;outline:0;filter:brightness(1.2);box-shadow:0 3px 0 #020305,0 0 0 3px #0b1116,0 0 0 5px color-mix(in srgb,var(--editor-colour) 58%,#6bd5ff),0 0 20px color-mix(in srgb,var(--editor-colour) 45%,transparent)}
 .stop-editor-hex-action:active{transform:translateY(2px);box-shadow:0 1px 0 #020305,0 2px 8px #000b inset}
@@ -536,10 +536,10 @@ body.tube-dragging{overscroll-behavior:none;touch-action:none;user-select:none}
   .bar-marker.anchor,.bar-marker.anchor.selected{width:90px}.bar-marker.anchor span,.bar-marker.anchor.selected span{width:80px}
   .tube-hint{font-size:5.5px;letter-spacing:.07em}
   .stop-editor-controls{grid-template-columns:96px minmax(0,1fr);gap:10px}
-  .stop-editor-hex-row{gap:4px}
+  .stop-editor-side{column-gap:8px}
+  .stop-editor-hex-actions{gap:6px}
   .stop-editor-hex-action{flex-basis:48px;width:48px}
 }
-@media(max-width:340px){.stop-editor-hex-row{display:grid;grid-template-columns:48px 48px}.stop-editor-hex input{grid-column:1/-1}}
 
 /* Final mobile compression and colour-wheel controls. */
 .field-head{min-height:23px;margin-bottom:5px}
