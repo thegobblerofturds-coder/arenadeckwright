@@ -137,6 +137,19 @@
     }, {position: requested, distance: Infinity}).position;
   }
 
+  function duplicateStopPosition(stops, selectedIndex) {
+    const source = normaliseGradientStops(stops);
+    const index = Math.max(0, Math.min(source.length - 1, Number(selectedIndex) || 0));
+    const selected = source[index];
+    const leftBoundary = index > 0 ? source[index - 1].position : 0;
+    const rightBoundary = index < source.length - 1 ? source[index + 1].position : 1;
+    const leftSpace = selected.position - leftBoundary;
+    const rightSpace = rightBoundary - selected.position;
+    if (rightSpace >= leftSpace && rightSpace > 0) return selected.position + rightSpace / 2;
+    if (leftSpace > 0) return selected.position - leftSpace / 2;
+    return .5;
+  }
+
   function colourAtPosition(stops, position) {
     const source = normaliseGradientStops(stops);
     const point = Math.max(0, Math.min(1, Number(position) || 0));
@@ -278,6 +291,7 @@
     normaliseGradientStops,
     separateGradientStops,
     collisionPosition,
+    duplicateStopPosition,
     colourAtPosition,
     sampleGradientStops,
     isWhiteish,

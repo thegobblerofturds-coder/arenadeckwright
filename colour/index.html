@@ -10,9 +10,9 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="manifest" href="site.webmanifest">
   <title>TurdGobbler's Deck Name Colourifier &mdash; Version 6</title>
-  <link rel="stylesheet" href="styles.css?v=6.7.5-hex-copy">
-  <script src="logic.js?v=6.4.0" defer></script>
-  <script src="app.js?v=6.7.5-hex-copy" defer></script>
+  <link rel="stylesheet" href="styles.css?v=6.7.6-paste-duplicate">
+  <script src="logic.js?v=6.7.6-paste-duplicate" defer></script>
+  <script src="app.js?v=6.7.6-paste-duplicate" defer></script>
 </head>
 <body>
   <main class="app-shell">
@@ -80,6 +80,7 @@
           <div class="order-tools" aria-label="Gradient order controls">
             <button id="rotateGradient" class="tool-button" type="button" title="Move the first colour to the end"><b aria-hidden="true">&#8635;</b><span>ROTATE</span></button>
             <button id="flipGradient" class="tool-button" type="button" title="Reverse the colour order"><b aria-hidden="true">&#8644;</b><span>FLIP</span></button>
+            <button id="duplicateGradient" class="tool-button duplicate-button" type="button" title="Duplicate the selected colour bubble"><b aria-hidden="true">&#x2398;</b><span>DUPLICATE</span></button>
           </div>
           <div id="quickPalettes" class="quick-palette-pad" role="group" aria-label="Palette library"></div>
         </div>
@@ -143,7 +144,8 @@
               </span>
               <div class="stop-editor-hex-row">
                 <input id="stopEditorHex" type="text" value="#FFFFFF" maxlength="7" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Hex code for selected colour">
-                <button id="stopEditorHexCopy" class="stop-editor-hex-copy" type="button" aria-label="Copy selected hex code"><span id="stopEditorHexCopyText">COPY</span></button>
+                <button id="stopEditorHexCopy" class="stop-editor-hex-action" type="button" aria-label="Copy selected hex code"><span id="stopEditorHexCopyText">COPY</span></button>
+                <button id="stopEditorHexPaste" class="stop-editor-hex-action" type="button" aria-label="Paste a hex code"><span id="stopEditorHexPasteText">PASTE</span></button>
               </div>
             </div>
           </div>

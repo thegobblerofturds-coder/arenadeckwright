@@ -1,4 +1,4 @@
-TURDGOBBLER'S DECK NAME COLOURIFIER - VERSION 6.7.5
+TURDGOBBLER'S DECK NAME COLOURIFIER - VERSION 6.7.6
 
 QUICK START
 1. Extract every file from the ZIP into one folder.
@@ -11,7 +11,8 @@ No installation, account, or internet connection is required. Everything runs lo
 MAIN FEATURES
 - One to seven directly positioned gradient colours.
 - Full colour wheel and direct three- or six-digit hex entry.
-- One-tap hex copying with in-editor confirmation; desktop editing stays centred while touch keyboards keep the mobile top alignment.
+- One-tap hex copy and paste with in-editor confirmation; desktop editing stays centred while touch keyboards keep the mobile top alignment.
+- A Duplicate tool clones the selected colour bubble and launches the new copy into the tube with the same side-entry motion as the + control.
 - Mobile-friendly tube controls with collision spacing and drag-to-delete.
 - Built-in palettes and ten persistent, custom-named local palette slots.
 - Ordered W/U/B/R/G shortcuts for mono, guild, three-colour, four-colour, and five-colour identities.

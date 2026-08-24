@@ -50,7 +50,7 @@
     prismaticNameBackdrop: $('prismaticNameBackdrop'), prismaticDeckName: $('prismaticDeckName'),
     prismaticNameClose: $('prismaticNameClose'), prismaticNameDone: $('prismaticNameDone'),
     rawCount: $('rawCount'), gradientPips: $('gradientPips'), undoButton: $('undoButton'),
-    rotateGradient: $('rotateGradient'), flipGradient: $('flipGradient'), gradientBar: $('gradientBar'),
+    rotateGradient: $('rotateGradient'), flipGradient: $('flipGradient'), duplicateGradient: $('duplicateGradient'), gradientBar: $('gradientBar'),
     tubeAddButton: $('tubeAddButton'), tubeHint: $('tubeHint'), stageWarning: $('stageWarning'),
     barStopMarkers: $('barStopMarkers'), quickPalettes: $('quickPalettes'),
     paletteTray: $('paletteTray'),
@@ -64,6 +64,7 @@
     stopEditorPreview: $('stopEditorPreview'),
     stopEditorHex: $('stopEditorHex'), stopEditorHexCopy: $('stopEditorHexCopy'),
     stopEditorHexCopyText: $('stopEditorHexCopyText'), stopEditorHexCopyStatus: $('stopEditorHexCopyStatus'),
+    stopEditorHexPaste: $('stopEditorHexPaste'), stopEditorHexPasteText: $('stopEditorHexPasteText'),
     stopEditorConfirm: $('stopEditorConfirm'),
     offlineDownload: $('offlineDownload')
   };
@@ -84,7 +85,7 @@
   let secondStopMemory = {colour: MANA.R.colour, position: 1};
   let stopEditorOpen = false;
   let editorDraftColour = null;
-  let hexCopyFeedbackTimer = null;
+  let hexClipboardFeedbackTimer = null;
   let viewMode = DEFAULT_VIEW_MODE;
 
   function clone(value) {
@@ -295,7 +296,7 @@
     editorDraftColour = gradientStops[selectedStop].colour;
     els.stopEditorHex.blur();
     els.stopEditorBackdrop.classList.remove('hex-entry-active');
-    resetHexCopyFeedback();
+    resetHexClipboardFeedback();
     document.body.classList.add('stop-editor-open');
     renderGradientBar();
     renderStopEditor();
@@ -310,7 +311,7 @@
     editorDraftColour = null;
     els.stopEditorHex.blur();
     els.stopEditorBackdrop.classList.remove('hex-entry-active');
-    resetHexCopyFeedback();
+    resetHexClipboardFeedback();
     document.body.classList.remove('stop-editor-open');
     els.stopEditorBackdrop.hidden = true;
     els.stopEditorHex.classList.remove('error');
@@ -710,6 +711,10 @@
     els.rotateGradient.disabled = gradientStops.length < 2;
     els.flipGradient.disabled = gradientStops.length < 2;
     const atStopLimit = gradientStops.length >= MAX_STOPS;
+    els.duplicateGradient.disabled = atStopLimit;
+    els.duplicateGradient.setAttribute('aria-label', atStopLimit
+      ? 'Maximum of seven colour bubbles reached; selected colour cannot be duplicated'
+      : 'Duplicate the selected colour bubble');
     els.tubeAddButton.disabled = atStopLimit;
     els.tubeAddButton.hidden = atStopLimit;
     els.tubeAddButton.closest('.gradient-tube-row').classList.toggle('at-stop-limit', atStopLimit);
@@ -748,6 +753,27 @@
     openStopEditor(selectedStop);
   }
 
+  function animateLaunchedBubble(sourceButton) {
+    sourceButton.classList.remove('firing');
+    void sourceButton.offsetWidth;
+    sourceButton.classList.add('firing');
+    const marker = els.barStopMarkers.querySelector(`[data-stop-index="${selectedStop}"]`);
+    if (marker) {
+      const markerBounds = marker.getBoundingClientRect();
+      const buttonBounds = sourceButton.getBoundingClientRect();
+      marker.style.setProperty('--launch-x', `${buttonBounds.left + buttonBounds.width / 2 - markerBounds.left - markerBounds.width / 2}px`);
+      void marker.offsetWidth;
+      marker.classList.add('bubble-launched');
+    }
+    setTimeout(() => {
+      sourceButton.classList.remove('firing');
+      if (marker) {
+        marker.classList.remove('bubble-launched');
+        marker.style.removeProperty('--launch-x');
+      }
+    }, 900);
+  }
+
   function addBubbleFromButton() {
     if (gradientStops.length >= MAX_STOPS) return;
     checkpoint();
@@ -763,24 +789,23 @@
     persist();
     renderAll();
     haptic([12, 12, 18]);
-    els.tubeAddButton.classList.remove('firing');
-    void els.tubeAddButton.offsetWidth;
-    els.tubeAddButton.classList.add('firing');
-    const marker = els.barStopMarkers.querySelector(`[data-stop-index="${selectedStop}"]`);
-    if (marker) {
-      const markerBounds = marker.getBoundingClientRect();
-      const buttonBounds = els.tubeAddButton.getBoundingClientRect();
-      marker.style.setProperty('--launch-x', `${buttonBounds.left + buttonBounds.width / 2 - markerBounds.left - markerBounds.width / 2}px`);
-      void marker.offsetWidth;
-      marker.classList.add('bubble-launched');
-    }
-    setTimeout(() => {
-      els.tubeAddButton.classList.remove('firing');
-      if (marker) {
-        marker.classList.remove('bubble-launched');
-        marker.style.removeProperty('--launch-x');
-      }
-    }, 900);
+    animateLaunchedBubble(els.tubeAddButton);
+  }
+
+  function duplicateSelectedBubble() {
+    if (gradientStops.length >= MAX_STOPS) return;
+    checkpoint();
+    const selected = gradientStops[Math.max(0, Math.min(selectedStop, gradientStops.length - 1))];
+    const point = Logic.duplicateStopPosition(gradientStops, selectedStop);
+    const duplicate = {colour: selected.colour, position: point};
+    const withDuplicate = [...gradientStops, duplicate].sort((left, right) => left.position - right.position);
+    selectedStop = withDuplicate.indexOf(duplicate);
+    gradientStops = normalisePalette(withDuplicate);
+    manaSelection = [];
+    persist();
+    renderAll();
+    haptic([12, 12, 18]);
+    animateLaunchedBubble(els.duplicateGradient);
   }
 
   function rotateGradient() {
@@ -1221,20 +1246,28 @@
     } catch (_) { return false; }
   }
 
-  function resetHexCopyFeedback() {
-    clearTimeout(hexCopyFeedbackTimer);
-    hexCopyFeedbackTimer = null;
-    els.stopEditorHexCopy.classList.remove('copy-confirmed', 'copy-error');
+  async function readClipboard() {
+    try {
+      if (navigator.clipboard?.readText) return await navigator.clipboard.readText();
+    } catch (_) {}
+    return null;
+  }
+
+  function resetHexClipboardFeedback() {
+    clearTimeout(hexClipboardFeedbackTimer);
+    hexClipboardFeedbackTimer = null;
+    [els.stopEditorHexCopy, els.stopEditorHexPaste].forEach((button) => button.classList.remove('copy-confirmed', 'copy-error'));
     els.stopEditorHexCopyText.textContent = 'COPY';
+    els.stopEditorHexPasteText.textContent = 'PASTE';
     els.stopEditorHexCopyStatus.textContent = '';
   }
 
-  function playHexCopyFeedback(message, error = false) {
-    resetHexCopyFeedback();
-    els.stopEditorHexCopy.classList.add(error ? 'copy-error' : 'copy-confirmed');
-    els.stopEditorHexCopyText.textContent = error ? 'RETRY' : 'COPIED';
+  function playHexClipboardFeedback(button, buttonText, message, successText, error = false) {
+    resetHexClipboardFeedback();
+    button.classList.add(error ? 'copy-error' : 'copy-confirmed');
+    buttonText.textContent = error ? 'RETRY' : successText;
     els.stopEditorHexCopyStatus.textContent = message;
-    hexCopyFeedbackTimer = setTimeout(resetHexCopyFeedback, 1200);
+    hexClipboardFeedbackTimer = setTimeout(resetHexClipboardFeedback, 1200);
   }
 
   async function copyEditorHex() {
@@ -1242,7 +1275,7 @@
     if (!colour) {
       els.stopEditorHex.classList.add('error');
       els.stopEditorHex.setAttribute('aria-invalid', 'true');
-      playHexCopyFeedback('INVALID HEX', true);
+      playHexClipboardFeedback(els.stopEditorHexCopy, els.stopEditorHexCopyText, 'INVALID HEX', 'COPIED', true);
       haptic(18);
       return;
     }
@@ -1250,8 +1283,28 @@
     els.stopEditorHex.removeAttribute('aria-invalid');
     setEditorDraft(colour);
     const copied = await writeClipboard(colour);
-    playHexCopyFeedback(copied ? 'HEX COPIED!' : 'COPY BLOCKED', !copied);
+    playHexClipboardFeedback(els.stopEditorHexCopy, els.stopEditorHexCopyText, copied ? 'HEX COPIED!' : 'COPY BLOCKED', 'COPIED', !copied);
     haptic(copied ? 10 : 24);
+  }
+
+  async function pasteEditorHex() {
+    const pasted = await readClipboard();
+    if (pasted === null) {
+      playHexClipboardFeedback(els.stopEditorHexPaste, els.stopEditorHexPasteText, 'PASTE BLOCKED', 'PASTED', true);
+      haptic(24);
+      return;
+    }
+    const colour = normaliseHex(pasted);
+    if (!colour) {
+      playHexClipboardFeedback(els.stopEditorHexPaste, els.stopEditorHexPasteText, 'INVALID HEX', 'PASTED', true);
+      haptic(18);
+      return;
+    }
+    els.stopEditorHex.classList.remove('error');
+    els.stopEditorHex.removeAttribute('aria-invalid');
+    setEditorDraft(colour);
+    playHexClipboardFeedback(els.stopEditorHexPaste, els.stopEditorHexPasteText, 'HEX PASTED!', 'PASTED');
+    haptic(10);
   }
 
   function playFeedback(message, error = false) {
@@ -1304,6 +1357,7 @@
   els.undoButton.addEventListener('click', undo);
   els.rotateGradient.addEventListener('click', rotateGradient);
   els.flipGradient.addEventListener('click', flipGradient);
+  els.duplicateGradient.addEventListener('click', duplicateSelectedBubble);
   els.tubeAddButton.addEventListener('click', addBubbleFromButton);
   els.gradientBar.addEventListener('click', (event) => {
     if (event.target.closest('.bar-marker')) return;
@@ -1381,7 +1435,7 @@
     closeStopEditor();
   };
   els.stopEditorHex.addEventListener('input', () => {
-    resetHexCopyFeedback();
+    resetHexClipboardFeedback();
     els.stopEditorHex.value = els.stopEditorHex.value.toUpperCase();
     els.stopEditorHex.classList.remove('error');
     els.stopEditorHex.removeAttribute('aria-invalid');
@@ -1390,6 +1444,7 @@
   });
   els.stopEditorHex.addEventListener('change', applyEditorHexDraft);
   els.stopEditorHexCopy.addEventListener('click', copyEditorHex);
+  els.stopEditorHexPaste.addEventListener('click', pasteEditorHex);
   els.stopEditorHex.addEventListener('focus', () => {
     els.stopEditorBackdrop.classList.add('hex-entry-active');
   });
