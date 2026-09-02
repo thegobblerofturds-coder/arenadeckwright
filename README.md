@@ -8,6 +8,7 @@ A fan-made, browser-based utility for creating colourful Magic Arena deck names 
 - `/colour/` is the standard Version 6 Deck Name Colourifier.
 - `/ultimate/` is the full-featured Ultimate Version, sourced from the internal `version7` development line.
 - `/cheugs/` is an intentionally unlisted joke edition whose escape link returns to `/colour/`.
+- `/tim/` is an unlisted, no-index technical digest of SpatialAnalyzer point-cloud and colourization improvements.
 
 The `/colour/` and `/ultimate/` folders provide the two public editions. No backend or server-side code is required.
 

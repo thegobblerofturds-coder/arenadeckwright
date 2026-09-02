@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="en-CA">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+  <meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet">
+  <meta name="theme-color" content="#0b1117">
+  <meta name="description" content="A practical guide to SpatialAnalyzer point-cloud and colourization improvements from 2023 through 2026.1.">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'none'; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'">
+  <title>SpatialAnalyzer Cloud &amp; Colourization — 2023 to 2026.1</title>
+  <link rel="icon" href="../favicon.ico" sizes="any">
+  <link rel="stylesheet" href="styles.css?v=1">
+</head>
+<body>
+  <main>
+    <header class="hero">
+      <div class="hero-meta">
+        <span class="status-dot" aria-hidden="true"></span>
+        <span>Technical field guide</span>
+        <span class="divider" aria-hidden="true"></span>
+        <span>Updated through 2026.1.0529.7</span>
+      </div>
+      <p class="kicker">SpatialAnalyzer / point-cloud workflows</p>
+      <h1>Cloud &amp; <span>colourization</span></h1>
+      <p class="lede">The biggest improvements since 2023, what they change in practice, and where to find them.</p>
+      <div class="hero-summary">
+        <strong>The short version</strong>
+        <p>SA moved from conventional scan clouds with improving filters and meshes to an <em>Enhanced Cloud</em> system built for large data, then added complete deviation-colour, RGB, intensity, cross-section and automation workflows around it.</p>
+      </div>
+    </header>
+
+    <section class="section" aria-labelledby="top-ten-title">
+      <div class="section-heading">
+        <p class="section-number">01</p>
+        <div>
+          <p class="eyebrow">The best changes</p>
+          <h2 id="top-ten-title">Ten upgrades that matter most</h2>
+        </div>
+      </div>
+
+      <ol class="upgrade-grid">
+        <li>
+          <span class="rank">01</span>
+          <div><h3>Enhanced Cloud format</h3><p>An octree plus local surface normals makes large clouds faster to access, draw, light and search for features. Introduced as an opt-in in 2025.2.</p></div>
+          <span class="release">2025.2</span>
+        </li>
+        <li>
+          <span class="rank">02</span>
+          <div><h3>Deviation colour maps</h3><p>Cloud-to-CAD and cloud-to-mesh inspection can turn geometric differences into an immediate tolerance map instead of a table of isolated values.</p></div>
+          <span class="release">2026.1</span>
+        </li>
+        <li>
+          <span class="rank">03</span>
+          <div><h3>Colourized cloud-to-cloud results</h3><p>Comparing two scans now returns a colourized Enhanced Cloud, making before/after, station-to-station and process-change comparisons much easier to read.</p></div>
+          <span class="release">2026.1</span>
+        </li>
+        <li>
+          <span class="rank">04</span>
+          <div><h3>Flexible cloud-to-mesh output</h3><p>The result can colour the reference mesh or the measured cloud. Choose the object that best supports presentation, investigation or downstream work.</p></div>
+          <span class="release">2026.1</span>
+        </li>
+        <li>
+          <span class="rank">05</span>
+          <div><h3>CAD-accurate inspection meshes</h3><p>Construct Mesh from CAD builds a minimal-triangle reference using Chordal Distance and Max Angle controls—light enough to work with, accurate enough to inspect against.</p></div>
+          <span class="release">2026.1</span>
+        </li>
+        <li>
+          <span class="rank">06</span>
+          <div><h3>Real RGB point data</h3><p>PLY import accepts XYZ, IJK normals and RGB. Enhanced Clouds can display captured colour, while SDK commands can read RGB values globally or near a point.</p></div>
+          <span class="release">2026.1</span>
+        </li>
+        <li>
+          <span class="rank">07</span>
+          <div><h3>Direct colour controls and filters</h3><p>A cloud or mesh right-click opens colour-bar and mapping controls. RGB filtering can isolate selected colour zones for focused analysis.</p></div>
+          <span class="release">2026.1</span>
+        </li>
+        <li>
+          <span class="rank">08</span>
+          <div><h3>Smarter feature filtering</h3><p>Threaded segmentation, iterative rejection, sigma thresholds and ring-band processing reduce noise and keep neighbouring geometry from pulling circle and slot fits off target.</p></div>
+          <span class="release">2023.2–2025.2</span>
+        </li>
+        <li>
+          <span class="rank">09</span>
+          <div><h3>Split without losing the source</h3><p>Split Cloud isolates a selected area for editing, can save it as a new cloud, and can restore the complete original cloud when needed.</p></div>
+          <span class="release">2025.2</span>
+        </li>
+        <li>
+          <span class="rank">10</span>
+          <div><h3>Cross-sections, callouts and automation</h3><p>Cross-section clouds, stored deviation/intensity callouts and expanded MP/SDK commands turn the visual result into a repeatable inspection workflow.</p></div>
+          <span class="release">2025.1–2026.1</span>
+        </li>
+      </ol>
+    </section>
+
+    <section class="section" aria-labelledby="pipeline-title">
+      <div class="section-heading">
+        <p class="section-number">02</p>
+        <div>
+          <p class="eyebrow">Under the hood</p>
+          <h2 id="pipeline-title">How colourization works</h2>
+        </div>
+      </div>
+
+      <div class="pipeline" aria-label="Five-stage colourization workflow">
+        <article>
+          <span>1</span>
+          <h3>Choose measured data</h3>
+          <p>Start with a measured point cloud—preferably Enhanced Cloud for the newest workflows.</p>
+        </article>
+        <i aria-hidden="true">→</i>
+        <article>
+          <span>2</span>
+          <h3>Choose a reference</h3>
+          <p>Compare it with CAD, a mesh, or another cloud depending on the inspection question.</p>
+        </article>
+        <i aria-hidden="true">→</i>
+        <article>
+          <span>3</span>
+          <h3>Calculate distance</h3>
+          <p>SA resolves correspondence to the reference and stores local geometric deviation.</p>
+        </article>
+        <i aria-hidden="true">→</i>
+        <article>
+          <span>4</span>
+          <h3>Map value to colour</h3>
+          <p>The colour bar converts signed or absolute deviation bands into a visual surface map.</p>
+        </article>
+        <i aria-hidden="true">→</i>
+        <article>
+          <span>5</span>
+          <h3>Inspect and report</h3>
+          <p>Adjust limits, filter zones, place callouts and carry results into reports or MPs.</p>
+        </article>
+      </div>
+
+      <div class="explain-grid">
+        <article class="explain-card">
+          <p class="card-label cyan">Enhanced Cloud</p>
+          <h3>Why the octree matters</h3>
+          <p>An octree divides 3D space into progressively smaller boxes. SA can load, draw or search only the branches relevant to the current view or operation instead of repeatedly walking every point. Local normals add an estimated surface direction at each neighbourhood, improving lighting, proximity searches and feature extraction.</p>
+        </article>
+        <article class="explain-card">
+          <p class="card-label orange">Reference quality</p>
+          <h3>Why CAD is converted to a mesh</h3>
+          <p>A tessellated reference is efficient for repeated closest-surface calculations. <strong>Chordal Distance</strong> limits how far the mesh may depart from the CAD curve or surface; <strong>Max Angle</strong> limits the change in direction between facets. Tighter settings increase fidelity and triangle count.</p>
+        </article>
+        <article class="explain-card">
+          <p class="card-label violet">Result choice</p>
+          <h3>Why you can colour either object</h3>
+          <p>Colouring the measured cloud preserves the scan as the inspection result and is ideal for finding local defects. Colouring the mesh gives a cleaner, continuous presentation on the nominal shape. Cloud-to-cloud comparisons return a colourized Enhanced Cloud.</p>
+        </article>
+        <article class="explain-card">
+          <p class="card-label green">Colour controls</p>
+          <h3>What the colour bar is doing</h3>
+          <p>The palette is a legend for stored values, not decoration. Changing its range or band limits changes how deviations are classified visually; it does not change the measured geometry. Set limits to the drawing tolerance before judging a map.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="colour-types-title">
+      <div class="section-heading">
+        <p class="section-number">03</p>
+        <div>
+          <p class="eyebrow">Do not mix these up</p>
+          <h2 id="colour-types-title">Three kinds of “colour”</h2>
+        </div>
+      </div>
+
+      <div class="colour-types">
+        <article>
+          <div class="colour-sample false-colour" aria-hidden="true"></div>
+          <div><h3>Deviation / false colour</h3><p>A computed inspection value is mapped to a palette. Blue might mean below nominal, green near nominal and red above—according to the active scale.</p></div>
+          <span>Computed</span>
+        </article>
+        <article>
+          <div class="colour-sample rgb-colour" aria-hidden="true"></div>
+          <div><h3>RGB</h3><p>The point’s captured or imported red, green and blue values represent real surface appearance. This is what PLY RGB import and RGB-zone filtering use.</p></div>
+          <span>Captured</span>
+        </article>
+        <article>
+          <div class="colour-sample intensity-colour" aria-hidden="true"></div>
+          <div><h3>Intensity</h3><p>A scanner return-strength value, usually displayed as a grayscale or palette. RTC360 sends an intensity Enhanced Cloud; voxel callouts can report the stored intensity.</p></div>
+          <span>Instrument signal</span>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="where-title">
+      <div class="section-heading">
+        <p class="section-number">04</p>
+        <div>
+          <p class="eyebrow">UI map</p>
+          <h2 id="where-title">Where the controls live</h2>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Task</th><th>Location</th><th>Added / matured</th></tr></thead>
+          <tbody>
+            <tr><td>Enable Enhanced Cloud</td><td><code>User Options › Display › Clouds &amp; Mesh</code></td><td>2025.2</td></tr>
+            <tr><td>Isolate part of a cloud</td><td><code>Cloud right-click › Split Cloud</code></td><td>2025.2</td></tr>
+            <tr><td>Build a CAD reference mesh</td><td><code>Construct Mesh from CAD</code></td><td>2026.1</td></tr>
+            <tr><td>Generate a colour map</td><td><code>Inspect/Query Cloud to CAD/Mesh</code> and choose <code>Mesh Result</code></td><td>2026.1</td></tr>
+            <tr><td>Change palette or limits</td><td><code>Cloud or mesh right-click › Colorization</code></td><td>2026.1</td></tr>
+            <tr><td>Make a cross-section cloud</td><td><code>Clouds &amp; Surfaces › New Clouds › Cross-Section</code></td><td>2025.1; Enhanced in 2026.1</td></tr>
+            <tr><td>Refresh feature-filtered data</td><td><code>Features › Extract Geometry › Auto Filter › Refresh Filtered Cloud Data</code></td><td>Direct ribbon entry in 2026.1</td></tr>
+            <tr><td>Replay scan-stripe data</td><td><code>Scan Stripe Cloud right-click › Export RSC File</code>, then import RSC</td><td>2024.2</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="timeline-title">
+      <div class="section-heading">
+        <p class="section-number">05</p>
+        <div>
+          <p class="eyebrow">Release progression</p>
+          <h2 id="timeline-title">How the capability evolved</h2>
+        </div>
+      </div>
+
+      <div class="timeline">
+        <article><time>2023.1</time><div><h3>Better display, extraction and mesh feedback</h3><p>Per-cloud point size, local circle/hole extraction, deviation histograms, probing-vector display and improved real-time mesh integrity, smoothing and incidence-angle colouring.</p></div></article>
+        <article><time>2023.2</time><div><h3>Filtering gets faster and more reusable</h3><p>Threaded segmentation accelerates feature-cloud filtering; direct cloud association, saved filter settings and slot extraction improve repeat work. Mesh display yields to point display when point selection is needed.</p></div></article>
+        <article><time>2024.1</time><div><h3>Large live data and meshing mature</h3><p>Faster visualization while several instruments stream high-rate data, a new General Mesh engine with presets and JSON configuration, Center in View and duplicate prevention during cloud feature searches.</p></div></article>
+        <article><time>2024.2</time><div><h3>Cloud data becomes replayable</h3><p>RSC export/import replays scan stripes with timing, instrument association and original base transform. Cloud-to-Swatch automation and richer ASCII cloud export arrive.</p></div></article>
+        <article><time>2025.1</time><div><h3>Cross-sections become a full workflow</h3><p>Create a cross-section from multiple clouds, measure ATS600 data directly into it, preserve filtered sphere-fit clouds, and choose measured geometry or raw cloud in batch feature measurement.</p></div></article>
+        <article class="milestone"><time>2025.2</time><div><h3>Enhanced Cloud is introduced</h3><p>Octree storage and local normals form the new foundation. Split Cloud, stronger rejection and ring-band filtering, automatic cloud-to-feature extraction and nearest-cloud reassociation reduce manual cleanup.</p></div></article>
+        <article class="milestone"><time>2026.1</time><div><h3>Colourization becomes end-to-end</h3><p>CAD-accurate reference meshes, cloud-to-CAD/mesh/cloud colour maps, RGB PLY data, direct mapping controls, RGB-zone filters, deviation/intensity callouts and expanded MP/SDK support complete the workflow.</p></div></article>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="watch-title">
+      <div class="section-heading">
+        <p class="section-number">06</p>
+        <div>
+          <p class="eyebrow">Practical cautions</p>
+          <h2 id="watch-title">What to watch for</h2>
+        </div>
+      </div>
+      <div class="cautions">
+        <article><strong>Enhanced Cloud is opt-in.</strong><p>Existing jobs may still use the legacy cloud type. Enable it under Clouds &amp; Mesh before expecting the new RGB, cross-section and colourized-result behaviour.</p></article>
+        <article><strong>Voxel display is not the fit itself.</strong><p>Voxelization is a display/acceleration representation. SA blocks Clouds-to-Objects fitting while a cloud is in voxel display mode to avoid an inappropriate fit.</p></article>
+        <article><strong>Colour scale determines readability.</strong><p>A dramatic map can simply be a narrow scale. Use drawing tolerances and confirm whether the map is signed deviation, absolute distance, RGB or intensity.</p></article>
+        <article><strong>Install the current 2026.1 hotfix.</strong><p>Build 2026.1.0529.7 fixes colourized cloud/mesh callouts and reports that were incorrectly forced to inches; values now follow the active units.</p></article>
+        <article><strong>Nexus reporting was removed.</strong><p>The 2024.1 Nexus Metrology Reporting cloud service is unrelated to point-cloud storage and was phased out in 2026.1. Do not plan a new reporting workflow around it.</p></article>
+        <article><strong>RTC360 firmware needs validation.</strong><p>The 2026.1 notes warn that firmware 7.02.2980 is incompatible with the documented wireless interface. Confirm the current supported pairing before changing scanner firmware.</p></article>
+      </div>
+    </section>
+
+    <section class="sources" aria-labelledby="sources-title">
+      <p class="eyebrow">Primary references</p>
+      <h2 id="sources-title">Official release material</h2>
+      <p>This guide consolidates Hexagon’s release summaries and the cumulative SpatialAnalyzer readme. It covers production releases from 2023.1 through the current 2026.1 hotfix.</p>
+      <div class="source-links">
+        <a href="https://www.spatialanalyzer.com/spatialanalyzer/whatsnew-software-release-sa-20231.php" target="_blank" rel="noopener noreferrer">2023.1 <span>↗</span></a>
+        <a href="https://www.spatialanalyzer.com/spatialanalyzer/whatsnew-software-release-sa-20232.php" target="_blank" rel="noopener noreferrer">2023.2 <span>↗</span></a>
+        <a href="https://www.spatialanalyzer.com/spatialanalyzer/whatsnew-software-release-sa-20241.php" target="_blank" rel="noopener noreferrer">2024.1 <span>↗</span></a>
+        <a href="https://www.spatialanalyzer.com/spatialanalyzer/whatsnew-software-release-sa-20242.php" target="_blank" rel="noopener noreferrer">2024.2 <span>↗</span></a>
+        <a href="https://www.spatialanalyzer.com/spatialanalyzer/whatsnew-software-release-sa-20251.php" target="_blank" rel="noopener noreferrer">2025.1 <span>↗</span></a>
+        <a href="https://nexus.hexagon.com/documentationcenter/en-US/bundle/SAUsersManual/page/Content/Topics/WhatsNew/2025.2.htm" target="_blank" rel="noopener noreferrer">2025.2 <span>↗</span></a>
+        <a href="https://hexagon.com/products/spatialanalyzer/whats-new" target="_blank" rel="noopener noreferrer">2026.1 <span>↗</span></a>
+        <a href="https://www.kinematics.com/ftp/SA/Install/_SAReadme.txt" target="_blank" rel="noopener noreferrer">Cumulative readme <span>↗</span></a>
+      </div>
+      <p class="note">SpatialAnalyzer is a Hexagon product. This independent digest is not official Hexagon documentation.</p>
+    </section>
+  </main>
+</body>
+</html>
