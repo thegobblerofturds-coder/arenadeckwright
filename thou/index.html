@@ -150,8 +150,7 @@
       text-transform: uppercase;
     }
 
-    .segmented,
-    .zoom-options {
+    .segmented {
       display: inline-flex;
       gap: 4px;
       padding: 4px;
@@ -160,8 +159,7 @@
       background: rgb(8 16 32 / 0.42);
     }
 
-    .segment,
-    .zoom-button {
+    .segment {
       min-width: 58px;
       min-height: 42px;
       padding: 8px 12px;
@@ -173,8 +171,7 @@
       cursor: pointer;
     }
 
-    .segment[aria-pressed="true"],
-    .zoom-button[aria-pressed="true"] {
+    .segment[aria-pressed="true"] {
       color: #07111f;
       background: var(--blue);
       box-shadow: 0 4px 16px rgb(88 210 255 / 0.22);
@@ -223,7 +220,7 @@
 
     .star-options {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 7px;
     }
 
@@ -246,8 +243,8 @@
 
     .star-option .stars {
       display: block;
-      font-size: 1rem;
-      letter-spacing: 0.08em;
+      font-size: 0.9rem;
+      letter-spacing: 0.035em;
       white-space: nowrap;
     }
 
@@ -365,9 +362,120 @@
 
     .feedback {
       min-height: 1.5em;
-      margin-top: 10px;
+      margin: 0;
       color: var(--muted);
       font-weight: 750;
+    }
+
+    .status-row {
+      position: relative;
+      z-index: 5;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 10px;
+      min-height: 66px;
+      margin-top: 8px;
+    }
+
+    .magnifier-dock {
+      display: grid;
+      width: 76px;
+      min-height: 60px;
+      place-items: center;
+    }
+
+    .magnifier-tool {
+      --drag-x: 0px;
+      --drag-y: 0px;
+      position: relative;
+      z-index: 20;
+      display: grid;
+      width: 66px;
+      height: 56px;
+      padding: 4px;
+      place-items: center;
+      border: 4px solid #cbd5e1;
+      border-radius: 22px;
+      color: #07111f;
+      background: #f8fafc;
+      box-shadow: 0 6px 0 #64748b, 0 11px 22px rgb(0 0 0 / 0.32);
+      cursor: grab;
+      touch-action: none;
+      user-select: none;
+      transform: translate(var(--drag-x), var(--drag-y));
+      transition: transform 220ms cubic-bezier(0.2, 1.45, 0.42, 1), box-shadow 120ms ease;
+    }
+
+    .magnifier-tool::after {
+      content: "";
+      position: absolute;
+      right: -12px;
+      bottom: -11px;
+      width: 23px;
+      height: 10px;
+      border: 3px solid #cbd5e1;
+      border-left: 0;
+      border-radius: 0 7px 7px 0;
+      background: #64748b;
+      transform: rotate(42deg);
+      transform-origin: left center;
+      pointer-events: none;
+    }
+
+    .magnifier-tool[data-dragging="true"] {
+      cursor: grabbing;
+      box-shadow: 0 9px 0 #64748b, 0 18px 32px rgb(0 0 0 / 0.42);
+      transform: translate(var(--drag-x), var(--drag-y)) scale(1.35);
+      transition: none;
+    }
+
+    .magnifier-tool:disabled {
+      opacity: 0.42;
+      cursor: not-allowed;
+      filter: grayscale(0.65);
+    }
+
+    .magnifier-icon {
+      font-size: 1.5rem;
+      line-height: 1;
+    }
+
+    .magnifier-copy {
+      color: #334155;
+      font-size: 0.62rem;
+      font-weight: 950;
+      letter-spacing: 0.045em;
+      line-height: 1;
+      text-transform: uppercase;
+    }
+
+    .magnifier-ruler,
+    .magnifier-value {
+      display: none;
+    }
+
+    .magnifier-tool[data-dragging="true"] .magnifier-icon,
+    .magnifier-tool[data-dragging="true"] .magnifier-copy {
+      display: none;
+    }
+
+    .magnifier-tool[data-dragging="true"] .magnifier-ruler {
+      display: block;
+      width: 54px;
+      height: 34px;
+    }
+
+    .magnifier-tool[data-dragging="true"] .magnifier-value {
+      display: block;
+      max-width: 56px;
+      overflow: hidden;
+      color: #0f172a;
+      font-size: 0.55rem;
+      font-weight: 950;
+      line-height: 1;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .feedback[data-kind="success"] {
@@ -402,54 +510,9 @@
     }
 
     .ruler-zone {
-      margin-top: 14px;
-      padding-top: 14px;
+      margin-top: 4px;
+      padding-top: 12px;
       border-top: 1px solid var(--line);
-    }
-
-    .ruler-tools {
-      display: flex;
-      justify-content: flex-end;
-    }
-
-    .zoom-area {
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .zoom-label {
-      color: var(--muted);
-      font-size: 0.78rem;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.07em;
-    }
-
-    .zoom-button {
-      min-width: 48px;
-    }
-
-    .center-button {
-      min-height: 42px;
-      padding: 8px 12px;
-      border: 1px solid var(--line);
-      border-radius: 11px;
-      color: var(--muted);
-      background: transparent;
-      font-weight: 800;
-      cursor: pointer;
-    }
-
-    .view-range {
-      width: 100%;
-      margin-top: 9px;
-      color: var(--muted);
-      font-size: 0.8rem;
-      text-align: right;
-      font-variant-numeric: tabular-nums;
     }
 
     .ruler-stage {
@@ -545,6 +608,21 @@
       filter: brightness(1.15);
     }
 
+    .nudge-button:disabled {
+      opacity: 0.38;
+      cursor: not-allowed;
+      transform: none;
+      filter: grayscale(0.5);
+    }
+
+    .fine-budget {
+      margin: 7px 2px 0;
+      color: var(--yellow);
+      font-size: 0.78rem;
+      font-weight: 850;
+      text-align: center;
+    }
+
     .detail-row {
       display: grid;
       grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -632,23 +710,26 @@
         width: 100%;
       }
 
-      .zoom-area {
-        display: grid;
-        grid-template-columns: 1fr;
-        justify-items: stretch;
+      .difficulty-panel {
+        gap: 9px;
       }
 
-      .zoom-area {
-        gap: 6px;
+      .star-options {
+        gap: 5px;
       }
 
-      .zoom-options {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
+      .star-option {
+        min-height: 48px;
+        padding-inline: 4px;
       }
 
-      .view-range {
-        text-align: left;
+      .star-option .stars {
+        font-size: 0.78rem;
+        letter-spacing: 0;
+      }
+
+      .star-option small {
+        font-size: 0.67rem;
       }
 
       .detail-row {
@@ -735,6 +816,10 @@
           <span class="stars" aria-hidden="true">★★★</span>
           <small>Expert</small>
         </button>
+        <button class="star-option" type="button" data-difficulty="4" aria-pressed="false" aria-label="Extreme difficulty, four stars">
+          <span class="stars" aria-hidden="true">★★★★</span>
+          <small>Extreme</small>
+        </button>
       </div>
 
       <p class="difficulty-help" data-difficulty-help>Common fractions with a forgiving target.</p>
@@ -759,24 +844,20 @@
         </div>
       </div>
 
-      <p class="feedback" aria-live="polite" data-feedback>Choose a difficulty, then start.</p>
+      <div class="status-row">
+        <p class="feedback" aria-live="polite" data-feedback>Choose a difficulty, then start.</p>
+        <div class="magnifier-dock">
+          <button class="magnifier-tool" type="button" data-magnifier data-dragging="false" aria-label="Drag the magnifying glass over the ruler for a temporary close-up">
+            <span class="magnifier-icon" aria-hidden="true">🔍</span>
+            <span class="magnifier-copy" data-magnifier-copy>Drag me</span>
+            <svg class="magnifier-ruler" data-magnifier-ruler viewBox="0 0 60 36" aria-hidden="true"></svg>
+            <span class="magnifier-value" data-magnifier-value aria-hidden="true"></span>
+          </button>
+        </div>
+      </div>
 
       <div class="ruler-zone">
-        <div class="ruler-tools">
-          <div class="zoom-area">
-            <span class="zoom-label">Zoom</span>
-            <div class="zoom-options" role="group" aria-label="Ruler zoom">
-              <button class="zoom-button" type="button" data-zoom="1" aria-pressed="true">1×</button>
-              <button class="zoom-button" type="button" data-zoom="5" aria-pressed="false">5×</button>
-              <button class="zoom-button" type="button" data-zoom="10" aria-pressed="false">10×</button>
-            </div>
-            <button class="center-button" type="button" data-center hidden>Center needle</button>
-          </div>
-        </div>
-
-        <div class="view-range" data-view-range>Whole ruler</div>
-
-        <div class="ruler-stage">
+        <div class="ruler-stage" data-ruler-stage>
           <svg class="ruler-svg" data-ruler role="img" aria-label="Ruler from zero to one inch">
             <title>Measurement ruler</title>
             <desc>The coloured ruler has a movable needle and small measurement ticks.</desc>
@@ -791,6 +872,7 @@
           <button class="nudge-button" data-size="fine" data-delta="1" type="button">+0.001 in</button>
           <button class="nudge-button" data-size="coarse" data-delta="10" type="button">+0.010 in</button>
         </div>
+        <p class="fine-budget" data-fine-budget hidden>Extreme fine taps: 10 left</p>
       </div>
 
       <div class="round-controls">
@@ -813,7 +895,7 @@
         </div>
       </div>
 
-      <p class="haptic-note" data-haptic-note>Small ruler ticks give a gentle pulse on supported phones.</p>
+      <p class="haptic-note" data-haptic-note>Buttons, ruler ticks, and sticky quarter marks give strong pulses on supported phones.</p>
     </section>
 
     <a class="home-link" href="/">Back to TurdGobbler.com</a>
@@ -823,9 +905,10 @@
     (function () {
       "use strict";
 
-      var storageKey = "thousandths-trainer-preferences-v3";
+      var storageKey = "thousandths-trainer-preferences-v4";
       var slider = document.querySelector("[data-slider]");
       var ruler = document.querySelector("[data-ruler]");
+      var rulerStage = document.querySelector("[data-ruler-stage]");
       var targetButton = document.querySelector("[data-target-button]");
       var currentEl = document.querySelector("[data-current]");
       var peekButton = document.querySelector("[data-peek-button]");
@@ -838,21 +921,22 @@
       var sliderLabelEl = document.querySelector("[data-slider-label]");
       var difficultyNameEl = document.querySelector("[data-difficulty-name]");
       var difficultyHelpEl = document.querySelector("[data-difficulty-help]");
-      var viewRangeEl = document.querySelector("[data-view-range]");
-      var centerButton = document.querySelector("[data-center]");
+      var magnifierTool = document.querySelector("[data-magnifier]");
+      var magnifierCopy = document.querySelector("[data-magnifier-copy]");
+      var magnifierRuler = document.querySelector("[data-magnifier-ruler]");
+      var magnifierValue = document.querySelector("[data-magnifier-value]");
+      var fineBudgetEl = document.querySelector("[data-fine-budget]");
       var coach = document.querySelector("[data-coach]");
       var coachSteps = document.querySelector("[data-coach-steps]");
       var hapticNote = document.querySelector("[data-haptic-note]");
       var unitButtons = Array.from(document.querySelectorAll("[data-unit]"));
       var difficultyButtons = Array.from(document.querySelectorAll("[data-difficulty]"));
-      var zoomButtons = Array.from(document.querySelectorAll("[data-zoom]"));
       var nudgeButtons = Array.from(document.querySelectorAll("[data-delta]"));
       var svgNamespace = "http://www.w3.org/2000/svg";
 
       var saved = loadPreferences();
       var unit = saved.unit === "mm" ? "mm" : "in";
-      var difficulty = [1, 2, 3].indexOf(Number(saved.difficulty)) >= 0 ? Number(saved.difficulty) : 1;
-      var zoom = [1, 5, 10].indexOf(Number(saved.zoom)) >= 0 ? Number(saved.zoom) : 1;
+      var difficulty = [1, 2, 3, 4].indexOf(Number(saved.difficulty)) >= 0 ? Number(saved.difficulty) : 1;
       var current = 0;
       var target = null;
       var tolerance = null;
@@ -861,11 +945,17 @@
       var guideVisible = false;
       var peeking = false;
       var peekTimer = null;
+      var fineTapsLeft = 10;
+      var stickyQuarter = null;
+      var magnifierPointer = null;
+      var magnifierStartX = 0;
+      var magnifierStartY = 0;
+      var magnifierTick = null;
       var viewStart = 0;
       var viewEnd = maximum();
 
       if (!("vibrate" in navigator)) {
-        hapticNote.textContent = "Tick haptics are not available in this browser.";
+        hapticNote.textContent = "Haptic feedback is not available in this browser.";
       }
 
       function loadPreferences() {
@@ -880,8 +970,7 @@
         try {
           localStorage.setItem(storageKey, JSON.stringify({
             unit: unit,
-            difficulty: difficulty,
-            zoom: zoom
+            difficulty: difficulty
           }));
         } catch (error) {
           // The game still works when browser storage is unavailable.
@@ -943,9 +1032,17 @@
               step: 25
             };
           }
+          if (difficulty === 3) {
+            return {
+              name: "Expert",
+              help: "Any thousandth with a ±0.003 in target. Magnifier locked.",
+              tolerance: 3,
+              step: 1
+            };
+          }
           return {
-            name: "Expert",
-            help: "Any thousandth from 0.001 to 0.999 in with a ±0.001 in target.",
+            name: "Extreme",
+            help: "±0.001 in, no magnifier, and only 10 fine taps per round.",
             tolerance: 1,
             step: 1
           };
@@ -967,9 +1064,17 @@
             step: 100
           };
         }
+        if (difficulty === 3) {
+          return {
+            name: "Expert",
+            help: "Any thousandth with a ±0.003 mm target. Magnifier locked.",
+            tolerance: 3,
+            step: 1
+          };
+        }
         return {
-          name: "Expert",
-          help: "Any thousandth from 0.001 to 25.399 mm with a ±0.001 mm target.",
+          name: "Extreme",
+          help: "±0.001 mm, no magnifier, and only 10 fine taps per round.",
           tolerance: 1,
           step: 1
         };
@@ -987,40 +1092,14 @@
       }
 
       function tickIntervals() {
-        if (unit === "in") {
-          if (zoom === 1) return { minor: 50, major: 250 };
-          if (zoom === 5) return { minor: 10, major: 50 };
-          return { minor: 5, major: 25 };
-        }
-        if (zoom === 1) return { minor: 1000, major: 5000 };
-        if (zoom === 5) return { minor: 250, major: 1000 };
-        return { minor: 100, major: 500 };
+        return unit === "in"
+          ? { minor: 50, major: 250 }
+          : { minor: 1000, major: 5000 };
       }
 
-      function zoomSpan() {
-        if (zoom === 1) return maximum();
-        if (unit === "in") return zoom === 5 ? 200 : 100;
-        return zoom === 5 ? 5000 : 2500;
-      }
-
-      function centerView(value) {
-        var max = maximum();
-        var span = Math.min(max, zoomSpan());
-        if (zoom === 1 || span === max) {
-          viewStart = 0;
-          viewEnd = max;
-          return;
-        }
-        var minor = tickIntervals().minor;
-        var proposed = Math.round((value - span / 2) / minor) * minor;
-        viewStart = clamp(proposed, 0, max - span);
-        viewEnd = viewStart + span;
-      }
-
-      function ensureCurrentInView() {
-        if (current < viewStart || current > viewEnd) {
-          centerView(current);
-        }
+      function resetView() {
+        viewStart = 0;
+        viewEnd = maximum();
       }
 
       function haptic(pattern) {
@@ -1032,8 +1111,31 @@
       function hapticForCrossedTick(before, after) {
         var interval = tickIntervals().minor;
         if (Math.floor(before / interval) !== Math.floor(after / interval)) {
-          haptic(5);
+          haptic(22);
         }
+      }
+
+      function stickyRulerValue(value) {
+        var threshold = unit === "in" ? 4 : 102;
+        var marks = [maximum() / 4, maximum() / 2, maximum() * 3 / 4];
+        var match = null;
+
+        marks.some(function (mark) {
+          if (Math.abs(value - mark) <= threshold) {
+            match = Math.round(mark);
+            return true;
+          }
+          return false;
+        });
+
+        if (match !== null) {
+          if (stickyQuarter !== match) haptic([45, 34, 55]);
+          stickyQuarter = match;
+          return match;
+        }
+
+        stickyQuarter = null;
+        return value;
       }
 
       function commonName(value) {
@@ -1181,6 +1283,93 @@
         }));
       }
 
+      function drawMagnifier(value) {
+        var width = 60;
+        var height = 36;
+        var localSpan = unit === "in" ? 80 : 2000;
+        var minor = unit === "in" ? 5 : 100;
+        var major = unit === "in" ? 10 : 500;
+        var start = clamp(value - localSpan / 2, 0, maximum() - localSpan);
+        var end = start + localSpan;
+        var x = function (tick) {
+          return ((tick - start) / localSpan) * width;
+        };
+
+        magnifierRuler.replaceChildren();
+        magnifierRuler.appendChild(svgNode("line", {
+          x1: 0,
+          y1: 12,
+          x2: width,
+          y2: 12,
+          stroke: "#475569",
+          "stroke-width": 3
+        }));
+
+        var firstTick = Math.ceil(start / minor) * minor;
+        for (var tick = firstTick; tick <= end; tick += minor) {
+          var isMajor = tick % major === 0;
+          magnifierRuler.appendChild(svgNode("line", {
+            x1: x(tick),
+            y1: 12,
+            x2: x(tick),
+            y2: isMajor ? 29 : 23,
+            stroke: "#0f172a",
+            "stroke-width": isMajor ? 1.8 : 1
+          }));
+        }
+
+        magnifierRuler.appendChild(svgNode("line", {
+          x1: width / 2,
+          y1: 3,
+          x2: width / 2,
+          y2: height,
+          stroke: "#0284c7",
+          "stroke-width": 2.5
+        }));
+        magnifierValue.textContent = formatted(value);
+      }
+
+      function magnifierValueAt(clientX) {
+        var bounds = rulerStage.getBoundingClientRect();
+        var ratio = clamp((clientX - bounds.left) / bounds.width, 0, 1);
+        return Math.round(ratio * maximum());
+      }
+
+      function moveMagnifier(event) {
+        if (magnifierPointer !== event.pointerId) return;
+        var dragX = event.clientX - magnifierStartX;
+        var dragY = event.clientY - magnifierStartY;
+        var value = magnifierValueAt(event.clientX);
+        var tick = Math.floor(value / (unit === "in" ? 5 : 100));
+
+        magnifierTool.style.setProperty("--drag-x", dragX + "px");
+        magnifierTool.style.setProperty("--drag-y", dragY + "px");
+        if (magnifierTick !== null && tick !== magnifierTick) haptic(20);
+        magnifierTick = tick;
+        drawMagnifier(value);
+      }
+
+      function snapMagnifier() {
+        magnifierPointer = null;
+        magnifierTick = null;
+        magnifierTool.dataset.dragging = "false";
+        magnifierTool.style.setProperty("--drag-x", "0px");
+        magnifierTool.style.setProperty("--drag-y", "0px");
+      }
+
+      function renderMagnifier() {
+        var locked = difficulty >= 3;
+        if (locked && magnifierPointer !== null) snapMagnifier();
+        magnifierTool.disabled = locked;
+        magnifierCopy.textContent = locked ? "Locked" : "Drag me";
+        magnifierTool.setAttribute(
+          "aria-label",
+          locked
+            ? "Magnifying glass locked in Expert and Extreme modes"
+            : "Drag the magnifying glass over the ruler for a temporary close-up"
+        );
+      }
+
       function renderDifficulty() {
         var settings = difficultySettings();
         difficultyNameEl.textContent = settings.name;
@@ -1196,26 +1385,21 @@
         });
       }
 
-      function renderZoom() {
-        zoomButtons.forEach(function (button) {
-          button.setAttribute("aria-pressed", String(Number(button.dataset.zoom) === zoom));
-        });
-        centerButton.hidden = zoom === 1;
-        viewRangeEl.textContent = zoom === 1
-          ? "Whole ruler"
-          : zoom + "× view · " + formatted(viewStart) + " to " + formatted(viewEnd);
-      }
-
       function renderNudges() {
         nudgeButtons.forEach(function (button) {
           var amount = Number(button.dataset.delta);
           var sign = amount < 0 ? "−" : "+";
+          var fineLimitReached = difficulty === 4 && phase === "checking" && Math.abs(amount) === 1 && fineTapsLeft <= 0;
           button.textContent = sign + decimal(Math.abs(amount)) + " " + suffix();
+          button.disabled = fineLimitReached;
           button.setAttribute(
             "aria-label",
-            (amount < 0 ? "Subtract " : "Add ") + decimal(Math.abs(amount)) + " " + (unit === "in" ? "inches" : "millimetres")
+            (amount < 0 ? "Subtract " : "Add ") + decimal(Math.abs(amount)) + " " + (unit === "in" ? "inches" : "millimetres") +
+            (difficulty === 4 && Math.abs(amount) === 1 ? ". " + fineTapsLeft + " fine taps remaining" : "")
           );
         });
+        fineBudgetEl.hidden = difficulty !== 4 || phase !== "checking";
+        fineBudgetEl.textContent = "Extreme fine taps: " + fineTapsLeft + " left";
       }
 
       function renderCoach() {
@@ -1228,9 +1412,12 @@
         var remaining = target - landmark;
         var tens = Math.floor(remaining / 10);
         var ones = remaining % 10;
+        var lookStep = difficulty < 3
+          ? "Drag the magnifying glass over crowded ticks, then let go to snap it back."
+          : "The magnifying glass is locked here, so use the quarter marks to judge the space.";
         var steps = [
           "<strong>Start:</strong> find the " + formatted(landmark) + " tick just below the target.",
-          "<strong>Look:</strong> your target is " + formatted(target) + ". Zoom in when the nearby ticks feel crowded.",
+          "<strong>Look:</strong> your target is " + formatted(target) + ". " + lookStep,
           "<strong>Adjust:</strong> from that tick, use +0.010 " + tens + " " + (tens === 1 ? "time" : "times") + " and +0.001 " + ones + " " + (ones === 1 ? "time" : "times") + "."
         ];
 
@@ -1281,17 +1468,16 @@
 
         renderUnit();
         renderDifficulty();
-        renderZoom();
+        renderMagnifier();
         renderNudges();
         renderCoach();
         drawRuler();
       }
 
-      function setCurrent(value, keepView) {
+      function setCurrent(value) {
         var before = current;
         current = clamp(Math.round(value), 0, maximum());
-        if (!keepView) ensureCurrentInView();
-        hapticForCrossedTick(before, current);
+        if (stickyQuarter === null) hapticForCrossedTick(before, current);
         render();
       }
 
@@ -1304,6 +1490,8 @@
         tolerance = settings.tolerance;
         phase = "checking";
         misses = 0;
+        fineTapsLeft = 10;
+        stickyQuarter = null;
         guideVisible = false;
         feedbackEl.textContent = "Find the target.";
         feedbackEl.removeAttribute("data-kind");
@@ -1322,7 +1510,7 @@
           guideVisible = false;
           feedbackEl.textContent = "⭐ Matched.";
           feedbackEl.dataset.kind = "success";
-          haptic([12, 34, 18]);
+          haptic([60, 70, 85]);
           render();
           return;
         }
@@ -1331,15 +1519,18 @@
         feedbackEl.dataset.kind = "miss";
         if (misses < 3) {
           feedbackEl.textContent = "Not yet.";
+          haptic([42, 48, 42]);
         } else {
           guideVisible = true;
           feedbackEl.textContent = "Three tries—here is one way to break it down.";
+          haptic([55, 42, 65]);
         }
         render();
       }
 
       function setDifficulty(nextDifficulty) {
         difficulty = nextDifficulty;
+        if (difficulty >= 3) snapMagnifier();
         savePreferences();
         if (phase === "checking") {
           newChallenge();
@@ -1357,28 +1548,32 @@
         if (target !== null) target = Math.round(target * factor);
         if (tolerance !== null) tolerance = Math.max(1, Math.round(tolerance * factor));
         unit = nextUnit;
-        centerView(current);
-        savePreferences();
-        render();
-      }
-
-      function setZoom(nextZoom) {
-        zoom = nextZoom;
-        centerView(current);
+        stickyQuarter = null;
+        resetView();
         savePreferences();
         render();
       }
 
       function nudge(amount) {
-        setCurrent(current + amount, false);
+        if (difficulty === 4 && phase === "checking" && Math.abs(amount) === 1) {
+          if (fineTapsLeft <= 0) {
+            feedbackEl.textContent = "Fine taps spent—finish with the ruler or a 0.010 move.";
+            feedbackEl.dataset.kind = "miss";
+            haptic([70, 55, 70]);
+            render();
+            return;
+          }
+          fineTapsLeft -= 1;
+        }
+        setCurrent(current + amount);
       }
 
       slider.addEventListener("input", function (event) {
-        setCurrent(Number(event.target.value), true);
+        setCurrent(stickyRulerValue(Number(event.target.value)));
       });
 
       slider.addEventListener("change", function () {
-        ensureCurrentInView();
+        stickyQuarter = null;
         render();
       });
 
@@ -1409,15 +1604,33 @@
         });
       });
 
-      zoomButtons.forEach(function (button) {
-        button.addEventListener("click", function () {
-          setZoom(Number(button.dataset.zoom));
-        });
+      magnifierTool.addEventListener("pointerdown", function (event) {
+        if (magnifierTool.disabled) return;
+        event.preventDefault();
+        magnifierPointer = event.pointerId;
+        magnifierStartX = event.clientX;
+        magnifierStartY = event.clientY;
+        magnifierTick = null;
+        magnifierTool.dataset.dragging = "true";
+        magnifierTool.setPointerCapture(event.pointerId);
+        moveMagnifier(event);
       });
 
-      centerButton.addEventListener("click", function () {
-        centerView(current);
-        render();
+      magnifierTool.addEventListener("pointermove", moveMagnifier);
+
+      function releaseMagnifier(event) {
+        if (magnifierPointer !== event.pointerId) return;
+        if (magnifierTool.hasPointerCapture(event.pointerId)) {
+          magnifierTool.releasePointerCapture(event.pointerId);
+        }
+        snapMagnifier();
+        haptic([32, 22, 44]);
+      }
+
+      magnifierTool.addEventListener("pointerup", releaseMagnifier);
+      magnifierTool.addEventListener("pointercancel", releaseMagnifier);
+      magnifierTool.addEventListener("lostpointercapture", function () {
+        if (magnifierPointer !== null) snapMagnifier();
       });
 
       nudgeButtons.forEach(function (button) {
@@ -1425,6 +1638,17 @@
           nudge(Number(button.dataset.delta));
         });
       });
+
+      document.addEventListener("pointerdown", function (event) {
+        var button = event.target.closest && event.target.closest("button");
+        if (button && !button.disabled) haptic(34);
+      }, true);
+
+      document.addEventListener("keydown", function (event) {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        var button = event.target.closest && event.target.closest("button");
+        if (button && !button.disabled) haptic(34);
+      }, true);
 
       var resizeFrame = null;
       window.addEventListener("resize", function () {
@@ -1435,7 +1659,7 @@
         });
       });
 
-      centerView(current);
+      resetView();
       render();
     })();
   </script>
