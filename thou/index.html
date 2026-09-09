@@ -1,1833 +1,1457 @@
 <!doctype html>
-<html lang="en" data-visualize-standalone>
+<html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="referrer" content="no-referrer">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; style-src 'unsafe-inline' blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; img-src blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; font-src blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; media-src blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; worker-src blob:; connect-src blob: data:; frame-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
-<title>Metric Inch Thousandths Game</title>
-<style>:root{color-scheme:light dark;background:light-dark(rgb(255 255 255), rgb(24 24 24))}html,body{margin:0}body{box-sizing:border-box;padding:1rem;background:inherit}iframe{display:block;width:100%;height:calc(100vh - 2rem);margin:0 auto;border:0}</style>
-</head>
-<body>
-<iframe sandbox="allow-scripts" referrerpolicy="no-referrer" title="Metric Inch Thousandths Game" srcdoc="&lt;!doctype html&gt;
-&lt;html lang=&quot;en&quot; data-visualize-standalone&gt;
-&lt;head&gt;
-&lt;meta charset=&quot;utf-8&quot;&gt;
-&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;&gt;
-&lt;meta name=&quot;referrer&quot; content=&quot;no-referrer&quot;&gt;
-&lt;meta http-equiv=&quot;Content-Security-Policy&quot; content=&quot;default-src &#x27;none&#x27;; script-src &#x27;unsafe-inline&#x27; &#x27;unsafe-eval&#x27; &#x27;wasm-unsafe-eval&#x27; blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; style-src &#x27;unsafe-inline&#x27; blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; img-src blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; font-src blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; media-src blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; worker-src blob:; connect-src blob: data:; frame-src &#x27;none&#x27;; object-src &#x27;none&#x27;; base-uri &#x27;none&#x27;; form-action &#x27;none&#x27;&quot;&gt;
-&lt;title&gt;Metric Inch Thousandths Game&lt;/title&gt;
-&lt;style&gt;:root {
-  color-scheme: light dark;
-  background-color: var(
-    --background,
-    var(--color-background-primary, light-dark(rgb(255 255 255), rgb(24 24 24)))
-  ) !important;
-
-  /* Agent-facing contract; keep in sync with SKILL.md. */
-  --background: var(
-    --color-background-primary,
-    light-dark(rgb(255 255 255), rgb(24 24 24))
-  );
-  --foreground: var(
-    --color-text-primary,
-    light-dark(rgb(26 28 31), rgb(255 255 255))
-  );
-  --card: color-mix(in oklab, var(--foreground) 5%, var(--background));
-  --card-foreground: var(
-    --color-text-primary,
-    light-dark(rgb(26 28 31), rgb(255 255 255))
-  );
-  --popover: var(
-    --color-background-secondary,
-    light-dark(rgb(255 255 255), rgb(45 45 45))
-  );
-  --popover-foreground: var(
-    --color-text-primary,
-    light-dark(rgb(26 28 31), rgb(255 255 255))
-  );
-  --primary: var(
-    --color-text-info,
-    light-dark(rgb(51 156 255), rgb(131 195 255))
-  );
-  --primary-foreground: var(
-    --color-text-inverse,
-    light-dark(rgb(255 255 255), rgb(13 13 13))
-  );
-  --secondary: var(
-    --color-background-secondary,
-    light-dark(rgb(255 255 255 / 96%), rgb(54 54 54 / 96%))
-  );
-  --secondary-foreground: var(
-    --color-text-primary,
-    light-dark(rgb(26 28 31), rgb(255 255 255))
-  );
-  --muted: color-mix(in srgb, var(--foreground) 10%, transparent);
-  --muted-foreground: var(
-    --color-text-secondary,
-    light-dark(rgb(26 28 31 / 49.4%), rgb(255 255 255 / 49.8%))
-  );
-  --accent: var(
-    --color-background-info,
-    light-dark(rgb(229 242 255), rgb(13 39 63))
-  );
-  --accent-foreground: var(
-    --color-text-info,
-    light-dark(rgb(51 156 255), rgb(131 195 255))
-  );
-  --destructive: var(
-    --color-text-warning,
-    light-dark(rgb(226 85 7), rgb(255 133 73))
-  );
-  --border: var(
-    --color-border-secondary,
-    light-dark(rgb(26 28 31 / 8%), rgb(255 255 255 / 8.2%))
-  );
-  --input: var(
-    --color-border-primary,
-    light-dark(
-      rgb(26 28 31 / 11.8%),
-      color-mix(in oklab, rgb(0 0 0) 10%, transparent)
-    )
-  );
-  --ring: var(
-    --color-ring-primary,
-    light-dark(rgb(51 156 255), rgb(131 195 255 / 76%))
-  );
-  --font-size-base: var(--font-text-md-size, 14px);
-  --blue: light-dark(rgb(51 156 255), rgb(51 156 255));
-  --orange: light-dark(rgb(226 85 7), rgb(251 106 34));
-  --green: light-dark(rgb(0 162 64), rgb(64 201 119));
-  --red: light-dark(rgb(224 46 42), rgb(255 103 100));
-  --purple: light-dark(rgb(146 79 247), rgb(173 123 249));
-  --yellow: light-dark(rgb(255 195 0), rgb(255 210 64));
-  --viz-series-1: var(--primary);
-  --viz-series-2: light-dark(rgb(243 136 59), rgb(245 154 86));
-  --viz-series-3: light-dark(rgb(93 201 119), rgb(116 213 139));
-  --viz-series-4: light-dark(rgb(235 119 177), rgb(240 143 192));
-  --viz-series-5: light-dark(rgb(155 121 236), rgb(170 145 239));
-  --viz-series-6: light-dark(rgb(58 185 177), rgb(90 203 194));
-
-  /* Internal implementation variables; not part of the agent contract. */
-  --font-sans: -apple-system, system-ui, &quot;Segoe UI&quot;, sans-serif;
-  --font-mono:
-    ui-monospace, SFMono-Regular, &quot;SF Mono&quot;, Menlo, Consolas, &quot;Liberation Mono&quot;,
-    monospace;
-  --font-size-normal: max(11px, var(--font-size-base));
-  --font-size-tooltip: calc(var(--font-size-base) - 1px);
-  --font-size-small: max(11px, calc(var(--font-size-base) - 2px));
-  --font-size-h1: calc(var(--font-size-normal) * 1.7142857143);
-  --font-size-h2: calc(var(--font-size-normal) * 1.4285714286);
-  --font-size-h3: calc(var(--font-size-normal) * 1.2857142857);
-  --font-weight-normal: 430;
-  --font-weight-medium: 500;
-  --icon-size: 16px;
-  --line-height-normal: calc(var(--font-size-normal) * 1.5);
-  --line-height-tooltip: calc(var(--font-size-tooltip) * 1.4285714286);
-  --line-height-small: calc(var(--font-size-small) + 4px);
-  --corner-shape: round;
-  --radius: var(--border-radius-lg, 10px);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-2xl: calc(var(--radius) * 1.6);
-  --radius-full: 9999px;
-  --shadow-sm: 0 1px 2px -1px rgb(0 0 0 / 8%);
-  --checkmark-image: url(&quot;data:image/svg+xml,%3Csvg xmlns=&#x27;http://www.w3.org/2000/svg&#x27; viewBox=&#x27;0 0 17 17&#x27;%3E%3Cpath d=&#x27;M12.8961 3.64101C13.1297 3.41418 13.4984 3.37523 13.7779 3.56581C14.0571 3.75635 14.1554 4.11331 14.0299 4.41347L13.9615 4.53847L7.71151 13.7045C7.59411 13.8767 7.4063 13.9877 7.19881 14.0072C6.99136 14.0267 6.78564 13.9533 6.63826 13.806L2.88826 10.056L2.79842 9.9457C2.6192 9.67407 2.64927 9.30496 2.88826 9.06581C3.12738 8.82669 3.49647 8.79676 3.76815 8.97597L3.8785 9.06581L7.03084 12.2182L12.8053 3.74941L12.8961 3.64101Z&#x27;/%3E%3C/svg%3E&quot;);
-
-  /* Legacy aliases; not part of the current agent contract. */
-  --viz-bg: transparent;
-  --viz-panel: var(--card);
-  --viz-border: var(--border);
-  --viz-text: var(--foreground);
-  --viz-muted: var(--muted-foreground);
-  --viz-accent: var(--primary);
-  --viz-accent-text: var(--primary-foreground);
-  --viz-accent-bg: var(--accent);
-  --viz-font-size: var(--font-size-base);
-  --viz-warning: var(--destructive);
-}
-
-:root[data-theme=&quot;light&quot;] {
-  color-scheme: light;
-}
-
-:root[data-theme=&quot;dark&quot;] {
-  color-scheme: dark;
-}
-
-* {
-  box-sizing: border-box;
-}
-
-html &gt; body {
-  /* Preserve MCP aliases for older inline renderers without creating :root cycles. */
-  --color-background-primary: var(
-    --background,
-    light-dark(rgb(255 255 255), rgb(24 24 24))
-  );
-  --color-text-primary: var(
-    --foreground,
-    light-dark(rgb(26 28 31), rgb(255 255 255))
-  );
-  --color-border-secondary: var(
-    --border,
-    light-dark(rgb(26 28 31 / 8%), rgb(255 255 255 / 8.2%))
-  );
-
-  margin: 0;
-  padding: var(--visualize-paint-gutter, 0px);
-  color: var(--foreground);
-  background: transparent !important;
-  font-family: var(--font-sans) !important;
-  font-size: var(--font-size-normal);
-  font-weight: var(--font-weight-normal);
-  line-height: var(--line-height-normal);
-}
-
-:root:not([data-app-block-surface], [data-visualize-standalone]) &gt; body {
-  padding: 12px;
-}
-
-a {
-  color: color-mix(in srgb, var(--viz-accent) 80%, var(--viz-text) 20%);
-  cursor: pointer;
-  font-weight: var(--font-weight-medium, 500);
-  text-decoration: none;
-  text-underline-offset: 2px;
-}
-
-a:is(:hover, :focus-visible) {
-  text-decoration-line: underline;
-  text-decoration-style: dashed;
-  text-decoration-thickness: 0.5px;
-}
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-p {
-  margin-block: 0;
-}
-
-h1 {
-  font-size: var(--font-size-h1);
-  font-weight: var(--font-weight-medium);
-  line-height: 1.25;
-}
-
-h2 {
-  font-size: var(--font-size-h2);
-  font-weight: var(--font-weight-medium);
-  line-height: 1.25;
-}
-
-h3,
-h4,
-h5,
-h6 {
-  font-size: var(--font-size-h3);
-  font-weight: var(--font-weight-medium);
-  line-height: 1.3;
-}
-
-b,
-strong,
-th {
-  font-weight: var(--font-weight-medium);
-}
-
-code:not(pre code) {
-  display: inline;
-  padding: 1px 6px;
-  border-radius: var(--radius-sm);
-  corner-shape: var(--corner-shape);
-  background: var(--muted);
-  font-family: var(--font-mono);
-  font-size: 0.92em;
-  overflow-wrap: anywhere;
-  -webkit-box-decoration-break: clone;
-  box-decoration-break: clone;
-  word-break: break-word;
-}
-
-.table-responsive {
-  width: 100%;
-  overflow-x: auto;
-  scrollbar-width: thin;
-}
-
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  color: var(--foreground);
-  font: inherit;
-  text-align: start;
-}
-
-.table :is(th, td) {
-  padding-block: 10px;
-  padding-inline: 0 24px;
-  overflow-wrap: anywhere;
-  border-bottom: 1px solid var(--border);
-  text-align: start;
-  vertical-align: top;
-}
-
-.table-responsive &gt; .table :is(th, td) {
-  overflow-wrap: break-word;
-}
-
-.table :is(th, td):last-child {
-  padding-inline-end: 0;
-}
-
-.table :is(caption, thead th) {
-  font-weight: 600;
-}
-
-.table thead th {
-  padding-block: 8px;
-  border-bottom-color: color-mix(in srgb, var(--foreground) 16%, transparent);
-}
-
-.table tbody tr:last-child :is(th, td) {
-  border-bottom: 0;
-}
-
-.table.table-sm :is(th, td) {
-  padding-block: 6px;
-}
-
-.table.table-sm :is(th, td):not(:last-child) {
-  padding-inline-end: 16px;
-}
-
-.table :is(.text-end, [align=&quot;right&quot;]) {
-  text-align: end;
-  font-variant-numeric: tabular-nums;
-}
-
-.table :is(.text-center, [align=&quot;center&quot;]) {
-  text-align: center;
-}
-
-.table .text-nowrap {
-  white-space: nowrap;
-}
-
-#widget {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  width: 100%;
-  padding: 0;
-  background: transparent !important;
-}
-
-.card {
-  min-width: 0;
-  padding: 12px;
-  overflow: hidden;
-  overflow-wrap: break-word;
-  border-radius: var(--radius-2xl);
-  corner-shape: var(--corner-shape);
-  color: var(--card-foreground);
-  background: var(--card);
-}
-
-#widget &gt; :not(.card, .progress) {
-  width: 100% !important;
-  max-width: none !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-}
-
-.tooltip {
-  position: fixed;
-  z-index: 50;
-  top: 0;
-  left: 0;
-  width: max-content;
-  max-width: min(
-    20rem,
-    var(--tooltip-available-width, calc(100vw - 10px)),
-    calc(100vw - 10px)
-  );
-  max-height: min(
-    var(--tooltip-available-height, calc(100vh - 10px)),
-    calc(100vh - 10px)
-  );
-  padding: 4px 8px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  corner-shape: var(--corner-shape);
-  color: var(--popover-foreground);
-  background: var(--popover);
-  box-shadow: none;
-  font-size: var(--font-size-tooltip);
-  line-height: var(--line-height-tooltip);
-  overflow-wrap: break-word;
-  white-space: normal;
-  pointer-events: none;
-  user-select: none;
-}
-
-/* The shared runtime owns data-tooltip; suppress AppBlock&#x27;s pseudo-tooltip. */
-main [data-tooltip]::after {
-  content: none;
-}
-
-.viz-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(max(180px, 24%), 1fr));
-  gap: 10px;
-}
-
-.viz-stat {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.viz-stat-value {
-  font-size: var(--font-size-h2);
-  font-weight: var(--font-weight-medium);
-  line-height: 1.25;
-}
-
-.viz-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px;
-}
-
-hr {
-  width: 100%;
-  height: 1px;
-  margin-block: 6px;
-  border: 0;
-  background: var(--border);
-}
-
-.nav {
-  display: flex;
-  min-width: 0;
-  align-items: center;
-  gap: 4px;
-}
-
-.progress {
-  display: flex;
-  height: 8px;
-  margin-block: calc((var(--line-height-normal, 1.5em) - 8px) / 2);
-  overflow: hidden;
-  border: 0;
-  border-radius: var(--radius-full);
-  background: var(--muted);
-}
-
-.progress-bar:only-child {
-  border-radius: var(--radius-full);
-}
-
-.progress-bar {
-  height: 100%;
-  flex-shrink: 0;
-  border: 0;
-  background: var(--viz-series-1);
-}
-
-.viz-badge {
-  padding: 3px 8px;
-  border-radius: var(--radius-full);
-  color: var(--accent-foreground);
-  background: var(--accent);
-  font-weight: var(--font-weight-medium);
-}
-
-small,
-.text-small,
-.viz-badge {
-  font-size: var(--font-size-small);
-  line-height: var(--line-height-small);
-}
-
-.text-muted {
-  color: var(--muted-foreground);
-}
-
-.tabular-nums {
-  font-variant-numeric: tabular-nums;
-}
-
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
-.viz-controls {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-}
-
-.viz-controls &gt; .form-label {
-  display: grid;
-  min-width: min(100%, 260px);
-  flex: 1 1 280px;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: baseline;
-  gap: 2px 12px;
-  margin-bottom: 0;
-}
-
-.viz-controls &gt; .form-label &gt; :is(.form-control, .form-range, .form-select) {
-  grid-column: 1 / -1;
-}
-
-.btn,
-.nav-link,
-.form-check-input,
-.form-control,
-.form-range,
-.form-select {
-  font: inherit;
-}
-
-.btn,
-.nav-link {
-  appearance: button;
-  display: inline-flex;
-  inline-size: fit-content;
-  max-inline-size: 100%;
-  min-height: 28px;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  margin: 0;
-  padding: 0 8px;
-  -webkit-app-region: no-drag;
-  border: 1px solid var(--input);
-  border-radius: var(--radius-lg);
-  corner-shape: var(--corner-shape);
-  color: var(--secondary-foreground);
-  background: var(--secondary);
-  cursor: var(--cursor-interaction, pointer);
-  text-align: center;
-  text-decoration: none;
-  white-space: nowrap;
-  user-select: none;
-  -webkit-font-smoothing: antialiased;
-}
-
-.btn:is(.btn-block, .viz-tile) {
-  inline-size: 100%;
-}
-
-.btn.viz-tile {
-  min-width: 0;
-  overflow-wrap: anywhere;
-  white-space: normal;
-}
-
-a.btn {
-  cursor: pointer;
-  text-decoration: none;
-}
-
-.btn:not(:disabled):hover,
-.nav-link:not(:disabled):not([aria-disabled=&quot;true&quot;]):hover {
-  background: color-mix(in srgb, var(--foreground) 6%, var(--secondary));
-}
-
-.btn-primary {
-  border-color: transparent;
-  color: var(--primary-foreground);
-  background: var(--foreground);
-  background-clip: padding-box;
-}
-
-.btn-primary .text-muted {
-  color: color-mix(in srgb, var(--primary-foreground) 50%, transparent);
-}
-
-.btn-primary:not(:disabled):hover {
-  background: color-mix(in srgb, var(--foreground) 80%, transparent);
-  background-clip: padding-box;
-}
-
-.btn-ghost {
-  border-color: transparent;
-  color: var(--muted-foreground);
-  background: transparent;
-}
-
-.btn-ghost:not(:disabled):hover {
-  color: var(--foreground);
-  background: color-mix(in srgb, var(--foreground) 6%, var(--secondary));
-}
-
-.nav-pills .nav-link {
-  min-width: 0;
-  border-color: transparent;
-  color: var(--muted-foreground);
-  background: transparent;
-}
-
-.nav-justified .nav-link {
-  flex: 1 1 0;
-  overflow-wrap: anywhere;
-  white-space: normal;
-}
-
-.nav-pills .nav-link.active {
-  color: var(--foreground);
-  background: var(--muted);
-}
-
-.btn:disabled,
-.nav-link:disabled,
-.nav-link[aria-disabled=&quot;true&quot;] {
-  cursor: not-allowed;
-  opacity: 0.4;
-}
-
-[data-lucide] {
-  stroke-width: 1.6;
-}
-
-.form-label {
-  display: block;
-  margin-bottom: 6px;
-  color: var(--foreground);
-}
-
-.form-control {
-  display: block;
-  width: 100%;
-  min-height: 28px;
-  padding: 0 8px;
-  outline: none;
-  border: 1px solid var(--input);
-  border-radius: var(--radius-lg);
-  corner-shape: var(--corner-shape);
-  color: var(--foreground);
-  background: var(--secondary);
-}
-
-.form-control::placeholder {
-  color: var(--muted-foreground);
-}
-
-.form-control[type=&quot;file&quot;] {
-  padding: 0;
-  overflow: hidden;
-  cursor: var(--cursor-interaction, pointer);
-}
-
-.form-control[type=&quot;file&quot;]::file-selector-button {
-  min-height: 26px;
-  margin-right: 8px;
-  padding: 0 8px;
-  border: 0;
-  border-right: 1px solid var(--input);
-  color: var(--secondary-foreground);
-  background: var(--secondary);
-  cursor: inherit;
-  font: inherit;
-}
-
-.form-control[type=&quot;file&quot;]:not(:disabled):hover::file-selector-button {
-  background: color-mix(in srgb, var(--foreground) 6%, var(--secondary));
-}
-
-.form-control-color[type=&quot;color&quot;] {
-  width: 40px;
-  height: 28px;
-  padding: 3px;
-  cursor: var(--cursor-interaction, pointer);
-}
-
-.form-control-color[type=&quot;color&quot;]::-webkit-color-swatch-wrapper {
-  padding: 0;
-}
-
-.form-control-color[type=&quot;color&quot;]::-webkit-color-swatch {
-  border: 0;
-  border-radius: calc(var(--radius-lg) - 4px);
-  corner-shape: var(--corner-shape);
-}
-
-textarea.form-control {
-  height: auto;
-  min-height: 72px;
-  padding: 8px 10px;
-  resize: vertical;
-}
-
-.form-control:focus-visible {
-  border-color: var(--ring);
-  box-shadow: inset 0 0 0 1px var(--ring);
-}
-
-.form-control:disabled,
-.form-select:disabled {
-  cursor: not-allowed;
-  opacity: 0.4;
-}
-
-.form-select {
-  appearance: none;
-  display: block;
-  width: 100%;
-  min-height: 28px;
-  margin: 0;
-  padding: 0 32px 0 8px;
-  outline: none;
-  border: 1px solid var(--input);
-  border-radius: var(--radius-lg);
-  corner-shape: var(--corner-shape);
-  color: var(--foreground);
-  background-color: var(--secondary);
-  background-image:
-    linear-gradient(45deg, transparent 50%, var(--muted-foreground) 50%),
-    linear-gradient(135deg, var(--muted-foreground) 50%, transparent 50%);
-  background-position:
-    calc(100% - 14px) 50%,
-    calc(100% - 10px) 50%;
-  background-repeat: no-repeat;
-  background-size: 4px 4px;
-  cursor: var(--cursor-interaction, default);
-}
-
-.form-select:not(:disabled):hover {
-  background-color: color-mix(in srgb, var(--foreground) 6%, var(--secondary));
-}
-
-.form-select:focus-visible {
-  border-color: var(--ring);
-  box-shadow: inset 0 0 0 1px var(--ring);
-}
-
-.form-check {
-  display: flex;
-  min-height: 20px;
-  align-items: center;
-  gap: 6px;
-}
-
-.form-check-input {
-  appearance: none;
-  width: 14px;
-  height: 14px;
-  flex: 0 0 auto;
-  margin: 0;
-  border: 1px solid var(--input);
-  color: var(--primary-foreground);
-  background-color: transparent;
-  cursor: var(--cursor-interaction, default);
-  transition:
-    background-color 150ms,
-    border-color 150ms,
-    box-shadow 150ms;
-}
-
-.form-check:not(.form-switch) .form-check-input[type=&quot;checkbox&quot;] {
-  border-color: var(--input);
-  border-radius: var(--radius-sm);
-  corner-shape: var(--corner-shape);
-  background-color: var(--secondary);
-  box-shadow: var(--shadow-sm);
-}
-
-.form-check:not(.form-switch)
-  .form-check-input:not(:disabled):not(:checked):hover {
-  background-color: var(--card);
-}
-
-.form-check:not(.form-switch) .form-check-input[type=&quot;checkbox&quot;]:checked {
-  border-color: var(--primary);
-  background-color: var(--primary);
-}
-
-.form-check:not(.form-switch)
-  .form-check-input[type=&quot;checkbox&quot;]:checked::before {
-  display: block;
-  width: 100%;
-  height: 100%;
-  background: var(--primary-foreground);
-  content: &quot;&quot;;
-  mask: var(--checkmark-image) center / 12px 12px no-repeat;
-}
-
-.form-check-input[type=&quot;radio&quot;] {
-  width: 14px;
-  height: 14px;
-  border-radius: var(--radius-full);
-}
-
-.form-check-input[type=&quot;radio&quot;]:checked {
-  border: 2px solid var(--primary);
-  background:
-    radial-gradient(circle, var(--primary-foreground) 0 2.5px, transparent 3px),
-    var(--primary);
-}
-
-.form-check:not(.form-switch) .form-check-input:focus-visible {
-  outline: 2px solid var(--ring);
-  outline-offset: 2px;
-}
-
-.form-check:not(.form-switch) .form-check-input:disabled {
-  cursor: not-allowed;
-  pointer-events: none;
-}
-
-.form-check:not(.form-switch) .form-check-input:disabled + .form-check-label {
-  cursor: not-allowed;
-}
-
-.form-switch .form-check-input:disabled,
-.form-switch .form-check-input:disabled + .form-check-label {
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-.form-check-label {
-  color: var(--foreground);
-  cursor: var(--cursor-interaction, default);
-}
-
-.form-switch .form-check-input {
-  position: relative;
-  width: 32px;
-  height: 20px;
-  border: 0;
-  border-radius: var(--radius-full);
-  background: var(--muted);
-  box-shadow: none;
-  transition: background-color 200ms cubic-bezier(0, 0, 0.2, 1);
-}
-
-.form-switch .form-check-input::before {
-  position: absolute;
-  top: 50%;
-  left: 0;
-  width: 16px;
-  height: 16px;
-  box-sizing: border-box;
-  border: 1px solid light-dark(var(--primary-foreground), var(--foreground));
-  border-radius: var(--radius-full);
-  background: light-dark(var(--primary-foreground), var(--foreground));
-  box-shadow: var(--shadow-sm);
-  content: &quot;&quot;;
-  transform: translate(2px, -50%);
-  transition: transform 200ms cubic-bezier(0, 0, 0.2, 1);
-}
-
-.form-switch .form-check-input:checked {
-  background: var(--primary);
-}
-
-.form-switch .form-check-input:checked::before {
-  transform: translate(14px, -50%);
-}
-
-.form-switch .form-check-input:focus-visible {
-  box-shadow: 0 0 0 2px var(--ring);
-}
-
-.form-range {
-  appearance: none;
-  display: block;
-  width: 100%;
-  height: 28px;
-  flex: 1;
-  margin: 0;
-  padding: 0;
-  outline: none;
-  border: 0;
-  accent-color: var(--primary);
-  background: linear-gradient(
-      color-mix(in srgb, var(--foreground) 7%, transparent),
-      color-mix(in srgb, var(--foreground) 7%, transparent)
-    )
-    center / 100% 2px no-repeat;
-}
-
-.form-range::-webkit-slider-runnable-track {
-  height: 28px;
-  background: transparent;
-}
-
-.form-range::-webkit-slider-thumb {
-  appearance: none;
-  width: 20px;
-  height: 20px;
-  margin-top: 4px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-full);
-  background: light-dark(var(--primary-foreground), var(--foreground));
-}
-
-.form-range:focus-visible::-webkit-slider-thumb {
-  border-color: var(--ring);
-  box-shadow: inset 0 0 0 1px var(--ring);
-}
-
-.form-range::-moz-range-track {
-  height: 28px;
-  background: transparent;
-}
-
-.form-range::-moz-range-thumb {
-  width: 20px;
-  height: 20px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-full);
-  background: light-dark(var(--primary-foreground), var(--foreground));
-}
-
-.form-range:focus-visible::-moz-range-thumb {
-  border-color: var(--ring);
-  box-shadow: inset 0 0 0 1px var(--ring);
-}
-
-.form-range:disabled {
-  cursor: not-allowed;
-  opacity: 0.4;
-}
-
-.btn:not(.btn-primary, .viz-tile):is(
-  [aria-pressed=&quot;true&quot;],
-  [aria-selected=&quot;true&quot;],
-  .is-selected
-) {
-  border-color: var(--primary);
-  color: var(--primary-foreground);
-  background: var(--primary);
-}
-
-.btn.viz-tile:is([aria-pressed=&quot;true&quot;], [aria-selected=&quot;true&quot;], .is-selected) {
-  border-color: var(--primary);
-  box-shadow: inset 0 0 0 1px var(--primary);
-}
-
-.btn:focus-visible,
-.nav-link:focus-visible {
-  outline: 2px solid var(--ring);
-  outline-offset: 2px;
-}
-
-@media (pointer: coarse) {
-  .btn,
-  .nav-link,
-  .form-control,
-  .form-select {
-    min-width: 44px;
-    min-height: 44px;
-  }
-
-  /* Keep small-screen WebKit from zooming when a text field receives focus. */
-  .form-control,
-  .form-select {
-    font-size: max(16px, var(--font-size-normal));
-  }
-
-  .form-control[type=&quot;file&quot;]::file-selector-button {
-    min-width: 44px;
-    min-height: 44px;
-  }
-
-  .form-control-color[type=&quot;color&quot;] {
-    width: 44px;
-    height: 44px;
-  }
-
-  .form-control:is(
-    [type=&quot;date&quot;],
-    [type=&quot;datetime-local&quot;],
-    [type=&quot;month&quot;],
-    [type=&quot;time&quot;],
-    [type=&quot;week&quot;]
-  ) {
-    min-width: 0;
-    max-width: 100%;
-    padding-block: 8px;
-  }
-
-  .form-check {
-    min-height: 44px;
-    padding-inline: 15px;
-  }
-
-  .form-check-input {
-    position: relative;
-  }
-
-  .form-check-input::after {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 44px;
-    height: 44px;
-    content: &quot;&quot;;
-    transform: translate(-50%, -50%);
-  }
-
-  .form-check-label {
-    display: inline-flex;
-    min-width: 44px;
-    min-height: 44px;
-    align-items: center;
-  }
-
-  .form-range {
-    height: 44px;
-    touch-action: pan-y;
-  }
-
-  .form-range::-webkit-slider-runnable-track {
-    height: 44px;
-  }
-
-  .form-range::-moz-range-track {
-    height: 44px;
-  }
-
-  .form-range::-webkit-slider-thumb {
-    margin-top: 12px;
-  }
-}
-
-svg {
-  display: block;
-  max-width: 100%;
-  height: auto;
-}
-
-#widget &gt; svg {
-  width: 100%;
-}
-
-/* Model-authored chart rules can otherwise stretch icons after these styles load. */
-svg.lucide {
-  display: block;
-  width: var(--icon-size) !important;
-  height: var(--icon-size) !important;
-  flex: none;
-  margin: 0 !important;
-  stroke-width: 1.6;
-}
-
-.text-warning,
-.text-destructive {
-  color: var(--destructive);
-}
-
-html&gt;body{padding:0}&lt;/style&gt;
-&lt;/head&gt;
-&lt;body&gt;
-&lt;div id=&quot;metric-inch-thousandths-game&quot; role=&quot;region&quot; aria-labelledby=&quot;oi-title&quot;&gt;
-  &lt;style&gt;
-    #metric-inch-thousandths-game {
-      display: grid;
-      gap: 10px;
-      width: 100%;
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="A colourful, pressure-free game for practising thousandths of an inch and millimetre measurements.">
+  <meta name="theme-color" content="#0f172a">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" href="/favicon-32x32.png" type="image/png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <title>Thousandths Playground</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --page: #0f172a;
+      --page-glow: #15284a;
+      --panel: #17233b;
+      --panel-strong: #1d2c49;
+      --text: #f8fafc;
+      --muted: #aebbd0;
+      --line: #344664;
+      --blue: #58d2ff;
+      --purple: #c084fc;
+      --orange: #fb923c;
+      --green: #4ade80;
+      --yellow: #facc15;
+      --danger: #fb7185;
+      --shadow: 0 18px 50px rgb(0 0 0 / 0.24);
+      font-family: Inter, ui-rounded, "Segoe UI", system-ui, -apple-system, sans-serif;
     }
-    #metric-inch-thousandths-game .oi-title-row {
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      min-width: 280px;
+      min-height: 100%;
+      background: var(--page);
+    }
+
+    body {
+      min-height: 100vh;
+      min-height: 100dvh;
+      margin: 0;
+      padding:
+        max(14px, env(safe-area-inset-top))
+        max(14px, env(safe-area-inset-right))
+        max(18px, env(safe-area-inset-bottom))
+        max(14px, env(safe-area-inset-left));
+      color: var(--text);
+      background:
+        radial-gradient(circle at 20% -10%, var(--page-glow), transparent 42rem),
+        var(--page);
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      color: inherit;
+    }
+
+    button,
+    input[type="range"],
+    input[type="checkbox"] {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    button:focus-visible,
+    input:focus-visible,
+    a:focus-visible {
+      outline: 3px solid var(--yellow);
+      outline-offset: 3px;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    .app-shell {
+      width: min(100%, 920px);
+      margin: 0 auto;
+      display: grid;
+      gap: 14px;
+    }
+
+    .topbar {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 10px;
+      gap: 12px;
       flex-wrap: wrap;
     }
-    #metric-inch-thousandths-game .oi-title-row h2 {
-      margin-bottom: 0;
-    }
-    #metric-inch-thousandths-game .oi-stars {
+
+    .brand {
       display: flex;
-      gap: 5px;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
     }
-    #metric-inch-thousandths-game .oi-star:nth-child(1) { color: var(--yellow); }
-    #metric-inch-thousandths-game .oi-star:nth-child(2) { color: var(--purple); }
-    #metric-inch-thousandths-game .oi-star:nth-child(3) { color: var(--green); }
-    #metric-inch-thousandths-game .oi-scoreboard {
+
+    .brand-mark {
+      display: grid;
+      width: 42px;
+      height: 42px;
+      flex: 0 0 auto;
+      place-items: center;
+      border: 1px solid rgb(88 210 255 / 0.35);
+      border-radius: 13px;
+      background: rgb(88 210 255 / 0.1);
+      font-size: 23px;
+      box-shadow: inset 0 0 20px rgb(88 210 255 / 0.08);
+    }
+
+    h1,
+    h2,
+    p {
+      margin: 0;
+    }
+
+    h1 {
+      font-size: clamp(1.45rem, 5vw, 2rem);
+      line-height: 1.05;
+      letter-spacing: -0.025em;
+    }
+
+    .eyebrow {
+      display: block;
+      margin-bottom: 2px;
+      color: var(--muted);
+      font-size: 0.76rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .segmented,
+    .zoom-options {
+      display: inline-flex;
+      gap: 4px;
+      padding: 4px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgb(8 16 32 / 0.42);
+    }
+
+    .segment,
+    .zoom-button {
+      min-width: 58px;
+      min-height: 42px;
+      padding: 8px 12px;
+      border: 0;
+      border-radius: 10px;
+      color: var(--muted);
+      background: transparent;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .segment[aria-pressed="true"],
+    .zoom-button[aria-pressed="true"] {
+      color: #07111f;
+      background: var(--blue);
+      box-shadow: 0 4px 16px rgb(88 210 255 / 0.22);
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: linear-gradient(145deg, rgb(255 255 255 / 0.025), transparent), var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .difficulty-panel {
+      display: grid;
+      grid-template-columns: minmax(120px, auto) 1fr;
+      align-items: center;
+      gap: 12px 22px;
+      padding: 14px 16px;
+    }
+
+    .difficulty-name {
+      font-size: 1.05rem;
+    }
+
+    .difficulty-help {
+      grid-column: 1 / -1;
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+
+    .star-options {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 6px;
-    }
-    #metric-inch-thousandths-game .oi-score-item {
-      min-width: 0;
-    }
-    #metric-inch-thousandths-game .oi-score-value {
-      display: block;
-      overflow-wrap: anywhere;
-    }
-    #metric-inch-thousandths-game .oi-you { color: var(--viz-series-1); }
-    #metric-inch-thousandths-game .oi-target { color: var(--viz-series-2); }
-    #metric-inch-thousandths-game .oi-tolerance { color: var(--viz-series-3); }
-    #metric-inch-thousandths-game .oi-quiz-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-    #metric-inch-thousandths-game .oi-feedback {
-      min-height: 1.4em;
-      flex: 1 1 160px;
-    }
-    #metric-inch-thousandths-game .oi-feedback[data-kind=&quot;success&quot;] { color: var(--green); }
-    #metric-inch-thousandths-game .oi-feedback[data-kind=&quot;adjust&quot;] { color: var(--purple); }
-    #metric-inch-thousandths-game .oi-stick-label {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      gap: 8px;
-    }
-    #metric-inch-thousandths-game .oi-stick-row {
-      display: grid;
-      grid-template-columns: auto minmax(0, 1fr) auto;
-      align-items: center;
       gap: 7px;
     }
-    #metric-inch-thousandths-game .oi-stick {
-      position: relative;
-      height: 78px;
-      min-width: 0;
+
+    .star-option {
+      min-height: 52px;
+      padding: 7px 8px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      color: var(--muted);
+      background: rgb(8 16 32 / 0.28);
+      cursor: pointer;
     }
-    #metric-inch-thousandths-game .oi-ruler {
+
+    .star-option[aria-pressed="true"] {
+      border-color: rgb(250 204 21 / 0.65);
+      color: var(--yellow);
+      background: rgb(250 204 21 / 0.1);
+      box-shadow: inset 0 0 20px rgb(250 204 21 / 0.06);
+    }
+
+    .star-option .stars {
+      display: block;
+      font-size: 1rem;
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+    }
+
+    .star-option small {
+      display: block;
+      margin-top: 3px;
+      color: var(--text);
+      font-size: 0.75rem;
+      font-weight: 800;
+    }
+
+    .challenge-panel {
+      padding: 16px;
+    }
+
+    .scoreboard {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 9px;
+    }
+
+    .score-item {
+      min-width: 0;
+      padding: 11px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgb(8 16 32 / 0.3);
+    }
+
+    .score-label {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--muted);
+      font-size: 0.75rem;
+      font-weight: 800;
+    }
+
+    .score-value {
+      display: block;
+      min-width: 0;
+      color: var(--text);
+      font-size: clamp(1rem, 4vw, 1.28rem);
+      font-variant-numeric: tabular-nums;
+      overflow-wrap: anywhere;
+    }
+
+    .target-button {
+      width: 100%;
+      min-height: 47px;
+      padding: 6px 8px;
+      border: 1px solid rgb(251 146 60 / 0.5);
+      border-radius: 10px;
+      color: var(--orange);
+      background: rgb(251 146 60 / 0.09);
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .current-value {
+      color: var(--blue);
+    }
+
+    .tolerance-value {
+      color: var(--green);
+    }
+
+    .round-controls {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .switch-label {
+      display: inline-flex;
+      min-height: 44px;
+      align-items: center;
+      gap: 9px;
+      color: var(--muted);
+      cursor: pointer;
+    }
+
+    .switch-label input {
+      width: 42px;
+      height: 24px;
+      flex: 0 0 auto;
+      margin: 0;
+      accent-color: var(--blue);
+    }
+
+    .primary-button {
+      min-width: 96px;
+      min-height: 48px;
+      padding: 10px 18px;
+      border: 0;
+      border-radius: 13px;
+      color: #07111f;
+      background: linear-gradient(135deg, var(--blue), #8ae8ff);
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgb(88 210 255 / 0.2);
+    }
+
+    .feedback {
+      min-height: 1.5em;
+      margin-top: 10px;
+      color: var(--muted);
+      font-weight: 750;
+    }
+
+    .feedback[data-kind="success"] {
+      color: var(--green);
+    }
+
+    .feedback[data-kind="miss"] {
+      color: var(--purple);
+    }
+
+    .coach {
+      margin-top: 12px;
+      padding: 13px 14px;
+      border: 1px solid rgb(250 204 21 / 0.45);
+      border-radius: 15px;
+      background: rgb(250 204 21 / 0.07);
+    }
+
+    .coach h2 {
+      margin-bottom: 8px;
+      color: var(--yellow);
+      font-size: 1rem;
+    }
+
+    .coach ol {
+      display: grid;
+      gap: 5px;
+      margin: 0;
+      padding-left: 1.25rem;
+      color: var(--text);
+      line-height: 1.4;
+    }
+
+    .ruler-panel {
+      padding: 16px;
+    }
+
+    .ruler-heading {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .ruler-title {
+      font-size: 1rem;
+      font-weight: 900;
+    }
+
+    .reading {
+      margin-top: 3px;
+      color: var(--blue);
+      font-size: 1.12rem;
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .zoom-area {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .zoom-label {
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+    }
+
+    .zoom-button {
+      min-width: 48px;
+    }
+
+    .center-button {
+      min-height: 42px;
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      color: var(--muted);
+      background: transparent;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .view-range {
+      width: 100%;
+      margin-top: 9px;
+      color: var(--muted);
+      font-size: 0.8rem;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .ruler-stage {
+      position: relative;
+      width: 100%;
+      height: 104px;
+      margin-top: 4px;
+      border-radius: 13px;
+      background: rgb(8 16 32 / 0.25);
+      overflow: hidden;
+    }
+
+    .ruler-svg {
       position: absolute;
       inset: 0;
-      display: block;
       width: 100%;
-      height: 78px;
+      height: 104px;
       pointer-events: none;
-      color: var(--foreground);
     }
-    #metric-inch-thousandths-game .oi-slider {
+
+    .ruler-input {
       position: absolute;
       z-index: 2;
-      top: 1px;
-      left: 8px;
-      width: calc(100% - 16px);
-      height: 44px;
+      top: 10px;
+      left: 12px;
+      width: calc(100% - 24px);
+      height: 58px;
       margin: 0;
       appearance: none;
       -webkit-appearance: none;
       background: transparent;
       cursor: ew-resize;
+      touch-action: pan-y;
     }
-    #metric-inch-thousandths-game .oi-slider::-webkit-slider-runnable-track {
-      height: 44px;
+
+    .ruler-input::-webkit-slider-runnable-track {
+      height: 58px;
       background: transparent;
       border: 0;
     }
-    #metric-inch-thousandths-game .oi-slider::-webkit-slider-thumb {
-      width: 2px;
-      height: 44px;
+
+    .ruler-input::-webkit-slider-thumb {
+      width: 4px;
+      height: 58px;
       margin: 0;
       appearance: none;
       -webkit-appearance: none;
-      background: transparent;
       border: 0;
-    }
-    #metric-inch-thousandths-game .oi-slider::-moz-range-track {
-      height: 44px;
       background: transparent;
-      border: 0;
     }
-    #metric-inch-thousandths-game .oi-slider::-moz-range-thumb {
-      width: 2px;
-      height: 44px;
+
+    .ruler-input::-moz-range-track {
+      height: 58px;
+      border: 0;
       background: transparent;
-      border: 0;
     }
-    #metric-inch-thousandths-game .oi-breakdown {
+
+    .ruler-input::-moz-range-thumb {
+      width: 4px;
+      height: 58px;
+      border: 0;
+      background: transparent;
+    }
+
+    .nudge-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .nudge-button {
+      min-height: 50px;
+      padding: 8px 6px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      color: var(--text);
+      background: var(--panel-strong);
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+      cursor: pointer;
+      user-select: none;
+      touch-action: manipulation;
+    }
+
+    .nudge-button[data-size="coarse"] {
+      border-color: rgb(192 132 252 / 0.45);
+      color: #e2c8ff;
+    }
+
+    .nudge-button:active {
+      transform: translateY(1px);
+      filter: brightness(1.15);
+    }
+
+    .detail-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 9px;
+      margin-top: 11px;
+    }
+
+    .detail {
+      min-width: 0;
+      padding: 10px 12px;
+      border-radius: 12px;
+      color: var(--muted);
+      background: rgb(8 16 32 / 0.25);
+      font-size: 0.88rem;
+      line-height: 1.35;
+    }
+
+    .detail strong {
+      color: var(--text);
+      font-weight: 850;
+    }
+
+    .haptic-note {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 0.76rem;
       text-align: center;
     }
-    #metric-inch-thousandths-game .oi-language {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      flex-wrap: wrap;
+
+    .home-link {
+      justify-self: center;
+      padding: 7px;
+      color: var(--muted);
+      font-size: 0.8rem;
+      text-decoration: none;
     }
-    @media (max-width: 360px) {
-      #metric-inch-thousandths-game {
-        gap: 8px;
+
+    .home-link:hover {
+      color: var(--blue);
+      text-decoration: underline;
+    }
+
+    @media (max-width: 620px) {
+      body {
+        padding:
+          max(10px, env(safe-area-inset-top))
+          max(10px, env(safe-area-inset-right))
+          max(14px, env(safe-area-inset-bottom))
+          max(10px, env(safe-area-inset-left));
       }
-      #metric-inch-thousandths-game .oi-stick-row {
+
+      .app-shell {
+        gap: 10px;
+      }
+
+      .brand-mark {
+        width: 38px;
+        height: 38px;
+        border-radius: 11px;
+        font-size: 20px;
+      }
+
+      .difficulty-panel {
+        grid-template-columns: 1fr;
+        padding: 12px;
+      }
+
+      .difficulty-help {
+        grid-column: auto;
+      }
+
+      .challenge-panel,
+      .ruler-panel {
+        padding: 12px;
+      }
+
+      .score-item {
+        padding: 9px 7px;
+      }
+
+      .score-label {
+        font-size: 0.7rem;
+      }
+
+      .round-controls {
+        grid-template-columns: 1fr;
+      }
+
+      .primary-button {
+        width: 100%;
+      }
+
+      .ruler-heading,
+      .zoom-area {
+        display: grid;
+        grid-template-columns: 1fr;
+        justify-items: stretch;
+      }
+
+      .zoom-area {
+        gap: 6px;
+      }
+
+      .zoom-options {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .view-range {
+        text-align: left;
+      }
+
+      .detail-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 350px) {
+      .topbar {
+        align-items: stretch;
+      }
+
+      .segmented {
+        display: grid;
+        width: 100%;
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .scoreboard {
         gap: 5px;
       }
+
+      .score-value {
+        font-size: 0.92rem;
+      }
+
+      .nudge-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
     }
-  &lt;/style&gt;
 
-  &lt;div class=&quot;oi-title-row&quot;&gt;
-    &lt;h2 id=&quot;oi-title&quot;&gt;📏 Thousandths playground&lt;/h2&gt;
-    &lt;label class=&quot;form-check form-switch&quot;&gt;
-      &lt;input class=&quot;form-check-input&quot; id=&quot;oi-mm-toggle&quot; type=&quot;checkbox&quot;&gt;
-      &lt;span class=&quot;form-check-label&quot;&gt;Use mm&lt;/span&gt;
-    &lt;/label&gt;
-    &lt;div class=&quot;oi-stars&quot; aria-hidden=&quot;true&quot;&gt;
-      &lt;span class=&quot;oi-star&quot;&gt;★&lt;/span&gt;&lt;span class=&quot;oi-star&quot;&gt;★&lt;/span&gt;&lt;span class=&quot;oi-star&quot;&gt;★&lt;/span&gt;
-    &lt;/div&gt;
-  &lt;/div&gt;
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app-shell" aria-labelledby="page-title">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">📏</span>
+        <h1 id="page-title">Thousandths Playground</h1>
+      </div>
 
-  &lt;section class=&quot;card&quot; aria-label=&quot;Practice challenge&quot;&gt;
-    &lt;div class=&quot;oi-scoreboard&quot;&gt;
-      &lt;div class=&quot;oi-score-item&quot;&gt;
-        &lt;span class=&quot;text-small text-muted&quot;&gt;🎯 New target&lt;/span&gt;
-        &lt;button class=&quot;btn oi-score-value oi-target tabular-nums&quot; type=&quot;button&quot; data-target aria-label=&quot;Load a new random target&quot;&gt;Tap me&lt;/button&gt;
-      &lt;/div&gt;
-      &lt;div class=&quot;oi-score-item&quot;&gt;
-        &lt;span class=&quot;text-small text-muted&quot;&gt;📍 You&lt;/span&gt;
-        &lt;strong class=&quot;oi-score-value oi-you tabular-nums&quot; data-current&gt;0.000&lt;/strong&gt;
-      &lt;/div&gt;
-      &lt;div class=&quot;oi-score-item&quot;&gt;
-        &lt;span class=&quot;text-small text-muted&quot;&gt;🌈 Close enough&lt;/span&gt;
-        &lt;strong class=&quot;oi-score-value oi-tolerance tabular-nums&quot; data-tolerance&gt;—&lt;/strong&gt;
-      &lt;/div&gt;
-    &lt;/div&gt;
-    &lt;label class=&quot;form-check form-switch&quot;&gt;
-      &lt;input class=&quot;form-check-input&quot; id=&quot;oi-hide-reading&quot; type=&quot;checkbox&quot;&gt;
-      &lt;span class=&quot;form-check-label&quot;&gt;Hide my number during each round&lt;/span&gt;
-    &lt;/label&gt;
-    &lt;hr&gt;
-    &lt;div class=&quot;oi-quiz-row&quot;&gt;
-      &lt;button class=&quot;btn btn-primary&quot; type=&quot;button&quot; data-practice-button&gt;Start&lt;/button&gt;
-      &lt;div class=&quot;oi-feedback&quot; aria-live=&quot;polite&quot; data-feedback&gt;No points or grades—just find the number.&lt;/div&gt;
-    &lt;/div&gt;
-  &lt;/section&gt;
+      <div class="segmented" role="group" aria-label="Measurement unit">
+        <button class="segment" type="button" data-unit="in" aria-pressed="true">Inch</button>
+        <button class="segment" type="button" data-unit="mm" aria-pressed="false">mm</button>
+      </div>
+    </header>
 
-  &lt;div class=&quot;oi-stick-label&quot;&gt;
-    &lt;span data-stick-title&gt;One-inch measuring stick&lt;/span&gt;
-    &lt;strong class=&quot;tabular-nums oi-you&quot; data-reading&gt;0.000 in&lt;/strong&gt;
-  &lt;/div&gt;
+    <section class="panel difficulty-panel" aria-labelledby="difficulty-heading">
+      <div>
+        <span class="eyebrow" id="difficulty-heading">Difficulty</span>
+        <strong class="difficulty-name" data-difficulty-name>Easy</strong>
+      </div>
 
-  &lt;div class=&quot;oi-stick-row&quot;&gt;
-    &lt;button class=&quot;btn&quot; type=&quot;button&quot; data-delta=&quot;-1&quot; aria-label=&quot;Subtract one thousandth of an inch&quot;&gt;−0.001 in&lt;/button&gt;
-    &lt;div class=&quot;oi-stick&quot;&gt;
-      &lt;svg class=&quot;oi-ruler&quot; data-ruler height=&quot;78&quot; role=&quot;img&quot; aria-label=&quot;One-inch ruler from zero to one inch&quot;&gt;
-        &lt;title&gt;One-inch measuring stick&lt;/title&gt;
-        &lt;desc&gt;The slider moves from zero to one inch. Longer marks show quarter inches and shorter marks divide the inch into twentieths.&lt;/desc&gt;
-      &lt;/svg&gt;
-      &lt;label class=&quot;sr-only&quot; for=&quot;oi-main-slider&quot; data-slider-label&gt;Position from zero to one inch&lt;/label&gt;
-      &lt;input class=&quot;form-range oi-slider&quot; id=&quot;oi-main-slider&quot; type=&quot;range&quot; min=&quot;0&quot; max=&quot;1000&quot; step=&quot;1&quot; value=&quot;0&quot; aria-valuetext=&quot;0.000 inches&quot;&gt;
-    &lt;/div&gt;
-    &lt;button class=&quot;btn&quot; type=&quot;button&quot; data-delta=&quot;1&quot; aria-label=&quot;Add one thousandth of an inch&quot;&gt;+0.001 in&lt;/button&gt;
-  &lt;/div&gt;
+      <div class="star-options" role="group" aria-label="Choose difficulty">
+        <button class="star-option" type="button" data-difficulty="1" aria-pressed="true" aria-label="Easy difficulty, one star">
+          <span class="stars" aria-hidden="true">★</span>
+          <small>Easy</small>
+        </button>
+        <button class="star-option" type="button" data-difficulty="2" aria-pressed="false" aria-label="Shop difficulty, two stars">
+          <span class="stars" aria-hidden="true">★★</span>
+          <small>Shop</small>
+        </button>
+        <button class="star-option" type="button" data-difficulty="3" aria-pressed="false" aria-label="Expert difficulty, three stars">
+          <span class="stars" aria-hidden="true">★★★</span>
+          <small>Expert</small>
+        </button>
+      </div>
 
-  &lt;div class=&quot;oi-breakdown text-small text-muted&quot; data-breakdown&gt;0 inches + 0 thousandths&lt;/div&gt;
-  &lt;div class=&quot;oi-language&quot; aria-live=&quot;polite&quot;&gt;
-    &lt;span&gt;🗣️ Everyday/shop name:&lt;/span&gt;
-    &lt;span class=&quot;viz-badge&quot; data-common-name&gt;zero&lt;/span&gt;
-  &lt;/div&gt;
+      <p class="difficulty-help" data-difficulty-help>Common fractions with a forgiving target.</p>
+    </section>
 
-  &lt;script&gt;
-    (() =&gt; {
-      const root = document.getElementById(&#x27;metric-inch-thousandths-game&#x27;);
-      if (!root) return;
+    <section class="panel challenge-panel" aria-label="Practice challenge">
+      <div class="scoreboard">
+        <div class="score-item">
+          <span class="score-label">🎯 Target</span>
+          <button class="target-button score-value" type="button" data-target-button aria-label="Load a new random target">New target</button>
+        </div>
+        <div class="score-item">
+          <span class="score-label">📍 You</span>
+          <strong class="score-value current-value" data-current>0.000 in</strong>
+        </div>
+        <div class="score-item">
+          <span class="score-label">🌈 Close enough</span>
+          <strong class="score-value tolerance-value" data-tolerance>—</strong>
+        </div>
+      </div>
 
-      const slider = root.querySelector(&#x27;#oi-main-slider&#x27;);
-      const ruler = root.querySelector(&#x27;[data-ruler]&#x27;);
-      const currentEl = root.querySelector(&#x27;[data-current]&#x27;);
-      const readingEl = root.querySelector(&#x27;[data-reading]&#x27;);
-      const breakdownEl = root.querySelector(&#x27;[data-breakdown]&#x27;);
-      const targetEl = root.querySelector(&#x27;[data-target]&#x27;);
-      const toleranceEl = root.querySelector(&#x27;[data-tolerance]&#x27;);
-      const feedbackEl = root.querySelector(&#x27;[data-feedback]&#x27;);
-      const practiceButton = root.querySelector(&#x27;[data-practice-button]&#x27;);
-      const hideReading = root.querySelector(&#x27;#oi-hide-reading&#x27;);
-      const mmToggle = root.querySelector(&#x27;#oi-mm-toggle&#x27;);
-      const commonNameEl = root.querySelector(&#x27;[data-common-name]&#x27;);
-      const stickTitleEl = root.querySelector(&#x27;[data-stick-title]&#x27;);
-      const sliderLabelEl = root.querySelector(&#x27;[data-slider-label]&#x27;);
-      const nudgeButtons = Array.from(root.querySelectorAll(&#x27;[data-delta]&#x27;));
-      const ns = &#x27;http://www.w3.org/2000/svg&#x27;;
+      <div class="round-controls">
+        <label class="switch-label">
+          <input type="checkbox" data-hide-reading checked>
+          <span>Hide my number during each round</span>
+        </label>
+        <button class="primary-button" type="button" data-check-button>Start</button>
+      </div>
 
-      let current = 0;
-      let target = null;
-      let tolerance = null;
-      let state = &#x27;ready&#x27;;
-      let unit = &#x27;in&#x27;;
-      const inchTolerances = [1, 2, 3, 5, 10];
-      const mmTolerances = [1, 2, 5, 10, 25];
-      const inchNames = {
-        0: &#x27;zero&#x27;,
-        125: &#x27;one-eighth inch&#x27;,
-        250: &#x27;quarter inch&#x27;,
-        375: &#x27;three-eighths inch&#x27;,
-        500: &#x27;half inch&#x27;,
-        625: &#x27;five-eighths inch&#x27;,
-        750: &#x27;three-quarter inch&#x27;,
-        875: &#x27;seven-eighths inch&#x27;,
-        1000: &#x27;one inch&#x27;
-      };
-      const mmNames = {
-        0: &#x27;zero&#x27;,
-        3175: &#x27;3.175 mm • one-eighth inch&#x27;,
-        6350: &#x27;6.350 mm • quarter inch&#x27;,
-        9525: &#x27;9.525 mm • three-eighths inch&#x27;,
-        12700: &#x27;12.700 mm • half inch&#x27;,
-        15875: &#x27;15.875 mm • five-eighths inch&#x27;,
-        19050: &#x27;19.050 mm • three-quarter inch&#x27;,
-        22225: &#x27;22.225 mm • seven-eighths inch&#x27;,
-        25400: &#x27;25.400 mm • one inch&#x27;
-      };
-      const decimal = value =&gt; (value / 1000).toFixed(3);
-      const maximum = () =&gt; unit === &#x27;in&#x27; ? 1000 : 25400;
-      const suffix = () =&gt; unit === &#x27;in&#x27; ? &#x27;in&#x27; : &#x27;mm&#x27;;
-      const formatted = value =&gt; `${decimal(value)} ${suffix()}`;
-      const tolerances = () =&gt; unit === &#x27;in&#x27; ? inchTolerances : mmTolerances;
-      const commonName = value =&gt; {
-        if (unit === &#x27;in&#x27;) return inchNames[value] || `${value} thou`;
-        return mmNames[value] || `${decimal(value)} millimetres`;
-      };
+      <p class="feedback" aria-live="polite" data-feedback>Choose a difficulty, then start.</p>
 
-      function svgNode(tag, attrs = {}, text = &#x27;&#x27;) {
-        const node = document.createElementNS(ns, tag);
-        Object.entries(attrs).forEach(([key, value]) =&gt; node.setAttribute(key, value));
-        if (text) node.textContent = text;
-        return node;
+      <aside class="coach" data-coach hidden>
+        <h2>How to work it out</h2>
+        <ol data-coach-steps></ol>
+      </aside>
+    </section>
+
+    <section class="panel ruler-panel" aria-labelledby="ruler-title">
+      <div class="ruler-heading">
+        <div>
+          <span class="eyebrow" id="ruler-title">Measuring stick</span>
+          <div class="ruler-title" data-stick-title>One-inch ruler</div>
+          <div class="reading" data-reading>0.000 in</div>
+        </div>
+
+        <div class="zoom-area">
+          <span class="zoom-label">Zoom</span>
+          <div class="zoom-options" role="group" aria-label="Ruler zoom">
+            <button class="zoom-button" type="button" data-zoom="1" aria-pressed="true">1×</button>
+            <button class="zoom-button" type="button" data-zoom="5" aria-pressed="false">5×</button>
+            <button class="zoom-button" type="button" data-zoom="10" aria-pressed="false">10×</button>
+          </div>
+          <button class="center-button" type="button" data-center hidden>Center needle</button>
+        </div>
+      </div>
+
+      <div class="view-range" data-view-range>Whole ruler</div>
+
+      <div class="ruler-stage">
+        <svg class="ruler-svg" data-ruler role="img" aria-label="Ruler from zero to one inch">
+          <title>Measurement ruler</title>
+          <desc>The coloured ruler has a movable needle and small measurement ticks.</desc>
+        </svg>
+        <label class="sr-only" for="measurement-slider" data-slider-label>Position from zero to one inch</label>
+        <input class="ruler-input" id="measurement-slider" data-slider type="range" min="0" max="1000" step="1" value="0" aria-valuetext="0.000 inches">
+      </div>
+
+      <div class="nudge-grid" aria-label="Fine adjustment buttons">
+        <button class="nudge-button" data-size="coarse" data-delta="-10" type="button">−0.010 in</button>
+        <button class="nudge-button" data-size="fine" data-delta="-1" type="button">−0.001 in</button>
+        <button class="nudge-button" data-size="fine" data-delta="1" type="button">+0.001 in</button>
+        <button class="nudge-button" data-size="coarse" data-delta="10" type="button">+0.010 in</button>
+      </div>
+
+      <div class="detail-row">
+        <div class="detail">
+          <span class="eyebrow">Breakdown</span>
+          <strong data-breakdown>0 whole inches + 0 thousandths</strong>
+        </div>
+        <div class="detail">
+          <span class="eyebrow">Everyday / shop name</span>
+          <strong data-common-name>zero</strong>
+        </div>
+      </div>
+
+      <p class="haptic-note" data-haptic-note>Small ruler ticks give a gentle pulse on supported phones.</p>
+    </section>
+
+    <a class="home-link" href="/">Back to TurdGobbler.com</a>
+  </main>
+
+  <script>
+    (function () {
+      "use strict";
+
+      var storageKey = "thousandths-playground-preferences-v2";
+      var slider = document.querySelector("[data-slider]");
+      var ruler = document.querySelector("[data-ruler]");
+      var targetButton = document.querySelector("[data-target-button]");
+      var currentEl = document.querySelector("[data-current]");
+      var toleranceEl = document.querySelector("[data-tolerance]");
+      var feedbackEl = document.querySelector("[data-feedback]");
+      var checkButton = document.querySelector("[data-check-button]");
+      var hideReading = document.querySelector("[data-hide-reading]");
+      var readingEl = document.querySelector("[data-reading]");
+      var breakdownEl = document.querySelector("[data-breakdown]");
+      var commonNameEl = document.querySelector("[data-common-name]");
+      var stickTitleEl = document.querySelector("[data-stick-title]");
+      var sliderLabelEl = document.querySelector("[data-slider-label]");
+      var difficultyNameEl = document.querySelector("[data-difficulty-name]");
+      var difficultyHelpEl = document.querySelector("[data-difficulty-help]");
+      var viewRangeEl = document.querySelector("[data-view-range]");
+      var centerButton = document.querySelector("[data-center]");
+      var coach = document.querySelector("[data-coach]");
+      var coachSteps = document.querySelector("[data-coach-steps]");
+      var hapticNote = document.querySelector("[data-haptic-note]");
+      var unitButtons = Array.from(document.querySelectorAll("[data-unit]"));
+      var difficultyButtons = Array.from(document.querySelectorAll("[data-difficulty]"));
+      var zoomButtons = Array.from(document.querySelectorAll("[data-zoom]"));
+      var nudgeButtons = Array.from(document.querySelectorAll("[data-delta]"));
+      var svgNamespace = "http://www.w3.org/2000/svg";
+
+      var saved = loadPreferences();
+      var unit = saved.unit === "mm" ? "mm" : "in";
+      var difficulty = [1, 2, 3].indexOf(Number(saved.difficulty)) >= 0 ? Number(saved.difficulty) : 1;
+      var zoom = [1, 5, 10].indexOf(Number(saved.zoom)) >= 0 ? Number(saved.zoom) : 1;
+      var current = 0;
+      var target = null;
+      var tolerance = null;
+      var phase = "ready";
+      var misses = 0;
+      var guideVisible = false;
+      var viewStart = 0;
+      var viewEnd = maximum();
+
+      hideReading.checked = saved.hideReading !== false;
+      if (!("vibrate" in navigator)) {
+        hapticNote.textContent = "Tick haptics are not available in this browser.";
       }
 
-      function clearRuler() {
-        Array.from(ruler.children).forEach(child =&gt; {
-          if (child.tagName !== &#x27;title&#x27; &amp;&amp; child.tagName !== &#x27;desc&#x27;) child.remove();
-        });
-      }
-
-      function drawRuler() {
-        const width = Math.max(110, Math.round(ruler.getBoundingClientRect().width || 110));
-        const left = 8;
-        const right = width - 8;
-        const span = right - left;
-        const max = maximum();
-        const x = value =&gt; left + (value / max) * span;
-        const labelValues = unit === &#x27;in&#x27;
-          ? (width &lt; 175 ? [0, 500, 1000] : [0, 250, 500, 750, 1000])
-          : (width &lt; 175 ? [0, 12700, 25400] : [0, 5000, 10000, 15000, 20000, 25400]);
-        const baseTicks = unit === &#x27;in&#x27;
-          ? Array.from({ length: 21 }, (_, index) =&gt; index * 50)
-          : [...Array.from({ length: 26 }, (_, index) =&gt; index * 1000), 25400];
-        const tickValues = [...new Set([...baseTicks, ...labelValues])].sort((a, b) =&gt; a - b);
-        const sectionColors = [&#x27;var(--blue)&#x27;, &#x27;var(--purple)&#x27;, &#x27;var(--orange)&#x27;, &#x27;var(--green)&#x27;];
-
-        clearRuler();
-        ruler.setAttribute(&#x27;viewBox&#x27;, `0 0 ${width} 78`);
-        ruler.setAttribute(&#x27;aria-label&#x27;, unit === &#x27;in&#x27;
-          ? &#x27;One-inch ruler from zero to one inch&#x27;
-          : &#x27;Metric ruler from zero to 25.400 millimetres&#x27;);
-
-        for (let quarter = 0; quarter &lt; 4; quarter += 1) {
-          ruler.appendChild(svgNode(&#x27;line&#x27;, {
-            x1: x(quarter * max / 4), y1: 25,
-            x2: x((quarter + 1) * max / 4), y2: 25,
-            stroke: sectionColors[quarter], &#x27;stroke-width&#x27;: 5, opacity: &#x27;0.55&#x27;
-          }));
+      function loadPreferences() {
+        try {
+          return JSON.parse(localStorage.getItem(storageKey) || "{}");
+        } catch (error) {
+          return {};
         }
+      }
 
-        for (const value of tickValues) {
-          const major = unit === &#x27;in&#x27; ? value % 250 === 0 : labelValues.includes(value);
-          ruler.appendChild(svgNode(&#x27;line&#x27;, {
-            x1: x(value), y1: 25, x2: x(value), y2: major ? 48 : 39,
-            stroke: &#x27;var(--foreground)&#x27;, &#x27;stroke-width&#x27;: major ? 2 : 1
+      function savePreferences() {
+        try {
+          localStorage.setItem(storageKey, JSON.stringify({
+            unit: unit,
+            difficulty: difficulty,
+            zoom: zoom,
+            hideReading: hideReading.checked
           }));
-          if (labelValues.includes(value)) {
-            const anchor = value === 0 ? &#x27;start&#x27; : value === max ? &#x27;end&#x27; : &#x27;middle&#x27;;
-            ruler.appendChild(svgNode(&#x27;text&#x27;, {
-              x: x(value), y: 66, fill: &#x27;var(--foreground)&#x27;,
-              &#x27;font-size&#x27;: &#x27;12px&#x27;, &#x27;text-anchor&#x27;: anchor
-            }, unit === &#x27;in&#x27; ? decimal(value) : (value / 1000).toFixed(value === 25400 ? 1 : 0)));
-          }
+        } catch (error) {
+          // The game still works when browser storage is unavailable.
         }
-
-        ruler.appendChild(svgNode(&#x27;line&#x27;, {
-          x1: x(current), y1: 7, x2: x(current), y2: 49,
-          stroke: &#x27;var(--viz-series-1)&#x27;, &#x27;stroke-width&#x27;: 2
-        }));
-        ruler.appendChild(svgNode(&#x27;polygon&#x27;, {
-          points: `${x(current) - 6},7 ${x(current) + 6},7 ${x(current)},15`,
-          fill: &#x27;var(--viz-series-1)&#x27;
-        }));
       }
 
-      function update() {
-        const hidden = hideReading.checked &amp;&amp; state === &#x27;checking&#x27;;
-        currentEl.textContent = hidden ? &#x27;???&#x27; : formatted(current);
-        readingEl.textContent = hidden ? &#x27;Number hidden&#x27; : formatted(current);
-        breakdownEl.textContent = hidden
-          ? &#x27;Use the stick and the tiny-step buttons&#x27;
-          : unit === &#x27;in&#x27;
-            ? current === 1000
-              ? &#x27;1 whole inch + 0 thousandths&#x27;
-              : `0 whole inches + ${current} thousandths`
-            : `${Math.floor(current / 1000)} whole mm + ${current % 1000} thousandths of a mm`;
-        commonNameEl.textContent = hidden ? &#x27;Hidden until you match it&#x27; : commonName(current);
-        slider.max = String(maximum());
-        slider.value = String(current);
-        slider.setAttribute(&#x27;aria-valuetext&#x27;, unit === &#x27;in&#x27;
-          ? `${decimal(current)} inches`
-          : `${decimal(current)} millimetres`);
-        stickTitleEl.textContent = unit === &#x27;in&#x27; ? &#x27;One-inch measuring stick&#x27; : &#x27;25.4 mm measuring stick&#x27;;
-        sliderLabelEl.textContent = unit === &#x27;in&#x27;
-          ? &#x27;Position from zero to one inch&#x27;
-          : &#x27;Position from zero to 25.4 millimetres&#x27;;
-        nudgeButtons.forEach(button =&gt; {
-          const minus = Number(button.dataset.delta) &lt; 0;
-          button.textContent = `${minus ? &#x27;−&#x27; : &#x27;+&#x27;}0.001 ${suffix()}`;
-          button.setAttribute(&#x27;aria-label&#x27;, `${minus ? &#x27;Subtract&#x27; : &#x27;Add&#x27;} one thousandth of a ${unit === &#x27;in&#x27; ? &#x27;inch&#x27; : &#x27;millimetre&#x27;}`);
-        });
-        drawRuler();
+      function maximum() {
+        return unit === "in" ? 1000 : 25400;
       }
 
-      function setCurrent(value) {
-        current = Math.max(0, Math.min(maximum(), Math.round(value)));
-        update();
+      function suffix() {
+        return unit === "in" ? "in" : "mm";
+      }
+
+      function decimal(value) {
+        return (value / 1000).toFixed(3);
+      }
+
+      function formatted(value) {
+        return decimal(value) + " " + suffix();
+      }
+
+      function spoken(value) {
+        return decimal(value) + (unit === "in" ? " inches" : " millimetres");
+      }
+
+      function clamp(value, minimum, maximumValue) {
+        return Math.min(maximumValue, Math.max(minimum, value));
       }
 
       function randomInt(maxInclusive) {
-        if (window.crypto &amp;&amp; window.crypto.getRandomValues) {
-          const values = new Uint32Array(1);
+        if (window.crypto && window.crypto.getRandomValues) {
+          var values = new Uint32Array(1);
           window.crypto.getRandomValues(values);
           return values[0] % (maxInclusive + 1);
         }
         return Math.floor(Math.random() * (maxInclusive + 1));
       }
 
-      function newChallenge() {
-        if (state === &#x27;ready&#x27;) hideReading.checked = true;
-        const choices = tolerances();
-        tolerance = choices[randomInt(choices.length - 1)];
-        target = tolerance + randomInt(maximum() - (2 * tolerance));
-        targetEl.textContent = formatted(target);
-        toleranceEl.textContent = `±${formatted(tolerance)}`;
-        feedbackEl.textContent = &#x27;Slide close, then use the tiny steps.&#x27;;
-        feedbackEl.removeAttribute(&#x27;data-kind&#x27;);
-        practiceButton.textContent = &#x27;Check&#x27;;
-        state = &#x27;checking&#x27;;
-        update();
+      function choose(values) {
+        return values[randomInt(values.length - 1)];
       }
 
-      function check() {
-        const difference = current - target;
-        const distance = Math.abs(difference);
-        if (distance &lt;= tolerance) {
-          feedbackEl.textContent = distance === 0 ? &#x27;⭐ Exact match!&#x27; : `⭐ You got it! Off by ${formatted(distance)}.`;
-          feedbackEl.dataset.kind = &#x27;success&#x27;;
-          practiceButton.textContent = &#x27;Next&#x27;;
-          state = &#x27;next&#x27;;
-          update();
-          if (navigator.vibrate) navigator.vibrate([18, 30, 18]);
-        } else {
-          feedbackEl.textContent = difference &lt; 0
-            ? `Go higher by at least ${formatted(distance - tolerance)}.`
-            : `Go lower by at least ${formatted(distance - tolerance)}.`;
-          feedbackEl.dataset.kind = &#x27;adjust&#x27;;
-          if (navigator.vibrate) navigator.vibrate(10);
+      function difficultySettings() {
+        if (unit === "in") {
+          if (difficulty === 1) {
+            return {
+              name: "Easy",
+              help: "Common eighth-inch fractions with a ±0.010 in target.",
+              tolerance: 10,
+              pool: [125, 250, 375, 500, 625, 750, 875]
+            };
+          }
+          if (difficulty === 2) {
+            return {
+              name: "Shop",
+              help: "Common 0.025 in steps with a ±0.005 in target.",
+              tolerance: 5,
+              step: 25
+            };
+          }
+          return {
+            name: "Expert",
+            help: "Any thousandth from 0.001 to 0.999 in with a ±0.001 in target.",
+            tolerance: 1,
+            step: 1
+          };
         }
+
+        if (difficulty === 1) {
+          return {
+            name: "Easy",
+            help: "Whole millimetres with a ±0.025 mm target.",
+            tolerance: 25,
+            step: 1000
+          };
+        }
+        if (difficulty === 2) {
+          return {
+            name: "Shop",
+            help: "Common 0.100 mm steps with a ±0.010 mm target.",
+            tolerance: 10,
+            step: 100
+          };
+        }
+        return {
+          name: "Expert",
+          help: "Any thousandth from 0.001 to 25.399 mm with a ±0.001 mm target.",
+          tolerance: 1,
+          step: 1
+        };
       }
 
-      slider.addEventListener(&#x27;input&#x27;, event =&gt; setCurrent(Number(event.target.value)));
-      root.querySelectorAll(&#x27;[data-delta]&#x27;).forEach(button =&gt; {
-        button.addEventListener(&#x27;click&#x27;, () =&gt; {
-          setCurrent(current + Number(button.dataset.delta));
-          if (navigator.vibrate) navigator.vibrate(5);
-        });
-      });
-      practiceButton.addEventListener(&#x27;click&#x27;, () =&gt; {
-        if (state === &#x27;ready&#x27; || state === &#x27;next&#x27;) newChallenge();
-        else check();
-      });
-      targetEl.addEventListener(&#x27;click&#x27;, newChallenge);
-      hideReading.addEventListener(&#x27;change&#x27;, update);
-      mmToggle.addEventListener(&#x27;change&#x27;, () =&gt; {
-        const nextUnit = mmToggle.checked ? &#x27;mm&#x27; : &#x27;in&#x27;;
-        if (nextUnit === unit) return;
-        current = nextUnit === &#x27;mm&#x27;
-          ? Math.round(current * 25.4)
-          : Math.round(current / 25.4);
-        unit = nextUnit;
-        if (state === &#x27;ready&#x27;) update();
-        else newChallenge();
-      });
+      function makeTarget(settings) {
+        if (settings.pool) {
+          return choose(settings.pool);
+        }
+        var step = settings.step;
+        var first = Math.max(step, Math.ceil(settings.tolerance / step) * step);
+        var last = Math.floor((maximum() - settings.tolerance) / step) * step;
+        var count = Math.floor((last - first) / step);
+        return first + randomInt(count) * step;
+      }
 
-      new ResizeObserver(drawRuler).observe(root);
-      drawRuler();
-      update();
-    })();
-  &lt;/script&gt;
-&lt;/div&gt;
+      function tickIntervals() {
+        if (unit === "in") {
+          if (zoom === 1) return { minor: 50, major: 250 };
+          if (zoom === 5) return { minor: 10, major: 50 };
+          return { minor: 5, major: 25 };
+        }
+        if (zoom === 1) return { minor: 1000, major: 5000 };
+        if (zoom === 5) return { minor: 250, major: 1000 };
+        return { minor: 100, major: 500 };
+      }
 
-&lt;script src=&quot;https://unpkg.com/@floating-ui/core@1.7.3/dist/floating-ui.core.umd.min.js&quot;&gt;&lt;/script&gt;
-&lt;script src=&quot;https://unpkg.com/@floating-ui/dom@1.7.4/dist/floating-ui.dom.umd.min.js&quot;&gt;&lt;/script&gt;
-&lt;script&gt;
-(() =&gt; {
-  if (window.FloatingUIDOM == null) {
-    return;
-  }
-  const { autoUpdate, computePosition, flip, offset, shift, size } =
-    window.FloatingUIDOM;
-  const tooltipPlacements = new Set([&quot;top&quot;, &quot;right&quot;, &quot;bottom&quot;, &quot;left&quot;]);
-  const tooltipId = `codex-visualization-tooltip-${
-    window.crypto?.randomUUID?.() ?? Date.now().toString(36)
-  }`;
-  const tooltipGap = 5;
-  const hoverDelay = 700;
-  const skipDelay = 300;
-  let activeTrigger = null;
-  let pendingTrigger = null;
-  let tooltip = null;
-  let openTimeout = null;
-  let autoUpdateCleanup = null;
-  let positionRequest = 0;
-  let skipDelayUntil = 0;
-  let lastPointerWasTouch = false;
-  let pinnedByTouch = false;
+      function zoomSpan() {
+        if (zoom === 1) return maximum();
+        if (unit === "in") return zoom === 5 ? 200 : 100;
+        return zoom === 5 ? 5000 : 2500;
+      }
 
-  const getTrigger = (target) =&gt;
-    target?.nodeType === Node.ELEMENT_NODE
-      ? target.closest(&quot;[data-tooltip]&quot;)
-      : null;
-  const containsTarget = (trigger, target) =&gt;
-    target?.nodeType != null &amp;&amp; trigger.contains(target);
-  const getContent = (trigger) =&gt;
-    trigger.getAttribute(&quot;data-tooltip&quot;)?.trim() ?? &quot;&quot;;
-  const getPlacement = (trigger) =&gt; {
-    const placement = trigger.getAttribute(&quot;data-tooltip-placement&quot;);
-    return tooltipPlacements.has(placement) ? placement : &quot;top&quot;;
-  };
-  const getTooltip = () =&gt; {
-    if (tooltip == null) {
-      tooltip = document.createElement(&quot;div&quot;);
-      tooltip.id = tooltipId;
-      tooltip.className = &quot;tooltip&quot;;
-      tooltip.setAttribute(&quot;role&quot;, &quot;tooltip&quot;);
-    }
-    return tooltip;
-  };
-  const setDescribedBy = (trigger, described) =&gt; {
-    const ids = new Set(
-      (trigger.getAttribute(&quot;aria-describedby&quot;) ?? &quot;&quot;)
-        .split(/\s+/)
-        .filter(Boolean),
-    );
-    if (described) {
-      ids.add(tooltipId);
-    } else {
-      ids.delete(tooltipId);
-    }
-    if (ids.size === 0) {
-      trigger.removeAttribute(&quot;aria-describedby&quot;);
-    } else {
-      trigger.setAttribute(&quot;aria-describedby&quot;, [...ids].join(&quot; &quot;));
-    }
-  };
-  const clearOpenTimeout = () =&gt; {
-    if (openTimeout != null) {
-      window.clearTimeout(openTimeout);
-      openTimeout = null;
-    }
-    pendingTrigger = null;
-  };
-  const closeTooltip = (activateSkipDelay = true) =&gt; {
-    clearOpenTimeout();
-    pinnedByTouch = false;
-    positionRequest += 1;
-    autoUpdateCleanup?.();
-    autoUpdateCleanup = null;
-    if (activeTrigger == null) {
-      return;
-    }
-    setDescribedBy(activeTrigger, false);
-    activeTrigger = null;
-    tooltip?.remove();
-    if (activateSkipDelay) {
-      skipDelayUntil = Date.now() + skipDelay;
-    }
-  };
-  const updatePosition = (trigger, floating) =&gt; {
-    const request = ++positionRequest;
-    void computePosition(trigger, floating, {
-      middleware: [
-        offset(tooltipGap),
-        flip({ padding: tooltipGap }),
-        shift({ padding: tooltipGap }),
-        size({
-          padding: tooltipGap,
-          apply({ availableHeight, availableWidth, elements }) {
-            elements.floating.style.setProperty(
-              &quot;--tooltip-available-width&quot;,
-              `${Math.max(0, availableWidth)}px`,
-            );
-            elements.floating.style.setProperty(
-              &quot;--tooltip-available-height&quot;,
-              `${Math.max(0, availableHeight)}px`,
-            );
-          },
-        }),
-      ],
-      placement: getPlacement(trigger),
-      strategy: &quot;fixed&quot;,
-    })
-      .then(({ x, y }) =&gt; {
-        if (activeTrigger !== trigger || request !== positionRequest) {
+      function centerView(value) {
+        var max = maximum();
+        var span = Math.min(max, zoomSpan());
+        if (zoom === 1 || span === max) {
+          viewStart = 0;
+          viewEnd = max;
           return;
         }
-        const scale = window.devicePixelRatio || 1;
-        floating.style.transform = `translate(${Math.round(x * scale) / scale}px, ${Math.round(y * scale) / scale}px)`;
-        floating.style.visibility = &quot;visible&quot;;
-      })
-      .catch(() =&gt; {
-        if (activeTrigger === trigger &amp;&amp; request === positionRequest) {
-          closeTooltip(false);
+        var minor = tickIntervals().minor;
+        var proposed = Math.round((value - span / 2) / minor) * minor;
+        viewStart = clamp(proposed, 0, max - span);
+        viewEnd = viewStart + span;
+      }
+
+      function ensureCurrentInView() {
+        if (current < viewStart || current > viewEnd) {
+          centerView(current);
         }
+      }
+
+      function haptic(pattern) {
+        if (navigator.vibrate) {
+          navigator.vibrate(pattern);
+        }
+      }
+
+      function hapticForCrossedTick(before, after) {
+        var interval = tickIntervals().minor;
+        if (Math.floor(before / interval) !== Math.floor(after / interval)) {
+          haptic(5);
+        }
+      }
+
+      function commonName(value) {
+        var inchNames = {
+          0: "zero",
+          125: "one-eighth inch",
+          250: "quarter inch",
+          375: "three-eighths inch",
+          500: "half inch",
+          625: "five-eighths inch",
+          750: "three-quarter inch",
+          875: "seven-eighths inch",
+          1000: "one inch"
+        };
+        var mmNames = {
+          0: "zero",
+          3175: "3.175 mm · one-eighth inch",
+          6350: "6.350 mm · quarter inch",
+          9525: "9.525 mm · three-eighths inch",
+          12700: "12.700 mm · half inch",
+          15875: "15.875 mm · five-eighths inch",
+          19050: "19.050 mm · three-quarter inch",
+          22225: "22.225 mm · seven-eighths inch",
+          25400: "25.400 mm · one inch"
+        };
+        if (unit === "in") return inchNames[value] || value + " thou";
+        return mmNames[value] || decimal(value) + " millimetres";
+      }
+
+      function breakdown(value) {
+        if (unit === "in") {
+          if (value === 1000) return "1 whole inch + 0 thousandths";
+          return "0 whole inches + " + value + " thousandths";
+        }
+        return Math.floor(value / 1000) + " whole mm + " + (value % 1000) + " thousandths";
+      }
+
+      function svgNode(name, attributes, text) {
+        var node = document.createElementNS(svgNamespace, name);
+        Object.keys(attributes || {}).forEach(function (key) {
+          node.setAttribute(key, attributes[key]);
+        });
+        if (text !== undefined) node.textContent = text;
+        return node;
+      }
+
+      function clearRuler() {
+        while (ruler.firstChild) ruler.removeChild(ruler.firstChild);
+        ruler.appendChild(svgNode("title", {}, "Measurement ruler"));
+        ruler.appendChild(svgNode("desc", {}, "The coloured ruler has a movable needle and small measurement ticks."));
+      }
+
+      function drawRuler() {
+        var width = Math.max(260, Math.round(ruler.getBoundingClientRect().width || 260));
+        var height = 104;
+        var left = 12;
+        var right = width - 12;
+        var span = viewEnd - viewStart;
+        var intervals = tickIntervals();
+        var colours = ["#58d2ff", "#c084fc", "#fb923c", "#4ade80"];
+        var x = function (value) {
+          return left + ((value - viewStart) / span) * (right - left);
+        };
+
+        clearRuler();
+        ruler.setAttribute("viewBox", "0 0 " + width + " " + height);
+        ruler.setAttribute("aria-label", "Ruler showing " + formatted(viewStart) + " to " + formatted(viewEnd));
+
+        for (var section = 0; section < 4; section += 1) {
+          var sectionStart = viewStart + (span * section) / 4;
+          var sectionEnd = viewStart + (span * (section + 1)) / 4;
+          ruler.appendChild(svgNode("line", {
+            x1: x(sectionStart),
+            y1: 35,
+            x2: x(sectionEnd),
+            y2: 35,
+            stroke: colours[section],
+            "stroke-width": 7,
+            "stroke-linecap": section === 0 || section === 3 ? "round" : "butt",
+            opacity: "0.72"
+          }));
+        }
+
+        var firstTick = Math.ceil(viewStart / intervals.minor) * intervals.minor;
+        for (var value = firstTick; value <= viewEnd; value += intervals.minor) {
+          var major = value % intervals.major === 0;
+          ruler.appendChild(svgNode("line", {
+            x1: x(value),
+            y1: 35,
+            x2: x(value),
+            y2: major ? 65 : 54,
+            stroke: "#f8fafc",
+            "stroke-width": major ? 2 : 1,
+            opacity: major ? "0.95" : "0.72"
+          }));
+          if (major) {
+            var anchor = value === viewStart ? "start" : value === viewEnd ? "end" : "middle";
+            ruler.appendChild(svgNode("text", {
+              x: x(value),
+              y: 86,
+              fill: "#f8fafc",
+              "font-size": width < 360 ? "12" : "13",
+              "font-weight": "700",
+              "font-family": "system-ui, sans-serif",
+              "text-anchor": anchor
+            }, decimal(value)));
+          }
+        }
+
+        if (guideVisible && target !== null && target >= viewStart && target <= viewEnd) {
+          var zoneStart = clamp(target - tolerance, viewStart, viewEnd);
+          var zoneEnd = clamp(target + tolerance, viewStart, viewEnd);
+          ruler.appendChild(svgNode("rect", {
+            x: x(zoneStart),
+            y: 13,
+            width: Math.max(3, x(zoneEnd) - x(zoneStart)),
+            height: 58,
+            rx: 3,
+            fill: "#facc15",
+            opacity: "0.22"
+          }));
+          ruler.appendChild(svgNode("line", {
+            x1: x(target),
+            y1: 14,
+            x2: x(target),
+            y2: 70,
+            stroke: "#facc15",
+            "stroke-width": 2,
+            "stroke-dasharray": "4 3"
+          }));
+        }
+
+        var needleX = x(current);
+        ruler.appendChild(svgNode("line", {
+          x1: needleX,
+          y1: 10,
+          x2: needleX,
+          y2: 68,
+          stroke: "#58d2ff",
+          "stroke-width": 3
+        }));
+        ruler.appendChild(svgNode("polygon", {
+          points: (needleX - 7) + ",10 " + (needleX + 7) + ",10 " + needleX + ",19",
+          fill: "#58d2ff"
+        }));
+      }
+
+      function renderDifficulty() {
+        var settings = difficultySettings();
+        difficultyNameEl.textContent = settings.name;
+        difficultyHelpEl.textContent = settings.help;
+        difficultyButtons.forEach(function (button) {
+          button.setAttribute("aria-pressed", String(Number(button.dataset.difficulty) === difficulty));
+        });
+      }
+
+      function renderUnit() {
+        unitButtons.forEach(function (button) {
+          button.setAttribute("aria-pressed", String(button.dataset.unit === unit));
+        });
+      }
+
+      function renderZoom() {
+        zoomButtons.forEach(function (button) {
+          button.setAttribute("aria-pressed", String(Number(button.dataset.zoom) === zoom));
+        });
+        centerButton.hidden = zoom === 1;
+        viewRangeEl.textContent = zoom === 1
+          ? "Whole ruler"
+          : zoom + "× view · " + formatted(viewStart) + " to " + formatted(viewEnd);
+      }
+
+      function renderNudges() {
+        nudgeButtons.forEach(function (button) {
+          var amount = Number(button.dataset.delta);
+          var sign = amount < 0 ? "−" : "+";
+          button.textContent = sign + decimal(Math.abs(amount)) + " " + suffix();
+          button.setAttribute(
+            "aria-label",
+            (amount < 0 ? "Subtract " : "Add ") + decimal(Math.abs(amount)) + " " + (unit === "in" ? "inches" : "millimetres")
+          );
+        });
+      }
+
+      function renderCoach() {
+        coach.hidden = !guideVisible;
+        coachSteps.replaceChildren();
+        if (!guideVisible || target === null) return;
+
+        var landmarkInterval = unit === "in" ? 50 : 100;
+        var landmark = Math.floor(target / landmarkInterval) * landmarkInterval;
+        var remaining = target - landmark;
+        var tens = Math.floor(remaining / 10);
+        var ones = remaining % 10;
+        var steps = [
+          "<strong>Start:</strong> find the " + formatted(landmark) + " tick just below the target.",
+          "<strong>Look:</strong> your target is " + formatted(target) + ". Zoom in when the nearby ticks feel crowded.",
+          "<strong>Adjust:</strong> from that tick, use +0.010 " + tens + " " + (tens === 1 ? "time" : "times") + " and +0.001 " + ones + " " + (ones === 1 ? "time" : "times") + "."
+        ];
+
+        steps.forEach(function (step) {
+          var item = document.createElement("li");
+          item.innerHTML = step;
+          coachSteps.appendChild(item);
+        });
+      }
+
+      function render() {
+        var hiddenReading = hideReading.checked && phase === "checking";
+        var displayCurrent = hiddenReading ? "???" : formatted(current);
+
+        currentEl.textContent = displayCurrent;
+        readingEl.textContent = hiddenReading ? "Number hidden" : formatted(current);
+        breakdownEl.textContent = hiddenReading ? "Use the ruler and adjustment buttons" : breakdown(current);
+        commonNameEl.textContent = hiddenReading ? "Hidden during this round" : commonName(current);
+        toleranceEl.textContent = tolerance === null ? "—" : "±" + formatted(tolerance);
+        targetButton.textContent = target === null ? "New target" : formatted(target);
+        targetButton.setAttribute(
+          "aria-label",
+          target === null
+            ? "Load a new random target"
+            : "Target " + spoken(target) + ". Load a new random target"
+        );
+
+        if (phase === "ready") checkButton.textContent = "Start";
+        if (phase === "checking") checkButton.textContent = "Check";
+        if (phase === "solved") checkButton.textContent = "Next";
+
+        stickTitleEl.textContent = unit === "in" ? "One-inch ruler" : "25.4 mm ruler";
+        sliderLabelEl.textContent = unit === "in"
+          ? "Position from zero to one inch"
+          : "Position from zero to 25.4 millimetres";
+        slider.min = String(viewStart);
+        slider.max = String(viewEnd);
+        slider.value = String(current);
+        slider.setAttribute("aria-valuetext", spoken(current));
+
+        renderUnit();
+        renderDifficulty();
+        renderZoom();
+        renderNudges();
+        renderCoach();
+        drawRuler();
+      }
+
+      function setCurrent(value, keepView) {
+        var before = current;
+        current = clamp(Math.round(value), 0, maximum());
+        if (!keepView) ensureCurrentInView();
+        hapticForCrossedTick(before, current);
+        render();
+      }
+
+      function newChallenge() {
+        var settings = difficultySettings();
+        target = makeTarget(settings);
+        tolerance = settings.tolerance;
+        phase = "checking";
+        misses = 0;
+        guideVisible = false;
+        feedbackEl.textContent = "Find the target.";
+        feedbackEl.removeAttribute("data-kind");
+        render();
+      }
+
+      function checkAnswer() {
+        if (phase === "ready" || phase === "solved" || target === null) {
+          newChallenge();
+          return;
+        }
+
+        var distance = Math.abs(current - target);
+        if (distance <= tolerance) {
+          phase = "solved";
+          guideVisible = false;
+          feedbackEl.textContent = "⭐ Matched.";
+          feedbackEl.dataset.kind = "success";
+          haptic([12, 34, 18]);
+          render();
+          return;
+        }
+
+        misses += 1;
+        feedbackEl.dataset.kind = "miss";
+        if (misses < 3) {
+          feedbackEl.textContent = "Not yet.";
+        } else {
+          guideVisible = true;
+          feedbackEl.textContent = "Three tries—here is one way to break it down.";
+        }
+        render();
+      }
+
+      function setDifficulty(nextDifficulty) {
+        difficulty = nextDifficulty;
+        savePreferences();
+        if (phase === "checking") {
+          newChallenge();
+        } else {
+          feedbackEl.textContent = "Choose Start for a " + difficultySettings().name.toLowerCase() + " target.";
+          feedbackEl.removeAttribute("data-kind");
+          render();
+        }
+      }
+
+      function setUnit(nextUnit) {
+        if (nextUnit === unit) return;
+        var factor = nextUnit === "mm" ? 25.4 : 1 / 25.4;
+        current = Math.round(current * factor);
+        if (target !== null) target = Math.round(target * factor);
+        if (tolerance !== null) tolerance = Math.max(1, Math.round(tolerance * factor));
+        unit = nextUnit;
+        centerView(current);
+        savePreferences();
+        render();
+      }
+
+      function setZoom(nextZoom) {
+        zoom = nextZoom;
+        centerView(current);
+        savePreferences();
+        render();
+      }
+
+      function nudge(amount) {
+        setCurrent(current + amount, false);
+      }
+
+      function bindRepeatingNudge(button) {
+        var amount = Number(button.dataset.delta);
+        var holdTimer = null;
+        var repeatTimer = null;
+        var pointerHandled = false;
+
+        function stopRepeat() {
+          if (holdTimer !== null) clearTimeout(holdTimer);
+          if (repeatTimer !== null) clearInterval(repeatTimer);
+          holdTimer = null;
+          repeatTimer = null;
+        }
+
+        button.addEventListener("pointerdown", function (event) {
+          if (event.pointerType === "mouse" && event.button !== 0) return;
+          pointerHandled = true;
+          nudge(amount);
+          holdTimer = window.setTimeout(function () {
+            repeatTimer = window.setInterval(function () {
+              nudge(amount);
+            }, 90);
+          }, 380);
+        });
+        button.addEventListener("pointerup", stopRepeat);
+        button.addEventListener("pointercancel", function () {
+          pointerHandled = false;
+          stopRepeat();
+        });
+        button.addEventListener("pointerleave", function () {
+          pointerHandled = false;
+          stopRepeat();
+        });
+        button.addEventListener("click", function () {
+          if (pointerHandled) {
+            pointerHandled = false;
+            return;
+          }
+          nudge(amount);
+        });
+        button.addEventListener("blur", function () {
+          pointerHandled = false;
+          stopRepeat();
+        });
+      }
+
+      slider.addEventListener("input", function (event) {
+        setCurrent(Number(event.target.value), true);
       });
-  };
-  const openTooltip = (trigger) =&gt; {
-    const content = getContent(trigger);
-    if (!trigger.isConnected || content.length === 0) {
-      return;
-    }
-    clearOpenTimeout();
-    if (activeTrigger === trigger) {
-      return;
-    }
-    closeTooltip();
-    const floating = getTooltip();
-    floating.textContent = content;
-    floating.style.visibility = &quot;hidden&quot;;
-    floating.style.transform = &quot;translate(0, 0)&quot;;
-    document.body.appendChild(floating);
-    activeTrigger = trigger;
-    setDescribedBy(trigger, true);
-    autoUpdateCleanup = autoUpdate(trigger, floating, () =&gt; {
-      updatePosition(trigger, floating);
-    });
-  };
-  const requestOpen = (trigger, immediate = false) =&gt; {
-    if (
-      getContent(trigger).length === 0 ||
-      activeTrigger === trigger ||
-      pendingTrigger === trigger
-    ) {
-      return;
-    }
-    clearOpenTimeout();
-    pendingTrigger = trigger;
-    const delay =
-      immediate || activeTrigger != null || Date.now() &lt; skipDelayUntil
-        ? 0
-        : hoverDelay;
-    if (delay === 0) {
-      openTooltip(trigger);
-      return;
-    }
-    openTimeout = window.setTimeout(() =&gt; {
-      openTimeout = null;
-      pendingTrigger = null;
-      openTooltip(trigger);
-    }, delay);
-  };
-  const handlePointerOpen = (event) =&gt; {
-    if (event.pointerType === &quot;touch&quot;) {
-      return;
-    }
-    const trigger = getTrigger(event.target);
-    if (trigger == null || containsTarget(trigger, event.relatedTarget)) {
-      return;
-    }
-    requestOpen(trigger);
-  };
-  const handlePointer = (event) =&gt; {
-    lastPointerWasTouch =
-      event.type === &quot;pointerdown&quot; &amp;&amp; event.pointerType === &quot;touch&quot;;
-  };
-  const handleTouchClick = (event) =&gt; {
-    const isTouch = event.pointerType === &quot;touch&quot; || lastPointerWasTouch;
-    lastPointerWasTouch = false;
-    if (!isTouch || event.detail === 0) {
-      return;
-    }
-    const trigger = getTrigger(event.target);
-    if (
-      trigger == null ||
-      !trigger.isConnected ||
-      getContent(trigger).length === 0 ||
-      (pinnedByTouch &amp;&amp; activeTrigger === trigger)
-    ) {
-      if (pinnedByTouch) {
-        closeTooltip();
-      }
-      return;
-    }
-    openTooltip(trigger);
-    pinnedByTouch = activeTrigger === trigger;
-    window.setTimeout(() =&gt; {
-      if (activeTrigger === trigger &amp;&amp; !trigger.isConnected) {
-        closeTooltip(false);
-      }
-    }, 0);
-  };
-  const handleLeave = (event) =&gt; {
-    if (pinnedByTouch) {
-      return;
-    }
-    const trigger = getTrigger(event.target);
-    if (trigger == null || containsTarget(trigger, event.relatedTarget)) {
-      return;
-    }
-    if (activeTrigger === trigger || pendingTrigger === trigger) {
-      closeTooltip();
-    }
-  };
-  const handleFocusIn = (event) =&gt; {
-    const trigger = getTrigger(event.target);
-    if (trigger?.matches(&quot;:focus-visible&quot;)) {
-      requestOpen(trigger, true);
-    }
-  };
-  const handleKeyDown = (event) =&gt; {
-    if (event.key === &quot;Escape&quot;) {
-      closeTooltip();
-    }
-  };
-  const handleContextMenu = (event) =&gt; {
-    lastPointerWasTouch = false;
-    const trigger = getTrigger(event.target);
-    if (activeTrigger === trigger || pendingTrigger === trigger) {
-      closeTooltip();
-    }
-  };
-  const destroy = () =&gt; {
-    closeTooltip(false);
-    lastPointerWasTouch = false;
-    document.removeEventListener(&quot;pointerover&quot;, handlePointerOpen);
-    document.removeEventListener(&quot;pointerdown&quot;, handlePointer);
-    document.removeEventListener(&quot;pointercancel&quot;, handlePointer);
-    document.removeEventListener(&quot;click&quot;, handleTouchClick);
-    document.removeEventListener(&quot;pointerout&quot;, handleLeave);
-    document.removeEventListener(&quot;focusin&quot;, handleFocusIn);
-    document.removeEventListener(&quot;focusout&quot;, handleLeave);
-    document.removeEventListener(&quot;keydown&quot;, handleKeyDown);
-    document.removeEventListener(&quot;contextmenu&quot;, handleContextMenu);
-    tooltip = null;
-  };
 
-  document.addEventListener(&quot;pointerover&quot;, handlePointerOpen);
-  document.addEventListener(&quot;pointerdown&quot;, handlePointer);
-  document.addEventListener(&quot;pointercancel&quot;, handlePointer);
-  document.addEventListener(&quot;click&quot;, handleTouchClick);
-  document.addEventListener(&quot;pointerout&quot;, handleLeave);
-  document.addEventListener(&quot;focusin&quot;, handleFocusIn);
-  document.addEventListener(&quot;focusout&quot;, handleLeave);
-  document.addEventListener(&quot;keydown&quot;, handleKeyDown);
-  document.addEventListener(&quot;contextmenu&quot;, handleContextMenu);
-  window.addEventListener(&quot;pagehide&quot;, destroy, { once: true });
-})();
-&lt;/script&gt;
-&lt;script id=&quot;codex-visualization-tabs&quot;&gt;
-(() =&gt; {
-  const selector = &#x27;.nav[role=&quot;tablist&quot;] [role=&quot;tab&quot;]&#x27;;
-  const disabled = &#x27;:disabled,[aria-disabled=&quot;true&quot;]&#x27;;
-  const selectTab = (selected) =&gt; {
-    const panelId = selected.getAttribute(&quot;aria-controls&quot;);
-    for (const tab of selected.closest(&#x27;[role=&quot;tablist&quot;]&#x27;).querySelectorAll(&#x27;[role=&quot;tab&quot;]&#x27;)) {
-      const active = tab === selected;
-      tab.classList.toggle(&quot;active&quot;, active);
-      tab.setAttribute(&quot;aria-selected&quot;, String(active));
-      const id = tab.getAttribute(&quot;aria-controls&quot;);
-      const panel = id &amp;&amp; document.getElementById(id);
-      if (panel != null) {
-        panel.hidden = id !== panelId;
-        if (!panel.hidden &amp;&amp; selected.id) {
-          panel.setAttribute(&quot;aria-labelledby&quot;, selected.id);
-        }
-      }
-    }
-  };
-  const interact = (event) =&gt; {
-    const tab = event.target?.closest?.(selector);
-    if (event.defaultPrevented || tab == null || tab.matches(disabled)) {
-      return;
-    }
-    if (event.type === &quot;click&quot;) {
-      selectTab(tab);
-      return;
-    }
-    const tabs = Array.from(
-      tab.closest(&#x27;[role=&quot;tablist&quot;]&#x27;).querySelectorAll(&#x27;[role=&quot;tab&quot;]&#x27;),
-    ).filter((candidate) =&gt; !candidate.matches(disabled));
-    const current = tabs.indexOf(tab);
-    let next;
-    if (event.key === &quot;ArrowRight&quot; || event.key === &quot;ArrowDown&quot;) {
-      next = (current + 1) % tabs.length;
-    } else if (event.key === &quot;ArrowLeft&quot; || event.key === &quot;ArrowUp&quot;) {
-      next = (current + tabs.length - 1) % tabs.length;
-    } else if (event.key === &quot;Home&quot;) {
-      next = 0;
-    } else if (event.key === &quot;End&quot;) {
-      next = tabs.length - 1;
-    } else {
-      return;
-    }
-    event.preventDefault();
-    tabs[next].focus();
-    selectTab(tabs[next]);
-  };
+      slider.addEventListener("change", function () {
+        ensureCurrentInView();
+        render();
+      });
 
-  for (const list of document.querySelectorAll(&#x27;.nav[role=&quot;tablist&quot;]&#x27;)) {
-    const selected =
-      list.querySelector(&#x27;[role=&quot;tab&quot;][aria-selected=&quot;true&quot;]&#x27;) ??
-      list.querySelector(&#x27;[role=&quot;tab&quot;].active&#x27;) ??
-      list.querySelector(&#x27;[role=&quot;tab&quot;]&#x27;);
-    if (selected != null) {
-      selectTab(selected);
-    }
-  }
-  document.addEventListener(&quot;click&quot;, interact);
-  document.addEventListener(&quot;keydown&quot;, interact);
-  window.addEventListener(&quot;pagehide&quot;, () =&gt; {
-    document.removeEventListener(&quot;click&quot;, interact);
-    document.removeEventListener(&quot;keydown&quot;, interact);
-  }, { once: true });
-})();
-&lt;/script&gt;
-&lt;script id=&quot;codex-visualization-lucide&quot; async src=&quot;https://unpkg.com/lucide@1.17.0/dist/umd/lucide.js&quot;&gt;&lt;/script&gt;
-&lt;script&gt;
-(() =&gt; {
-  const initialize = () =&gt; {
-    globalThis.lucide?.createIcons({ attrs: { width: 16, height: 16 } });
-  };
-  if (globalThis.lucide != null) {
-    initialize();
-    return;
-  }
-  document
-    .getElementById(&quot;codex-visualization-lucide&quot;)
-    ?.addEventListener(&quot;load&quot;, initialize, { once: true });
-})();
-&lt;/script&gt;
+      targetButton.addEventListener("click", newChallenge);
+      checkButton.addEventListener("click", checkAnswer);
+      hideReading.addEventListener("change", function () {
+        savePreferences();
+        render();
+      });
 
-&lt;/body&gt;
-&lt;/html&gt;
-"></iframe>
+      unitButtons.forEach(function (button) {
+        button.addEventListener("click", function () {
+          setUnit(button.dataset.unit);
+        });
+      });
+
+      difficultyButtons.forEach(function (button) {
+        button.addEventListener("click", function () {
+          setDifficulty(Number(button.dataset.difficulty));
+        });
+      });
+
+      zoomButtons.forEach(function (button) {
+        button.addEventListener("click", function () {
+          setZoom(Number(button.dataset.zoom));
+        });
+      });
+
+      centerButton.addEventListener("click", function () {
+        centerView(current);
+        render();
+      });
+
+      nudgeButtons.forEach(bindRepeatingNudge);
+
+      var resizeFrame = null;
+      window.addEventListener("resize", function () {
+        if (resizeFrame !== null) cancelAnimationFrame(resizeFrame);
+        resizeFrame = requestAnimationFrame(function () {
+          resizeFrame = null;
+          drawRuler();
+        });
+      });
+
+      centerView(current);
+      render();
+    })();
+  </script>
 </body>
 </html>
