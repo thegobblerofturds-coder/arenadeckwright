@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="description" content="A colourful, pressure-free game for practising thousandths of an inch and millimetre measurements.">
+  <meta name="description" content="A colourful, pressure-free trainer for practising thousandths of an inch and millimetre measurements.">
   <meta name="theme-color" content="#0f172a">
   <link rel="icon" href="/favicon.ico" sizes="any">
   <link rel="icon" href="/favicon-32x32.png" type="image/png">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <link rel="manifest" href="/site.webmanifest">
-  <title>Thousandths Playground</title>
+  <title>Thousandths Trainer</title>
   <style>
     :root {
       color-scheme: dark;
@@ -101,11 +101,10 @@
     }
 
     .topbar {
-      display: flex;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
       align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      flex-wrap: wrap;
+      gap: 8px;
     }
 
     .brand {
@@ -135,7 +134,8 @@
     }
 
     h1 {
-      font-size: clamp(1.45rem, 5vw, 2rem);
+      min-width: 0;
+      font-size: clamp(1.2rem, 4.6vw, 2rem);
       line-height: 1.05;
       letter-spacing: -0.025em;
     }
@@ -178,6 +178,21 @@
       color: #07111f;
       background: var(--blue);
       box-shadow: 0 4px 16px rgb(88 210 255 / 0.22);
+    }
+
+    .unit-toggle {
+      flex: 0 0 auto;
+      gap: 2px;
+      padding: 2px;
+      border-radius: 10px;
+    }
+
+    .unit-toggle .segment {
+      min-width: 38px;
+      min-height: 32px;
+      padding: 4px 7px;
+      border-radius: 8px;
+      font-size: 0.76rem;
     }
 
     .panel {
@@ -244,7 +259,7 @@
       font-weight: 800;
     }
 
-    .challenge-panel {
+    .trainer-panel {
       padding: 16px;
     }
 
@@ -295,33 +310,44 @@
       color: var(--blue);
     }
 
+    .peek-button {
+      width: 100%;
+      min-height: 47px;
+      padding: 5px 6px;
+      border: 1px dashed rgb(88 210 255 / 0.52);
+      border-radius: 10px;
+      background: rgb(88 210 255 / 0.07);
+      cursor: pointer;
+    }
+
+    .peek-button:disabled {
+      border-color: transparent;
+      background: transparent;
+      cursor: default;
+    }
+
+    .peek-button[data-censored="true"] .current-value {
+      font-size: clamp(0.78rem, 2.8vw, 0.98rem);
+      letter-spacing: 0.025em;
+    }
+
+    .peek-hint {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 0.64rem;
+      font-weight: 800;
+    }
+
     .tolerance-value {
       color: var(--green);
     }
 
     .round-controls {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
+      display: flex;
       align-items: center;
-      gap: 12px;
+      justify-content: flex-end;
       margin-top: 12px;
-    }
-
-    .switch-label {
-      display: inline-flex;
-      min-height: 44px;
-      align-items: center;
-      gap: 9px;
-      color: var(--muted);
-      cursor: pointer;
-    }
-
-    .switch-label input {
-      width: 42px;
-      height: 24px;
-      flex: 0 0 auto;
-      margin: 0;
-      accent-color: var(--blue);
     }
 
     .primary-button {
@@ -375,29 +401,15 @@
       line-height: 1.4;
     }
 
-    .ruler-panel {
-      padding: 16px;
+    .ruler-zone {
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid var(--line);
     }
 
-    .ruler-heading {
+    .ruler-tools {
       display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 14px;
-      flex-wrap: wrap;
-    }
-
-    .ruler-title {
-      font-size: 1rem;
-      font-weight: 900;
-    }
-
-    .reading {
-      margin-top: 3px;
-      color: var(--blue);
-      font-size: 1.12rem;
-      font-weight: 900;
-      font-variant-numeric: tabular-nums;
+      justify-content: flex-end;
     }
 
     .zoom-area {
@@ -604,8 +616,7 @@
         grid-column: auto;
       }
 
-      .challenge-panel,
-      .ruler-panel {
+      .trainer-panel {
         padding: 12px;
       }
 
@@ -617,15 +628,10 @@
         font-size: 0.7rem;
       }
 
-      .round-controls {
-        grid-template-columns: 1fr;
-      }
-
       .primary-button {
         width: 100%;
       }
 
-      .ruler-heading,
       .zoom-area {
         display: grid;
         grid-template-columns: 1fr;
@@ -651,14 +657,24 @@
     }
 
     @media (max-width: 350px) {
-      .topbar {
-        align-items: stretch;
+      .brand {
+        gap: 7px;
       }
 
-      .segmented {
-        display: grid;
-        width: 100%;
-        grid-template-columns: 1fr 1fr;
+      .brand-mark {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        font-size: 19px;
+      }
+
+      h1 {
+        font-size: 1.08rem;
+      }
+
+      .unit-toggle .segment {
+        min-width: 34px;
+        padding-inline: 5px;
       }
 
       .scoreboard {
@@ -691,10 +707,10 @@
     <header class="topbar">
       <div class="brand">
         <span class="brand-mark" aria-hidden="true">📏</span>
-        <h1 id="page-title">Thousandths Playground</h1>
+        <h1 id="page-title">Thousandths Trainer</h1>
       </div>
 
-      <div class="segmented" role="group" aria-label="Measurement unit">
+      <div class="segmented unit-toggle" role="group" aria-label="Measurement unit">
         <button class="segment" type="button" data-unit="in" aria-pressed="true">Inch</button>
         <button class="segment" type="button" data-unit="mm" aria-pressed="false">mm</button>
       </div>
@@ -724,7 +740,7 @@
       <p class="difficulty-help" data-difficulty-help>Common fractions with a forgiving target.</p>
     </section>
 
-    <section class="panel challenge-panel" aria-label="Practice challenge">
+    <section class="panel trainer-panel" aria-label="Thousandths training challenge">
       <div class="scoreboard">
         <div class="score-item">
           <span class="score-label">🎯 Target</span>
@@ -732,66 +748,59 @@
         </div>
         <div class="score-item">
           <span class="score-label">📍 You</span>
-          <strong class="score-value current-value" data-current>0.000 in</strong>
+          <button class="peek-button" type="button" data-peek-button disabled>
+            <strong class="score-value current-value" data-current>0.000 in</strong>
+            <span class="peek-hint" data-peek-hint hidden>tap to peek 👀</span>
+          </button>
         </div>
         <div class="score-item">
-          <span class="score-label">🌈 Close enough</span>
+          <span class="score-label">🌈 Tolerance</span>
           <strong class="score-value tolerance-value" data-tolerance>—</strong>
         </div>
       </div>
 
-      <div class="round-controls">
-        <label class="switch-label">
-          <input type="checkbox" data-hide-reading checked>
-          <span>Hide my number during each round</span>
-        </label>
-        <button class="primary-button" type="button" data-check-button>Start</button>
+      <p class="feedback" aria-live="polite" data-feedback>Choose a difficulty, then start.</p>
+
+      <div class="ruler-zone">
+        <div class="ruler-tools">
+          <div class="zoom-area">
+            <span class="zoom-label">Zoom</span>
+            <div class="zoom-options" role="group" aria-label="Ruler zoom">
+              <button class="zoom-button" type="button" data-zoom="1" aria-pressed="true">1×</button>
+              <button class="zoom-button" type="button" data-zoom="5" aria-pressed="false">5×</button>
+              <button class="zoom-button" type="button" data-zoom="10" aria-pressed="false">10×</button>
+            </div>
+            <button class="center-button" type="button" data-center hidden>Center needle</button>
+          </div>
+        </div>
+
+        <div class="view-range" data-view-range>Whole ruler</div>
+
+        <div class="ruler-stage">
+          <svg class="ruler-svg" data-ruler role="img" aria-label="Ruler from zero to one inch">
+            <title>Measurement ruler</title>
+            <desc>The coloured ruler has a movable needle and small measurement ticks.</desc>
+          </svg>
+          <label class="sr-only" for="measurement-slider" data-slider-label>Position from zero to one inch</label>
+          <input class="ruler-input" id="measurement-slider" data-slider type="range" min="0" max="1000" step="1" value="0" aria-valuetext="0.000 inches">
+        </div>
+
+        <div class="nudge-grid" aria-label="Fine adjustment buttons">
+          <button class="nudge-button" data-size="coarse" data-delta="-10" type="button">−0.010 in</button>
+          <button class="nudge-button" data-size="fine" data-delta="-1" type="button">−0.001 in</button>
+          <button class="nudge-button" data-size="fine" data-delta="1" type="button">+0.001 in</button>
+          <button class="nudge-button" data-size="coarse" data-delta="10" type="button">+0.010 in</button>
+        </div>
       </div>
 
-      <p class="feedback" aria-live="polite" data-feedback>Choose a difficulty, then start.</p>
+      <div class="round-controls">
+        <button class="primary-button" type="button" data-check-button>Start</button>
+      </div>
 
       <aside class="coach" data-coach hidden>
         <h2>How to work it out</h2>
         <ol data-coach-steps></ol>
       </aside>
-    </section>
-
-    <section class="panel ruler-panel" aria-labelledby="ruler-title">
-      <div class="ruler-heading">
-        <div>
-          <span class="eyebrow" id="ruler-title">Measuring stick</span>
-          <div class="ruler-title" data-stick-title>One-inch ruler</div>
-          <div class="reading" data-reading>0.000 in</div>
-        </div>
-
-        <div class="zoom-area">
-          <span class="zoom-label">Zoom</span>
-          <div class="zoom-options" role="group" aria-label="Ruler zoom">
-            <button class="zoom-button" type="button" data-zoom="1" aria-pressed="true">1×</button>
-            <button class="zoom-button" type="button" data-zoom="5" aria-pressed="false">5×</button>
-            <button class="zoom-button" type="button" data-zoom="10" aria-pressed="false">10×</button>
-          </div>
-          <button class="center-button" type="button" data-center hidden>Center needle</button>
-        </div>
-      </div>
-
-      <div class="view-range" data-view-range>Whole ruler</div>
-
-      <div class="ruler-stage">
-        <svg class="ruler-svg" data-ruler role="img" aria-label="Ruler from zero to one inch">
-          <title>Measurement ruler</title>
-          <desc>The coloured ruler has a movable needle and small measurement ticks.</desc>
-        </svg>
-        <label class="sr-only" for="measurement-slider" data-slider-label>Position from zero to one inch</label>
-        <input class="ruler-input" id="measurement-slider" data-slider type="range" min="0" max="1000" step="1" value="0" aria-valuetext="0.000 inches">
-      </div>
-
-      <div class="nudge-grid" aria-label="Fine adjustment buttons">
-        <button class="nudge-button" data-size="coarse" data-delta="-10" type="button">−0.010 in</button>
-        <button class="nudge-button" data-size="fine" data-delta="-1" type="button">−0.001 in</button>
-        <button class="nudge-button" data-size="fine" data-delta="1" type="button">+0.001 in</button>
-        <button class="nudge-button" data-size="coarse" data-delta="10" type="button">+0.010 in</button>
-      </div>
 
       <div class="detail-row">
         <div class="detail">
@@ -814,19 +823,18 @@
     (function () {
       "use strict";
 
-      var storageKey = "thousandths-playground-preferences-v2";
+      var storageKey = "thousandths-trainer-preferences-v3";
       var slider = document.querySelector("[data-slider]");
       var ruler = document.querySelector("[data-ruler]");
       var targetButton = document.querySelector("[data-target-button]");
       var currentEl = document.querySelector("[data-current]");
+      var peekButton = document.querySelector("[data-peek-button]");
+      var peekHint = document.querySelector("[data-peek-hint]");
       var toleranceEl = document.querySelector("[data-tolerance]");
       var feedbackEl = document.querySelector("[data-feedback]");
       var checkButton = document.querySelector("[data-check-button]");
-      var hideReading = document.querySelector("[data-hide-reading]");
-      var readingEl = document.querySelector("[data-reading]");
       var breakdownEl = document.querySelector("[data-breakdown]");
       var commonNameEl = document.querySelector("[data-common-name]");
-      var stickTitleEl = document.querySelector("[data-stick-title]");
       var sliderLabelEl = document.querySelector("[data-slider-label]");
       var difficultyNameEl = document.querySelector("[data-difficulty-name]");
       var difficultyHelpEl = document.querySelector("[data-difficulty-help]");
@@ -851,10 +859,11 @@
       var phase = "ready";
       var misses = 0;
       var guideVisible = false;
+      var peeking = false;
+      var peekTimer = null;
       var viewStart = 0;
       var viewEnd = maximum();
 
-      hideReading.checked = saved.hideReading !== false;
       if (!("vibrate" in navigator)) {
         hapticNote.textContent = "Tick haptics are not available in this browser.";
       }
@@ -872,8 +881,7 @@
           localStorage.setItem(storageKey, JSON.stringify({
             unit: unit,
             difficulty: difficulty,
-            zoom: zoom,
-            hideReading: hideReading.checked
+            zoom: zoom
           }));
         } catch (error) {
           // The game still works when browser storage is unavailable.
@@ -1234,13 +1242,22 @@
       }
 
       function render() {
-        var hiddenReading = hideReading.checked && phase === "checking";
-        var displayCurrent = hiddenReading ? "???" : formatted(current);
+        var hiddenReading = phase === "checking" && !peeking;
+        var displayCurrent = hiddenReading ? "🤐 CENSORED" : formatted(current);
 
         currentEl.textContent = displayCurrent;
-        readingEl.textContent = hiddenReading ? "Number hidden" : formatted(current);
-        breakdownEl.textContent = hiddenReading ? "Use the ruler and adjustment buttons" : breakdown(current);
-        commonNameEl.textContent = hiddenReading ? "Hidden during this round" : commonName(current);
+        peekButton.disabled = phase !== "checking";
+        peekButton.dataset.censored = String(hiddenReading);
+        peekButton.setAttribute(
+          "aria-label",
+          hiddenReading
+            ? "Current measurement censored. Tap to peek."
+            : "Current measurement " + spoken(current)
+        );
+        peekHint.hidden = phase !== "checking";
+        peekHint.textContent = peeking ? "shh… hiding again" : "tap to peek 👀";
+        breakdownEl.textContent = hiddenReading ? "Classified until you tap the censored number" : breakdown(current);
+        commonNameEl.textContent = hiddenReading ? "Nice try 👀" : commonName(current);
         toleranceEl.textContent = tolerance === null ? "—" : "±" + formatted(tolerance);
         targetButton.textContent = target === null ? "New target" : formatted(target);
         targetButton.setAttribute(
@@ -1254,7 +1271,6 @@
         if (phase === "checking") checkButton.textContent = "Check";
         if (phase === "solved") checkButton.textContent = "Next";
 
-        stickTitleEl.textContent = unit === "in" ? "One-inch ruler" : "25.4 mm ruler";
         sliderLabelEl.textContent = unit === "in"
           ? "Position from zero to one inch"
           : "Position from zero to 25.4 millimetres";
@@ -1281,6 +1297,9 @@
 
       function newChallenge() {
         var settings = difficultySettings();
+        if (peekTimer !== null) clearTimeout(peekTimer);
+        peekTimer = null;
+        peeking = false;
         target = makeTarget(settings);
         tolerance = settings.tolerance;
         phase = "checking";
@@ -1354,51 +1373,6 @@
         setCurrent(current + amount, false);
       }
 
-      function bindRepeatingNudge(button) {
-        var amount = Number(button.dataset.delta);
-        var holdTimer = null;
-        var repeatTimer = null;
-        var pointerHandled = false;
-
-        function stopRepeat() {
-          if (holdTimer !== null) clearTimeout(holdTimer);
-          if (repeatTimer !== null) clearInterval(repeatTimer);
-          holdTimer = null;
-          repeatTimer = null;
-        }
-
-        button.addEventListener("pointerdown", function (event) {
-          if (event.pointerType === "mouse" && event.button !== 0) return;
-          pointerHandled = true;
-          nudge(amount);
-          holdTimer = window.setTimeout(function () {
-            repeatTimer = window.setInterval(function () {
-              nudge(amount);
-            }, 90);
-          }, 380);
-        });
-        button.addEventListener("pointerup", stopRepeat);
-        button.addEventListener("pointercancel", function () {
-          pointerHandled = false;
-          stopRepeat();
-        });
-        button.addEventListener("pointerleave", function () {
-          pointerHandled = false;
-          stopRepeat();
-        });
-        button.addEventListener("click", function () {
-          if (pointerHandled) {
-            pointerHandled = false;
-            return;
-          }
-          nudge(amount);
-        });
-        button.addEventListener("blur", function () {
-          pointerHandled = false;
-          stopRepeat();
-        });
-      }
-
       slider.addEventListener("input", function (event) {
         setCurrent(Number(event.target.value), true);
       });
@@ -1410,9 +1384,17 @@
 
       targetButton.addEventListener("click", newChallenge);
       checkButton.addEventListener("click", checkAnswer);
-      hideReading.addEventListener("change", function () {
-        savePreferences();
+
+      peekButton.addEventListener("click", function () {
+        if (phase !== "checking") return;
+        if (peekTimer !== null) clearTimeout(peekTimer);
+        peeking = true;
         render();
+        peekTimer = window.setTimeout(function () {
+          peeking = false;
+          peekTimer = null;
+          render();
+        }, 1400);
       });
 
       unitButtons.forEach(function (button) {
@@ -1438,7 +1420,11 @@
         render();
       });
 
-      nudgeButtons.forEach(bindRepeatingNudge);
+      nudgeButtons.forEach(function (button) {
+        button.addEventListener("click", function () {
+          nudge(Number(button.dataset.delta));
+        });
+      });
 
       var resizeFrame = null;
       window.addEventListener("resize", function () {
