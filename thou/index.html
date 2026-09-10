@@ -953,6 +953,39 @@
       text-transform: uppercase;
     }
 
+    .certificate-unlock p {
+      line-height: 1.45;
+    }
+
+    .certificate-link {
+      display: inline-flex;
+      min-height: 46px;
+      align-items: center;
+      justify-content: center;
+      margin-top: 11px;
+      padding: 9px 16px;
+      border: 2px solid #dfc362;
+      border-radius: 4px;
+      color: #171307;
+      background: linear-gradient(#f2dc73, #b99a32);
+      box-shadow: 0 4px 0 #4a380b, inset 0 1px 0 rgb(255 255 211 / 0.62), 0 0 16px rgb(223 195 98 / 0.2);
+      font-size: 0.9rem;
+      font-weight: 950;
+      letter-spacing: 0.045em;
+      text-decoration: none;
+      text-transform: uppercase;
+    }
+
+    .certificate-link:hover {
+      filter: brightness(1.08);
+      transform: translateY(-1px);
+    }
+
+    .certificate-link:active {
+      box-shadow: 0 2px 0 #4a380b, inset 0 1px 0 rgb(255 255 211 / 0.62);
+      transform: translateY(2px);
+    }
+
     .celebration-layer {
       position: fixed;
       z-index: 1000;
@@ -1571,7 +1604,8 @@
 
       <div class="certificate-unlock" data-certificate-unlock hidden>
         <strong>Certificate unlocked</strong>
-        <p>Challenge cleared. We’ll connect your certificate here when we build its sister page together.</p>
+        <p>Challenge cleared. Your Nuclear-Grade Thou Proficiency certificate is ready. Click its name line to personalize it before printing.</p>
+        <a class="certificate-link" href="./nuclear-grade-thou-certificate.pdf" target="_blank" rel="noopener" aria-label="Open your fillable Nuclear-Grade Thou Proficiency certificate PDF">Open your certificate</a>
       </div>
     </section>
 
