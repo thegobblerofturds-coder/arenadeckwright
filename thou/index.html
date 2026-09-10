@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="description" content="A colourful, pressure-free trainer for practising thousandths of an inch and millimetre measurements.">
-  <meta name="theme-color" content="#0f172a">
+  <meta name="theme-color" content="#120b08">
   <link rel="icon" href="/favicon.ico" sizes="any">
   <link rel="icon" href="/favicon-32x32.png" type="image/png">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -13,21 +13,21 @@
   <style>
     :root {
       color-scheme: dark;
-      --page: #0f172a;
-      --page-glow: #15284a;
-      --panel: #17233b;
-      --panel-strong: #1d2c49;
-      --text: #f8fafc;
-      --muted: #aebbd0;
-      --line: #344664;
-      --blue: #58d2ff;
-      --purple: #c084fc;
-      --orange: #fb923c;
-      --green: #4ade80;
-      --yellow: #facc15;
-      --danger: #fb7185;
-      --shadow: 0 18px 50px rgb(0 0 0 / 0.24);
-      font-family: Inter, ui-rounded, "Segoe UI", system-ui, -apple-system, sans-serif;
+      --page: #120b08;
+      --page-glow: #67140f;
+      --panel: #2b211b;
+      --panel-strong: #49362b;
+      --text: #f1e2c4;
+      --muted: #b9a487;
+      --line: #7d5941;
+      --blue: #d7352d;
+      --purple: #b75c36;
+      --orange: #ca7a32;
+      --green: #d8b14a;
+      --yellow: #f3c85a;
+      --danger: #ed4338;
+      --shadow: 0 18px 45px rgb(0 0 0 / 0.52), inset 0 1px 0 rgb(255 226 178 / 0.08);
+      font-family: "Bahnschrift Condensed", "Arial Narrow", "Segoe UI", system-ui, sans-serif;
     }
 
     * {
@@ -51,7 +51,9 @@
         max(14px, env(safe-area-inset-left));
       color: var(--text);
       background:
-        radial-gradient(circle at 20% -10%, var(--page-glow), transparent 42rem),
+        radial-gradient(circle at 16% -12%, rgb(135 28 20 / 0.72), transparent 36rem),
+        repeating-linear-gradient(97deg, transparent 0 76px, rgb(213 92 49 / 0.025) 77px 79px),
+        repeating-linear-gradient(3deg, rgb(255 255 255 / 0.018) 0 1px, transparent 1px 7px),
         var(--page);
     }
 
@@ -450,8 +452,7 @@
       text-transform: uppercase;
     }
 
-    .magnifier-ruler,
-    .magnifier-value {
+    .magnifier-ruler {
       display: none;
     }
 
@@ -464,18 +465,6 @@
       display: block;
       width: 54px;
       height: 34px;
-    }
-
-    .magnifier-tool[data-dragging="true"] .magnifier-value {
-      display: block;
-      max-width: 56px;
-      overflow: hidden;
-      color: #0f172a;
-      font-size: 0.55rem;
-      font-weight: 950;
-      line-height: 1;
-      text-overflow: ellipsis;
-      white-space: nowrap;
     }
 
     .feedback[data-kind="success"] {
@@ -665,6 +654,406 @@
       text-decoration: underline;
     }
 
+    /* Rusted command-console remix */
+    h1 {
+      color: #f0d8ad;
+      font-weight: 950;
+      letter-spacing: 0.045em;
+      text-transform: uppercase;
+      text-shadow: 0 2px 0 #160807, 0 0 18px rgb(211 53 45 / 0.24);
+    }
+
+    .brand-mark {
+      border: 2px solid #8f241d;
+      border-radius: 6px;
+      color: #ff463b;
+      background:
+        radial-gradient(circle at 32% 24%, rgb(255 159 112 / 0.2), transparent 33%),
+        linear-gradient(145deg, #4b3025, #211713 68%);
+      font-family: Georgia, serif;
+      font-size: 28px;
+      font-weight: 900;
+      text-shadow: 0 0 10px rgb(255 42 32 / 0.48);
+      box-shadow: inset 0 0 0 2px #1a0e0b, 0 4px 0 #090504;
+    }
+
+    .eyebrow,
+    .score-label {
+      color: #d95740;
+      letter-spacing: 0.095em;
+      text-transform: uppercase;
+    }
+
+    .segmented {
+      padding: 3px;
+      border: 2px solid #6f4b36;
+      border-radius: 6px;
+      background: #1a120f;
+      box-shadow: inset 0 2px 8px rgb(0 0 0 / 0.72), 0 2px 0 #8a6044;
+    }
+
+    .segment {
+      border: 1px solid #775541;
+      border-radius: 3px;
+      color: #d7c19e;
+      background: linear-gradient(#574237, #34251e);
+      box-shadow: 0 3px 0 #160d0a, inset 0 1px 0 rgb(255 232 194 / 0.15);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .segment[aria-pressed="true"] {
+      color: #fff1d3;
+      background: linear-gradient(#dc493d, #8f1713);
+      box-shadow: 0 3px 0 #4d0b08, inset 0 1px 0 rgb(255 223 199 / 0.3), 0 0 12px rgb(215 53 45 / 0.22);
+    }
+
+    .panel {
+      position: relative;
+      border: 2px solid #79533c;
+      border-radius: 8px;
+      background:
+        linear-gradient(128deg, rgb(255 222 167 / 0.06), transparent 26%),
+        repeating-linear-gradient(102deg, transparent 0 53px, rgb(193 92 45 / 0.04) 54px 57px),
+        linear-gradient(155deg, #382a22, #211813 78%);
+      box-shadow:
+        0 8px 0 #090504,
+        0 18px 42px rgb(0 0 0 / 0.48),
+        inset 0 0 0 2px #1a110d,
+        inset 0 1px 0 rgb(255 225 177 / 0.13);
+    }
+
+    .panel::before,
+    .panel::after {
+      content: "";
+      position: absolute;
+      z-index: 3;
+      top: 7px;
+      width: 7px;
+      height: 7px;
+      border: 1px solid #190e0b;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%, #d0a070, #5c3a28 55%, #130b08 58%);
+      box-shadow: 0 1px 0 rgb(255 224 175 / 0.1);
+      pointer-events: none;
+    }
+
+    .panel::before {
+      left: 7px;
+    }
+
+    .panel::after {
+      right: 7px;
+    }
+
+    .difficulty-panel {
+      display: block;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .difficulty-summary {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 10px;
+      min-height: 58px;
+      padding: 10px 16px;
+      cursor: pointer;
+      list-style: none;
+      user-select: none;
+    }
+
+    .difficulty-summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .summary-star {
+      color: #e43b31;
+      font-size: 1.55rem;
+      line-height: 1;
+      text-shadow: 0 0 12px rgb(228 59 49 / 0.44);
+    }
+
+    .difficulty-toggle {
+      color: #d2b487;
+      font-size: 0.78rem;
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .difficulty-content {
+      padding: 11px 14px 13px;
+      border-top: 2px solid #17100c;
+      box-shadow: inset 0 2px 0 rgb(150 93 59 / 0.22);
+    }
+
+    .difficulty-help {
+      margin-top: 9px;
+    }
+
+    .star-options {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .star-option,
+    .target-button,
+    .peek-button,
+    .primary-button,
+    .nudge-button {
+      border: 2px solid #80604a;
+      border-radius: 5px;
+      color: #ead8b8;
+      background:
+        linear-gradient(180deg, rgb(255 242 211 / 0.13), transparent 34%),
+        linear-gradient(#58453a, #30231d);
+      box-shadow: 0 5px 0 #140c09, inset 0 1px 0 rgb(255 231 188 / 0.18);
+      letter-spacing: 0.025em;
+      text-transform: uppercase;
+      transition: transform 70ms ease, box-shadow 70ms ease, filter 100ms ease;
+    }
+
+    .star-option:active,
+    .target-button:active,
+    .peek-button:active,
+    .primary-button:active,
+    .nudge-button:active {
+      transform: translateY(3px);
+      box-shadow: 0 2px 0 #140c09, inset 0 2px 5px rgb(0 0 0 / 0.36);
+    }
+
+    .star-option[aria-pressed="true"] {
+      border-color: #e04438;
+      color: #ff4c40;
+      background: linear-gradient(#5f2a24, #2c1714);
+      box-shadow: 0 5px 0 #140706, inset 0 0 18px rgb(223 48 41 / 0.14), 0 0 11px rgb(223 48 41 / 0.22);
+    }
+
+    .star-option small {
+      color: #ead8b8;
+    }
+
+    .score-item {
+      border: 2px solid #684b39;
+      border-radius: 5px;
+      background:
+        repeating-linear-gradient(96deg, transparent 0 34px, rgb(190 88 47 / 0.035) 35px 37px),
+        #201714;
+      box-shadow: inset 0 3px 10px rgb(0 0 0 / 0.62), 0 1px 0 rgb(255 222 176 / 0.08);
+    }
+
+    .target-button {
+      border-color: #a45c2d;
+      color: #f2b15d;
+      background: linear-gradient(#70472f, #37251d);
+    }
+
+    .peek-button {
+      border-color: #8e281f;
+      color: #ff5044;
+      background: linear-gradient(#4f2923, #281714);
+    }
+
+    .peek-button:disabled {
+      border: 1px solid #5e4435;
+      background: #1e1612;
+      box-shadow: inset 0 2px 7px rgb(0 0 0 / 0.58);
+    }
+
+    .current-value {
+      color: #ff493d;
+    }
+
+    .tolerance-value,
+    .feedback[data-kind="success"] {
+      color: #f0c453;
+    }
+
+    .primary-button {
+      border-color: #f15a4d;
+      color: #fff0d1;
+      background: linear-gradient(#dc463b, #8d1713);
+      box-shadow: 0 6px 0 #4b0b08, inset 0 1px 0 rgb(255 234 208 / 0.28), 0 0 16px rgb(215 53 45 / 0.18);
+    }
+
+    .feedback {
+      color: #d7c09c;
+      font-size: 1rem;
+      font-weight: 900;
+      letter-spacing: 0.035em;
+      text-transform: uppercase;
+    }
+
+    .feedback[data-kind="miss"] {
+      color: #e87945;
+    }
+
+    .coach {
+      border: 2px solid #a42c24;
+      border-radius: 5px;
+      background: rgb(114 25 20 / 0.17);
+      box-shadow: inset 0 0 18px rgb(0 0 0 / 0.26);
+    }
+
+    .coach h2,
+    .fine-budget {
+      color: #f0c453;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .ruler-zone {
+      border-top: 2px solid #17100c;
+      box-shadow: inset 0 2px 0 rgb(151 93 57 / 0.2);
+    }
+
+    .ruler-stage {
+      height: 110px;
+      border: 3px solid #76543f;
+      border-radius: 5px;
+      background:
+        repeating-linear-gradient(90deg, transparent 0 31px, rgb(215 74 52 / 0.045) 32px 34px),
+        linear-gradient(#201815, #110c0a);
+      box-shadow: inset 0 5px 16px rgb(0 0 0 / 0.72), 0 4px 0 #0b0605;
+    }
+
+    .ruler-svg {
+      filter: drop-shadow(0 2px 0 rgb(0 0 0 / 0.8));
+    }
+
+    .nudge-button {
+      border-color: #795845;
+      color: #ebd9ba;
+      background: linear-gradient(#5a463a, #2d211b);
+      box-shadow: 0 6px 0 #120a08, inset 0 1px 0 rgb(255 231 190 / 0.17);
+    }
+
+    .nudge-button[data-size="coarse"] {
+      border-color: #a34c2f;
+      color: #f0ad70;
+    }
+
+    .detail {
+      border: 2px solid #614534;
+      border-radius: 4px;
+      background: #1f1713;
+      box-shadow: inset 0 3px 9px rgb(0 0 0 / 0.52);
+    }
+
+    .home-link {
+      color: #b99d78;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .status-row {
+      grid-template-columns: minmax(0, 1fr) 82px;
+      min-height: 70px;
+    }
+
+    .magnifier-dock {
+      width: 82px;
+      min-height: 68px;
+      justify-items: center;
+    }
+
+    .magnifier-tool {
+      width: 70px;
+      height: 66px;
+      border: 4px solid #bd2a23;
+      border-radius: 50%;
+      color: #ff3b31;
+      background:
+        repeating-linear-gradient(0deg, transparent 0 6px, rgb(224 49 41 / 0.16) 7px 8px),
+        repeating-linear-gradient(90deg, transparent 0 11px, rgb(224 49 41 / 0.12) 12px 13px),
+        radial-gradient(circle, #36110f, #100807 70%);
+      box-shadow: 0 5px 0 #4a0c09, 0 0 18px rgb(224 49 41 / 0.35), inset 0 0 0 3px #120605;
+    }
+
+    .magnifier-tool::after {
+      display: none;
+    }
+
+    .magnifier-icon,
+    .magnifier-copy,
+    .magnifier-ruler,
+    .magnifier-status {
+      position: relative;
+      z-index: 2;
+    }
+
+    .magnifier-icon {
+      color: #ff4d42;
+      font-size: 1.7rem;
+      text-shadow: 0 0 9px #e62d25;
+    }
+
+    .magnifier-copy {
+      color: #ef8278;
+      font-size: 0.68rem;
+      letter-spacing: 0.08em;
+    }
+
+    .magnifier-handle {
+      position: absolute;
+      z-index: 1;
+      top: 52px;
+      left: 20px;
+      display: grid;
+      width: 28px;
+      height: 92px;
+      place-items: center;
+      border: 3px solid #72503a;
+      border-top-width: 8px;
+      border-radius: 3px 3px 8px 8px;
+      color: #cbb08a;
+      background:
+        repeating-linear-gradient(90deg, transparent 0 13px, rgb(185 74 40 / 0.13) 14px 16px),
+        linear-gradient(#594337, #2c211b);
+      box-shadow: 0 5px 0 #100907, inset 0 2px 0 rgb(255 232 194 / 0.13);
+      font-size: 0.68rem;
+      font-weight: 950;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      writing-mode: vertical-rl;
+    }
+
+    .magnifier-tool[data-dragging="true"] {
+      border-color: #ff4237;
+      box-shadow: 0 6px 0 #4a0c09, 0 0 30px rgb(255 42 32 / 0.68), inset 0 0 0 3px #120605;
+      transform: translate(var(--drag-x), var(--drag-y)) scale(1.08);
+    }
+
+    .magnifier-tool[data-dragging="true"] .magnifier-ruler {
+      display: block;
+      width: 60px;
+      height: 39px;
+    }
+
+    .magnifier-status {
+      display: none;
+    }
+
+    .magnifier-tool[data-dragging="true"] .magnifier-status {
+      display: block;
+      width: 62px;
+      overflow: hidden;
+      color: #ef8278;
+      font-size: 0.68rem;
+      font-weight: 950;
+      line-height: 1;
+      text-align: center;
+      text-overflow: ellipsis;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .magnifier-tool[data-selector-visible="true"] {
+      border-color: #f2c653;
+      box-shadow: 0 6px 0 #4a0c09, 0 0 34px rgb(242 198 83 / 0.7), inset 0 0 0 3px #120605;
+    }
+
     @media (max-width: 620px) {
       body {
         padding:
@@ -681,13 +1070,12 @@
       .brand-mark {
         width: 38px;
         height: 38px;
-        border-radius: 11px;
+        border-radius: 5px;
         font-size: 20px;
       }
 
       .difficulty-panel {
-        grid-template-columns: 1fr;
-        padding: 12px;
+        padding: 0;
       }
 
       .difficulty-help {
@@ -703,15 +1091,11 @@
       }
 
       .score-label {
-        font-size: 0.7rem;
+        font-size: 0.75rem;
       }
 
       .primary-button {
         width: 100%;
-      }
-
-      .difficulty-panel {
-        gap: 9px;
       }
 
       .star-options {
@@ -729,7 +1113,7 @@
       }
 
       .star-option small {
-        font-size: 0.67rem;
+        font-size: 0.75rem;
       }
 
       .detail-row {
@@ -745,7 +1129,7 @@
       .brand-mark {
         width: 34px;
         height: 34px;
-        border-radius: 10px;
+        border-radius: 5px;
         font-size: 19px;
       }
 
@@ -764,6 +1148,14 @@
 
       .score-value {
         font-size: 0.92rem;
+      }
+
+      .status-row {
+        grid-template-columns: minmax(0, 1fr) 76px;
+      }
+
+      .magnifier-dock {
+        width: 76px;
       }
 
       .nudge-grid {
@@ -787,7 +1179,7 @@
   <main class="app-shell" aria-labelledby="page-title">
     <header class="topbar">
       <div class="brand">
-        <span class="brand-mark" aria-hidden="true">📏</span>
+        <span class="brand-mark" aria-hidden="true">☭</span>
         <h1 id="page-title">Thousandths Trainer</h1>
       </div>
 
@@ -797,49 +1189,51 @@
       </div>
     </header>
 
-    <section class="panel difficulty-panel" aria-labelledby="difficulty-heading">
-      <div>
-        <span class="eyebrow" id="difficulty-heading">Difficulty</span>
-        <strong class="difficulty-name" data-difficulty-name>Easy</strong>
-      </div>
+    <details class="panel difficulty-panel" data-difficulty-panel open>
+      <summary class="difficulty-summary">
+        <span class="summary-star" aria-hidden="true">★</span>
+        <span>
+          <span class="eyebrow" id="difficulty-heading">Difficulty</span>
+          <strong class="difficulty-name" data-difficulty-name>Shop</strong>
+        </span>
+        <span class="difficulty-toggle" aria-hidden="true">Retract ▴</span>
+      </summary>
 
-      <div class="star-options" role="group" aria-label="Choose difficulty">
-        <button class="star-option" type="button" data-difficulty="1" aria-pressed="true" aria-label="Easy difficulty, one star">
-          <span class="stars" aria-hidden="true">★</span>
-          <small>Easy</small>
-        </button>
-        <button class="star-option" type="button" data-difficulty="2" aria-pressed="false" aria-label="Shop difficulty, two stars">
-          <span class="stars" aria-hidden="true">★★</span>
-          <small>Shop</small>
-        </button>
-        <button class="star-option" type="button" data-difficulty="3" aria-pressed="false" aria-label="Expert difficulty, three stars">
-          <span class="stars" aria-hidden="true">★★★</span>
-          <small>Expert</small>
-        </button>
-        <button class="star-option" type="button" data-difficulty="4" aria-pressed="false" aria-label="Extreme difficulty, four stars">
-          <span class="stars" aria-hidden="true">★★★★</span>
-          <small>Extreme</small>
-        </button>
-      </div>
+      <div class="difficulty-content">
+        <div class="star-options" role="group" aria-label="Choose difficulty">
+          <button class="star-option" type="button" data-difficulty="2" aria-pressed="true" aria-label="Shop difficulty, two stars">
+            <span class="stars" aria-hidden="true">★★</span>
+            <small>Shop</small>
+          </button>
+          <button class="star-option" type="button" data-difficulty="3" aria-pressed="false" aria-label="Expert difficulty, three stars">
+            <span class="stars" aria-hidden="true">★★★</span>
+            <small>Expert</small>
+          </button>
+          <button class="star-option" type="button" data-difficulty="4" aria-pressed="false" aria-label="Extreme difficulty, four stars">
+            <span class="stars" aria-hidden="true">★★★★</span>
+            <small>Extreme</small>
+          </button>
+        </div>
 
-      <p class="difficulty-help" data-difficulty-help>Common fractions with a forgiving target.</p>
-    </section>
+        <p class="difficulty-help" data-difficulty-help>Common 0.025 in steps with a ±0.005 in target.</p>
+      </div>
+    </details>
 
     <section class="panel trainer-panel" aria-label="Thousandths training challenge">
       <div class="scoreboard">
         <div class="score-item">
-          <span class="score-label">🎯 Target</span>
+          <span class="score-label">⌖ Target</span>
           <button class="target-button score-value" type="button" data-target-button aria-label="Load a new random target">New target</button>
         </div>
         <div class="score-item">
-          <span class="score-label">📍 You</span>
+          <span class="score-label">▼ Selector</span>
           <button class="peek-button" type="button" data-peek-button disabled>
             <strong class="score-value current-value" data-current>0.000 in</strong>
             <span class="peek-hint" data-peek-hint hidden>tap to peek 👀</span>
           </button>
         </div>
         <div class="score-item">
-          <span class="score-label">🌈 Tolerance</span>
+          <span class="score-label">★ Tolerance</span>
           <strong class="score-value tolerance-value" data-tolerance>—</strong>
         </div>
       </div>
@@ -847,11 +1241,12 @@
       <div class="status-row">
         <p class="feedback" aria-live="polite" data-feedback>Choose a difficulty, then start.</p>
         <div class="magnifier-dock">
-          <button class="magnifier-tool" type="button" data-magnifier data-dragging="false" aria-label="Drag the magnifying glass over the ruler for a temporary close-up">
-            <span class="magnifier-icon" aria-hidden="true">🔍</span>
-            <span class="magnifier-copy" data-magnifier-copy>Drag me</span>
+          <button class="magnifier-tool" type="button" data-magnifier data-dragging="false" aria-label="Drag the visor by its long grip over the ruler for a temporary close-up">
+            <span class="magnifier-icon" aria-hidden="true">▦</span>
+            <span class="magnifier-copy" data-magnifier-copy>Visor</span>
             <svg class="magnifier-ruler" data-magnifier-ruler viewBox="0 0 60 36" aria-hidden="true"></svg>
-            <span class="magnifier-value" data-magnifier-value aria-hidden="true"></span>
+            <span class="magnifier-status" data-magnifier-status aria-hidden="true"></span>
+            <span class="magnifier-handle" aria-hidden="true"><span>Grip</span></span>
           </button>
         </div>
       </div>
@@ -872,7 +1267,7 @@
           <button class="nudge-button" data-size="fine" data-delta="1" type="button">+0.001 in</button>
           <button class="nudge-button" data-size="coarse" data-delta="10" type="button">+0.010 in</button>
         </div>
-        <p class="fine-budget" data-fine-budget hidden>Extreme fine taps: 10 left</p>
+        <p class="fine-budget" data-fine-budget hidden>Fine taps: 0 left</p>
       </div>
 
       <div class="round-controls">
@@ -895,7 +1290,7 @@
         </div>
       </div>
 
-      <p class="haptic-note" data-haptic-note>Buttons, ruler ticks, and sticky quarter marks give strong pulses on supported phones.</p>
+      <p class="haptic-note" data-haptic-note>Buttons and every sticky ruler tick give strong pulses on supported phones.</p>
     </section>
 
     <a class="home-link" href="/">Back to TurdGobbler.com</a>
@@ -905,7 +1300,7 @@
     (function () {
       "use strict";
 
-      var storageKey = "thousandths-trainer-preferences-v4";
+      var storageKey = "thousandths-trainer-preferences-v5";
       var slider = document.querySelector("[data-slider]");
       var ruler = document.querySelector("[data-ruler]");
       var rulerStage = document.querySelector("[data-ruler-stage]");
@@ -924,8 +1319,10 @@
       var magnifierTool = document.querySelector("[data-magnifier]");
       var magnifierCopy = document.querySelector("[data-magnifier-copy]");
       var magnifierRuler = document.querySelector("[data-magnifier-ruler]");
-      var magnifierValue = document.querySelector("[data-magnifier-value]");
+      var magnifierStatus = document.querySelector("[data-magnifier-status]");
       var fineBudgetEl = document.querySelector("[data-fine-budget]");
+      var difficultyPanel = document.querySelector("[data-difficulty-panel]");
+      var difficultyToggle = document.querySelector(".difficulty-toggle");
       var coach = document.querySelector("[data-coach]");
       var coachSteps = document.querySelector("[data-coach-steps]");
       var hapticNote = document.querySelector("[data-haptic-note]");
@@ -936,7 +1333,7 @@
 
       var saved = loadPreferences();
       var unit = saved.unit === "mm" ? "mm" : "in";
-      var difficulty = [1, 2, 3, 4].indexOf(Number(saved.difficulty)) >= 0 ? Number(saved.difficulty) : 1;
+      var difficulty = [2, 3, 4].indexOf(Number(saved.difficulty)) >= 0 ? Number(saved.difficulty) : 2;
       var current = 0;
       var target = null;
       var tolerance = null;
@@ -945,14 +1342,17 @@
       var guideVisible = false;
       var peeking = false;
       var peekTimer = null;
-      var fineTapsLeft = 10;
-      var stickyQuarter = null;
+      var fineTapsLeft = difficulty === 4 ? 5 : difficulty === 3 ? 10 : 0;
+      var stickyTick = null;
       var magnifierPointer = null;
       var magnifierStartX = 0;
       var magnifierStartY = 0;
+      var magnifierLensOffsetX = 0;
       var magnifierTick = null;
       var viewStart = 0;
       var viewEnd = maximum();
+
+      difficultyPanel.open = saved.difficultyOpen !== false;
 
       if (!("vibrate" in navigator)) {
         hapticNote.textContent = "Haptic feedback is not available in this browser.";
@@ -970,7 +1370,8 @@
         try {
           localStorage.setItem(storageKey, JSON.stringify({
             unit: unit,
-            difficulty: difficulty
+            difficulty: difficulty,
+            difficultyOpen: difficultyPanel.open
           }));
         } catch (error) {
           // The game still works when browser storage is unavailable.
@@ -1016,14 +1417,6 @@
 
       function difficultySettings() {
         if (unit === "in") {
-          if (difficulty === 1) {
-            return {
-              name: "Easy",
-              help: "Common eighth-inch fractions with a ±0.010 in target.",
-              tolerance: 10,
-              pool: [125, 250, 375, 500, 625, 750, 875]
-            };
-          }
           if (difficulty === 2) {
             return {
               name: "Shop",
@@ -1035,27 +1428,19 @@
           if (difficulty === 3) {
             return {
               name: "Expert",
-              help: "Any thousandth with a ±0.003 in target. Magnifier locked.",
+              help: "±0.003 in, visor locked, and 10 fine taps per round.",
               tolerance: 3,
               step: 1
             };
           }
           return {
             name: "Extreme",
-            help: "±0.001 in, no magnifier, and only 10 fine taps per round.",
+            help: "±0.001 in, visor locked, and only 5 fine taps per round.",
             tolerance: 1,
             step: 1
           };
         }
 
-        if (difficulty === 1) {
-          return {
-            name: "Easy",
-            help: "Whole millimetres with a ±0.025 mm target.",
-            tolerance: 25,
-            step: 1000
-          };
-        }
         if (difficulty === 2) {
           return {
             name: "Shop",
@@ -1067,17 +1452,23 @@
         if (difficulty === 3) {
           return {
             name: "Expert",
-            help: "Any thousandth with a ±0.003 mm target. Magnifier locked.",
+            help: "±0.003 mm, visor locked, and 10 fine taps per round.",
             tolerance: 3,
             step: 1
           };
         }
         return {
           name: "Extreme",
-          help: "±0.001 mm, no magnifier, and only 10 fine taps per round.",
+          help: "±0.001 mm, visor locked, and only 5 fine taps per round.",
           tolerance: 1,
           step: 1
         };
+      }
+
+      function fineTapLimit() {
+        if (difficulty === 3) return 10;
+        if (difficulty === 4) return 5;
+        return 0;
       }
 
       function makeTarget(settings) {
@@ -1117,24 +1508,16 @@
 
       function stickyRulerValue(value) {
         var threshold = unit === "in" ? 4 : 102;
-        var marks = [maximum() / 4, maximum() / 2, maximum() * 3 / 4];
-        var match = null;
+        var interval = tickIntervals().minor;
+        var nearest = clamp(Math.round(value / interval) * interval, 0, maximum());
 
-        marks.some(function (mark) {
-          if (Math.abs(value - mark) <= threshold) {
-            match = Math.round(mark);
-            return true;
-          }
-          return false;
-        });
-
-        if (match !== null) {
-          if (stickyQuarter !== match) haptic([45, 34, 55]);
-          stickyQuarter = match;
-          return match;
+        if (Math.abs(value - nearest) <= threshold) {
+          if (stickyTick !== nearest) haptic([45, 34, 55]);
+          stickyTick = nearest;
+          return nearest;
         }
 
-        stickyQuarter = null;
+        stickyTick = null;
         return value;
       }
 
@@ -1195,7 +1578,7 @@
         var right = width - 12;
         var span = viewEnd - viewStart;
         var intervals = tickIntervals();
-        var colours = ["#58d2ff", "#c084fc", "#fb923c", "#4ade80"];
+        var colours = ["#7d1713", "#ad3025", "#77412a", "#a8241d"];
         var x = function (value) {
           return left + ((value - viewStart) / span) * (right - left);
         };
@@ -1227,7 +1610,7 @@
             y1: 35,
             x2: x(value),
             y2: major ? 65 : 54,
-            stroke: "#f8fafc",
+            stroke: "#ead8b8",
             "stroke-width": major ? 2 : 1,
             opacity: major ? "0.95" : "0.72"
           }));
@@ -1236,7 +1619,7 @@
             ruler.appendChild(svgNode("text", {
               x: x(value),
               y: 86,
-              fill: "#f8fafc",
+              fill: "#ead8b8",
               "font-size": width < 360 ? "12" : "13",
               "font-weight": "700",
               "font-family": "system-ui, sans-serif",
@@ -1271,15 +1654,26 @@
         var needleX = x(current);
         ruler.appendChild(svgNode("line", {
           x1: needleX,
-          y1: 10,
+          y1: 8,
           x2: needleX,
-          y2: 68,
-          stroke: "#58d2ff",
-          "stroke-width": 3
+          y2: 70,
+          stroke: "#160706",
+          "stroke-width": 9,
+          opacity: "0.86"
+        }));
+        ruler.appendChild(svgNode("line", {
+          x1: needleX,
+          y1: 8,
+          x2: needleX,
+          y2: 70,
+          stroke: "#ff3b30",
+          "stroke-width": 5
         }));
         ruler.appendChild(svgNode("polygon", {
-          points: (needleX - 7) + ",10 " + (needleX + 7) + ",10 " + needleX + ",19",
-          fill: "#58d2ff"
+          points: (needleX - 10) + ",8 " + (needleX + 10) + ",8 " + needleX + ",22",
+          fill: "#ff3b30",
+          stroke: "#160706",
+          "stroke-width": 2
         }));
       }
 
@@ -1301,7 +1695,7 @@
           y1: 12,
           x2: width,
           y2: 12,
-          stroke: "#475569",
+          stroke: "#8f211b",
           "stroke-width": 3
         }));
 
@@ -1313,20 +1707,29 @@
             y1: 12,
             x2: x(tick),
             y2: isMajor ? 29 : 23,
-            stroke: "#0f172a",
+            stroke: "#ff9b82",
             "stroke-width": isMajor ? 1.8 : 1
           }));
         }
 
-        magnifierRuler.appendChild(svgNode("line", {
-          x1: width / 2,
-          y1: 3,
-          x2: width / 2,
-          y2: height,
-          stroke: "#0284c7",
-          "stroke-width": 2.5
-        }));
-        magnifierValue.textContent = formatted(value);
+        var selectorVisible = current >= start && current <= end;
+        if (selectorVisible) {
+          var selectorX = x(current);
+          magnifierRuler.appendChild(svgNode("line", {
+            x1: selectorX,
+            y1: 1,
+            x2: selectorX,
+            y2: height,
+            stroke: "#ff2a20",
+            "stroke-width": 3
+          }));
+          magnifierRuler.appendChild(svgNode("polygon", {
+            points: (selectorX - 5) + ",1 " + (selectorX + 5) + ",1 " + selectorX + ",8",
+            fill: "#ff2a20"
+          }));
+        }
+        magnifierTool.dataset.selectorVisible = String(selectorVisible);
+        magnifierStatus.textContent = selectorVisible ? "Needle" : "Scanning";
       }
 
       function magnifierValueAt(clientX) {
@@ -1339,7 +1742,7 @@
         if (magnifierPointer !== event.pointerId) return;
         var dragX = event.clientX - magnifierStartX;
         var dragY = event.clientY - magnifierStartY;
-        var value = magnifierValueAt(event.clientX);
+        var value = magnifierValueAt(event.clientX - magnifierLensOffsetX);
         var tick = Math.floor(value / (unit === "in" ? 5 : 100));
 
         magnifierTool.style.setProperty("--drag-x", dragX + "px");
@@ -1353,6 +1756,8 @@
         magnifierPointer = null;
         magnifierTick = null;
         magnifierTool.dataset.dragging = "false";
+        magnifierTool.dataset.selectorVisible = "false";
+        magnifierStatus.textContent = "";
         magnifierTool.style.setProperty("--drag-x", "0px");
         magnifierTool.style.setProperty("--drag-y", "0px");
       }
@@ -1361,12 +1766,12 @@
         var locked = difficulty >= 3;
         if (locked && magnifierPointer !== null) snapMagnifier();
         magnifierTool.disabled = locked;
-        magnifierCopy.textContent = locked ? "Locked" : "Drag me";
+        magnifierCopy.textContent = locked ? "Locked" : "Visor";
         magnifierTool.setAttribute(
           "aria-label",
           locked
-            ? "Magnifying glass locked in Expert and Extreme modes"
-            : "Drag the magnifying glass over the ruler for a temporary close-up"
+            ? "Targeting visor locked in Expert and Extreme modes"
+            : "Drag the visor by its long grip over the ruler for a temporary close-up"
         );
       }
 
@@ -1374,6 +1779,7 @@
         var settings = difficultySettings();
         difficultyNameEl.textContent = settings.name;
         difficultyHelpEl.textContent = settings.help;
+        difficultyToggle.textContent = difficultyPanel.open ? "Retract ▴" : "Deploy ▾";
         difficultyButtons.forEach(function (button) {
           button.setAttribute("aria-pressed", String(Number(button.dataset.difficulty) === difficulty));
         });
@@ -1386,20 +1792,21 @@
       }
 
       function renderNudges() {
+        var limit = fineTapLimit();
         nudgeButtons.forEach(function (button) {
           var amount = Number(button.dataset.delta);
           var sign = amount < 0 ? "−" : "+";
-          var fineLimitReached = difficulty === 4 && phase === "checking" && Math.abs(amount) === 1 && fineTapsLeft <= 0;
+          var fineLimitReached = limit > 0 && phase === "checking" && Math.abs(amount) === 1 && fineTapsLeft <= 0;
           button.textContent = sign + decimal(Math.abs(amount)) + " " + suffix();
           button.disabled = fineLimitReached;
           button.setAttribute(
             "aria-label",
             (amount < 0 ? "Subtract " : "Add ") + decimal(Math.abs(amount)) + " " + (unit === "in" ? "inches" : "millimetres") +
-            (difficulty === 4 && Math.abs(amount) === 1 ? ". " + fineTapsLeft + " fine taps remaining" : "")
+            (limit > 0 && Math.abs(amount) === 1 ? ". " + fineTapsLeft + " fine taps remaining" : "")
           );
         });
-        fineBudgetEl.hidden = difficulty !== 4 || phase !== "checking";
-        fineBudgetEl.textContent = "Extreme fine taps: " + fineTapsLeft + " left";
+        fineBudgetEl.hidden = limit === 0 || phase !== "checking";
+        fineBudgetEl.textContent = difficultySettings().name + " fine taps: " + fineTapsLeft + " of " + limit + " left";
       }
 
       function renderCoach() {
@@ -1413,8 +1820,8 @@
         var tens = Math.floor(remaining / 10);
         var ones = remaining % 10;
         var lookStep = difficulty < 3
-          ? "Drag the magnifying glass over crowded ticks, then let go to snap it back."
-          : "The magnifying glass is locked here, so use the quarter marks to judge the space.";
+          ? "Drag the targeting visor by its long grip over crowded ticks, then let go to snap it back."
+          : "The visor is locked here, so use the sticky ruler ticks to judge the space.";
         var steps = [
           "<strong>Start:</strong> find the " + formatted(landmark) + " tick just below the target.",
           "<strong>Look:</strong> your target is " + formatted(target) + ". " + lookStep,
@@ -1477,7 +1884,7 @@
       function setCurrent(value) {
         var before = current;
         current = clamp(Math.round(value), 0, maximum());
-        if (stickyQuarter === null) hapticForCrossedTick(before, current);
+        if (stickyTick === null) hapticForCrossedTick(before, current);
         render();
       }
 
@@ -1490,8 +1897,8 @@
         tolerance = settings.tolerance;
         phase = "checking";
         misses = 0;
-        fineTapsLeft = 10;
-        stickyQuarter = null;
+        fineTapsLeft = fineTapLimit();
+        stickyTick = null;
         guideVisible = false;
         feedbackEl.textContent = "Find the target.";
         feedbackEl.removeAttribute("data-kind");
@@ -1548,14 +1955,14 @@
         if (target !== null) target = Math.round(target * factor);
         if (tolerance !== null) tolerance = Math.max(1, Math.round(tolerance * factor));
         unit = nextUnit;
-        stickyQuarter = null;
+        stickyTick = null;
         resetView();
         savePreferences();
         render();
       }
 
       function nudge(amount) {
-        if (difficulty === 4 && phase === "checking" && Math.abs(amount) === 1) {
+        if (fineTapLimit() > 0 && phase === "checking" && Math.abs(amount) === 1) {
           if (fineTapsLeft <= 0) {
             feedbackEl.textContent = "Fine taps spent—finish with the ruler or a 0.010 move.";
             feedbackEl.dataset.kind = "miss";
@@ -1573,7 +1980,7 @@
       });
 
       slider.addEventListener("change", function () {
-        stickyQuarter = null;
+        stickyTick = null;
         render();
       });
 
@@ -1604,12 +2011,20 @@
         });
       });
 
+      difficultyPanel.addEventListener("toggle", function () {
+        difficultyToggle.textContent = difficultyPanel.open ? "Retract ▴" : "Deploy ▾";
+        savePreferences();
+        haptic(34);
+      });
+
       magnifierTool.addEventListener("pointerdown", function (event) {
         if (magnifierTool.disabled) return;
         event.preventDefault();
         magnifierPointer = event.pointerId;
         magnifierStartX = event.clientX;
         magnifierStartY = event.clientY;
+        var magnifierBounds = magnifierTool.getBoundingClientRect();
+        magnifierLensOffsetX = event.clientX - (magnifierBounds.left + magnifierBounds.width / 2);
         magnifierTick = null;
         magnifierTool.dataset.dragging = "true";
         magnifierTool.setPointerCapture(event.pointerId);
