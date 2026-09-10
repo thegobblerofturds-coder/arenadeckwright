@@ -1,0 +1,702 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="A browser-based Nuclear-Grade Thou Proficiency certificate from the TurdGobbler Institute of Applied Metrology.">
+  <meta name="theme-color" content="#150c08">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <title>Nuclear-Grade Thou Proficiency Certificate</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --page: #150c08;
+      --paper: #f3ead3;
+      --paper-light: #fffaf0;
+      --ink: #172c3a;
+      --ink-soft: #3a4c55;
+      --gold: #a57929;
+      --gold-light: #ddc478;
+      --crimson: #77242d;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      min-width: 280px;
+      min-height: 100%;
+      background: var(--page);
+    }
+
+    body {
+      min-height: 100vh;
+      min-height: 100dvh;
+      margin: 0;
+      padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+      color: #f4e3bf;
+      background:
+        radial-gradient(circle at 50% -10%, rgb(130 35 25 / 0.72), transparent 36rem),
+        repeating-linear-gradient(101deg, transparent 0 68px, rgb(220 118 55 / 0.025) 69px 71px),
+        var(--page);
+      font-family: "Segoe UI", system-ui, sans-serif;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button,
+    .back-link {
+      min-height: 44px;
+    }
+
+    button:focus-visible,
+    input:focus-visible,
+    a:focus-visible {
+      outline: 3px solid #f2cb59;
+      outline-offset: 3px;
+    }
+
+    .toolbar {
+      position: sticky;
+      z-index: 20;
+      top: max(8px, env(safe-area-inset-top));
+      width: min(1100px, 100%);
+      margin: 0 auto 14px;
+      padding: 11px;
+      border: 2px solid #7b5740;
+      border-radius: 8px;
+      background: rgb(35 24 18 / 0.94);
+      box-shadow: 0 8px 24px rgb(0 0 0 / 0.45);
+      backdrop-filter: blur(10px);
+    }
+
+    .toolbar-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .toolbar p {
+      flex: 1 1 260px;
+      margin: 0;
+      color: #cbb691;
+      font-size: 0.88rem;
+      line-height: 1.35;
+    }
+
+    .control-button,
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 9px 14px;
+      border: 2px solid #76533c;
+      border-radius: 5px;
+      color: #ead6b4;
+      background: linear-gradient(#513b30, #2a1d18);
+      box-shadow: 0 3px 0 #0c0705, inset 0 1px 0 rgb(255 235 199 / 0.15);
+      font-weight: 850;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .control-button.primary {
+      border-color: #d4b24a;
+      color: #1d1607;
+      background: linear-gradient(#f0d76d, #af8b25);
+    }
+
+    .stage {
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .certificate {
+      position: relative;
+      width: min(1100px, 100%);
+      min-height: 720px;
+      margin: 0 auto;
+      padding: clamp(34px, 5vw, 64px) clamp(22px, 6vw, 76px) 34px;
+      overflow: hidden;
+      border: 4px solid var(--ink);
+      outline: 3px double var(--gold);
+      outline-offset: -13px;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 50% 46%, rgb(165 121 41 / 0.08), transparent 18rem),
+        radial-gradient(circle at 12% 50%, transparent 0 52px, rgb(165 121 41 / 0.12) 53px 54px, transparent 55px),
+        radial-gradient(circle at 88% 50%, transparent 0 52px, rgb(165 121 41 / 0.12) 53px 54px, transparent 55px),
+        repeating-linear-gradient(3deg, rgb(70 49 27 / 0.018) 0 1px, transparent 1px 7px),
+        var(--paper);
+      box-shadow: 0 20px 70px rgb(0 0 0 / 0.58), inset 0 0 0 7px var(--paper), inset 0 0 0 9px var(--crimson), inset 0 0 0 14px var(--paper), inset 0 0 0 15px var(--gold);
+      text-align: center;
+    }
+
+    .certificate::before,
+    .certificate::after {
+      position: absolute;
+      top: 26px;
+      color: var(--crimson);
+      font-family: Georgia, serif;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .certificate::before {
+      left: clamp(24px, 5vw, 60px);
+      content: "☢";
+    }
+
+    .certificate::after {
+      right: clamp(24px, 5vw, 60px);
+      content: ".001";
+      font-size: clamp(1.1rem, 3vw, 2rem);
+      top: 40px;
+    }
+
+    .institution {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(1.35rem, 4.2vw, 2.6rem);
+      letter-spacing: 0.08em;
+      line-height: 1.05;
+    }
+
+    .office,
+    .certificate-kicker,
+    .course-note {
+      font-weight: 900;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .office {
+      margin: 8px auto 0;
+      color: var(--crimson);
+      font-size: clamp(0.68rem, 1.6vw, 0.92rem);
+    }
+
+    .gold-rule {
+      width: min(520px, 70%);
+      height: 1px;
+      margin: 16px auto;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    }
+
+    .certificate-kicker {
+      margin: 0;
+      color: var(--gold);
+      font-family: Georgia, serif;
+      font-size: clamp(0.78rem, 1.8vw, 1rem);
+    }
+
+    .certificate-title {
+      margin: 7px auto 4px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(1.55rem, 5vw, 3.25rem);
+      line-height: 1.02;
+      text-transform: uppercase;
+    }
+
+    .diploma-line {
+      margin: 0 auto 15px;
+      color: var(--crimson);
+      font-size: clamp(0.68rem, 1.6vw, 0.9rem);
+      font-weight: 900;
+      letter-spacing: 0.11em;
+      text-transform: uppercase;
+    }
+
+    .solemn-copy,
+    .body-copy {
+      max-width: 780px;
+      margin: 0 auto;
+      color: var(--ink-soft);
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(0.9rem, 2vw, 1.08rem);
+      line-height: 1.45;
+    }
+
+    .solemn-copy {
+      font-style: italic;
+    }
+
+    .recipient-name {
+      width: min(700px, 92%);
+      min-height: 62px;
+      margin: 12px auto 13px;
+      padding: 6px 14px 7px;
+      border-bottom: 3px solid var(--gold);
+      color: var(--ink);
+      background: rgb(255 250 240 / 0.68);
+      font-family: "Brush Script MT", "Segoe Script", "Lucida Handwriting", cursive;
+      font-size: clamp(1.75rem, 6vw, 3.6rem);
+      font-weight: 700;
+      line-height: 1.15;
+      overflow-wrap: anywhere;
+    }
+
+    .course-title {
+      margin: 14px auto 2px;
+      color: var(--crimson);
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(1.05rem, 3vw, 1.8rem);
+      line-height: 1.1;
+      text-transform: uppercase;
+    }
+
+    .course-note {
+      margin: 5px auto 13px;
+      color: var(--gold);
+      font-size: clamp(0.6rem, 1.5vw, 0.78rem);
+    }
+
+    .classification {
+      width: min(680px, 94%);
+      margin: 15px auto 12px;
+      padding: 8px 12px;
+      border: 2px solid var(--gold);
+      border-radius: 5px;
+      color: var(--paper-light);
+      background: var(--ink);
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(0.78rem, 1.8vw, 1rem);
+      font-weight: 900;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .classification small {
+      display: block;
+      margin-top: 2px;
+      font-size: 0.76em;
+      font-style: italic;
+      font-weight: 400;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
+    .rank-intro {
+      margin: 0;
+      color: var(--gold);
+      font-family: Georgia, serif;
+      font-size: 0.82rem;
+      font-style: italic;
+    }
+
+    .rank {
+      margin: 4px auto 14px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(1rem, 2.6vw, 1.48rem);
+      text-transform: uppercase;
+    }
+
+    .signatures {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 118px minmax(0, 1fr);
+      align-items: end;
+      gap: clamp(10px, 3vw, 30px);
+      margin-top: 8px;
+    }
+
+    .signature-script {
+      min-height: 44px;
+      padding: 0 4px 4px;
+      border-bottom: 1px solid var(--ink);
+      font-family: "Brush Script MT", "Segoe Script", "Lucida Handwriting", cursive;
+      font-size: clamp(1.3rem, 3.7vw, 2.45rem);
+      font-weight: 700;
+      line-height: 1;
+      transform: rotate(-2deg);
+    }
+
+    .signature-script.secondary {
+      font-size: clamp(1.15rem, 3vw, 1.85rem);
+      transform: rotate(1deg);
+    }
+
+    .signature-title {
+      margin-top: 7px;
+      font-size: clamp(0.56rem, 1.2vw, 0.72rem);
+      font-weight: 900;
+      line-height: 1.25;
+      text-transform: uppercase;
+    }
+
+    .degree-joke {
+      display: block;
+      margin-top: 3px;
+      color: var(--crimson);
+      font-family: Georgia, serif;
+      font-size: 0.72rem;
+      font-style: italic;
+      font-weight: 700;
+      text-transform: none;
+    }
+
+    .poop-seal {
+      display: grid;
+      width: 108px;
+      height: 108px;
+      place-items: center;
+      align-self: center;
+      justify-self: center;
+      border: 6px double var(--gold-light);
+      border-radius: 50%;
+      color: var(--gold-light);
+      background: var(--crimson);
+      box-shadow: 0 0 0 3px var(--crimson), 0 0 0 5px var(--gold), inset 0 0 0 3px rgb(255 240 178 / 0.2);
+      font-family: Georgia, serif;
+      text-align: center;
+      transform: rotate(-5deg);
+    }
+
+    .calligraphy-poop {
+      display: block;
+      font-family: "Segoe UI Emoji", sans-serif;
+      font-size: 2.55rem;
+      filter: sepia(0.3) saturate(1.1);
+      line-height: 0.9;
+      text-shadow: 0 2px 0 #512027;
+    }
+
+    .seal-flourish {
+      display: block;
+      font-family: "Brush Script MT", "Segoe Script", cursive;
+      font-size: 0.75rem;
+      font-weight: 900;
+      letter-spacing: 0.02em;
+      line-height: 1;
+    }
+
+    .certificate-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 15px;
+      color: var(--ink-soft);
+      font-family: "Courier New", monospace;
+      font-size: clamp(0.56rem, 1.2vw, 0.7rem);
+    }
+
+    .scale {
+      height: 25px;
+      margin: 9px 4% 5px;
+      border-top: 1px solid var(--ink-soft);
+      background: repeating-linear-gradient(90deg, transparent 0 22px, var(--ink-soft) 22px 23px, transparent 23px 27px);
+      opacity: 0.78;
+    }
+
+    .fine-print {
+      margin: 0;
+      color: var(--crimson);
+      font-family: Georgia, serif;
+      font-size: clamp(0.58rem, 1.2vw, 0.72rem);
+      font-style: italic;
+    }
+
+    dialog {
+      width: min(92vw, 460px);
+      padding: 0;
+      border: 2px solid #b08c36;
+      border-radius: 8px;
+      color: #f1dfbb;
+      background: #2a1d17;
+      box-shadow: 0 24px 80px rgb(0 0 0 / 0.75);
+    }
+
+    dialog::backdrop {
+      background: rgb(9 5 4 / 0.78);
+      backdrop-filter: blur(3px);
+    }
+
+    .name-form {
+      display: grid;
+      gap: 12px;
+      padding: 20px;
+    }
+
+    .name-form h2,
+    .name-form p {
+      margin: 0;
+    }
+
+    .name-form h2 {
+      color: #f2cb59;
+      font-family: Georgia, serif;
+    }
+
+    .name-form p {
+      color: #cbb691;
+      line-height: 1.45;
+    }
+
+    .name-form label {
+      font-weight: 850;
+    }
+
+    .name-form input {
+      width: 100%;
+      min-height: 48px;
+      padding: 9px 11px;
+      border: 2px solid #8c6846;
+      border-radius: 5px;
+      color: #1c1915;
+      background: #fff8e8;
+      font-size: 1rem;
+    }
+
+    .dialog-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 9px;
+    }
+
+    @media (max-width: 680px) {
+      .certificate {
+        min-height: 0;
+        padding-top: 76px;
+      }
+
+      .certificate::before,
+      .certificate::after {
+        top: 32px;
+      }
+
+      .signatures {
+        grid-template-columns: 1fr;
+      }
+
+      .poop-seal {
+        grid-row: 1;
+        width: 96px;
+        height: 96px;
+      }
+
+      .certificate-meta {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+
+    @media print {
+      @page {
+        size: letter landscape;
+        margin: 0;
+      }
+
+      html,
+      body {
+        width: 11in;
+        height: 8.5in;
+        background: #fff;
+      }
+
+      body {
+        min-height: 0;
+        padding: 0;
+      }
+
+      .toolbar,
+      dialog {
+        display: none !important;
+      }
+
+      .stage {
+        overflow: visible;
+      }
+
+      .certificate {
+        width: 11in;
+        height: 8.5in;
+        min-height: 0;
+        margin: 0;
+        padding: 0.47in 0.63in 0.28in;
+        border-width: 3px;
+        outline-offset: -11px;
+        box-shadow: inset 0 0 0 7px var(--paper), inset 0 0 0 9px var(--crimson), inset 0 0 0 14px var(--paper), inset 0 0 0 15px var(--gold);
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+      }
+
+      .institution { font-size: 26pt; }
+      .office { font-size: 8pt; }
+      .gold-rule { margin: 10px auto; }
+      .certificate-kicker { font-size: 8pt; }
+      .certificate-title { font-size: 27pt; margin-top: 4px; }
+      .diploma-line { font-size: 7pt; margin-bottom: 8px; }
+      .solemn-copy, .body-copy { font-size: 9pt; line-height: 1.32; }
+      .recipient-name { min-height: 48px; margin: 7px auto 8px; font-size: 27pt; }
+      .course-title { margin-top: 8px; font-size: 15pt; }
+      .course-note { margin-bottom: 7px; font-size: 6.5pt; }
+      .classification { margin: 8px auto 7px; padding: 5px 10px; font-size: 8pt; }
+      .rank { margin-bottom: 8px; font-size: 12pt; }
+      .signature-script { min-height: 32px; font-size: 19pt; }
+      .signature-script.secondary { font-size: 15pt; }
+      .signature-title { margin-top: 4px; font-size: 5.5pt; }
+      .degree-joke { font-size: 5.3pt; }
+      .poop-seal { width: 78px; height: 78px; border-width: 5px; }
+      .calligraphy-poop { font-size: 1.8rem; }
+      .seal-flourish { font-size: 0.56rem; }
+      .certificate-meta { margin-top: 7px; font-size: 5.5pt; }
+      .scale { height: 16px; margin-top: 5px; margin-bottom: 2px; }
+      .fine-print { font-size: 5.5pt; }
+    }
+  </style>
+</head>
+<body>
+  <header class="toolbar" aria-label="Certificate controls">
+    <div class="toolbar-row">
+      <p>No Adobe, downloads, or mysterious mobile nonsense. Add a name, then use your browser to print or save the certificate.</p>
+      <button class="control-button" type="button" data-change-name>Change name</button>
+      <button class="control-button primary" type="button" data-print>Print / save</button>
+      <a class="back-link" href="../">Back to test</a>
+    </div>
+  </header>
+
+  <main class="stage">
+    <article class="certificate" aria-labelledby="certificate-title">
+      <h1 class="institution">TURDGOBBLER INSTITUTE</h1>
+      <p class="office">of Applied Metrology &amp; Fractional Astonishment</p>
+      <div class="gold-rule" aria-hidden="true"></div>
+      <p class="certificate-kicker">Certificate of</p>
+      <h2 class="certificate-title" id="certificate-title">Nuclear-Grade Thou Proficiency</h2>
+      <p class="diploma-line">Foundational diploma in sub-inch dimensional literacy</p>
+
+      <p class="solemn-copy">By the excessively solemn authority of the Faculty of Minute Affairs, this instrument certifies that</p>
+      <div class="recipient-name" data-recipient-name>The Esteemed Graduate</div>
+
+      <p class="body-copy">has successfully completed seven Expert ruler trials and the sacred bonus inquiry of the TurdGobbler Nuclear-Grade Thou Training curriculum.</p>
+      <h3 class="course-title">The Basic Comprehension of the Thou</h3>
+      <p class="course-note">with a concentration in the third decimal place</p>
+      <p class="body-copy">The bearer has demonstrated a serviceable understanding that one thou is precisely one thousandth of an inch (0.001 in), along with the microscopic bragging rights and highly conditional privileges appertaining thereto.</p>
+
+      <div class="classification">
+        Classification: Nuclear-Grade
+        <small>Academic, ceremonial, and extremely tiny</small>
+      </div>
+      <p class="rank-intro">and is therefore elevated to the honorary rank of</p>
+      <h3 class="rank">Associate Custodian of the Third Decimal Place</h3>
+
+      <div class="signatures">
+        <div class="signature">
+          <div class="signature-script">Sir Turd G. Gobbler, D.Thou.</div>
+          <div class="signature-title">
+            Grand Poopah of Microscopic Measurements
+            <span class="degree-joke">Ph.D. (Pretty Highly Delusional)</span>
+          </div>
+        </div>
+
+        <div class="poop-seal" aria-label="Calligraphic ceremonial poop seal">
+          <span>
+            <span class="seal-flourish">❦ nuclear ❦</span>
+            <span class="calligraphy-poop" aria-hidden="true">💩</span>
+            <span class="seal-flourish">❦ grade ❦</span>
+          </span>
+        </div>
+
+        <div class="signature">
+          <div class="signature-script secondary">Professor V. Nier</div>
+          <div class="signature-title">
+            Chair of Very Small Distances
+            <span class="degree-joke">Bureau of Fractional Astonishment</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="certificate-meta">
+        <span>Certificate No. TG-NG-008-2026</span>
+        <span>Issued September 10, 2026</span>
+      </div>
+      <div class="scale" aria-hidden="true"></div>
+      <p class="fine-print">Ceremonial credential. Not valid for operating reactors, calibrating spacecraft, or winning arguments with an actual metrologist.</p>
+    </article>
+  </main>
+
+  <dialog data-name-dialog aria-labelledby="name-dialog-title">
+    <form class="name-form" data-name-form method="dialog">
+      <h2 id="name-dialog-title">Name the distinguished graduate</h2>
+      <p>This is the only piece of paperwork required by the TurdGobbler Institute.</p>
+      <label for="graduate-name">Graduate name</label>
+      <input id="graduate-name" data-name-input type="text" maxlength="80" autocomplete="name" placeholder="Enter name here">
+      <div class="dialog-actions">
+        <button class="control-button" type="button" data-skip-name>Leave it pompously blank</button>
+        <button class="control-button primary" type="submit">Engrave name</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script>
+    (function () {
+      var dialog = document.querySelector("[data-name-dialog]");
+      var form = document.querySelector("[data-name-form]");
+      var input = document.querySelector("[data-name-input]");
+      var recipient = document.querySelector("[data-recipient-name]");
+      var changeNameButton = document.querySelector("[data-change-name]");
+      var skipNameButton = document.querySelector("[data-skip-name]");
+      var printButton = document.querySelector("[data-print]");
+      var storageKey = "turdgobbler-thou-certificate-name";
+
+      function storedName() {
+        try {
+          return localStorage.getItem(storageKey) || "";
+        } catch (error) {
+          return "";
+        }
+      }
+
+      function saveName(name) {
+        try {
+          localStorage.setItem(storageKey, name);
+        } catch (error) {
+          return;
+        }
+      }
+
+      function applyName(name) {
+        var cleaned = name.trim().replace(/\s+/g, " ");
+        recipient.textContent = cleaned || "The Esteemed Graduate";
+        input.value = cleaned;
+        saveName(cleaned);
+      }
+
+      function openNameDialog() {
+        input.value = storedName();
+        if (typeof dialog.showModal === "function") {
+          dialog.showModal();
+          window.setTimeout(function () {
+            input.focus();
+            input.select();
+          }, 0);
+        } else {
+          var fallbackName = window.prompt("Graduate name", input.value);
+          if (fallbackName !== null) applyName(fallbackName);
+        }
+      }
+
+      form.addEventListener("submit", function () {
+        applyName(input.value);
+      });
+
+      skipNameButton.addEventListener("click", function () {
+        dialog.close();
+      });
+
+      changeNameButton.addEventListener("click", openNameDialog);
+      printButton.addEventListener("click", function () {
+        window.print();
+      });
+
+      applyName(storedName());
+      openNameDialog();
+    })();
+  </script>
+</body>
+</html>

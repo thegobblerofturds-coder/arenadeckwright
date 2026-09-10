@@ -1497,16 +1497,16 @@
         <span class="summary-star" aria-hidden="true">☢</span>
         <span>
           <span class="eyebrow" id="difficulty-heading">Difficulty</span>
-          <strong class="difficulty-name" data-difficulty-name>Shop</strong>
+          <strong class="difficulty-name" data-difficulty-name>Apprentice</strong>
         </span>
         <span class="difficulty-toggle" aria-hidden="true">Retract ▴</span>
       </summary>
 
       <div class="difficulty-content">
         <div class="star-options" role="group" aria-label="Choose difficulty">
-          <button class="star-option" type="button" data-difficulty="2" aria-pressed="true" aria-label="Shop difficulty, two stars">
+          <button class="star-option" type="button" data-difficulty="2" aria-pressed="true" aria-label="Apprentice difficulty, two stars">
             <span class="stars" aria-hidden="true">★★</span>
-            <small>Shop</small>
+            <small>Apprentice</small>
           </button>
           <button class="star-option" type="button" data-difficulty="3" aria-pressed="false" aria-label="Expert difficulty, three stars">
             <span class="stars" aria-hidden="true">★★★</span>
@@ -1582,8 +1582,8 @@
     <section class="panel challenge-panel" aria-labelledby="challenge-heading">
       <div class="challenge-heading">
         <span class="eyebrow">Challenge mode</span>
-        <h2 id="challenge-heading">Ten-question expert test</h2>
-        <p>Nine Expert ruler targets, followed by one final shop-knowledge question.</p>
+        <h2 id="challenge-heading">Eight-question expert test</h2>
+        <p>Seven Expert ruler targets, followed by one bonus question. The selector readout stays locked for the entire test.</p>
       </div>
 
       <div class="challenge-actions">
@@ -1591,10 +1591,10 @@
         <button class="secondary-button" type="button" data-challenge-exit hidden>Exit challenge</button>
       </div>
 
-      <p class="challenge-progress" data-challenge-progress hidden aria-live="polite">Question 1 of 10 · Expert</p>
+      <p class="challenge-progress" data-challenge-progress hidden aria-live="polite">Question 1 of 8 · Expert</p>
 
       <form class="final-question" data-final-question hidden>
-        <label for="final-thou-answer">Question 10 of 10: How many thou are in one inch?</label>
+        <label for="final-thou-answer">Bonus question 8 of 8: How many thou are in one inch?</label>
         <div class="answer-row">
           <input class="challenge-input" id="final-thou-answer" data-final-answer type="number" min="0" step="1" inputmode="numeric" autocomplete="off" required>
           <button class="primary-button" type="submit">Check answer</button>
@@ -1604,8 +1604,8 @@
 
       <div class="certificate-unlock" data-certificate-unlock hidden>
         <strong>Certificate unlocked</strong>
-        <p>Challenge cleared. Your Nuclear-Grade Thou Proficiency certificate is ready. Click its name line to personalize it before printing.</p>
-        <a class="certificate-link" href="./nuclear-grade-thou-certificate.pdf" target="_blank" rel="noopener" aria-label="Open your fillable Nuclear-Grade Thou Proficiency certificate PDF">Open your certificate</a>
+        <p>Challenge cleared. Personalize and print your Nuclear-Grade Thou Proficiency certificate right in the browser. No special app required.</p>
+        <a class="certificate-link" href="./certificate/" aria-label="Open your browser-based Nuclear-Grade Thou Proficiency certificate">Open your certificate</a>
       </div>
     </section>
 
@@ -1774,7 +1774,7 @@
         if (unit === "in") {
           if (difficulty === 2) {
             return {
-              name: "Shop",
+              name: "Apprentice",
               help: "0.025 in steps plus practical sixteenths, rounded to the nearest thousandth.",
               tolerance: 5,
               pool: shopTargetPool()
@@ -1798,7 +1798,7 @@
 
         if (difficulty === 2) {
           return {
-            name: "Shop",
+            name: "Apprentice",
             help: "0.100 mm steps plus inch sixteenths with a practical ±0.100 mm target.",
             tolerance: 100,
             pool: shopTargetPool()
@@ -2218,7 +2218,7 @@
         challengeStartButton.textContent = challengeActive || challengeComplete ? "Restart challenge" : "Start challenge";
         challengeExitButton.hidden = !challengeActive;
         challengeProgressEl.hidden = !challengeActive;
-        challengeProgressEl.textContent = "Question " + challengeRound + " of 10 · Expert";
+        challengeProgressEl.textContent = "Question " + challengeRound + " of 8 · Expert";
         finalQuestionForm.hidden = !finalQuestionActive;
         certificateUnlock.hidden = !challengeComplete;
         targetButton.disabled = challengeActive;
@@ -2229,7 +2229,8 @@
       }
 
       function render() {
-        var hiddenReading = phase === "checking" && !peeking;
+        var challengePeekLocked = challengeActive;
+        var hiddenReading = challengePeekLocked || (phase === "checking" && !peeking);
         var displayCurrent = hiddenReading ? "🤐 CENSORED" : formatted(current);
         var selectorFraction = hiddenReading ? "" : shopFraction(current);
         var targetShopLabel = target === null ? "" : shopNameWithFraction(target);
@@ -2238,16 +2239,18 @@
           : "";
 
         currentEl.textContent = displayCurrent;
-        peekButton.disabled = phase !== "checking";
+        peekButton.disabled = challengePeekLocked || phase !== "checking";
         peekButton.dataset.censored = String(hiddenReading);
         peekButton.setAttribute(
           "aria-label",
-          hiddenReading
+          challengePeekLocked
+            ? "Current measurement hidden. Peek is unavailable during the Expert test."
+            : hiddenReading
             ? "Current measurement censored. Tap to peek."
             : "Current measurement " + spoken(current) + selectorFractionSpeech
         );
-        peekHint.hidden = phase !== "checking";
-        peekHint.textContent = peeking ? "shh… hiding again" : "tap to peek 👀";
+        peekHint.hidden = !challengePeekLocked && phase !== "checking";
+        peekHint.textContent = challengePeekLocked ? "peek locked during test" : peeking ? "shh… hiding again" : "tap to peek 👀";
         selectorShopNameEl.hidden = !selectorFraction;
         selectorShopNameEl.textContent = selectorFraction;
         toleranceEl.textContent = tolerance === null ? "—" : "±" + preciseFormatted(tolerance);
@@ -2289,6 +2292,7 @@
       }
 
       function newChallenge() {
+        if (challengeActive) difficulty = 3;
         var settings = difficultySettings();
         if (peekTimer !== null) clearTimeout(peekTimer);
         peekTimer = null;
@@ -2301,7 +2305,7 @@
         stickyTick = null;
         guideVisible = false;
         feedbackEl.textContent = challengeActive
-          ? "Expert challenge: question " + challengeRound + " of 10."
+          ? "Expert challenge: question " + challengeRound + " of 8."
           : "Find the target.";
         feedbackEl.removeAttribute("data-kind");
         render();
@@ -2340,13 +2344,13 @@
       }
 
       function showFinalQuestion() {
-        challengeRound = 10;
+        challengeRound = 8;
         finalQuestionActive = true;
         target = null;
         tolerance = null;
         phase = "ready";
         guideVisible = false;
-        feedbackEl.textContent = "Nine ruler questions complete. Final question below.";
+        feedbackEl.textContent = "Seven Expert ruler questions complete. Bonus question below.";
         feedbackEl.removeAttribute("data-kind");
         render();
         window.setTimeout(function () {
@@ -2355,7 +2359,7 @@
       }
 
       function advanceChallenge() {
-        if (challengeRound >= 9) {
+        if (challengeRound >= 7) {
           showFinalQuestion();
           return;
         }
@@ -2451,7 +2455,7 @@
       checkButton.addEventListener("click", checkAnswer);
 
       peekButton.addEventListener("click", function () {
-        if (phase !== "checking") return;
+        if (challengeActive || phase !== "checking") return;
         if (peekTimer !== null) clearTimeout(peekTimer);
         peeking = true;
         render();
