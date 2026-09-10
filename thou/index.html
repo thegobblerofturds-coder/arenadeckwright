@@ -820,6 +820,81 @@
       text-transform: uppercase;
     }
 
+    .trainer-panel,
+    .challenge-panel,
+    .ruler-stage {
+      transition: border-color 420ms ease, box-shadow 520ms ease, background-color 520ms ease;
+    }
+
+    body.challenge-running .trainer-panel,
+    body.challenge-running .challenge-panel {
+      border-color: #bd3029;
+      box-shadow:
+        0 8px 0 #090504,
+        0 18px 48px rgb(0 0 0 / 0.58),
+        inset 0 0 0 2px #1a110d,
+        inset 0 0 24px rgb(224 45 39 / 0.12),
+        0 0 22px rgb(224 45 39 / 0.16);
+    }
+
+    body.challenge-running .ruler-stage {
+      border-color: #bd3029;
+      box-shadow:
+        inset 0 5px 18px rgb(0 0 0 / 0.78),
+        inset 0 0 22px rgb(224 45 39 / 0.13),
+        0 4px 0 #0b0605,
+        0 0 18px rgb(224 45 39 / 0.16);
+    }
+
+    body.challenge-running .challenge-progress {
+      color: #ffd8cf;
+      background: linear-gradient(90deg, #4b100d, #1a120f 72%);
+      box-shadow: inset 0 0 16px rgb(236 56 46 / 0.16), 0 0 12px rgb(236 56 46 / 0.12);
+      animation: challenge-status-pulse 1.8s ease-in-out infinite;
+    }
+
+    .challenge-launch-pulse {
+      position: fixed;
+      z-index: 1200;
+      left: var(--pulse-x);
+      top: var(--pulse-y);
+      width: 18px;
+      height: 18px;
+      border: 7px solid #f0443a;
+      border-radius: 50%;
+      opacity: 0;
+      box-shadow: 0 0 18px #ff2b24, inset 0 0 18px #ff2b24;
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      animation: challenge-launch-wave 950ms cubic-bezier(0.13, 0.74, 0.18, 1) forwards;
+    }
+
+    @keyframes challenge-launch-wave {
+      0% {
+        width: 18px;
+        height: 18px;
+        border-width: 7px;
+        opacity: 0.95;
+      }
+
+      100% {
+        width: var(--pulse-size);
+        height: var(--pulse-size);
+        border-width: 1px;
+        opacity: 0;
+      }
+    }
+
+    @keyframes challenge-status-pulse {
+      0%, 100% {
+        filter: brightness(0.92);
+      }
+
+      50% {
+        filter: brightness(1.18);
+      }
+    }
+
     .final-question {
       display: grid;
       gap: 10px;
@@ -1780,6 +1855,24 @@
         }, 1300);
       }
 
+      function launchChallengePulse() {
+        if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+        var buttonBounds = challengeStartButton.getBoundingClientRect();
+        var pulse = document.createElement("span");
+        var pulseSize = Math.ceil(Math.hypot(window.innerWidth, window.innerHeight) * 2.1);
+
+        pulse.className = "challenge-launch-pulse";
+        pulse.setAttribute("aria-hidden", "true");
+        pulse.style.setProperty("--pulse-x", buttonBounds.left + buttonBounds.width / 2 + "px");
+        pulse.style.setProperty("--pulse-y", buttonBounds.top + buttonBounds.height / 2 + "px");
+        pulse.style.setProperty("--pulse-size", pulseSize + "px");
+        document.body.appendChild(pulse);
+        window.setTimeout(function () {
+          pulse.remove();
+        }, 1100);
+      }
+
       function hapticForCrossedTick(before, after) {
         var interval = tickIntervals().minor;
         var crossedMainTick = Math.floor(before / interval) !== Math.floor(after / interval);
@@ -2087,6 +2180,7 @@
       }
 
       function renderChallenge() {
+        document.body.classList.toggle("challenge-running", challengeActive);
         challengeStartButton.textContent = challengeActive || challengeComplete ? "Restart challenge" : "Start challenge";
         challengeExitButton.hidden = !challengeActive;
         challengeProgressEl.hidden = !challengeActive;
@@ -2180,6 +2274,8 @@
       }
 
       function startChallenge() {
+        launchChallengePulse();
+        haptic([85, 35, 110]);
         challengeActive = true;
         challengeRound = 1;
         finalQuestionActive = false;
