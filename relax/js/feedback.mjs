@@ -1,4 +1,5 @@
 import { clamp } from './physics.mjs';
+import {chainFrequency} from './chains.mjs';
 
 export const hapticPattern = radius => radius >= 85
   ? [65, 28, 50, 22, 70, 25, 130]
@@ -9,6 +10,7 @@ export class Feedback {
     this.theme=theme; this.enabled=false; this.haptics=true; this.context=null;
     this.hapticAvailable=typeof navigator!=='undefined' && typeof navigator.vibrate==='function';
     this.lastTick=0; this.lastStretch=0; this.lastPop=0; this.voices=0; this.suspended=false;
+    this.nextChainNoteTime=0;this.sources=new Set();
   }
   async setSound(enabled) {
     this.enabled=enabled;
@@ -39,8 +41,8 @@ export class Feedback {
     const data=this.noise.getChannelData(0);
     for(let i=0;i<data.length;i++)data[i]=Math.random()*2-1;
   }
-  tone(frequency, endFrequency, duration, gain, offset=0, type='sine', pan=0) {
-    if(!this.context || this.voices>=42)return;
+  tone(frequency, endFrequency, duration, gain, offset=0, type='sine', pan=0,priority=false) {
+    if(!this.context || this.voices>=(priority?50:38))return;
     const ctx=this.context, now=ctx.currentTime+offset;
     const oscillator=ctx.createOscillator(), envelope=ctx.createGain();
     oscillator.type=type;oscillator.frequency.setValueAtTime(frequency,now);
@@ -51,8 +53,8 @@ export class Feedback {
     let panner;
     if(ctx.createStereoPanner) {panner=ctx.createStereoPanner();panner.pan.value=pan;envelope.connect(panner);panner.connect(this.master);}
     else envelope.connect(this.master);
-    this.voices++;
-    oscillator.onended=()=>{oscillator.disconnect();envelope.disconnect();panner?.disconnect();this.voices--;};
+    this.voices++;this.sources.add(oscillator);
+    oscillator.onended=()=>{oscillator.disconnect();envelope.disconnect();panner?.disconnect();this.sources.delete(oscillator);this.voices--;};
     oscillator.start(now);oscillator.stop(now+duration+.02);
   }
   splash(size, pan) {
@@ -62,15 +64,29 @@ export class Feedback {
     source.buffer=this.noise;filter.type='bandpass';filter.Q.value=.65;
     filter.frequency.setValueAtTime(2200,now);filter.frequency.exponentialRampToValueAtTime(320,now+duration);
     gain.gain.setValueAtTime(0,now);gain.gain.linearRampToValueAtTime(.8,now+.006);gain.gain.exponentialRampToValueAtTime(.0001,now+duration);
-    source.connect(filter);filter.connect(gain);gain.connect(this.master);this.voices++;
-    source.onended=()=>{source.disconnect();filter.disconnect();gain.disconnect();this.voices--;};
+    source.connect(filter);filter.connect(gain);gain.connect(this.master);this.voices++;this.sources.add(source);
+    source.onended=()=>{source.disconnect();filter.disconnect();gain.disconnect();this.sources.delete(source);this.voices--;};
     source.start();source.stop(now+duration+.02);
   }
-  pop(radius, pan=0, party=false) {
+  pop(radius, pan=0, party=false,event={}) {
     if(this.suspended)return;
     this.lastPop=performance.now();
-    this.vibrate(party?[70,25,70,25,100,40,160]:hapticPattern(radius));
+    this.vibrate(event.chainComplete?[45,25,75,30,140]:event.fragment?[16,12,28]:party?[70,25,70,25,100,40,160]:hapticPattern(radius));
     if(!this.enabled || this.context?.state!=='running')return;
+    if(event.fragment) {
+      const now=this.context.currentTime;
+      const start=Math.max(now,Math.min(this.nextChainNoteTime,now+.30));
+      const offset=start-now;this.nextChainNoteTime=start+.033;
+      const frequency=chainFrequency(event.chainStep??0);
+      this.tone(260,70,.13,.48,offset,'sine',pan);
+      this.tone(frequency,frequency,.25,.24,offset+.006,'sine',pan);
+      if(event.chainComplete) {
+        const chord=[784,987.77,1174.66,1568];
+        chord.forEach((note,i)=>this.tone(note,note,.8,.12,offset+.09+i*.014,'sine',(i-1.5)*.3,true));
+        if(event.goldenChain)this.tone(3136,3136,1,.07,offset+.19,'sine',0,true);
+      }
+      return;
+    }
     const size=clamp(radius/110,.2,1.5), pitch=this.theme.audioPitch;
     this.tone((230-size*55)*pitch,42,.30+size*.11,.87,0,'sine',pan);
     this.tone((620-size*120)*pitch,90,.19,.34,.014,'sine',pan);
@@ -108,6 +124,8 @@ export class Feedback {
   stopVibration() {if(this.hapticAvailable)try{navigator.vibrate(0);}catch{}}
   async suspend() {
     this.suspended=true;this.stopVibration();
+    this.nextChainNoteTime=0;
+    for(const source of this.sources)try{source.stop();}catch{}
     try {await this.context?.suspend();}catch{}
   }
   async resume() {

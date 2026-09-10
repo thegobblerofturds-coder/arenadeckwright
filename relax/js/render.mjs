@@ -18,19 +18,26 @@ export class BubbleRenderer {
     for(let i=0;i<POINTS;i++) {const p=pts[i],n=pts[(i+1)%POINTS];path.quadraticCurveTo(p.x*scale,p.y*scale,(p.x+n.x)*scale/2,(p.y+n.y)*scale/2);}
     path.closePath();return path;
   }
-  rainbow(x,y,r,angle) {
+  rainbow(x,y,r,angle,golden=false) {
     const ctx=this.ctx;
     const gradient=ctx.createConicGradient ? ctx.createConicGradient(angle,x,y) : ctx.createLinearGradient(x-r,y-r,x+r,y+r);
-    this.theme.spectrum.forEach((color,i)=>gradient.addColorStop(i/(this.theme.spectrum.length-1),color));
+    const spectrum=golden?['#fff5bc','#ffd76c','#eaaa3a','#ffe4a1','#fff6cd','#d8a44c','#fff5bc']:this.theme.spectrum;
+    spectrum.forEach((color,i)=>gradient.addColorStop(i/(spectrum.length-1),color));
     return gradient;
   }
   bubble(b,time,focused) {
     const ctx=this.ctx,r=b.r,path=this.outline(b);
     ctx.save();ctx.translate(b.x,b.y);
-    const spectrum=this.rainbow(0,0,r,b.hue+time*.075);
+    if(b.fragment){const emergence=clamp(b.age/.24,.08,1);ctx.scale(emergence,emergence);}
+    const spectrum=this.rainbow(0,0,r,b.hue+time*.075,b.golden);
+    if(b.golden) {
+      const glow=ctx.createRadialGradient(0,0,r*.7,0,0,r*1.34);
+      glow.addColorStop(0,'#ffe19700');glow.addColorStop(.6,'#ffc55e15');glow.addColorStop(1,'#ffe19700');
+      ctx.fillStyle=glow;ctx.fillRect(-r*1.4,-r*1.4,r*2.8,r*2.8);
+    }
     // Transparent film, with color concentrated around the curved edge.
     ctx.save();ctx.clip(path);
-    ctx.globalAlpha=this.theme.filmOpacity;ctx.fillStyle=spectrum;ctx.fill(path);ctx.globalAlpha=1;
+    ctx.globalAlpha=b.golden?.23:this.theme.filmOpacity;ctx.fillStyle=spectrum;ctx.fill(path);ctx.globalAlpha=1;
     const film=ctx.createRadialGradient(-r*.22,-r*.3,r*.08,0,0,r*1.15);
     film.addColorStop(0,'rgba(175,191,232,0.015)');film.addColorStop(.62,'rgba(74,76,136,0.018)');
     film.addColorStop(.84,'rgba(177,157,239,0.085)');film.addColorStop(.96,'rgba(180,236,247,0.17)');film.addColorStop(1,'rgba(167,149,237,0.025)');
@@ -47,7 +54,7 @@ export class BubbleRenderer {
     ctx.strokeStyle=spectrum;ctx.globalAlpha=.08;ctx.lineWidth=17;ctx.stroke(path);
     ctx.globalAlpha=.17;ctx.lineWidth=6;ctx.stroke(path);
     ctx.restore();
-    ctx.globalAlpha=.9;ctx.strokeStyle=spectrum;ctx.lineWidth=this.theme.rimWidth;ctx.stroke(path);
+    ctx.globalAlpha=.9;ctx.strokeStyle=spectrum;ctx.lineWidth=b.fragment?2:b.golden?2.4:this.theme.rimWidth;ctx.stroke(path);
     ctx.globalAlpha=.26;ctx.lineWidth=.6;ctx.stroke(this.outline(b,.963));ctx.globalAlpha=1;
     // Broken highlights follow the actual deforming membrane, including stretched necks.
     this.highlight(b,17,23,'rgba(239,250,255,.8)',r>70?3.1:2.3,.915);
@@ -56,6 +63,15 @@ export class BubbleRenderer {
     this.highlight(b,9,12,'rgba(132,241,232,.45)',1.5,.95);
     const p=b.points[21];ctx.fillStyle='#fbffff';ctx.globalAlpha=.9;
     ctx.beginPath();ctx.ellipse(p.x*.94,p.y*.94,Math.max(1.5,r*.027),Math.max(1,r*.014),-.65,0,TAU);ctx.fill();
+    if(b.golden) {
+      ctx.save();ctx.clip(path);ctx.strokeStyle='#fff1a8';ctx.lineWidth=1.2;
+      for(let i=0;i<7;i++) {
+        const a=i*TAU/7+time*.09,orbit=r*(.37+(i%3)*.14),x=Math.cos(a)*orbit,y=Math.sin(a)*orbit;
+        const s=2+Math.sin(time*1.8+i)*1.4;ctx.globalAlpha=.42+Math.sin(time*1.8+i)*.2;
+        ctx.beginPath();ctx.moveTo(x-s,y);ctx.lineTo(x+s,y);ctx.moveTo(x,y-s);ctx.lineTo(x,y+s);ctx.stroke();
+      }
+      ctx.restore();
+    }
     if(focused) {ctx.globalAlpha=.8;ctx.strokeStyle='#f8efff';ctx.lineWidth=1.5;ctx.setLineDash([5,6]);ctx.stroke(this.outline(b,1.09));ctx.setLineDash([]);}
     ctx.restore();
   }
@@ -93,6 +109,23 @@ export class BubbleRenderer {
     }
     return {id:a.id,x,y,r,hue:a.hue,phase:a.phase,points};
   }
+  threads(world) {
+    const ctx=this.ctx;
+    for(const chain of world.chains.values()) {
+      const members=world.bubbles.filter(b=>b.chainId===chain.id).sort((a,b)=>a.chainIndex-b.chainIndex);
+      for(let i=1;i<members.length;i++) {
+        const a=members[i-1],b=members[i];if(b.chainIndex-a.chainIndex!==1)continue;
+        const dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy);
+        if(d<a.r+b.r||d>(a.r+b.r)*5)continue;
+        const nx=dx/d,ny=dy/d,x1=a.x+nx*a.r*.91,y1=a.y+ny*a.r*.91,x2=b.x-nx*b.r*.91,y2=b.y-ny*b.r*.91;
+        const bend=Math.sin(world.time*2+a.chainIndex)*Math.min(8,d*.08);
+        ctx.save();ctx.globalAlpha=.48*Math.min(1,a.age*3,b.age*3);
+        ctx.strokeStyle=this.rainbow((x1+x2)/2,(y1+y2)/2,d,world.time*.2+a.hue,chain.golden);
+        ctx.lineWidth=1.6;ctx.beginPath();ctx.moveTo(x1,y1);ctx.quadraticCurveTo((x1+x2)/2-ny*bend,(y1+y2)/2+nx*bend,x2,y2);ctx.stroke();
+        ctx.globalAlpha=.13;ctx.lineWidth=5;ctx.stroke();ctx.restore();
+      }
+    }
+  }
   draw(world,effects,focusedId=null) {
     const ctx=this.ctx;ctx.setTransform(this.dpr,0,0,this.dpr,0,0);ctx.clearRect(0,0,this.width,this.height);
     ctx.save();
@@ -104,12 +137,13 @@ export class BubbleRenderer {
       ctx.beginPath();ctx.arc(x,y,i%3===0?1.5:.8,0,TAU);ctx.fill();
     }
     ctx.globalAlpha=1;
+    this.threads(world);
     const joined=new Set();
     for(const link of world.links.values()) {
       const a=world.get(link.a),b=world.get(link.b);
       if(a&&b) {this.bubble(this.compound(a,b,link.progress),world.time,a.id===focusedId||b.id===focusedId);joined.add(a.id);joined.add(b.id);}
     }
-    for(const b of world.bubbles)if(!joined.has(b.id))this.bubble(b,world.time,b.id===focusedId);
+    for(const fragment of [false,true])for(const b of world.bubbles)if(b.fragment===fragment&&!joined.has(b.id))this.bubble(b,world.time,b.id===focusedId);
     effects.draw(ctx,this.width,this.height,world.time);
     ctx.restore();
   }

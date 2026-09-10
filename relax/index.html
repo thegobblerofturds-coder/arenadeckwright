@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#090b13">
-  <meta name="description" content="Big, gooey rainbow bubbles and ridiculously satisfying pops. Stretch, squish, score, and set off a pop party.">
+  <meta name="description" content="Big, gooey rainbow bubbles and ridiculously satisfying pops. Split bubbly chains, sweep through rising chimes, and discover golden bubbles.">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; media-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'">
   <title>Bubble Mix · TurdGobbler</title>
   <link rel="icon" href="../favicon.ico" sizes="any">
@@ -15,10 +15,9 @@
 <body>
   <main class="playroom" aria-label="Bubble Mix">
     <canvas id="bubbles" tabindex="0" aria-label="Rainbow bubble playground" aria-describedby="canvas-help">Your browser needs canvas support to show the bubbles.</canvas>
-    <p class="sr-only" id="canvas-help">Tap a bubble to pop it. Drag a bubble to stretch it. With a keyboard, use the arrow keys to choose a bubble and press Space or Enter to pop it. Tab moves to the sound, pause, and mix controls.</p>
+    <p class="sr-only" id="canvas-help">Tap a large bubble to split it into a chain of little bubbles. Sweep through the little bubbles to pop them. Drag ordinary bubbles to stretch them. With a keyboard, use the arrow keys to choose a bubble and press Space or Enter to burst it. Tab moves to the sound, pause, and slider controls.</p>
 
     <header class="topbar">
-      <div class="wordmark"><h1>bubble <em>mix</em></h1><p>RAINBOW SOAP</p></div>
       <div class="quick-controls">
         <button class="icon-button" id="sound" type="button" aria-label="Turn sound on" aria-pressed="false" title="Turn sound on">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4Z"/><path class="sound-off" d="m16 9 5 6m0-6-5 6"/><path class="sound-on" d="M15 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/></svg>
@@ -30,31 +29,24 @@
     </header>
 
     <aside class="scoreboard" aria-label="Your score">
-      <div class="score-main"><span class="score-label">POP POINTS</span><strong id="score" aria-live="off">0</strong></div>
-      <div class="score-side"><span class="best-score">BEST <span id="best">0</span></span><span class="combo" id="combo" hidden>×2 COMBO</span></div>
-      <div class="party-progress" aria-label="Pop party progress"><div class="party-heading"><span id="party-label">POP PARTY</span><span id="party-count">0 / 10</span></div><div class="party-track"><div id="party-fill"></div></div></div>
+      <strong id="score" aria-label="0 points" aria-live="off">0</strong>
+      <span class="combo" id="combo" hidden>×2</span>
     </aside>
     <div class="bottom-ui">
-      <p class="gesture-hint" id="gesture-hint">tap to pop <span>·</span> drag to stretch</p>
       <section class="mix-tray" aria-label="Bubble settings">
-        <button class="tray-toggle" type="button" id="tray-toggle" aria-expanded="true" aria-controls="mix-controls">
-          <span class="tray-name">Your mix</span>
-          <span class="tray-toggle-label">Tuck away</span>
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg>
-        </button>
         <div id="mix-controls" class="mix-controls">
           <div class="slider-group">
-            <div class="slider-heading"><label for="thickness">Thickness</label><output for="thickness" id="thickness-value">Syrupy</output></div>
+            <label for="thickness">Thickness</label>
             <input type="range" id="thickness" min="0" max="100" value="78" aria-valuetext="Syrupy">
-            <div class="range-ends" aria-hidden="true"><span>Floaty</span><span>Gooey</span></div>
           </div>
           <div class="slider-group">
-            <div class="slider-heading"><label for="generation">New bubbles</label><output for="generation" id="generation-value">Gentle</output></div>
+            <label for="generation">Bubbles</label>
             <input type="range" id="generation" min="0" max="100" value="32" aria-valuetext="Gentle">
-            <div class="range-ends" aria-hidden="true"><span>None</span><span>Plenty</span></div>
           </div>
-          <div class="tray-footer"><span id="sound-note">Sound on = extra satisfying</span><button id="haptics" class="haptics-button" type="button" aria-pressed="true">Haptics <span>on</span></button></div>
         </div>
+        <button class="tray-toggle" type="button" id="tray-toggle" aria-expanded="true" aria-controls="mix-controls" aria-label="Hide sliders" title="Hide sliders">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg>
+        </button>
       </section>
     </div>
     <p id="status" class="sr-only" role="status" aria-live="polite"></p>
