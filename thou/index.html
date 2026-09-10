@@ -305,6 +305,20 @@
       cursor: pointer;
     }
 
+    .target-reading,
+    .target-shop-name {
+      display: block;
+    }
+
+    .target-shop-name {
+      margin-top: 4px;
+      color: var(--text);
+      font-size: 0.74rem;
+      font-weight: 800;
+      line-height: 1.15;
+      text-transform: none;
+    }
+
     .current-value {
       color: var(--blue);
     }
@@ -372,99 +386,8 @@
     .status-row {
       position: relative;
       z-index: 5;
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
-      align-items: center;
-      gap: 10px;
-      min-height: 66px;
+      min-height: 34px;
       margin-top: 8px;
-    }
-
-    .magnifier-dock {
-      display: grid;
-      width: 76px;
-      min-height: 60px;
-      place-items: center;
-    }
-
-    .magnifier-tool {
-      --drag-x: 0px;
-      --drag-y: 0px;
-      position: relative;
-      z-index: 20;
-      display: grid;
-      width: 66px;
-      height: 56px;
-      padding: 4px;
-      place-items: center;
-      border: 4px solid #cbd5e1;
-      border-radius: 22px;
-      color: #07111f;
-      background: #f8fafc;
-      box-shadow: 0 6px 0 #64748b, 0 11px 22px rgb(0 0 0 / 0.32);
-      cursor: grab;
-      touch-action: none;
-      user-select: none;
-      transform: translate(var(--drag-x), var(--drag-y));
-      transition: transform 220ms cubic-bezier(0.2, 1.45, 0.42, 1), box-shadow 120ms ease;
-    }
-
-    .magnifier-tool::after {
-      content: "";
-      position: absolute;
-      right: -12px;
-      bottom: -11px;
-      width: 23px;
-      height: 10px;
-      border: 3px solid #cbd5e1;
-      border-left: 0;
-      border-radius: 0 7px 7px 0;
-      background: #64748b;
-      transform: rotate(42deg);
-      transform-origin: left center;
-      pointer-events: none;
-    }
-
-    .magnifier-tool[data-dragging="true"] {
-      cursor: grabbing;
-      box-shadow: 0 9px 0 #64748b, 0 18px 32px rgb(0 0 0 / 0.42);
-      transform: translate(var(--drag-x), var(--drag-y)) scale(1.35);
-      transition: none;
-    }
-
-    .magnifier-tool:disabled {
-      opacity: 0.42;
-      cursor: not-allowed;
-      filter: grayscale(0.65);
-    }
-
-    .magnifier-icon {
-      font-size: 1.5rem;
-      line-height: 1;
-    }
-
-    .magnifier-copy {
-      color: #334155;
-      font-size: 0.62rem;
-      font-weight: 950;
-      letter-spacing: 0.045em;
-      line-height: 1;
-      text-transform: uppercase;
-    }
-
-    .magnifier-ruler {
-      display: none;
-    }
-
-    .magnifier-tool[data-dragging="true"] .magnifier-icon,
-    .magnifier-tool[data-dragging="true"] .magnifier-copy {
-      display: none;
-    }
-
-    .magnifier-tool[data-dragging="true"] .magnifier-ruler {
-      display: block;
-      width: 54px;
-      height: 34px;
     }
 
     .feedback[data-kind="success"] {
@@ -947,113 +870,6 @@
       text-transform: uppercase;
     }
 
-    .status-row {
-      grid-template-columns: minmax(0, 1fr) 82px;
-      min-height: 70px;
-    }
-
-    .magnifier-dock {
-      width: 82px;
-      min-height: 68px;
-      justify-items: center;
-    }
-
-    .magnifier-tool {
-      width: 70px;
-      height: 66px;
-      border: 4px solid #bd2a23;
-      border-radius: 50%;
-      color: #ff3b31;
-      background:
-        repeating-linear-gradient(0deg, transparent 0 6px, rgb(224 49 41 / 0.16) 7px 8px),
-        repeating-linear-gradient(90deg, transparent 0 11px, rgb(224 49 41 / 0.12) 12px 13px),
-        radial-gradient(circle, #36110f, #100807 70%);
-      box-shadow: 0 5px 0 #4a0c09, 0 0 18px rgb(224 49 41 / 0.35), inset 0 0 0 3px #120605;
-    }
-
-    .magnifier-tool::after {
-      display: none;
-    }
-
-    .magnifier-icon,
-    .magnifier-copy,
-    .magnifier-ruler,
-    .magnifier-status {
-      position: relative;
-      z-index: 2;
-    }
-
-    .magnifier-icon {
-      color: #ff4d42;
-      font-size: 1.7rem;
-      text-shadow: 0 0 9px #e62d25;
-    }
-
-    .magnifier-copy {
-      color: #ef8278;
-      font-size: 0.68rem;
-      letter-spacing: 0.08em;
-    }
-
-    .magnifier-handle {
-      position: absolute;
-      z-index: 1;
-      top: 52px;
-      left: 20px;
-      display: grid;
-      width: 28px;
-      height: 92px;
-      place-items: center;
-      border: 3px solid #72503a;
-      border-top-width: 8px;
-      border-radius: 3px 3px 8px 8px;
-      color: #cbb08a;
-      background:
-        repeating-linear-gradient(90deg, transparent 0 13px, rgb(185 74 40 / 0.13) 14px 16px),
-        linear-gradient(#594337, #2c211b);
-      box-shadow: 0 5px 0 #100907, inset 0 2px 0 rgb(255 232 194 / 0.13);
-      font-size: 0.68rem;
-      font-weight: 950;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      writing-mode: vertical-rl;
-    }
-
-    .magnifier-tool[data-dragging="true"] {
-      border-color: #ff4237;
-      box-shadow: 0 6px 0 #4a0c09, 0 0 30px rgb(255 42 32 / 0.68), inset 0 0 0 3px #120605;
-      transform: translate(var(--drag-x), var(--drag-y)) scale(1.08);
-    }
-
-    .magnifier-tool[data-dragging="true"] .magnifier-ruler {
-      display: block;
-      width: 60px;
-      height: 39px;
-    }
-
-    .magnifier-status {
-      display: none;
-    }
-
-    .magnifier-tool[data-dragging="true"] .magnifier-status {
-      display: block;
-      width: 62px;
-      overflow: hidden;
-      color: #ef8278;
-      font-size: 0.68rem;
-      font-weight: 950;
-      line-height: 1;
-      text-align: center;
-      text-overflow: ellipsis;
-      text-transform: uppercase;
-      white-space: nowrap;
-    }
-
-    .magnifier-tool[data-selector-visible="true"] {
-      border-color: #f2c653;
-      box-shadow: 0 6px 0 #4a0c09, 0 0 34px rgb(242 198 83 / 0.7), inset 0 0 0 3px #120605;
-    }
-
     @media (max-width: 620px) {
       body {
         padding:
@@ -1150,14 +966,6 @@
         font-size: 0.92rem;
       }
 
-      .status-row {
-        grid-template-columns: minmax(0, 1fr) 76px;
-      }
-
-      .magnifier-dock {
-        width: 76px;
-      }
-
       .nudge-grid {
         grid-template-columns: repeat(2, 1fr);
       }
@@ -1215,7 +1023,7 @@
           </button>
         </div>
 
-        <p class="difficulty-help" data-difficulty-help>Common 0.025 in steps with a ±0.005 in target.</p>
+        <p class="difficulty-help" data-difficulty-help>0.025 in steps plus practical sixteenths, rounded to the nearest thousandth.</p>
       </div>
     </details>
 
@@ -1223,7 +1031,10 @@
       <div class="scoreboard">
         <div class="score-item">
           <span class="score-label">⌖ Target</span>
-          <button class="target-button score-value" type="button" data-target-button aria-label="Load a new random target">New target</button>
+          <button class="target-button score-value" type="button" data-target-button aria-label="Load a new random target">
+            <span class="target-reading" data-target-reading>New target</span>
+            <span class="target-shop-name" data-target-shop-name hidden></span>
+          </button>
         </div>
         <div class="score-item">
           <span class="score-label">▼ Selector</span>
@@ -1240,19 +1051,10 @@
 
       <div class="status-row">
         <p class="feedback" aria-live="polite" data-feedback>Choose a difficulty, then start.</p>
-        <div class="magnifier-dock">
-          <button class="magnifier-tool" type="button" data-magnifier data-dragging="false" aria-label="Drag the visor by its long grip over the ruler for a temporary close-up">
-            <span class="magnifier-icon" aria-hidden="true">▦</span>
-            <span class="magnifier-copy" data-magnifier-copy>Visor</span>
-            <svg class="magnifier-ruler" data-magnifier-ruler viewBox="0 0 60 36" aria-hidden="true"></svg>
-            <span class="magnifier-status" data-magnifier-status aria-hidden="true"></span>
-            <span class="magnifier-handle" aria-hidden="true"><span>Grip</span></span>
-          </button>
-        </div>
       </div>
 
       <div class="ruler-zone">
-        <div class="ruler-stage" data-ruler-stage>
+        <div class="ruler-stage">
           <svg class="ruler-svg" data-ruler role="img" aria-label="Ruler from zero to one inch">
             <title>Measurement ruler</title>
             <desc>The coloured ruler has a movable needle and small measurement ticks.</desc>
@@ -1303,8 +1105,9 @@
       var storageKey = "thousandths-trainer-preferences-v5";
       var slider = document.querySelector("[data-slider]");
       var ruler = document.querySelector("[data-ruler]");
-      var rulerStage = document.querySelector("[data-ruler-stage]");
       var targetButton = document.querySelector("[data-target-button]");
+      var targetReadingEl = document.querySelector("[data-target-reading]");
+      var targetShopNameEl = document.querySelector("[data-target-shop-name]");
       var currentEl = document.querySelector("[data-current]");
       var peekButton = document.querySelector("[data-peek-button]");
       var peekHint = document.querySelector("[data-peek-hint]");
@@ -1316,10 +1119,6 @@
       var sliderLabelEl = document.querySelector("[data-slider-label]");
       var difficultyNameEl = document.querySelector("[data-difficulty-name]");
       var difficultyHelpEl = document.querySelector("[data-difficulty-help]");
-      var magnifierTool = document.querySelector("[data-magnifier]");
-      var magnifierCopy = document.querySelector("[data-magnifier-copy]");
-      var magnifierRuler = document.querySelector("[data-magnifier-ruler]");
-      var magnifierStatus = document.querySelector("[data-magnifier-status]");
       var fineBudgetEl = document.querySelector("[data-fine-budget]");
       var difficultyPanel = document.querySelector("[data-difficulty-panel]");
       var difficultyToggle = document.querySelector(".difficulty-toggle");
@@ -1344,11 +1143,6 @@
       var peekTimer = null;
       var fineTapsLeft = difficulty === 4 ? 5 : difficulty === 3 ? 10 : 0;
       var stickyTick = null;
-      var magnifierPointer = null;
-      var magnifierStartX = 0;
-      var magnifierStartY = 0;
-      var magnifierLensOffsetX = 0;
-      var magnifierTick = null;
       var viewStart = 0;
       var viewEnd = maximum();
 
@@ -1398,6 +1192,27 @@
         return decimal(value) + (unit === "in" ? " inches" : " millimetres");
       }
 
+      function isHalfStep(value) {
+        return Math.abs(value - (Math.floor(value) + 0.5)) < 0.001;
+      }
+
+      function preciseFormatted(value) {
+        var digits = Number.isInteger(value) ? 3 : 4;
+        return (value / 1000).toFixed(digits) + " " + suffix();
+      }
+
+      function compactDecimal(value) {
+        var result = decimal(value);
+        return unit === "in" ? result.replace(/^0/, "") : result;
+      }
+
+      function targetReading(value) {
+        if (isHalfStep(value)) {
+          return compactDecimal(Math.floor(value)) + " / " + compactDecimal(Math.ceil(value)) + " " + suffix();
+        }
+        return formatted(value);
+      }
+
       function clamp(value, minimum, maximumValue) {
         return Math.min(maximumValue, Math.max(minimum, value));
       }
@@ -1415,27 +1230,42 @@
         return values[randomInt(values.length - 1)];
       }
 
+      function shopTargetPool() {
+        var targets = new Set();
+        var regularStep = unit === "in" ? 25 : 100;
+        var sixteenthStep = unit === "in" ? 62.5 : 1587.5;
+
+        for (var value = regularStep; value < maximum(); value += regularStep) {
+          targets.add(value);
+        }
+        for (var sixteenth = 1; sixteenth < 16; sixteenth += 1) {
+          targets.add(sixteenth * sixteenthStep);
+        }
+
+        return Array.from(targets).sort(function (a, b) { return a - b; });
+      }
+
       function difficultySettings() {
         if (unit === "in") {
           if (difficulty === 2) {
             return {
               name: "Shop",
-              help: "Common 0.025 in steps with a ±0.005 in target.",
+              help: "0.025 in steps plus practical sixteenths, rounded to the nearest thousandth.",
               tolerance: 5,
-              step: 25
+              pool: shopTargetPool()
             };
           }
           if (difficulty === 3) {
             return {
               name: "Expert",
-              help: "±0.003 in, visor locked, and 10 fine taps per round.",
+              help: "Any thousandth with a ±0.003 in target and 10 fine taps per round.",
               tolerance: 3,
               step: 1
             };
           }
           return {
             name: "Extreme",
-            help: "±0.001 in, visor locked, and only 5 fine taps per round.",
+            help: "Any thousandth with a ±0.001 in target and only 5 fine taps per round.",
             tolerance: 1,
             step: 1
           };
@@ -1444,22 +1274,22 @@
         if (difficulty === 2) {
           return {
             name: "Shop",
-            help: "Common 0.100 mm steps with a ±0.010 mm target.",
+            help: "0.100 mm steps plus inch sixteenths, rounded to the nearest thousandth.",
             tolerance: 10,
-            step: 100
+            pool: shopTargetPool()
           };
         }
         if (difficulty === 3) {
           return {
             name: "Expert",
-            help: "±0.003 mm, visor locked, and 10 fine taps per round.",
+            help: "Any thousandth with a ±0.003 mm target and 10 fine taps per round.",
             tolerance: 3,
             step: 1
           };
         }
         return {
           name: "Extreme",
-          help: "±0.001 mm, visor locked, and only 5 fine taps per round.",
+          help: "Any thousandth with a ±0.001 mm target and only 5 fine taps per round.",
           tolerance: 1,
           step: 1
         };
@@ -1521,31 +1351,47 @@
         return value;
       }
 
+      function sixteenthName(index) {
+        var names = {
+          1: "one-sixteenth inch",
+          2: "one-eighth inch",
+          3: "three-sixteenths inch",
+          4: "quarter inch",
+          5: "five-sixteenths inch",
+          6: "three-eighths inch",
+          7: "seven-sixteenths inch",
+          8: "half inch",
+          9: "nine-sixteenths inch",
+          10: "five-eighths inch",
+          11: "eleven-sixteenths inch",
+          12: "three-quarter inch",
+          13: "thirteen-sixteenths inch",
+          14: "seven-eighths inch",
+          15: "fifteen-sixteenths inch",
+          16: "one inch"
+        };
+        return names[index] || "";
+      }
+
+      function shopName(value) {
+        if (value === 0) return "zero";
+        var inchThousandths = unit === "in" ? value : value / 25.4;
+        var sixteenth = Math.round(inchThousandths / 62.5);
+        if (sixteenth < 1 || sixteenth > 16) return "";
+        if (Math.abs(inchThousandths - sixteenth * 62.5) > 0.51) return "";
+        return sixteenthName(sixteenth);
+      }
+
       function commonName(value) {
-        var inchNames = {
-          0: "zero",
-          125: "one-eighth inch",
-          250: "quarter inch",
-          375: "three-eighths inch",
-          500: "half inch",
-          625: "five-eighths inch",
-          750: "three-quarter inch",
-          875: "seven-eighths inch",
-          1000: "one inch"
-        };
-        var mmNames = {
-          0: "zero",
-          3175: "3.175 mm · one-eighth inch",
-          6350: "6.350 mm · quarter inch",
-          9525: "9.525 mm · three-eighths inch",
-          12700: "12.700 mm · half inch",
-          15875: "15.875 mm · five-eighths inch",
-          19050: "19.050 mm · three-quarter inch",
-          22225: "22.225 mm · seven-eighths inch",
-          25400: "25.400 mm · one inch"
-        };
-        if (unit === "in") return inchNames[value] || value + " thou";
-        return mmNames[value] || decimal(value) + " millimetres";
+        var name = shopName(value);
+        if (name) {
+          var inchThousandths = unit === "in" ? value : value / 25.4;
+          var sixteenth = Math.round(inchThousandths / 62.5);
+          var approximate = Math.abs(inchThousandths - sixteenth * 62.5) > 0.001;
+          return (approximate ? "about " : "") + name;
+        }
+        if (unit === "in") return value + " thou";
+        return decimal(value) + " millimetres";
       }
 
       function breakdown(value) {
@@ -1677,104 +1523,6 @@
         }));
       }
 
-      function drawMagnifier(value) {
-        var width = 60;
-        var height = 36;
-        var localSpan = unit === "in" ? 80 : 2000;
-        var minor = unit === "in" ? 5 : 100;
-        var major = unit === "in" ? 10 : 500;
-        var start = clamp(value - localSpan / 2, 0, maximum() - localSpan);
-        var end = start + localSpan;
-        var x = function (tick) {
-          return ((tick - start) / localSpan) * width;
-        };
-
-        magnifierRuler.replaceChildren();
-        magnifierRuler.appendChild(svgNode("line", {
-          x1: 0,
-          y1: 12,
-          x2: width,
-          y2: 12,
-          stroke: "#8f211b",
-          "stroke-width": 3
-        }));
-
-        var firstTick = Math.ceil(start / minor) * minor;
-        for (var tick = firstTick; tick <= end; tick += minor) {
-          var isMajor = tick % major === 0;
-          magnifierRuler.appendChild(svgNode("line", {
-            x1: x(tick),
-            y1: 12,
-            x2: x(tick),
-            y2: isMajor ? 29 : 23,
-            stroke: "#ff9b82",
-            "stroke-width": isMajor ? 1.8 : 1
-          }));
-        }
-
-        var selectorVisible = current >= start && current <= end;
-        if (selectorVisible) {
-          var selectorX = x(current);
-          magnifierRuler.appendChild(svgNode("line", {
-            x1: selectorX,
-            y1: 1,
-            x2: selectorX,
-            y2: height,
-            stroke: "#ff2a20",
-            "stroke-width": 3
-          }));
-          magnifierRuler.appendChild(svgNode("polygon", {
-            points: (selectorX - 5) + ",1 " + (selectorX + 5) + ",1 " + selectorX + ",8",
-            fill: "#ff2a20"
-          }));
-        }
-        magnifierTool.dataset.selectorVisible = String(selectorVisible);
-        magnifierStatus.textContent = selectorVisible ? "Needle" : "Scanning";
-      }
-
-      function magnifierValueAt(clientX) {
-        var bounds = rulerStage.getBoundingClientRect();
-        var ratio = clamp((clientX - bounds.left) / bounds.width, 0, 1);
-        return Math.round(ratio * maximum());
-      }
-
-      function moveMagnifier(event) {
-        if (magnifierPointer !== event.pointerId) return;
-        var dragX = event.clientX - magnifierStartX;
-        var dragY = event.clientY - magnifierStartY;
-        var value = magnifierValueAt(event.clientX - magnifierLensOffsetX);
-        var tick = Math.floor(value / (unit === "in" ? 5 : 100));
-
-        magnifierTool.style.setProperty("--drag-x", dragX + "px");
-        magnifierTool.style.setProperty("--drag-y", dragY + "px");
-        if (magnifierTick !== null && tick !== magnifierTick) haptic(20);
-        magnifierTick = tick;
-        drawMagnifier(value);
-      }
-
-      function snapMagnifier() {
-        magnifierPointer = null;
-        magnifierTick = null;
-        magnifierTool.dataset.dragging = "false";
-        magnifierTool.dataset.selectorVisible = "false";
-        magnifierStatus.textContent = "";
-        magnifierTool.style.setProperty("--drag-x", "0px");
-        magnifierTool.style.setProperty("--drag-y", "0px");
-      }
-
-      function renderMagnifier() {
-        var locked = difficulty >= 3;
-        if (locked && magnifierPointer !== null) snapMagnifier();
-        magnifierTool.disabled = locked;
-        magnifierCopy.textContent = locked ? "Locked" : "Visor";
-        magnifierTool.setAttribute(
-          "aria-label",
-          locked
-            ? "Targeting visor locked in Expert and Extreme modes"
-            : "Drag the visor by its long grip over the ruler for a temporary close-up"
-        );
-      }
-
       function renderDifficulty() {
         var settings = difficultySettings();
         difficultyNameEl.textContent = settings.name;
@@ -1814,17 +1562,18 @@
         coachSteps.replaceChildren();
         if (!guideVisible || target === null) return;
 
+        var acceptedReading = isHalfStep(target) ? Math.floor(target) : target;
         var landmarkInterval = unit === "in" ? 50 : 100;
-        var landmark = Math.floor(target / landmarkInterval) * landmarkInterval;
-        var remaining = target - landmark;
+        var landmark = Math.floor(acceptedReading / landmarkInterval) * landmarkInterval;
+        var remaining = acceptedReading - landmark;
         var tens = Math.floor(remaining / 10);
         var ones = remaining % 10;
-        var lookStep = difficulty < 3
-          ? "Drag the targeting visor by its long grip over crowded ticks, then let go to snap it back."
-          : "The visor is locked here, so use the sticky ruler ticks to judge the space.";
+        var lookStep = isHalfStep(target)
+          ? "This sixteenth lands halfway between " + formatted(Math.floor(target)) + " and " + formatted(Math.ceil(target)) + "; either reading qualifies."
+          : "Use the sticky ruler ticks to judge the space.";
         var steps = [
           "<strong>Start:</strong> find the " + formatted(landmark) + " tick just below the target.",
-          "<strong>Look:</strong> your target is " + formatted(target) + ". " + lookStep,
+          "<strong>Look:</strong> your target is " + targetReading(target) + ". " + lookStep,
           "<strong>Adjust:</strong> from that tick, use +0.010 " + tens + " " + (tens === 1 ? "time" : "times") + " and +0.001 " + ones + " " + (ones === 1 ? "time" : "times") + "."
         ];
 
@@ -1852,13 +1601,15 @@
         peekHint.textContent = peeking ? "shh… hiding again" : "tap to peek 👀";
         breakdownEl.textContent = hiddenReading ? "Classified until you tap the censored number" : breakdown(current);
         commonNameEl.textContent = hiddenReading ? "Nice try 👀" : commonName(current);
-        toleranceEl.textContent = tolerance === null ? "—" : "±" + formatted(tolerance);
-        targetButton.textContent = target === null ? "New target" : formatted(target);
+        toleranceEl.textContent = tolerance === null ? "—" : "±" + preciseFormatted(tolerance);
+        targetReadingEl.textContent = target === null ? "New target" : targetReading(target);
+        targetShopNameEl.hidden = target === null || !shopName(target);
+        targetShopNameEl.textContent = target === null ? "" : shopName(target);
         targetButton.setAttribute(
           "aria-label",
           target === null
             ? "Load a new random target"
-            : "Target " + spoken(target) + ". Load a new random target"
+            : "Target " + targetReading(target) + (shopName(target) ? ", " + shopName(target) : "") + ". Load a new random target"
         );
 
         if (phase === "ready") checkButton.textContent = "Start";
@@ -1875,7 +1626,6 @@
 
         renderUnit();
         renderDifficulty();
-        renderMagnifier();
         renderNudges();
         renderCoach();
         drawRuler();
@@ -1894,7 +1644,7 @@
         peekTimer = null;
         peeking = false;
         target = makeTarget(settings);
-        tolerance = settings.tolerance;
+        tolerance = isHalfStep(target) ? 0.5 : settings.tolerance;
         phase = "checking";
         misses = 0;
         fineTapsLeft = fineTapLimit();
@@ -1937,7 +1687,6 @@
 
       function setDifficulty(nextDifficulty) {
         difficulty = nextDifficulty;
-        if (difficulty >= 3) snapMagnifier();
         savePreferences();
         if (phase === "checking") {
           newChallenge();
@@ -1952,8 +1701,8 @@
         if (nextUnit === unit) return;
         var factor = nextUnit === "mm" ? 25.4 : 1 / 25.4;
         current = Math.round(current * factor);
-        if (target !== null) target = Math.round(target * factor);
-        if (tolerance !== null) tolerance = Math.max(1, Math.round(tolerance * factor));
+        if (target !== null) target = Math.round(target * factor * 1000) / 1000;
+        if (tolerance !== null) tolerance = Math.round(tolerance * factor * 1000) / 1000;
         unit = nextUnit;
         stickyTick = null;
         resetView();
@@ -2015,37 +1764,6 @@
         difficultyToggle.textContent = difficultyPanel.open ? "Retract ▴" : "Deploy ▾";
         savePreferences();
         haptic(34);
-      });
-
-      magnifierTool.addEventListener("pointerdown", function (event) {
-        if (magnifierTool.disabled) return;
-        event.preventDefault();
-        magnifierPointer = event.pointerId;
-        magnifierStartX = event.clientX;
-        magnifierStartY = event.clientY;
-        var magnifierBounds = magnifierTool.getBoundingClientRect();
-        magnifierLensOffsetX = event.clientX - (magnifierBounds.left + magnifierBounds.width / 2);
-        magnifierTick = null;
-        magnifierTool.dataset.dragging = "true";
-        magnifierTool.setPointerCapture(event.pointerId);
-        moveMagnifier(event);
-      });
-
-      magnifierTool.addEventListener("pointermove", moveMagnifier);
-
-      function releaseMagnifier(event) {
-        if (magnifierPointer !== event.pointerId) return;
-        if (magnifierTool.hasPointerCapture(event.pointerId)) {
-          magnifierTool.releasePointerCapture(event.pointerId);
-        }
-        snapMagnifier();
-        haptic([32, 22, 44]);
-      }
-
-      magnifierTool.addEventListener("pointerup", releaseMagnifier);
-      magnifierTool.addEventListener("pointercancel", releaseMagnifier);
-      magnifierTool.addEventListener("lostpointercapture", function () {
-        if (magnifierPointer !== null) snapMagnifier();
       });
 
       nudgeButtons.forEach(function (button) {
