@@ -538,28 +538,6 @@
       text-align: center;
     }
 
-    .detail-row {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 9px;
-      margin-top: 11px;
-    }
-
-    .detail {
-      min-width: 0;
-      padding: 10px 12px;
-      border-radius: 12px;
-      color: var(--muted);
-      background: rgb(8 16 32 / 0.25);
-      font-size: 0.88rem;
-      line-height: 1.35;
-    }
-
-    .detail strong {
-      color: var(--text);
-      font-weight: 850;
-    }
-
     .haptic-note {
       margin-top: 10px;
       color: var(--muted);
@@ -1124,13 +1102,6 @@
       color: #f0ad70;
     }
 
-    .detail {
-      border: 2px solid #614534;
-      border-radius: 4px;
-      background: #1f1713;
-      box-shadow: inset 0 3px 9px rgb(0 0 0 / 0.52);
-    }
-
     .home-link {
       color: #b99d78;
       letter-spacing: 0.06em;
@@ -1187,6 +1158,49 @@
     .current-value {
       color: #c9ef58;
       text-shadow: 0 0 10px rgb(176 226 74 / 0.2);
+    }
+
+    .selector-display {
+      position: relative;
+      overflow: hidden;
+      border-color: #657f36;
+      background:
+        repeating-linear-gradient(0deg, rgb(183 255 96 / 0.025) 0 2px, transparent 2px 4px),
+        radial-gradient(circle at 50% 30%, #203c18, #081008 74%);
+      box-shadow:
+        inset 0 0 0 2px #030703,
+        inset 0 0 24px rgb(127 219 71 / 0.17),
+        0 1px 0 rgb(222 255 171 / 0.12);
+    }
+
+    .selector-display .score-label {
+      color: #7cab4a;
+      font-family: "Lucida Console", "Courier New", monospace;
+      letter-spacing: 0.12em;
+    }
+
+    .selector-display .peek-button,
+    .selector-display .peek-button:disabled {
+      border-color: #48662d;
+      color: #bdf86c;
+      background: linear-gradient(#182a13, #0a1209);
+      box-shadow: inset 0 0 13px rgb(136 232 76 / 0.12), 0 3px 0 #020502;
+    }
+
+    .selector-display .current-value {
+      color: #bdff70;
+      font-family: "Lucida Console", "Courier New", monospace;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.045em;
+      text-shadow: 0 0 5px #8acf4d, 0 0 13px rgb(126 221 69 / 0.55);
+    }
+
+    .selector-display .selector-shop-name,
+    .selector-display .peek-hint {
+      color: #83bd55;
+      font-family: "Lucida Console", "Courier New", monospace;
+      letter-spacing: 0.035em;
+      text-shadow: 0 0 8px rgb(126 221 69 / 0.34);
     }
 
     .primary-button {
@@ -1281,10 +1295,6 @@
 
       .star-option small {
         font-size: 0.75rem;
-      }
-
-      .detail-row {
-        grid-template-columns: 1fr;
       }
 
       .scale-examples {
@@ -1417,8 +1427,8 @@
             <span class="target-shop-name" data-target-shop-name hidden></span>
           </button>
         </div>
-        <div class="score-item">
-          <span class="score-label">▼ Selector</span>
+        <div class="score-item selector-display">
+          <span class="score-label">LCD Readout</span>
           <button class="peek-button" type="button" data-peek-button disabled>
             <strong class="score-value current-value" data-current>0.000 in</strong>
             <span class="selector-shop-name" data-selector-shop-name>zero</span>
@@ -1462,13 +1472,6 @@
         <h2>How to work it out</h2>
         <ol data-coach-steps></ol>
       </aside>
-
-      <div class="detail-row">
-        <div class="detail">
-          <span class="eyebrow">Breakdown</span>
-          <strong data-breakdown>0 whole inches + 0 thousandths</strong>
-        </div>
-      </div>
 
       <p class="haptic-note" data-haptic-note>Buttons and every sticky ruler tick give strong pulses on supported phones.</p>
     </section>
@@ -1523,7 +1526,6 @@
       var toleranceEl = document.querySelector("[data-tolerance]");
       var feedbackEl = document.querySelector("[data-feedback]");
       var checkButton = document.querySelector("[data-check-button]");
-      var breakdownEl = document.querySelector("[data-breakdown]");
       var sliderLabelEl = document.querySelector("[data-slider-label]");
       var difficultyNameEl = document.querySelector("[data-difficulty-name]");
       var difficultyHelpEl = document.querySelector("[data-difficulty-help]");
@@ -1846,24 +1848,27 @@
         return sixteenthName(sixteenth);
       }
 
-      function commonName(value) {
-        var name = shopName(value);
-        if (name) {
-          var inchThousandths = unit === "in" ? value : value / 25.4;
-          var sixteenth = Math.round(inchThousandths / 62.5);
-          var approximate = Math.abs(inchThousandths - sixteenth * 62.5) > 0.001;
-          return (approximate ? "about " : "") + name;
+      function greatestCommonDivisor(first, second) {
+        while (second) {
+          var remainder = first % second;
+          first = second;
+          second = remainder;
         }
-        if (unit === "in") return value + " thou";
-        return decimal(value) + " millimetres";
+        return first;
       }
 
-      function breakdown(value) {
-        if (unit === "in") {
-          if (value === 1000) return "1 whole inch + 0 thousandths";
-          return "0 whole inches + " + value + " thousandths";
-        }
-        return Math.floor(value / 1000) + " whole mm + " + (value % 1000) + " thousandths";
+      function shopFraction(value) {
+        if (value === 0) return "0 in";
+        var inchThousandths = unit === "in" ? value : value / 25.4;
+        var sixteenth = Math.round(inchThousandths / 62.5);
+        if (sixteenth < 1 || sixteenth > 16) return "";
+        if (Math.abs(inchThousandths - sixteenth * 62.5) > 0.51) return "";
+        if (sixteenth === 16) return "1 in";
+
+        var divisor = greatestCommonDivisor(sixteenth, 16);
+        var fraction = (sixteenth / divisor) + "/" + (16 / divisor) + " in";
+        var approximate = Math.abs(inchThousandths - sixteenth * 62.5) > 0.001;
+        return (approximate ? "≈ " : "") + fraction;
       }
 
       function svgNode(name, attributes, text) {
@@ -2095,7 +2100,10 @@
       function render() {
         var hiddenReading = phase === "checking" && !peeking;
         var displayCurrent = hiddenReading ? "🤐 CENSORED" : formatted(current);
-        var selectorShopName = hiddenReading ? "" : shopName(current);
+        var selectorFraction = hiddenReading ? "" : shopFraction(current);
+        var selectorFractionSpeech = selectorFraction
+          ? (selectorFraction.indexOf("≈ ") === 0 ? ", approximately " + selectorFraction.slice(2) : ", " + selectorFraction)
+          : "";
 
         currentEl.textContent = displayCurrent;
         peekButton.disabled = phase !== "checking";
@@ -2104,13 +2112,12 @@
           "aria-label",
           hiddenReading
             ? "Current measurement censored. Tap to peek."
-            : "Current measurement " + spoken(current) + (selectorShopName ? ", " + commonName(current) : "")
+            : "Current measurement " + spoken(current) + selectorFractionSpeech
         );
         peekHint.hidden = phase !== "checking";
         peekHint.textContent = peeking ? "shh… hiding again" : "tap to peek 👀";
-        breakdownEl.textContent = hiddenReading ? "Classified until you tap the censored number" : breakdown(current);
-        selectorShopNameEl.hidden = !selectorShopName;
-        selectorShopNameEl.textContent = selectorShopName ? commonName(current) : "";
+        selectorShopNameEl.hidden = !selectorFraction;
+        selectorShopNameEl.textContent = selectorFraction;
         toleranceEl.textContent = tolerance === null ? "—" : "±" + preciseFormatted(tolerance);
         targetReadingEl.textContent = target === null ? "New target" : targetReading(target);
         targetShopNameEl.hidden = target === null || !shopName(target);
