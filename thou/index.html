@@ -74,7 +74,8 @@
 
     button:focus-visible,
     input:focus-visible,
-    a:focus-visible {
+    a:focus-visible,
+    summary:focus-visible {
       outline: 3px solid var(--yellow);
       outline-offset: 3px;
     }
@@ -669,6 +670,96 @@
       right: 7px;
     }
 
+    .thou-explainer {
+      overflow: hidden;
+    }
+
+    .thou-explainer-summary {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 10px;
+      min-height: 46px;
+      padding: 8px 16px;
+      cursor: pointer;
+      list-style: none;
+      user-select: none;
+    }
+
+    .thou-explainer-summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .thou-explainer-icon {
+      display: grid;
+      width: 28px;
+      height: 28px;
+      place-items: center;
+      border: 1px solid #8e241e;
+      border-radius: 50%;
+      color: #f2c653;
+      background: #32110f;
+      box-shadow: inset 0 0 0 2px #160807, 0 0 12px rgb(215 53 45 / 0.2);
+      font-weight: 950;
+    }
+
+    .thou-explainer-title {
+      color: #f1e2c4;
+      font-size: 0.92rem;
+      font-weight: 950;
+      letter-spacing: 0.045em;
+      text-transform: uppercase;
+    }
+
+    .thou-explainer-toggle {
+      color: #d2b487;
+      font-size: 0.72rem;
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .thou-explainer-toggle .when-open,
+    .thou-explainer[open] .thou-explainer-toggle .when-closed {
+      display: none;
+    }
+
+    .thou-explainer[open] .thou-explainer-toggle .when-open {
+      display: inline;
+    }
+
+    .thou-explainer-body {
+      padding: 13px 16px 15px;
+      border-top: 2px solid #17100c;
+      color: #d8c5a5;
+      box-shadow: inset 0 2px 0 rgb(150 93 59 / 0.22);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .thou-explainer-body strong {
+      color: #f2c653;
+    }
+
+    .thou-examples {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 7px;
+      margin-top: 11px;
+    }
+
+    .thou-example {
+      padding: 8px 7px;
+      border: 1px solid #684432;
+      border-radius: 4px;
+      color: #f0d9b2;
+      background: #1a120f;
+      box-shadow: inset 0 1px 6px rgb(0 0 0 / 0.65);
+      font-size: 0.78rem;
+      font-weight: 850;
+      text-align: center;
+    }
+
     .difficulty-panel {
       display: block;
       padding: 0;
@@ -996,6 +1087,25 @@
         <button class="segment" type="button" data-unit="mm" aria-pressed="false">mm</button>
       </div>
     </header>
+
+    <details class="panel thou-explainer">
+      <summary class="thou-explainer-summary">
+        <span class="thou-explainer-icon" aria-hidden="true">?</span>
+        <span class="thou-explainer-title">What is a thou?</span>
+        <span class="thou-explainer-toggle" aria-hidden="true">
+          <span class="when-closed">Open ▾</span>
+          <span class="when-open">Close ▴</span>
+        </span>
+      </summary>
+      <div class="thou-explainer-body">
+        <p><strong>One thou is one thousandth of an inch: 0.001 in.</strong> It is machinist shorthand for talking about tiny movements and tolerances without reciting a pile of zeros. Odd sixteenths land between two whole thou, so this trainer accepts either nearest reading.</p>
+        <div class="thou-examples" aria-label="Examples of thousandths and common shop measurements">
+          <span class="thou-example">10 thou = 0.010 in</span>
+          <span class="thou-example">62.5 thou = 1/16 in</span>
+          <span class="thou-example">250 thou = 1/4 in</span>
+        </div>
+      </div>
+    </details>
 
     <details class="panel difficulty-panel" data-difficulty-panel open>
       <summary class="difficulty-summary">
