@@ -307,11 +307,13 @@
     }
 
     .target-reading,
-    .target-shop-name {
+    .target-shop-name,
+    .selector-shop-name {
       display: block;
     }
 
-    .target-shop-name {
+    .target-shop-name,
+    .selector-shop-name {
       margin-top: 4px;
       color: var(--text);
       font-size: 0.74rem;
@@ -538,7 +540,7 @@
 
     .detail-row {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      grid-template-columns: 1fr;
       gap: 9px;
       margin-top: 11px;
     }
@@ -1078,7 +1080,7 @@
   <main class="app-shell" aria-labelledby="page-title">
     <header class="topbar">
       <div class="brand">
-        <span class="brand-mark" aria-hidden="true">☭</span>
+        <span class="brand-mark" aria-hidden="true">★</span>
         <h1 id="page-title">Thousandths Trainer</h1>
       </div>
 
@@ -1150,6 +1152,7 @@
           <span class="score-label">▼ Selector</span>
           <button class="peek-button" type="button" data-peek-button disabled>
             <strong class="score-value current-value" data-current>0.000 in</strong>
+            <span class="selector-shop-name" data-selector-shop-name>zero</span>
             <span class="peek-hint" data-peek-hint hidden>tap to peek 👀</span>
           </button>
         </div>
@@ -1196,10 +1199,6 @@
           <span class="eyebrow">Breakdown</span>
           <strong data-breakdown>0 whole inches + 0 thousandths</strong>
         </div>
-        <div class="detail">
-          <span class="eyebrow">Everyday / shop name</span>
-          <strong data-common-name>zero</strong>
-        </div>
       </div>
 
       <p class="haptic-note" data-haptic-note>Buttons and every sticky ruler tick give strong pulses on supported phones.</p>
@@ -1219,13 +1218,13 @@
       var targetReadingEl = document.querySelector("[data-target-reading]");
       var targetShopNameEl = document.querySelector("[data-target-shop-name]");
       var currentEl = document.querySelector("[data-current]");
+      var selectorShopNameEl = document.querySelector("[data-selector-shop-name]");
       var peekButton = document.querySelector("[data-peek-button]");
       var peekHint = document.querySelector("[data-peek-hint]");
       var toleranceEl = document.querySelector("[data-tolerance]");
       var feedbackEl = document.querySelector("[data-feedback]");
       var checkButton = document.querySelector("[data-check-button]");
       var breakdownEl = document.querySelector("[data-breakdown]");
-      var commonNameEl = document.querySelector("[data-common-name]");
       var sliderLabelEl = document.querySelector("[data-slider-label]");
       var difficultyNameEl = document.querySelector("[data-difficulty-name]");
       var difficultyHelpEl = document.querySelector("[data-difficulty-help]");
@@ -1291,7 +1290,7 @@
       }
 
       function decimal(value) {
-        return (value / 1000).toFixed(3);
+        return (Math.round(value) / 1000).toFixed(3);
       }
 
       function formatted(value) {
@@ -1317,7 +1316,7 @@
       }
 
       function targetReading(value) {
-        if (isHalfStep(value)) {
+        if (unit === "in" && isHalfStep(value)) {
           return compactDecimal(Math.floor(value)) + " / " + compactDecimal(Math.ceil(value)) + " " + suffix();
         }
         return formatted(value);
@@ -1384,23 +1383,23 @@
         if (difficulty === 2) {
           return {
             name: "Shop",
-            help: "0.100 mm steps plus inch sixteenths, rounded to the nearest thousandth.",
-            tolerance: 10,
+            help: "0.100 mm steps plus inch sixteenths with a practical ±0.100 mm target.",
+            tolerance: 100,
             pool: shopTargetPool()
           };
         }
         if (difficulty === 3) {
           return {
             name: "Expert",
-            help: "Any thousandth with a ±0.003 mm target and 10 fine taps per round.",
-            tolerance: 3,
+            help: "Any thousandth with a ±0.075 mm target and 10 fine taps per round.",
+            tolerance: 75,
             step: 1
           };
         }
         return {
           name: "Extreme",
-          help: "Any thousandth with a ±0.001 mm target and only 5 fine taps per round.",
-          tolerance: 1,
+          help: "Any thousandth with a ±0.025 mm target and only 5 fine taps per round.",
+          tolerance: 25,
           step: 1
         };
       }
@@ -1672,13 +1671,13 @@
         coachSteps.replaceChildren();
         if (!guideVisible || target === null) return;
 
-        var acceptedReading = isHalfStep(target) ? Math.floor(target) : target;
+        var acceptedReading = unit === "in" && isHalfStep(target) ? Math.floor(target) : Math.round(target);
         var landmarkInterval = unit === "in" ? 50 : 100;
         var landmark = Math.floor(acceptedReading / landmarkInterval) * landmarkInterval;
         var remaining = acceptedReading - landmark;
         var tens = Math.floor(remaining / 10);
         var ones = remaining % 10;
-        var lookStep = isHalfStep(target)
+        var lookStep = unit === "in" && isHalfStep(target)
           ? "This sixteenth lands halfway between " + formatted(Math.floor(target)) + " and " + formatted(Math.ceil(target)) + "; either reading qualifies."
           : "Use the sticky ruler ticks to judge the space.";
         var steps = [
@@ -1697,6 +1696,7 @@
       function render() {
         var hiddenReading = phase === "checking" && !peeking;
         var displayCurrent = hiddenReading ? "🤐 CENSORED" : formatted(current);
+        var selectorShopName = hiddenReading ? "" : shopName(current);
 
         currentEl.textContent = displayCurrent;
         peekButton.disabled = phase !== "checking";
@@ -1705,12 +1705,13 @@
           "aria-label",
           hiddenReading
             ? "Current measurement censored. Tap to peek."
-            : "Current measurement " + spoken(current)
+            : "Current measurement " + spoken(current) + (selectorShopName ? ", " + commonName(current) : "")
         );
         peekHint.hidden = phase !== "checking";
         peekHint.textContent = peeking ? "shh… hiding again" : "tap to peek 👀";
         breakdownEl.textContent = hiddenReading ? "Classified until you tap the censored number" : breakdown(current);
-        commonNameEl.textContent = hiddenReading ? "Nice try 👀" : commonName(current);
+        selectorShopNameEl.hidden = !selectorShopName;
+        selectorShopNameEl.textContent = selectorShopName ? commonName(current) : "";
         toleranceEl.textContent = tolerance === null ? "—" : "±" + preciseFormatted(tolerance);
         targetReadingEl.textContent = target === null ? "New target" : targetReading(target);
         targetShopNameEl.hidden = target === null || !shopName(target);
@@ -1754,7 +1755,7 @@
         peekTimer = null;
         peeking = false;
         target = makeTarget(settings);
-        tolerance = isHalfStep(target) ? 0.5 : settings.tolerance;
+        tolerance = unit === "in" && isHalfStep(target) ? 0.5 : settings.tolerance;
         phase = "checking";
         misses = 0;
         fineTapsLeft = fineTapLimit();
