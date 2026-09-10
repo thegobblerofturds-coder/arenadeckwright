@@ -580,26 +580,26 @@
       text-decoration: underline;
     }
 
-    /* Rusted command-console remix */
+    /* Rusted nuclear control-console */
     h1 {
       color: #f0d8ad;
       font-weight: 950;
       letter-spacing: 0.045em;
       text-transform: uppercase;
-      text-shadow: 0 2px 0 #160807, 0 0 18px rgb(211 53 45 / 0.24);
+      text-shadow: 0 2px 0 #160807, 0 0 18px rgb(181 218 73 / 0.22);
     }
 
     .brand-mark {
-      border: 2px solid #8f241d;
+      border: 2px solid #a89835;
       border-radius: 6px;
-      color: #ff463b;
+      color: #dce95a;
       background:
-        radial-gradient(circle at 32% 24%, rgb(255 159 112 / 0.2), transparent 33%),
-        linear-gradient(145deg, #4b3025, #211713 68%);
+        radial-gradient(circle at 32% 24%, rgb(211 232 86 / 0.18), transparent 33%),
+        linear-gradient(145deg, #48452a, #202116 68%);
       font-family: Georgia, serif;
       font-size: 28px;
       font-weight: 900;
-      text-shadow: 0 0 10px rgb(255 42 32 / 0.48);
+      text-shadow: 0 0 10px rgb(197 232 79 / 0.46);
       box-shadow: inset 0 0 0 2px #1a0e0b, 0 4px 0 #090504;
     }
 
@@ -672,71 +672,59 @@
       right: 7px;
     }
 
-    .thou-explainer {
-      overflow: hidden;
+    .topbar {
+      position: relative;
+      z-index: 30;
     }
 
-    .thou-explainer-summary {
-      display: grid;
-      grid-template-columns: auto minmax(0, 1fr) auto;
-      align-items: center;
-      gap: 10px;
-      min-height: 46px;
-      padding: 8px 16px;
+    .thou-explainer {
+      position: relative;
+      z-index: 40;
+      flex: 0 0 auto;
+    }
+
+    .thou-help-trigger {
       cursor: pointer;
       list-style: none;
       user-select: none;
     }
 
-    .thou-explainer-summary::-webkit-details-marker {
+    .thou-help-trigger::-webkit-details-marker {
       display: none;
     }
 
-    .thou-explainer-icon {
-      display: grid;
-      width: 28px;
-      height: 28px;
-      place-items: center;
-      border: 1px solid #8e241e;
-      border-radius: 50%;
+    .thou-explainer[open] .thou-help-trigger {
       color: #f2c653;
-      background: #32110f;
-      box-shadow: inset 0 0 0 2px #160807, 0 0 12px rgb(215 53 45 / 0.2);
-      font-weight: 950;
-    }
-
-    .thou-explainer-title {
-      color: #f1e2c4;
-      font-size: 0.92rem;
-      font-weight: 950;
-      letter-spacing: 0.045em;
-      text-transform: uppercase;
-    }
-
-    .thou-explainer-toggle {
-      color: #d2b487;
-      font-size: 0.72rem;
-      font-weight: 900;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-    }
-
-    .thou-explainer-toggle .when-open,
-    .thou-explainer[open] .thou-explainer-toggle .when-closed {
-      display: none;
-    }
-
-    .thou-explainer[open] .thou-explainer-toggle .when-open {
-      display: inline;
+      border-color: #d8a941;
+      box-shadow: 0 4px 0 #3c0d09, inset 0 1px 0 rgb(255 231 188 / 0.18), 0 0 18px rgb(242 198 83 / 0.3);
     }
 
     .thou-explainer-body {
-      padding: 13px 16px 15px;
-      border-top: 2px solid #17100c;
+      position: absolute;
+      z-index: 100;
+      top: calc(100% + 12px);
+      left: 0;
+      width: min(560px, calc(100vw - 28px));
+      max-height: calc(100dvh - 84px);
+      padding: 15px 16px 16px;
+      overflow-y: auto;
+      border: 2px solid #79533c;
+      border-radius: 7px;
       color: #d8c5a5;
-      box-shadow: inset 0 2px 0 rgb(150 93 59 / 0.22);
-      font-size: 0.9rem;
+      background:
+        repeating-linear-gradient(102deg, transparent 0 53px, rgb(193 92 45 / 0.04) 54px 57px),
+        linear-gradient(155deg, #382a22, #211813 78%);
+      box-shadow: 0 8px 0 #090504, 0 20px 48px rgb(0 0 0 / 0.72), inset 0 0 0 2px #1a110d;
+      font-size: 0.92rem;
       line-height: 1.5;
+    }
+
+    .thou-explainer-body h2 {
+      margin: 0 0 7px;
+      color: #f1e2c4;
+      font-size: 1.05rem;
+      letter-spacing: 0.045em;
+      text-transform: uppercase;
     }
 
     .thou-explainer-body strong {
@@ -760,6 +748,192 @@
       font-size: 0.78rem;
       font-weight: 850;
       text-align: center;
+    }
+
+    .tenths-note {
+      margin-top: 12px;
+      padding: 10px 11px;
+      border-left: 4px solid #b92720;
+      color: #d8c5a5;
+      background: rgb(17 9 7 / 0.52);
+    }
+
+    .scale-examples {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 7px;
+      margin-top: 12px;
+      padding-top: 11px;
+      border-top: 1px solid #684432;
+    }
+
+    .scale-examples h3 {
+      grid-column: 1 / -1;
+      margin: 0;
+      color: #f0c453;
+      font-size: 0.86rem;
+      letter-spacing: 0.055em;
+      text-transform: uppercase;
+    }
+
+    .scale-examples p {
+      padding: 8px;
+      border: 1px solid #53382b;
+      border-radius: 4px;
+      background: rgb(17 9 7 / 0.42);
+      font-size: 0.82rem;
+      line-height: 1.35;
+    }
+
+    .challenge-panel {
+      display: grid;
+      gap: 12px;
+      padding: 16px;
+    }
+
+    .challenge-heading {
+      display: grid;
+      gap: 3px;
+    }
+
+    .challenge-heading h2 {
+      font-size: 1.12rem;
+      letter-spacing: 0.025em;
+      text-transform: uppercase;
+    }
+
+    .challenge-heading p {
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+
+    .challenge-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+    }
+
+    .challenge-actions .primary-button {
+      min-height: 48px;
+      padding-inline: 18px;
+    }
+
+    .secondary-button {
+      min-height: 44px;
+      padding: 8px 14px;
+      border: 2px solid #69503e;
+      border-radius: 5px;
+      color: #d9c5a4;
+      background: linear-gradient(#49382f, #281d18);
+      box-shadow: 0 4px 0 #120a08, inset 0 1px 0 rgb(255 231 188 / 0.14);
+      cursor: pointer;
+    }
+
+    .challenge-progress {
+      padding: 9px 11px;
+      border: 1px solid #684432;
+      border-left: 5px solid #b92720;
+      border-radius: 3px;
+      color: #f0d9b2;
+      background: #1a120f;
+      font-weight: 900;
+      letter-spacing: 0.035em;
+      text-transform: uppercase;
+    }
+
+    .final-question {
+      display: grid;
+      gap: 10px;
+      padding: 13px;
+      border: 2px solid #8b623f;
+      border-radius: 5px;
+      background: #1a120f;
+      box-shadow: inset 0 2px 9px rgb(0 0 0 / 0.66);
+    }
+
+    .final-question label {
+      color: #f2c653;
+      font-size: 1rem;
+      font-weight: 950;
+    }
+
+    .answer-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+    }
+
+    .challenge-input {
+      width: 100%;
+      min-height: 48px;
+      padding: 8px 11px;
+      border: 2px solid #6f4b36;
+      border-radius: 4px;
+      color: #fff1d3;
+      background: #100b09;
+      box-shadow: inset 0 3px 9px rgb(0 0 0 / 0.72);
+      font-size: 1.05rem;
+      font-weight: 900;
+    }
+
+    .final-result {
+      min-height: 1.4em;
+      color: #d8c5a5;
+      font-weight: 800;
+    }
+
+    .certificate-unlock {
+      padding: 13px;
+      border: 2px solid #b48a35;
+      border-radius: 5px;
+      color: #f5dfad;
+      background: linear-gradient(145deg, #4b361d, #21170e);
+      box-shadow: 0 5px 0 #130c06, inset 0 1px 0 rgb(255 237 178 / 0.2), 0 0 18px rgb(242 198 83 / 0.18);
+    }
+
+    .certificate-unlock strong {
+      display: block;
+      margin-bottom: 3px;
+      color: #f2c653;
+      font-size: 1.05rem;
+      text-transform: uppercase;
+    }
+
+    .celebration-layer {
+      position: fixed;
+      z-index: 1000;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .firework-spark {
+      position: absolute;
+      left: var(--spark-x);
+      top: var(--spark-y);
+      color: var(--spark-colour);
+      font-size: clamp(0.72rem, 2.8vw, 1.25rem);
+      line-height: 1;
+      opacity: 0;
+      text-shadow: 0 0 8px currentColor;
+      animation: firework-burst 900ms cubic-bezier(0.12, 0.66, 0.2, 1) var(--spark-delay) forwards;
+    }
+
+    @keyframes firework-burst {
+      0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.2);
+      }
+
+      12% {
+        opacity: 1;
+      }
+
+      100% {
+        opacity: 0;
+        transform: translate(calc(-50% + var(--spark-dx)), calc(-50% + var(--spark-dy))) scale(0.45) rotate(160deg);
+      }
     }
 
     .difficulty-panel {
@@ -963,6 +1137,90 @@
       text-transform: uppercase;
     }
 
+    body {
+      background:
+        radial-gradient(circle at 16% -12%, rgb(105 125 32 / 0.48), transparent 35rem),
+        repeating-linear-gradient(97deg, transparent 0 76px, rgb(219 183 52 / 0.026) 77px 79px),
+        repeating-linear-gradient(3deg, rgb(255 255 255 / 0.018) 0 1px, transparent 1px 7px),
+        var(--page);
+    }
+
+    .eyebrow,
+    .score-label {
+      color: #d7bd42;
+    }
+
+    .segment[aria-pressed="true"] {
+      color: #151307;
+      background: linear-gradient(#e1ca4c, #8d791f);
+      box-shadow: 0 3px 0 #3c330b, inset 0 1px 0 rgb(255 250 190 / 0.42), 0 0 14px rgb(194 215 75 / 0.24);
+    }
+
+    .summary-star {
+      color: #cfdf55;
+      text-shadow: 0 0 13px rgb(182 222 75 / 0.48);
+    }
+
+    .star-option .stars {
+      color: #d5cf4e;
+    }
+
+    .star-option[aria-pressed="true"] {
+      border-color: #c8bb3f;
+      color: #e9e66d;
+      background: linear-gradient(#555323, #282914);
+      box-shadow: 0 5px 0 #101105, inset 0 0 18px rgb(188 217 63 / 0.13), 0 0 12px rgb(188 217 63 / 0.22);
+    }
+
+    .target-button {
+      border-color: #a68b2e;
+      color: #ead767;
+      background: linear-gradient(#645a2c, #302b19);
+    }
+
+    .peek-button {
+      border-color: #789137;
+      color: #cce861;
+      background: linear-gradient(#3d4927, #202518);
+    }
+
+    .current-value {
+      color: #c9ef58;
+      text-shadow: 0 0 10px rgb(176 226 74 / 0.2);
+    }
+
+    .primary-button {
+      border-color: #e0c743;
+      color: #171307;
+      background:
+        repeating-linear-gradient(135deg, transparent 0 12px, rgb(23 19 7 / 0.16) 13px 18px),
+        linear-gradient(#e4cf52, #8f7820);
+      box-shadow: 0 6px 0 #3d3209, inset 0 1px 0 rgb(255 249 187 / 0.5), 0 0 16px rgb(201 218 72 / 0.18);
+    }
+
+    .coach,
+    .final-question {
+      border-color: #859b39;
+      background: rgb(85 101 31 / 0.14);
+    }
+
+    .ruler-stage {
+      background:
+        repeating-linear-gradient(135deg, transparent 0 22px, rgb(218 193 64 / 0.045) 23px 32px),
+        linear-gradient(#1e2114, #0d0f09);
+    }
+
+    .nudge-button[data-size="coarse"],
+    .challenge-progress,
+    .tenths-note {
+      border-color: #a79132;
+    }
+
+    .certificate-unlock {
+      border-color: #becb49;
+      background: linear-gradient(145deg, #3f4620, #1c210f);
+    }
+
     @media (max-width: 620px) {
       body {
         padding:
@@ -1028,6 +1286,10 @@
       .detail-row {
         grid-template-columns: 1fr;
       }
+
+      .scale-examples {
+        grid-template-columns: 1fr;
+      }
     }
 
     @media (max-width: 350px) {
@@ -1059,12 +1321,20 @@
         font-size: 0.92rem;
       }
 
+      .answer-row {
+        grid-template-columns: 1fr;
+      }
+
       .nudge-grid {
         grid-template-columns: repeat(2, 1fr);
       }
     }
 
     @media (prefers-reduced-motion: reduce) {
+      .celebration-layer {
+        display: none;
+      }
+
       *,
       *::before,
       *::after {
@@ -1080,7 +1350,25 @@
   <main class="app-shell" aria-labelledby="page-title">
     <header class="topbar">
       <div class="brand">
-        <span class="brand-mark" aria-hidden="true">★</span>
+        <details class="thou-explainer">
+          <summary class="brand-mark thou-help-trigger" aria-label="What is a thou?">?</summary>
+          <div class="thou-explainer-body" role="dialog" aria-label="What is a thou?">
+            <h2>What is a thou?</h2>
+            <p><strong>One thou is one thousandth of an inch: 0.001 in.</strong> It is machinist shorthand for talking about tiny movements and tolerances without reciting a pile of zeros. Odd sixteenths land between two whole thou, so this trainer accepts either nearest reading.</p>
+            <div class="thou-examples" aria-label="Examples of thousandths and common shop measurements">
+              <span class="thou-example">10 thou = 0.010 in</span>
+              <span class="thou-example">62.5 thou = 1/16 in</span>
+              <span class="thou-example">250 thou = 1/4 in</span>
+            </div>
+            <p class="tenths-note"><strong>What is a tenth?</strong> In machining, one tenth means one ten-thousandth of an inch: <strong>0.0001 in</strong>. It is one-tenth of one thou, so 10 tenths equal 1 thou.</p>
+            <div class="scale-examples" aria-label="Approximate thicknesses of familiar objects">
+              <h3>How small is that?</h3>
+              <p><strong>Kitchen foil:</strong> about 0.5–1 thou</p>
+              <p><strong>Human hair:</strong> about 2–5 thou across</p>
+              <p><strong>Printer paper:</strong> about 4 thou thick</p>
+            </div>
+          </div>
+        </details>
         <h1 id="page-title">Thousandths Trainer</h1>
       </div>
 
@@ -1090,28 +1378,9 @@
       </div>
     </header>
 
-    <details class="panel thou-explainer">
-      <summary class="thou-explainer-summary">
-        <span class="thou-explainer-icon" aria-hidden="true">?</span>
-        <span class="thou-explainer-title">What is a thou?</span>
-        <span class="thou-explainer-toggle" aria-hidden="true">
-          <span class="when-closed">Open ▾</span>
-          <span class="when-open">Close ▴</span>
-        </span>
-      </summary>
-      <div class="thou-explainer-body">
-        <p><strong>One thou is one thousandth of an inch: 0.001 in.</strong> It is machinist shorthand for talking about tiny movements and tolerances without reciting a pile of zeros. Odd sixteenths land between two whole thou, so this trainer accepts either nearest reading.</p>
-        <div class="thou-examples" aria-label="Examples of thousandths and common shop measurements">
-          <span class="thou-example">10 thou = 0.010 in</span>
-          <span class="thou-example">62.5 thou = 1/16 in</span>
-          <span class="thou-example">250 thou = 1/4 in</span>
-        </div>
-      </div>
-    </details>
-
     <details class="panel difficulty-panel" data-difficulty-panel open>
       <summary class="difficulty-summary">
-        <span class="summary-star" aria-hidden="true">★</span>
+        <span class="summary-star" aria-hidden="true">☢</span>
         <span>
           <span class="eyebrow" id="difficulty-heading">Difficulty</span>
           <strong class="difficulty-name" data-difficulty-name>Shop</strong>
@@ -1157,7 +1426,7 @@
           </button>
         </div>
         <div class="score-item">
-          <span class="score-label">★ Tolerance</span>
+          <span class="score-label">☢ Tolerance</span>
           <strong class="score-value tolerance-value" data-tolerance>—</strong>
         </div>
       </div>
@@ -1204,6 +1473,35 @@
       <p class="haptic-note" data-haptic-note>Buttons and every sticky ruler tick give strong pulses on supported phones.</p>
     </section>
 
+    <section class="panel challenge-panel" aria-labelledby="challenge-heading">
+      <div class="challenge-heading">
+        <span class="eyebrow">Challenge mode</span>
+        <h2 id="challenge-heading">Ten-question expert test</h2>
+        <p>Nine Expert ruler targets, followed by one final shop-knowledge question.</p>
+      </div>
+
+      <div class="challenge-actions">
+        <button class="primary-button" type="button" data-challenge-start>Start challenge</button>
+        <button class="secondary-button" type="button" data-challenge-exit hidden>Exit challenge</button>
+      </div>
+
+      <p class="challenge-progress" data-challenge-progress hidden aria-live="polite">Question 1 of 10 · Expert</p>
+
+      <form class="final-question" data-final-question hidden>
+        <label for="final-thou-answer">Question 10 of 10: How many thou are in one inch?</label>
+        <div class="answer-row">
+          <input class="challenge-input" id="final-thou-answer" data-final-answer type="number" min="0" step="1" inputmode="numeric" autocomplete="off" required>
+          <button class="primary-button" type="submit">Check answer</button>
+        </div>
+        <p class="final-result" data-final-result aria-live="polite"></p>
+      </form>
+
+      <div class="certificate-unlock" data-certificate-unlock hidden>
+        <strong>Certificate unlocked</strong>
+        <p>Challenge cleared. We’ll connect your certificate here when we build its sister page together.</p>
+      </div>
+    </section>
+
     <a class="home-link" href="/">Back to TurdGobbler.com</a>
   </main>
 
@@ -1212,6 +1510,7 @@
       "use strict";
 
       var storageKey = "thousandths-trainer-preferences-v5";
+      var trainerPanel = document.querySelector(".trainer-panel");
       var slider = document.querySelector("[data-slider]");
       var ruler = document.querySelector("[data-ruler]");
       var targetButton = document.querySelector("[data-target-button]");
@@ -1234,6 +1533,13 @@
       var coach = document.querySelector("[data-coach]");
       var coachSteps = document.querySelector("[data-coach-steps]");
       var hapticNote = document.querySelector("[data-haptic-note]");
+      var challengeStartButton = document.querySelector("[data-challenge-start]");
+      var challengeExitButton = document.querySelector("[data-challenge-exit]");
+      var challengeProgressEl = document.querySelector("[data-challenge-progress]");
+      var finalQuestionForm = document.querySelector("[data-final-question]");
+      var finalAnswerInput = document.querySelector("[data-final-answer]");
+      var finalResultEl = document.querySelector("[data-final-result]");
+      var certificateUnlock = document.querySelector("[data-certificate-unlock]");
       var unitButtons = Array.from(document.querySelectorAll("[data-unit]"));
       var difficultyButtons = Array.from(document.querySelectorAll("[data-difficulty]"));
       var nudgeButtons = Array.from(document.querySelectorAll("[data-delta]"));
@@ -1254,6 +1560,10 @@
       var stickyTick = null;
       var viewStart = 0;
       var viewEnd = maximum();
+      var challengeActive = false;
+      var challengeRound = 0;
+      var finalQuestionActive = false;
+      var challengeComplete = false;
 
       difficultyPanel.open = saved.difficultyOpen !== false;
 
@@ -1438,9 +1748,46 @@
         }
       }
 
+      function celebrate() {
+        if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+        var layer = document.createElement("div");
+        var bursts = [
+          { x: 28, y: 30, delay: 0 },
+          { x: 50, y: 20, delay: 110 },
+          { x: 72, y: 34, delay: 210 }
+        ];
+        var colours = ["#f2c653", "#a9d957", "#e98732", "#fff1b8"];
+
+        layer.className = "celebration-layer";
+        layer.setAttribute("aria-hidden", "true");
+        bursts.forEach(function (burst, burstIndex) {
+          for (var sparkIndex = 0; sparkIndex < 14; sparkIndex += 1) {
+            var angle = (Math.PI * 2 * sparkIndex) / 14 + burstIndex * 0.17;
+            var distance = 58 + (sparkIndex % 4) * 17;
+            var spark = document.createElement("span");
+            spark.className = "firework-spark";
+            spark.textContent = sparkIndex % 3 === 0 ? "✦" : "•";
+            spark.style.setProperty("--spark-x", burst.x + "%");
+            spark.style.setProperty("--spark-y", burst.y + "%");
+            spark.style.setProperty("--spark-dx", Math.cos(angle) * distance + "px");
+            spark.style.setProperty("--spark-dy", Math.sin(angle) * distance + "px");
+            spark.style.setProperty("--spark-delay", burst.delay + "ms");
+            spark.style.setProperty("--spark-colour", colours[(sparkIndex + burstIndex) % colours.length]);
+            layer.appendChild(spark);
+          }
+        });
+        document.body.appendChild(layer);
+        window.setTimeout(function () {
+          layer.remove();
+        }, 1300);
+      }
+
       function hapticForCrossedTick(before, after) {
         var interval = tickIntervals().minor;
-        if (Math.floor(before / interval) !== Math.floor(after / interval)) {
+        var crossedMainTick = Math.floor(before / interval) !== Math.floor(after / interval);
+        var crossedSixteenth = unit === "in" && Math.floor(before / 62.5) !== Math.floor(after / 62.5);
+        if (crossedMainTick || crossedSixteenth) {
           haptic(22);
         }
       }
@@ -1450,10 +1797,18 @@
         var interval = tickIntervals().minor;
         var nearest = clamp(Math.round(value / interval) * interval, 0, maximum());
 
+        if (unit === "in") {
+          var nearestSixteenth = clamp(Math.round(value / 62.5) * 62.5, 0, maximum());
+          if (Math.abs(value - nearestSixteenth) < Math.abs(value - nearest)) {
+            nearest = nearestSixteenth;
+          }
+        }
+
         if (Math.abs(value - nearest) <= threshold) {
-          if (stickyTick !== nearest) haptic([45, 34, 55]);
-          stickyTick = nearest;
-          return nearest;
+          var roundedNearest = Math.round(nearest);
+          if (stickyTick !== roundedNearest) haptic([45, 34, 55]);
+          stickyTick = roundedNearest;
+          return roundedNearest;
         }
 
         stickyTick = null;
@@ -1533,7 +1888,7 @@
         var right = width - 12;
         var span = viewEnd - viewStart;
         var intervals = tickIntervals();
-        var colours = ["#7d1713", "#ad3025", "#77412a", "#a8241d"];
+        var colours = ["#45551b", "#66752a", "#8a7c28", "#a8621e"];
         var x = function (value) {
           return left + ((value - viewStart) / span) * (right - left);
         };
@@ -1555,6 +1910,23 @@
             "stroke-linecap": section === 0 || section === 3 ? "round" : "butt",
             opacity: "0.72"
           }));
+        }
+
+        if (unit === "in") {
+          var firstSixteenth = Math.max(62.5, Math.ceil(viewStart / 62.5) * 62.5);
+          for (var sixteenthMark = firstSixteenth; sixteenthMark <= viewEnd; sixteenthMark += 62.5) {
+            var eighthMark = Math.abs(sixteenthMark % 125) < 0.001;
+            ruler.appendChild(svgNode("line", {
+              x1: x(sixteenthMark),
+              y1: eighthMark ? 18 : 23,
+              x2: x(sixteenthMark),
+              y2: 34,
+              stroke: "#d9c85d",
+              "stroke-width": eighthMark ? 1.5 : 1,
+              opacity: eighthMark ? "0.46" : "0.32",
+              "stroke-dasharray": "2 2"
+            }));
+          }
         }
 
         var firstTick = Math.ceil(viewStart / intervals.minor) * intervals.minor;
@@ -1621,12 +1993,12 @@
           y1: 8,
           x2: needleX,
           y2: 70,
-          stroke: "#ff3b30",
+          stroke: "#c8ee55",
           "stroke-width": 5
         }));
         ruler.appendChild(svgNode("polygon", {
           points: (needleX - 10) + ",8 " + (needleX + 10) + ",8 " + needleX + ",22",
-          fill: "#ff3b30",
+          fill: "#c8ee55",
           stroke: "#160706",
           "stroke-width": 2
         }));
@@ -1648,18 +2020,29 @@
         });
       }
 
+      function nudgeMagnitude(size) {
+        if (unit === "mm") return size === "fine" ? 10 : 100;
+        return size === "fine" ? 1 : 10;
+      }
+
+      function isFineNudge(amount) {
+        return Math.abs(amount) === nudgeMagnitude("fine");
+      }
+
       function renderNudges() {
         var limit = fineTapLimit();
         nudgeButtons.forEach(function (button) {
-          var amount = Number(button.dataset.delta);
-          var sign = amount < 0 ? "−" : "+";
-          var fineLimitReached = limit > 0 && phase === "checking" && Math.abs(amount) === 1 && fineTapsLeft <= 0;
+          var direction = Number(button.dataset.delta) < 0 ? -1 : 1;
+          var amount = direction * nudgeMagnitude(button.dataset.size);
+          var sign = direction < 0 ? "−" : "+";
+          var fineLimitReached = limit > 0 && phase === "checking" && isFineNudge(amount) && fineTapsLeft <= 0;
+          button.dataset.delta = String(amount);
           button.textContent = sign + decimal(Math.abs(amount)) + " " + suffix();
           button.disabled = fineLimitReached;
           button.setAttribute(
             "aria-label",
             (amount < 0 ? "Subtract " : "Add ") + decimal(Math.abs(amount)) + " " + (unit === "in" ? "inches" : "millimetres") +
-            (limit > 0 && Math.abs(amount) === 1 ? ". " + fineTapsLeft + " fine taps remaining" : "")
+            (limit > 0 && isFineNudge(amount) ? ". " + fineTapsLeft + " fine taps remaining" : "")
           );
         });
         fineBudgetEl.hidden = limit === 0 || phase !== "checking";
@@ -1675,21 +2058,37 @@
         var landmarkInterval = unit === "in" ? 50 : 100;
         var landmark = Math.floor(acceptedReading / landmarkInterval) * landmarkInterval;
         var remaining = acceptedReading - landmark;
-        var tens = Math.floor(remaining / 10);
-        var ones = remaining % 10;
+        var coarseAmount = nudgeMagnitude("coarse");
+        var fineAmount = nudgeMagnitude("fine");
+        var coarseTaps = Math.floor(remaining / coarseAmount);
+        var fineTaps = Math.round((remaining - coarseTaps * coarseAmount) / fineAmount);
         var lookStep = unit === "in" && isHalfStep(target)
           ? "This sixteenth lands halfway between " + formatted(Math.floor(target)) + " and " + formatted(Math.ceil(target)) + "; either reading qualifies."
           : "Use the sticky ruler ticks to judge the space.";
         var steps = [
           "<strong>Start:</strong> find the " + formatted(landmark) + " tick just below the target.",
           "<strong>Look:</strong> your target is " + targetReading(target) + ". " + lookStep,
-          "<strong>Adjust:</strong> from that tick, use +0.010 " + tens + " " + (tens === 1 ? "time" : "times") + " and +0.001 " + ones + " " + (ones === 1 ? "time" : "times") + "."
+          "<strong>Adjust:</strong> from that tick, use +" + decimal(coarseAmount) + " " + suffix() + " " + coarseTaps + " " + (coarseTaps === 1 ? "time" : "times") + " and +" + decimal(fineAmount) + " " + suffix() + " " + fineTaps + " " + (fineTaps === 1 ? "time" : "times") + "."
         ];
 
         steps.forEach(function (step) {
           var item = document.createElement("li");
           item.innerHTML = step;
           coachSteps.appendChild(item);
+        });
+      }
+
+      function renderChallenge() {
+        challengeStartButton.textContent = challengeActive || challengeComplete ? "Restart challenge" : "Start challenge";
+        challengeExitButton.hidden = !challengeActive;
+        challengeProgressEl.hidden = !challengeActive;
+        challengeProgressEl.textContent = "Question " + challengeRound + " of 10 · Expert";
+        finalQuestionForm.hidden = !finalQuestionActive;
+        certificateUnlock.hidden = !challengeComplete;
+        targetButton.disabled = challengeActive;
+        checkButton.hidden = finalQuestionActive;
+        difficultyButtons.forEach(function (button) {
+          button.disabled = challengeActive;
         });
       }
 
@@ -1739,6 +2138,7 @@
         renderDifficulty();
         renderNudges();
         renderCoach();
+        renderChallenge();
         drawRuler();
       }
 
@@ -1761,12 +2161,73 @@
         fineTapsLeft = fineTapLimit();
         stickyTick = null;
         guideVisible = false;
-        feedbackEl.textContent = "Find the target.";
+        feedbackEl.textContent = challengeActive
+          ? "Expert challenge: question " + challengeRound + " of 10."
+          : "Find the target.";
         feedbackEl.removeAttribute("data-kind");
         render();
       }
 
+      function startChallenge() {
+        challengeActive = true;
+        challengeRound = 1;
+        finalQuestionActive = false;
+        challengeComplete = false;
+        difficulty = 3;
+        finalAnswerInput.value = "";
+        finalResultEl.textContent = "";
+        savePreferences();
+        newChallenge();
+        trainerPanel.scrollIntoView({
+          behavior: window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+          block: "start"
+        });
+      }
+
+      function exitChallenge() {
+        challengeActive = false;
+        challengeRound = 0;
+        finalQuestionActive = false;
+        challengeComplete = false;
+        target = null;
+        tolerance = null;
+        phase = "ready";
+        guideVisible = false;
+        feedbackEl.textContent = "Challenge closed. Choose Start for a practice target.";
+        feedbackEl.removeAttribute("data-kind");
+        render();
+      }
+
+      function showFinalQuestion() {
+        challengeRound = 10;
+        finalQuestionActive = true;
+        target = null;
+        tolerance = null;
+        phase = "ready";
+        guideVisible = false;
+        feedbackEl.textContent = "Nine ruler questions complete. Final question below.";
+        feedbackEl.removeAttribute("data-kind");
+        render();
+        window.setTimeout(function () {
+          finalAnswerInput.focus();
+        }, 0);
+      }
+
+      function advanceChallenge() {
+        if (challengeRound >= 9) {
+          showFinalQuestion();
+          return;
+        }
+        challengeRound += 1;
+        newChallenge();
+      }
+
       function checkAnswer() {
+        if (finalQuestionActive) return;
+        if (phase === "solved" && challengeActive) {
+          advanceChallenge();
+          return;
+        }
         if (phase === "ready" || phase === "solved" || target === null) {
           newChallenge();
           return;
@@ -1776,9 +2237,10 @@
         if (distance <= tolerance) {
           phase = "solved";
           guideVisible = false;
-          feedbackEl.textContent = "⭐ Matched.";
+          feedbackEl.textContent = "✓ Matched.";
           feedbackEl.dataset.kind = "success";
           haptic([60, 70, 85]);
+          celebrate();
           render();
           return;
         }
@@ -1822,9 +2284,9 @@
       }
 
       function nudge(amount) {
-        if (fineTapLimit() > 0 && phase === "checking" && Math.abs(amount) === 1) {
+        if (fineTapLimit() > 0 && phase === "checking" && isFineNudge(amount)) {
           if (fineTapsLeft <= 0) {
-            feedbackEl.textContent = "Fine taps spent—finish with the ruler or a 0.010 move.";
+            feedbackEl.textContent = "Fine taps spent—finish with the ruler or a " + decimal(nudgeMagnitude("coarse")) + " " + suffix() + " move.";
             feedbackEl.dataset.kind = "miss";
             haptic([70, 55, 70]);
             render();
@@ -1875,6 +2337,30 @@
         difficultyToggle.textContent = difficultyPanel.open ? "Retract ▴" : "Deploy ▾";
         savePreferences();
         haptic(34);
+      });
+
+      challengeStartButton.addEventListener("click", startChallenge);
+      challengeExitButton.addEventListener("click", exitChallenge);
+
+      finalQuestionForm.addEventListener("submit", function (event) {
+        event.preventDefault();
+        if (Number(finalAnswerInput.value) !== 1000) {
+          finalResultEl.textContent = "Not quite. Think about what one thousandth means.";
+          haptic([42, 48, 42]);
+          return;
+        }
+
+        challengeActive = false;
+        finalQuestionActive = false;
+        challengeComplete = true;
+        target = null;
+        tolerance = null;
+        phase = "ready";
+        feedbackEl.textContent = "Challenge complete. Certificate unlocked.";
+        feedbackEl.dataset.kind = "success";
+        haptic([70, 55, 90, 55, 110]);
+        celebrate();
+        render();
       });
 
       nudgeButtons.forEach(function (button) {
