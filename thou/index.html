@@ -1162,6 +1162,8 @@
 
     .selector-display {
       position: relative;
+      display: grid;
+      align-content: center;
       overflow: hidden;
       border-color: #657f36;
       background:
@@ -1171,12 +1173,6 @@
         inset 0 0 0 2px #030703,
         inset 0 0 24px rgb(127 219 71 / 0.17),
         0 1px 0 rgb(222 255 171 / 0.12);
-    }
-
-    .selector-display .score-label {
-      color: #7cab4a;
-      font-family: "Lucida Console", "Courier New", monospace;
-      letter-spacing: 0.12em;
     }
 
     .selector-display .peek-button,
@@ -1428,7 +1424,6 @@
           </button>
         </div>
         <div class="score-item selector-display">
-          <span class="score-label">LCD Readout</span>
           <button class="peek-button" type="button" data-peek-button disabled>
             <strong class="score-value current-value" data-current>0.000 in</strong>
             <span class="selector-shop-name" data-selector-shop-name>zero</span>
@@ -1871,6 +1866,14 @@
         return (approximate ? "≈ " : "") + fraction;
       }
 
+      function shopNameWithFraction(value) {
+        var name = shopName(value);
+        if (!name) return "";
+
+        var fraction = shopFraction(value).replace(/^≈\s*/, "").replace(/ in$/, "″");
+        return fraction ? name + " · " + fraction : name;
+      }
+
       function svgNode(name, attributes, text) {
         var node = document.createElementNS(svgNamespace, name);
         Object.keys(attributes || {}).forEach(function (key) {
@@ -2101,6 +2104,7 @@
         var hiddenReading = phase === "checking" && !peeking;
         var displayCurrent = hiddenReading ? "🤐 CENSORED" : formatted(current);
         var selectorFraction = hiddenReading ? "" : shopFraction(current);
+        var targetShopLabel = target === null ? "" : shopNameWithFraction(target);
         var selectorFractionSpeech = selectorFraction
           ? (selectorFraction.indexOf("≈ ") === 0 ? ", approximately " + selectorFraction.slice(2) : ", " + selectorFraction)
           : "";
@@ -2120,13 +2124,13 @@
         selectorShopNameEl.textContent = selectorFraction;
         toleranceEl.textContent = tolerance === null ? "—" : "±" + preciseFormatted(tolerance);
         targetReadingEl.textContent = target === null ? "New target" : targetReading(target);
-        targetShopNameEl.hidden = target === null || !shopName(target);
-        targetShopNameEl.textContent = target === null ? "" : shopName(target);
+        targetShopNameEl.hidden = !targetShopLabel;
+        targetShopNameEl.textContent = targetShopLabel;
         targetButton.setAttribute(
           "aria-label",
           target === null
             ? "Load a new random target"
-            : "Target " + targetReading(target) + (shopName(target) ? ", " + shopName(target) : "") + ". Load a new random target"
+            : "Target " + targetReading(target) + (targetShopLabel ? ", " + targetShopLabel : "") + ". Load a new random target"
         );
 
         if (phase === "ready") checkButton.textContent = "Start";
