@@ -9,6 +9,7 @@ A fan-made, browser-based utility for creating colourful Magic Arena deck names 
 - `/ultimate/` is the full-featured Ultimate Version, sourced from the internal `version7` development line.
 - `/cheugs/` is an intentionally unlisted joke edition whose escape link returns to `/colour/`.
 - `/tim/` is an unlisted, no-index technical digest of SpatialAnalyzer point-cloud and colourization improvements.
+- `/relax/` is Bubble Mix: a rainbow bubble playground with viscous stretching, merging, pop points, combos, and celebrations.
 
 The `/colour/` and `/ultimate/` folders provide the two public editions. No backend or server-side code is required.
 
