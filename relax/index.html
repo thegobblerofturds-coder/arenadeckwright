@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#090b13">
   <meta name="description" content="Big, gooey rainbow bubbles and ridiculously satisfying pops. Split bubbly chains, sweep through rising chimes, and discover golden bubbles.">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; media-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; media-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'">
   <title>Bubble Mix · TurdGobbler</title>
   <link rel="icon" href="../favicon.ico" sizes="any">
   <link rel="apple-touch-icon" href="../apple-touch-icon.png">
@@ -15,40 +15,12 @@
 <body>
   <main class="playroom" aria-label="Bubble Mix">
     <canvas id="bubbles" tabindex="0" aria-label="Rainbow bubble playground" aria-describedby="canvas-help">Your browser needs canvas support to show the bubbles.</canvas>
-    <p class="sr-only" id="canvas-help">Tap a large bubble to split it into a chain of little bubbles. Sweep through the little bubbles to pop them. Drag ordinary bubbles to stretch them. With a keyboard, use the arrow keys to choose a bubble and press Space or Enter to burst it. Tab moves to the sound, pause, and slider controls.</p>
-
-    <header class="topbar">
-      <div class="quick-controls">
-        <button class="icon-button" id="sound" type="button" aria-label="Turn sound on" aria-pressed="false" title="Turn sound on">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4Z"/><path class="sound-off" d="m16 9 5 6m0-6-5 6"/><path class="sound-on" d="M15 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/></svg>
-        </button>
-        <button class="icon-button" id="pause" type="button" aria-label="Pause bubbles" aria-pressed="false" title="Pause bubbles">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path class="pause-icon" d="M8 5v14M16 5v14"/><path class="play-icon" d="m9 5 11 7-11 7Z"/></svg>
-        </button>
-      </div>
-    </header>
+    <p class="sr-only" id="canvas-help">Tap a large bubble to split it into a chain of little bubbles. Sweep through the little bubbles to pop them. Drag gently to stretch; a hard pull bursts the bubble. Bubble flow increases as you pop. Sound starts with your first tap or keypress. Use your device volume to adjust it. With a keyboard, use the arrow keys to choose a bubble and press Space or Enter to burst it.</p>
 
     <aside class="scoreboard" aria-label="Your score">
       <strong id="score" aria-label="0 points" aria-live="off">0</strong>
       <span class="combo" id="combo" hidden>×2</span>
     </aside>
-    <div class="bottom-ui">
-      <section class="mix-tray" aria-label="Bubble settings">
-        <div id="mix-controls" class="mix-controls">
-          <div class="slider-group">
-            <label for="thickness">Thickness</label>
-            <input type="range" id="thickness" min="0" max="100" value="78" aria-valuetext="Syrupy">
-          </div>
-          <div class="slider-group">
-            <label for="generation">Bubbles</label>
-            <input type="range" id="generation" min="0" max="100" value="32" aria-valuetext="Gentle">
-          </div>
-        </div>
-        <button class="tray-toggle" type="button" id="tray-toggle" aria-expanded="true" aria-controls="mix-controls" aria-label="Hide sliders" title="Hide sliders">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg>
-        </button>
-      </section>
-    </div>
     <p id="status" class="sr-only" role="status" aria-live="polite"></p>
     <noscript><p class="fallback">Turn on JavaScript to let the bubbles float.</p></noscript>
   </main>

@@ -11,16 +11,19 @@ export class Feedback {
     this.hapticAvailable=typeof navigator!=='undefined' && typeof navigator.vibrate==='function';
     this.lastTick=0; this.lastStretch=0; this.lastPop=0; this.voices=0; this.suspended=false;
     this.nextChainNoteTime=0;this.sources=new Set();
+    this.nextScoreTickTime=0;this.wowBuffer=null;this.voiceReady=null;
+    this.voiceRequest=0;this.wowPlaying=false;this.wowPending=false;this.wowCount=0;
   }
   async setSound(enabled) {
     this.enabled=enabled;
-    if(!enabled) { if(this.master)this.master.gain.setTargetAtTime(0,this.context.currentTime,.025);return false; }
+    if(!enabled) { if(this.master){this.master.gain.cancelScheduledValues(this.context.currentTime);this.master.gain.setTargetAtTime(0,this.context.currentTime,.025);}return false; }
     try {
       if(!this.context) this.initialize();
       if(!this.context) {this.enabled=false;return false;}
       await this.context.resume();
       if(!this.enabled)return false;
       this.master.gain.setTargetAtTime(.82,this.context.currentTime,.02);
+      if(this.suspended)await this.context.suspend();
       return true;
     } catch { this.enabled=false;return false; }
   }
@@ -29,7 +32,7 @@ export class Feedback {
     if(!Audio)return;
     const ctx=this.context=new Audio();
     this.master=ctx.createGain();this.master.gain.value=.82;
-    const compressor=ctx.createDynamicsCompressor();
+    const compressor=this.mixBus=ctx.createDynamicsCompressor();
     compressor.threshold.value=-8;compressor.knee.value=14;compressor.ratio.value=10;
     compressor.attack.value=.003;compressor.release.value=.2;
     // A soft limiter keeps rapid overlapping bursts full without digital clipping.
@@ -40,6 +43,45 @@ export class Feedback {
     this.noise=ctx.createBuffer(1,ctx.sampleRate*.7,ctx.sampleRate);
     const data=this.noise.getChannelData(0);
     for(let i=0;i<data.length;i++)data[i]=Math.random()*2-1;
+    this.voiceReady=this.loadVoice();
+  }
+  async loadVoice() {
+    try {
+      const response=await fetch(new URL('../audio/wow.wav',import.meta.url));
+      if(!response.ok)return;
+      this.wowBuffer=await this.context.decodeAudioData(await response.arrayBuffer());
+    }catch{}
+  }
+  scoreTick(remaining) {
+    const ctx=this.context;
+    if(!this.enabled||this.suspended||ctx?.state!=='running'||remaining<2||ctx.currentTime<this.nextScoreTickTime)return false;
+    this.nextScoreTickTime=ctx.currentTime+.085;
+    this.tone(1450+Math.min(500,Math.log2(remaining+1)*32),850,.025,.028,0,'sine');
+    return true;
+  }
+  wow() {
+    if(!this.enabled||this.suspended||this.context?.state!=='running'||this.wowPlaying||this.wowPending)return false;
+    const requestedAt=this.context.currentTime,request=this.voiceRequest;
+    if(this.wowBuffer)return this.playWow();
+    if(!this.voiceReady)return false;
+    this.wowPending=true;
+    void this.voiceReady.then(()=>{
+      this.wowPending=false;
+      if(request===this.voiceRequest&&this.context.currentTime-requestedAt<.9)this.playWow();
+    });
+    return true;
+  }
+  playWow() {
+    if(!this.wowBuffer||!this.enabled||this.suspended||this.context?.state!=='running'||this.wowPlaying)return false;
+    const ctx=this.context,now=ctx.currentTime,source=ctx.createBufferSource(),gain=ctx.createGain();
+    source.buffer=this.wowBuffer;source.playbackRate.value=1.04;gain.gain.value=.9;
+    source.connect(gain);gain.connect(this.mixBus);
+    this.master.gain.cancelScheduledValues(now);
+    this.master.gain.setTargetAtTime(.34,now,.035);
+    this.master.gain.setTargetAtTime(.82,now+this.wowBuffer.duration*.85,.12);
+    this.wowPlaying=true;this.wowCount++;this.voices++;this.sources.add(source);
+    source.onended=()=>{source.disconnect();gain.disconnect();this.sources.delete(source);this.voices--;this.wowPlaying=false;};
+    source.start();return true;
   }
   tone(frequency, endFrequency, duration, gain, offset=0, type='sine', pan=0,priority=false) {
     if(!this.context || this.voices>=(priority?50:38))return;
@@ -124,8 +166,10 @@ export class Feedback {
   stopVibration() {if(this.hapticAvailable)try{navigator.vibrate(0);}catch{}}
   async suspend() {
     this.suspended=true;this.stopVibration();
-    this.nextChainNoteTime=0;
+    this.nextChainNoteTime=0;this.nextScoreTickTime=0;this.voiceRequest++;
     for(const source of this.sources)try{source.stop();}catch{}
+    this.master?.gain?.cancelScheduledValues?.(this.context.currentTime);
+    this.master?.gain?.setValueAtTime?.(this.enabled?.82:0,this.context.currentTime);
     try {await this.context?.suspend();}catch{}
   }
   async resume() {

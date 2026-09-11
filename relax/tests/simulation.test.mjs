@@ -55,18 +55,22 @@ test('the merged outline flows continuously into one final membrane',()=>{
   }
   assert.ok(previous);
 });
-test('goo deforms, recovers more slowly, and survives extreme pointer positions',()=>{
+test('gentle drags deform the goo and the thicker membrane settles more slowly',()=>{
   const results=[];
   for(const thickness of [0,1]) {
     const w=new BubbleWorld(390,844,{generation:0,thickness,random:random()});
     const b=w.addBubble(190,400,65);
-    w.startDrag(b.id,250,400);w.moveDrag(b.id,370,300);advance(w,.2);
+    w.startDrag(b.id,245,400);assert.equal(w.moveDrag(b.id,286,382,.12),null);advance(w,.2);
     assert.ok(Math.max(...b.points.map(p=>Math.hypot(p.x,p.y)))>b.r*1.15);
     advance(w,.4);
-    w.endDrag(b.id);advance(w,.35);
-    results.push(b.points.reduce((s,p)=>s+Math.abs(Math.hypot(p.x,p.y)-b.r),0));
-    w.startDrag(b.id,190,400);w.moveDrag(b.id,1e6,-1e6);advance(w,2);finite(w);
-    w.endDrag(b.id);advance(w,6);finite(w);
+    w.endDrag(b.id);advance(w,.25);
+    advance(w,6);finite(w);assert.ok(w.get(b.id));
+    // Compare the same initial deformation against each material's moving rest shape.
+    const resting=structuredClone(b),displaced=structuredClone(b);
+    for(const p of resting.points){p.vx=0;p.vy=0;}
+    for(const p of displaced.points){p.x*=1.35;p.y*=1.35;p.vx=0;p.vy=0;}
+    for(let i=0;i<36;i++){w.time+=1/90;w.deform(resting,1/90);w.deform(displaced,1/90);}
+    results.push(displaced.points.reduce((sum,p,i)=>sum+Math.hypot(p.x-resting.points[i].x,p.y-resting.points[i].y),0));
   }
   assert.ok(results[1]>results[0],`goo should retain more deformation: ${results}`);
 });
@@ -92,7 +96,7 @@ test('points and multipliers increase, ten pops pay a bonus, and breaks never re
   const r=new PopRewards(0,{random:random()});let reward;
   for(let i=0;i<10;i++){reward=r.pop(60,i*.3);assert.ok(reward.points>0);}
   assert.equal(reward.party,true);assert.equal(reward.label,'POP PARTY!');assert.equal(r.combo,8);
-  assert.ok(reward.points>=1000);const score=r.score;r.expire(100);assert.equal(r.score,score);assert.equal(r.combo,0);
+  assert.ok(reward.points>=1000000);const score=r.score;r.expire(100);assert.equal(r.score,score);assert.equal(r.combo,0);
   assert.equal(r.pop(60,101).combo,1);assert.equal(r.best,r.score);
 });
 test('effects stay bounded during pop spam and fully expire',()=>{

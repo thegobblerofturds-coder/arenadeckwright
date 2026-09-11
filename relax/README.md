@@ -2,17 +2,21 @@
 
 Lives at https://turdgobbler.com/relax/ on the existing GitHub Pages site.
 
-Tap small bubbles to pop them and large bubbles to split them into curved chains of 6–8 little bubbles. Sweep through a chain to burst it, snapping the liquid threads between bubbles. Ordinary bubbles can still be dragged, stretched, and merged. The compact tray has glossy bubble sliders for thickness and generation; its arrow tucks both away. The score, combo, speaker, and pause icons are the only other visible controls.
+Tap small bubbles to pop them and large bubbles to split them into curved chains of 6–8 little bubbles. Sweep through a chain to burst it, snapping the liquid threads between bubbles. Ordinary bubbles can be gently dragged, stretched, and merged. Hard pulls, fast flicks, and dragging through the opposite side burst the bubble before its outline can fold through itself.
 
-Rare sparkling golden bubbles split into longer, two-row chains of 12. Popping earns points, up to an 8× combo, and a 1,000-point celebration every ten pops. Golden splits pay 500 extra points; finishing a regular chain pays 300, or 1,500 for a golden chain. Each pop gets animated praise, with a larger “PERFECT!” or “GOLD RUSH!” celebration on completion. There are no lives, losing states, or score deductions. Best score is saved only in this browser under `bubble-mix.best.v1`.
+The only persistent overlay is a modest score centered at the top, plus its combo badge. There are no buttons or sliders. Thickness stays at the recommended 78%. Bubble flow starts at 40% and increases smoothly with total pops: about 57% after 30 pops and 80% after 100, approaching 100% during longer play. The simulation's population and area limits still apply.
 
-Sound starts muted. The speaker button enables synthesized wet pops, a bass impact, and bright chime flourishes. Chain pops climb a pentatonic scale and resolve into a finishing chord. Rapid swipes retain short spacing between notes; voice limits and a compressor/limiter bound overlapping audio. The phone's volume controls output loudness. Vibration runs automatically when `navigator.vibrate` is supported, with a stronger pattern for large pops and chain finishes. Browser/API support does not guarantee vibration hardware. No microphone permission is needed.
+Rare sparkling golden bubbles split into longer, two-row chains of 12. Popping earns at least 50,000 points, up to an 8× combo, and a 1,000,000-point celebration every ten pops. Golden splits pay 500,000 extra points; finishing a regular chain pays 300,000, or 1,500,000 for a golden chain. A typical full chain earns millions. Each pop gets animated praise, with a larger “PERFECT!” or “GOLD RUSH!” celebration on completion. There are no lives, losing states, or score deductions. Best score is saved only in this browser under `bubble-mix.best.v2`; legacy `v1` scores are scaled by 1,000 on import and retained.
 
-The pause button and hidden-tab handling stop the simulation and audio. Reduced-motion preferences remove camera shake and large particle motion. Keyboard users can focus the canvas, select bubbles with arrow keys, and pop with Enter or Space.
+Bubbles have stronger spherical shading, curved reflections, and light along the lower rim. The lighting texture is generated once and reused across the deforming membranes. Big pops send sparks toward the score; busy chains add hearts and stars. Occasional “YOU’RE DOING GREAT!” messages appear during play, with 24–36 seconds between encouragements after the first one.
+
+Sound unlocks with the first canvas tap or gameplay keypress, as required by browser autoplay rules. Wet pops, bass impacts, and chime flourishes accompany play. Chain pops climb a pentatonic scale and resolve into a finishing chord; a quiet ticker follows the score as it rolls up. A short bundled feminine “WOW!” clip plays on busy chains, with a ten-second activity cooldown and no overlapping voice clips. Other effects briefly soften underneath the voice. Rapid swipes retain short spacing between notes; voice limits and a compressor/limiter bound overlapping audio. Device volume controls output loudness. Vibration runs automatically when `navigator.vibrate` is supported, with a stronger pattern for large pops and chain finishes. Browser/API support does not guarantee vibration hardware. No microphone permission is needed.
+
+Hidden-tab handling stops the simulation and all audio, including in-progress or pending voice clips. Reduced-motion preferences remove camera shake and large particle motion. Keyboard users can focus the canvas, select bubbles with arrow keys, and pop with Enter or Space.
 
 ## Development
 
-Serve the repository root with any static HTTP server and open `/relax/`. No build, dependencies, backend, or external assets are needed. JavaScript uses native ES modules. All app code lives in this directory; the site homepage and existing tools keep their current behavior.
+Serve the repository root with any static HTTP server and open `/relax/`. No build, dependencies, backend, or external assets are needed. JavaScript uses native ES modules; the small voice clip lives in `audio/wow.wav` and is fetched from the same origin. All app code lives in this directory; the site homepage and existing tools keep their current behavior.
 
 Run the deterministic checks from the repository root:
 
@@ -20,17 +24,18 @@ Run the deterministic checks from the repository root:
 node --test relax/tests/*.test.mjs
 ```
 
-The tests cover long simulation runs, generation limits, area-preserving merges, drag recovery, extreme inputs, resizing, tap classification, chain splitting and placement, fast swept hits, golden rarity, completion and bonuses, audio scheduling/cancellation, effect limits, reduced motion, and haptic patterns.
+The tests cover long simulation runs, progressive flow and population limits, area-preserving merges, rounded drag recovery, extreme-drag bursts, resizing, tap classification, chain splitting and placement, fast swept hits, golden rarity, million-scale rewards, audio and voice scheduling/cancellation, encouragement timing, effect limits, reduced motion, and haptic patterns.
 
 ## Structure
 
 - `js/physics.mjs`: bounded time steps, deformable membranes, collision links, merging, splitting, and population limits.
 - `js/chains.mjs`: curved chain layouts, swept hit detection, and rising musical pitches.
-- `js/render.mjs`: translucent film, iridescent rims, moving highlights, smooth merged outlines, golden bubbles, and liquid threads.
+- `js/play.mjs`: default thickness, progressive flow, activity-triggered cheers, and occasional encouragement.
+- `js/render.mjs`: translucent film, cached sphere lighting, iridescent rims, moving highlights, smooth merged outlines, golden bubbles, and liquid threads.
 - `js/effects.mjs`, `js/feedback.mjs`, `js/rewards.mjs`: bounded visual celebrations, synthesized audio and vibration, points and praise.
 - `js/theme.mjs`: material/palette/sound choices for future skins. Rainbow soap is the only current skin.
 - `js/main.mjs`: UI, pointer and keyboard input, lifecycle, score storage, optional WebMCP integration.
 
-On supporting browsers, `get_bubble_mix`, `configure_bubble_mix`, and `pop_bubbles` expose the same state/actions as the app. Invalid settings and stale IDs fail before mutation. Audio can only be enabled through the visible sound button.
+On supporting browsers, `get_bubble_mix` and `pop_bubbles` expose gameplay state and actions. `configure_bubble_mix` provides simulation settings and pause state for inspection; these controls are not shown on the page. Invalid settings and stale IDs fail before mutation. Actual taps or gameplay keypresses unlock sound.
 
-Publish the directory with the repository's existing GitHub Pages deployment. `/relax` redirects to `/relax/`; all app imports and assets are relative. Revert the Bubble Mix commit to roll back this addition.
+Publish the directory with the repository's existing GitHub Pages deployment. `/relax` redirects to `/relax/`; all app imports and assets are relative. Revert the relevant commit and redeploy to roll back a change.

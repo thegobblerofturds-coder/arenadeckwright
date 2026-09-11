@@ -1,4 +1,5 @@
 import {chainLayout,segmentHit,FRAGMENT_READY_AGE} from './chains.mjs';
+import {RECOMMENDED_THICKNESS,STARTING_FLOW} from './play.mjs';
 export const TAU = Math.PI * 2;
 export const POINTS = 32;
 export const MAX_BUBBLES = 54;
@@ -8,7 +9,7 @@ export const lerp = (a, b, t) => a + (b - a) * t;
 const angleDistance = (a, b) => Math.atan2(Math.sin(a - b), Math.cos(a - b));
 
 export class BubbleWorld {
-  constructor(width, height, { random = Math.random, thickness = 0.78, generation = 0.32, reducedMotion = false } = {}) {
+  constructor(width, height, { random = Math.random, thickness = RECOMMENDED_THICKNESS, generation = STARTING_FLOW, reducedMotion = false } = {}) {
     this.width = Math.max(width, 1); this.height = Math.max(height, 1);
     this.random = random; this.thickness = thickness; this.generation = generation;
     this.reducedMotion = reducedMotion; this.bubbles = []; this.links = new Map();
@@ -104,14 +105,22 @@ export class BubbleWorld {
       .map(b=>({id:b.id,t:segmentHit(x1,y1,x2,y2,b.x,b.y,b.r+6)}))
       .filter(hit=>hit.t!==null).sort((a,b)=>a.t-b.t).map(hit=>hit.id);
   }
-  startDrag(id, x, y) {
+  startDrag(id, x, y, angle) {
     const b = this.get(id); if (!b || b.drag || b.fragment) return false;
-    b.drag = { x, y, angle: Math.atan2(y-b.y, x-b.x) };
+    b.drag = { x, y, restX:x-b.x,restY:y-b.y,angle:angle??Math.atan2(y-b.y,x-b.x) };
     this.clearLinks(id); return true;
   }
-  moveDrag(id, x, y) {
+  moveDrag(id, x, y, seconds=.05) {
     const b = this.get(id);
-    if (b?.drag) { b.drag.x = x; b.drag.y = y; }
+    if(!b?.drag||!Number.isFinite(x)||!Number.isFinite(y))return null;
+    const distance=Math.hypot(x-b.x,y-b.y),jump=Math.hypot(x-b.drag.x,y-b.drag.y);
+    const speed=jump/clamp(seconds,.008,.1);
+    const across=(x-b.x)*Math.cos(b.drag.angle)+(y-b.y)*Math.sin(b.drag.angle);
+    // Burst before a hard pull or a reversal can fold the membrane through itself.
+    if(distance>b.r*1.95||jump>b.r*1.2||(speed>2400&&jump>Math.max(28,b.r*.5))||across<-b.r*.3) {
+      const event=this.pop(id);event.extremeDrag=true;return event;
+    }
+    b.drag.x=x;b.drag.y=y;return null;
   }
   endDrag(id) {
     const b = this.get(id);
@@ -231,9 +240,7 @@ export class BubbleWorld {
   deform(b,dt) {
     const visc=this.thickness, spring=lerp(60,15,visc), damping=Math.exp(-dt*lerp(6,11,visc));
     const motion=this.reducedMotion?.3:1, newborn=b.fragment?0:Math.max(0,1-b.age/2.8);
-    const dx=b.drag?b.drag.x-b.x:0, dy=b.drag?b.drag.y-b.y:0;
-    const dragLength=Math.hypot(dx,dy), maxStretch=b.r*2.5;
-    const dragScale=dragLength>maxStretch ? maxStretch/dragLength : 1;
+    const dx=b.drag?b.drag.x-b.x-b.drag.restX:0, dy=b.drag?b.drag.y-b.y-b.drag.restY:0;
     const restOffsets=b.points.map((p,i)=>({x:p.x-Math.cos(i*TAU/POINTS)*b.r,y:p.y-Math.sin(i*TAU/POINTS)*b.r}));
     for(let i=0;i<POINTS;i++) {
       const a=i*TAU/POINTS, p=b.points[i];
@@ -243,9 +250,11 @@ export class BubbleWorld {
       // The lower membrane trails into a thick neck during formation.
       if(newborn>0) { const neck=Math.exp(-(angleDistance(a,Math.PI/2)**2)*10); ty+=neck*b.r*.85*newborn; tx*=1-newborn*.14; }
       if(b.drag) {
-        const da=angleDistance(a,b.drag.angle), weight=Math.exp(-da*da*lerp(1.3,2.6,visc));
-        grip=weight*210;
-        tx=lerp(tx,dx*dragScale,weight*.94); ty=lerp(ty,dy*dragScale,weight*.94);
+        const da=angleDistance(a,b.drag.angle), weight=Math.exp(-da*da*1.45);
+        const stretch=clamp((dx*Math.cos(a)+dy*Math.sin(a))*weight,-b.r*.28,b.r*.8);
+        grip=weight*95;
+        // Move a broad, rounded patch outward instead of collapsing nodes to one point.
+        tx+=Math.cos(a)*stretch;ty+=Math.sin(a)*stretch;
       }
       const previous=restOffsets[(i+POINTS-1)%POINTS], next=restOffsets[(i+1)%POINTS], current=restOffsets[i];
       p.vx+=((tx-p.x)*(spring+grip)+(previous.x+next.x-current.x*2)*35)*dt;

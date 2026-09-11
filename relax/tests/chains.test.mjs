@@ -121,10 +121,10 @@ test('only existing adjacent strands snap, and missing fragments never earn a fa
 
 test('golden splits and completed chains pay their distinct bonuses',()=>{
   const normal=new PopRewards(),gold=new PopRewards();
-  assert.equal(gold.pop(90,0,{type:'split',golden:true}).points-normal.pop(90,0,{type:'split'}).points,500);
+  assert.equal(gold.pop(90,0,{type:'split',golden:true}).points-normal.pop(90,0,{type:'split'}).points,500000);
   const plain=new PopRewards().pop(18,0),finish=new PopRewards().pop(18,0,{chainComplete:true});
   const jackpot=new PopRewards().pop(18,0,{chainComplete:true,goldenChain:true});
-  assert.equal(finish.points-plain.points,300);assert.equal(jackpot.points-plain.points,1500);
+  assert.equal(finish.points-plain.points,300000);assert.equal(jackpot.points-plain.points,1500000);
   assert.equal(finish.label,'PERFECT!');assert.equal(jackpot.label,'GOLD RUSH!');
 });
 

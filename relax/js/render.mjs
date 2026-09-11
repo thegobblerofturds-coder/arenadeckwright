@@ -5,6 +5,28 @@ export class BubbleRenderer {
     this.canvas=canvas;this.ctx=canvas.getContext('2d',{alpha:true});this.theme=theme;
     if(!this.ctx)throw new Error('Canvas is unavailable.');
     this.width=0;this.height=0;this.dpr=1;
+    this.lighting=this.makeLighting();
+  }
+  makeLighting() {
+    // Shared sphere lighting keeps the richer film inexpensive even during long chains.
+    const canvas=document.createElement('canvas');canvas.width=canvas.height=256;
+    const ctx=canvas.getContext('2d');ctx.translate(128,128);ctx.scale(128,128);
+    const volume=ctx.createRadialGradient(-.28,-.35,.04,0,0,1.05);
+    volume.addColorStop(0,'#d7f0ff52');volume.addColorStop(.34,'#aacbff0c');volume.addColorStop(.62,'#13122d14');
+    volume.addColorStop(.82,'#03031863');volume.addColorStop(.93,'#addffc40');volume.addColorStop(1,'#e1f8ff85');
+    ctx.fillStyle=volume;ctx.fillRect(-1,-1,2,2);
+    const bounce=ctx.createRadialGradient(.34,.62,0,.34,.62,.65);
+    bounce.addColorStop(0,'#84f7f74d');bounce.addColorStop(.55,'#e9a6ff14');bounce.addColorStop(1,'#e9a6ff00');
+    ctx.fillStyle=bounce;ctx.fillRect(-1,-1,2,2);
+    ctx.save();ctx.translate(-.35,-.43);ctx.rotate(-.58);ctx.scale(.34,.5);
+    const reflection=ctx.createRadialGradient(0,-.1,0,0,0,1);
+    reflection.addColorStop(0,'#ffffff8c');reflection.addColorStop(.32,'#ffffff38');reflection.addColorStop(1,'#ffffff00');
+    ctx.fillStyle=reflection;ctx.fillRect(-1,-1,2,2);ctx.restore();
+    ctx.fillStyle='#f8ffffd9';ctx.beginPath();ctx.ellipse(-.38,-.57,.22,.045,-.57,0,TAU);ctx.fill();
+    ctx.fillStyle='#ffffffa6';ctx.beginPath();ctx.ellipse(-.16,-.73,.055,.027,-.35,0,TAU);ctx.fill();
+    const lower=ctx.createLinearGradient(-.2,.6,.65,.91);lower.addColorStop(0,'#b9ffff00');lower.addColorStop(.5,'#b9ffff99');lower.addColorStop(1,'#ffbce700');
+    ctx.strokeStyle=lower;ctx.lineWidth=.025;ctx.beginPath();ctx.ellipse(0,0,.91,.91,0,.3,1.6);ctx.stroke();
+    return canvas;
   }
   resize(width,height,dpr=globalThis.devicePixelRatio||1) {
     this.width=width;this.height=height;
@@ -42,12 +64,14 @@ export class BubbleRenderer {
     film.addColorStop(0,'rgba(175,191,232,0.015)');film.addColorStop(.62,'rgba(74,76,136,0.018)');
     film.addColorStop(.84,'rgba(177,157,239,0.085)');film.addColorStop(.96,'rgba(180,236,247,0.17)');film.addColorStop(1,'rgba(167,149,237,0.025)');
     ctx.fillStyle=film;ctx.fill(path);
+    const extentX=Math.max(...b.points.map(p=>Math.abs(p.x))),extentY=Math.max(...b.points.map(p=>Math.abs(p.y)));
+    ctx.drawImage(this.lighting,-extentX,-extentY,extentX*2,extentY*2);
     // Flowing interference bands travel slowly through the soap film.
     ctx.save();ctx.rotate(-.38+Math.sin(time*.13+b.phase)*.12);
     for(let i=0;i<3;i++) {
       const y=(-.8+i*.68+Math.sin(time*.17+b.phase+i)*.12)*r;
       const glow=ctx.createLinearGradient(0,y-r*.13,0,y+r*.16);
-      glow.addColorStop(0,'rgba(180,155,255,0)');glow.addColorStop(.45,i%2?'rgba(127,236,225,.11)':'rgba(244,167,219,.09)');glow.addColorStop(1,'rgba(180,155,255,0)');
+      glow.addColorStop(0,'rgba(180,155,255,0)');glow.addColorStop(.45,i%2?'rgba(127,236,225,.09)':'rgba(244,167,219,.075)');glow.addColorStop(1,'rgba(180,155,255,0)');
       ctx.fillStyle=glow;ctx.fillRect(-r*3,y-r*.15,r*6,r*.34);
     }
     ctx.restore();
