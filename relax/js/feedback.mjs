@@ -1,9 +1,10 @@
 import { clamp } from './physics.mjs';
 import {chainFrequency} from './chains.mjs';
+import {makeRatchetSamples,ratchetInterval} from './ratchet.mjs';
 
 export const hapticPattern = radius => radius >= 85
-  ? [65, 28, 50, 22, 70, 25, 130]
-  : radius >= 50 ? [40, 22, 60, 25, 85] : [30, 18, 55];
+  ? [85, 20, 100, 20, 145, 30, 190]
+  : radius >= 50 ? [65, 20, 85, 18, 100] : [50, 16, 70];
 
 export class Feedback {
   constructor(theme) {
@@ -13,6 +14,7 @@ export class Feedback {
     this.nextChainNoteTime=0;this.sources=new Set();
     this.nextScoreTickTime=0;this.wowBuffer=null;this.voiceReady=null;
     this.voiceRequest=0;this.wowPlaying=false;this.wowPending=false;this.wowCount=0;
+    this.ratcheting=false;this.ratchetBuffer=null;
   }
   async setSound(enabled) {
     this.enabled=enabled;
@@ -43,6 +45,8 @@ export class Feedback {
     this.noise=ctx.createBuffer(1,ctx.sampleRate*.7,ctx.sampleRate);
     const data=this.noise.getChannelData(0);
     for(let i=0;i<data.length;i++)data[i]=Math.random()*2-1;
+    const teeth=makeRatchetSamples(ctx.sampleRate);
+    this.ratchetBuffer=ctx.createBuffer(1,teeth.length,ctx.sampleRate);this.ratchetBuffer.getChannelData(0).set(teeth);
     this.voiceReady=this.loadVoice();
   }
   async loadVoice() {
@@ -54,10 +58,24 @@ export class Feedback {
   }
   scoreTick(remaining) {
     const ctx=this.context;
-    if(!this.enabled||this.suspended||ctx?.state!=='running'||remaining<2||ctx.currentTime<this.nextScoreTickTime)return false;
-    this.nextScoreTickTime=ctx.currentTime+.085;
-    this.tone(1450+Math.min(500,Math.log2(remaining+1)*32),850,.025,.028,0,'sine');
+    if(!this.enabled||this.suspended||ctx?.state!=='running')return false;
+    if(remaining<=0) {
+      if(!this.ratcheting)return false;
+      this.ratcheting=false;this.ratchetClick(.29,.78);this.tone(210,95,.055,.11);return true;
+    }
+    this.ratcheting=true;
+    if(ctx.currentTime<this.nextScoreTickTime)return false;
+    const interval=ratchetInterval(remaining);this.nextScoreTickTime=ctx.currentTime+interval;
+    this.ratchetClick(.22,1+(1-interval/.115)*.1);
     return true;
+  }
+  ratchetClick(volume,rate=1) {
+    if(!this.ratchetBuffer||this.voices>=46)return;
+    const ctx=this.context,source=ctx.createBufferSource(),gain=ctx.createGain();
+    source.buffer=this.ratchetBuffer;source.playbackRate.value=rate;gain.gain.value=volume;
+    source.connect(gain);gain.connect(this.master);this.sources.add(source);this.voices++;
+    source.onended=()=>{source.disconnect();gain.disconnect();this.sources.delete(source);this.voices--;};
+    source.start();source.stop(ctx.currentTime+this.ratchetBuffer.duration/rate+.005);
   }
   wow() {
     if(!this.enabled||this.suspended||this.context?.state!=='running'||this.wowPlaying||this.wowPending)return false;
@@ -74,10 +92,10 @@ export class Feedback {
   playWow() {
     if(!this.wowBuffer||!this.enabled||this.suspended||this.context?.state!=='running'||this.wowPlaying)return false;
     const ctx=this.context,now=ctx.currentTime,source=ctx.createBufferSource(),gain=ctx.createGain();
-    source.buffer=this.wowBuffer;source.playbackRate.value=1;gain.gain.value=.95;
+    source.buffer=this.wowBuffer;source.playbackRate.value=1;gain.gain.value=.42;
     source.connect(gain);gain.connect(this.mixBus);
     this.master.gain.cancelScheduledValues(now);
-    this.master.gain.setTargetAtTime(.34,now,.035);
+    this.master.gain.setTargetAtTime(.62,now,.035);
     this.master.gain.setTargetAtTime(.82,now+this.wowBuffer.duration*.85,.12);
     this.wowPlaying=true;this.wowCount++;this.voices++;this.sources.add(source);
     source.onended=()=>{source.disconnect();gain.disconnect();this.sources.delete(source);this.voices--;this.wowPlaying=false;};
@@ -114,7 +132,7 @@ export class Feedback {
     if(this.suspended)return;
     if(event.type==='layer'){this.layer(event,pan);return;}
     this.lastPop=performance.now();
-    this.vibrate(event.chainComplete?[45,25,75,30,140]:event.fragment?[16,12,28]:party?[70,25,70,25,100,40,160]:hapticPattern(radius));
+    this.vibrate(event.chainComplete?[65,18,95,22,170]:event.fragment?[30,10,48]:party?[90,20,100,20,140,25,190]:hapticPattern(radius));
     if(!this.enabled || this.context?.state!=='running')return;
     if(event.fragment) {
       const now=this.context.currentTime;
@@ -142,7 +160,7 @@ export class Feedback {
     });
   }
   layer(event,pan=0) {
-    this.lastPop=performance.now();this.vibrate(event.layers===1?[45,20,70]:[24,15,38]);
+    this.lastPop=performance.now();this.vibrate(event.layers===1?[65,18,95]:[40,14,55]);
     if(!this.enabled||this.suspended||this.context?.state!=='running')return;
     const step=event.totalLayers-event.layers,note=chainFrequency(step);
     this.tone(140+step*28,65,.24,.55,0,'sine',pan);
@@ -151,10 +169,24 @@ export class Feedback {
   }
   cascade(wave) {
     if(this.suspended)return;
-    this.vibrate([60,25,90,20,130]);
+    this.vibrate([90,20,120,20,175]);
     if(!this.enabled||this.context?.state!=='running')return;
     this.tone(95+wave*20,32,.65,.8,0,'sine',0,true);
     [523.25,659.25,783.99,1046.5].forEach((note,i)=>this.tone(note*2**(wave*.5),note*2**(wave*.5),.7,.12,i*.065,'sine',(i-1.5)*.4,true));
+  }
+  bossEntrance() {
+    if(this.suspended)return;
+    this.vibrate([25,55,40,55,65]);
+    if(!this.enabled||this.context?.state!=='running')return;
+    this.tone(80,180,.9,.16);
+    [392,523.25,659.25,783.99].forEach((note,i)=>this.tone(note,note,.4,.08,.2+i*.17,'sine',(i-1.5)*.2));
+  }
+  bossCharge() {
+    if(this.suspended)return;
+    this.vibrate([35,20,55,20,100]);
+    if(!this.enabled||this.context?.state!=='running')return;
+    this.tone(130,440,.46,.22,0,'sine',0,true);
+    this.tone(650,1300,.4,.09,.03,'sine',0,true);
   }
   stretch(amount) {
     if(this.suspended)return;
@@ -182,7 +214,7 @@ export class Feedback {
   stopVibration() {if(this.hapticAvailable)try{navigator.vibrate(0);}catch{}}
   async suspend() {
     this.suspended=true;this.stopVibration();
-    this.nextChainNoteTime=0;this.nextScoreTickTime=0;this.voiceRequest++;
+    this.nextChainNoteTime=0;this.nextScoreTickTime=0;this.ratcheting=false;this.voiceRequest++;
     for(const source of this.sources)try{source.stop();}catch{}
     this.master?.gain?.cancelScheduledValues?.(this.context.currentTime);
     this.master?.gain?.setValueAtTime?.(this.enabled?.82:0,this.context.currentTime);

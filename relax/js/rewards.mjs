@@ -20,7 +20,7 @@ export class PopRewards {
     let choice=Math.floor(this.random()*PRAISE.length);
     if(choice===this.lastPraise)choice=(choice+1)%PRAISE.length;
     this.lastPraise=choice;
-    const spicy=time>=8&&time-this.lastSpicy>=18&&!event.cascade&&!event.special&&!event.bossFinal&&!event.layeredFinal&&!event.chainComplete&&this.random()<.055;
+    const spicy=time>=2&&time-this.lastSpicy>=5&&!event.cascade&&!event.special&&!event.bossFinal&&!event.layeredFinal&&!event.chainComplete&&this.random()<.3;
     if(spicy)this.lastSpicy=time;
     const label=spicy?SPICY_PRAISE[this.spicyIndex++%SPICY_PRAISE.length]:event.bossFinal?'MEGA CASCADE!':event.layeredFinal?'LAYER HEAVEN!':event.type==='layer'?(event.layers===1?'ONE MORE!':'SQUISH!'):event.chainComplete?(event.goldenChain?'GOLD RUSH!':'PERFECT!'):goldenBonus?'GOLDEN!':party?'POP PARTY!':this.combo>=8?'UNREAL!':radius>=105?BIG_PRAISE[this.pops%BIG_PRAISE.length]:PRAISE[choice];
     return {points,party,label,combo:this.combo,score:this.score,pops:this.pops,record};

@@ -32,7 +32,7 @@ test('painting stays bounded under fast multi-touch and never turns a tap into b
 });
 
 test('a giant keeps its identity for four hits, peels layers, then becomes a chain',()=>{
-  const w=world(),rewards=new PopRewards(),b=w.addSpecial();w.drainEvents();
+  const w=world(),rewards=new PopRewards(),b=w.addSpecial();advance(w,.8);
   for(let i=3;i>0;i--) {
     const event=w.pop(b.id,{x:b.x+b.r*.8,y:b.y});rewards.pop(event.radius,w.time,event);
     assert.equal(event.type,'layer');assert.equal(event.layers,i);assert.equal(w.get(b.id),b);
@@ -44,7 +44,7 @@ test('a giant keeps its identity for four hits, peels layers, then becomes a cha
 });
 
 test('hard dragging consumes one giant layer and releases its grab without collapsing the outline',()=>{
-  const w=world(),b=w.addSpecial('boss');w.drainEvents();
+  const w=world(),b=w.addSpecial('boss');advance(w,1.5);
   w.startDrag(b.id,b.x,b.y,0);b.held=true;
   const e=w.moveDrag(b.id,b.x+b.r*3,b.y,.01);
   assert.equal(e.type,'layer');assert.equal(e.extremeDrag,true);assert.equal(b.layers,6);
@@ -55,10 +55,11 @@ test('hard dragging consumes one giant layer and releases its grab without colla
 });
 
 test('a seven-hit boss cascades in timed waves, even with no other bubbles on screen',()=>{
-  const w=world(),b=w.addSpecial('boss'),rewards=new PopRewards();w.drainEvents();
+  const w=world(),b=w.addSpecial('boss'),rewards=new PopRewards();advance(w,1.5);
   for(let i=0;i<6;i++){const e=w.pop(b.id);assert.equal(e.type,'layer');rewards.pop(e.radius,0,e);}
   assert.equal(w.cascades.length,0);
-  const final=w.pop(b.id);rewards.pop(final.radius,0,final);
+  const charge=w.pop(b.id);assert.equal(charge.type,'bossCharge');assert.ok(w.get(b.id));assert.equal(w.pop(b.id),null);
+  const waiting=advance(w,.6),final=waiting.find(e=>e.bossFinal);rewards.pop(final.radius,0,final);
   assert.equal(final.bossFinal,true);assert.equal(w.get(b.id),undefined);assert.ok(rewards.score>15000000);
   w.drainEvents();const events=advance(w,5);
   assert.equal(events.filter(e=>e.type==='cascadeWave').length,3);
@@ -69,7 +70,7 @@ test('a seven-hit boss cascades in timed waves, even with no other bubbles on sc
 });
 
 test('boss cascades finish once on crowded resized boards without exceeding budgets',()=>{
-  const w=world(),b=w.addSpecial('boss');
+  const w=world(),b=w.addSpecial('boss');advance(w,1.5);
   for(let i=0;i<35;i++)w.addBubble(30+i%5*77,150+Math.floor(i/5)*90,i%3?24:80);
   for(let i=0;i<7;i++)w.pop(b.id);w.drainEvents();w.resize(844,390);
   const all=[];
@@ -98,6 +99,7 @@ test('special bubbles appear during play, remain distinct, and fit after resizin
 test('shell peels and cascades respect reduced motion and expire completely',()=>{
   for(const reducedMotion of [false,true]) {
     const w=world(),fx=new PopEffects(rainbowSoap,{reducedMotion}),b=w.addSpecial('boss');
+    advance(w,1.5);
     for(let i=0;i<6;i++){const e=w.pop(b.id);fx.pop({...e,points:100000,label:'SQUISH!'},390,844);}
     for(let wave=0;wave<12;wave++)fx.cascade({x:190,y:400,radius:160,wave},390,844);
     assert.ok(fx.peels.length<=6);assert.ok(fx.particles.length<=MAX_PARTICLES);

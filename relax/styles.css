@@ -6,11 +6,9 @@ body { margin: 0; }
 .scoreboard { position: absolute; top: max(14px, env(safe-area-inset-top)); left: max(18px, env(safe-area-inset-left)); right: max(18px, env(safe-area-inset-right)); display: flex; flex-direction: column; align-items: center; gap: 5px; pointer-events: none; user-select: none; }
 #score { --score-width: 1; display: block; font-family: ui-rounded, "Arial Rounded MT Bold", system-ui, sans-serif; font-size: min(clamp(26px, 7vw, 34px), calc((100vw - 40px) / var(--score-width))); font-weight: 900; line-height: 1.06; letter-spacing: -.055em; font-variant-numeric: tabular-nums; white-space: nowrap; color: #fff4ff; background: linear-gradient(180deg, #fff 8%, #ffe3f5 37%, #d9b2fa 70%, #9aebe8 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 3px 0 #352343) drop-shadow(0 0 17px #e3b0ff44); transform-origin: center; }
 #score.score-bump { animation: score-bump .32s cubic-bezier(.2, .8, .3, 1); }
-.combo { color: #ffe3a2; font-size: 14px; font-weight: 800; padding: 3px 9px; border-radius: 20px; background: #f3b76319; box-shadow: inset 0 1px #ffe09e24; white-space: nowrap; }
-.combo[hidden] { display: none; }
 @keyframes score-bump { 0% { transform: scale(1.09); } 100% { transform: scale(1); } }
 canvas:focus-visible { outline: 2px solid #dec5fa; outline-offset: -3px; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
 .fallback { position: absolute; top: 40%; left: 24px; right: 24px; text-align: center; color: #e7dcef; }
-@media (max-height: 500px) and (orientation: landscape) { .scoreboard { top: max(8px, env(safe-area-inset-top)); align-items: center; } #score { font-size: min(34px, calc((100vw - 40px) / var(--score-width))); } .combo { font-size: 13px; padding: 2px 8px; } }
+@media (max-height: 500px) and (orientation: landscape) { .scoreboard { top: max(8px, env(safe-area-inset-top)); align-items: center; } #score { font-size: min(34px, calc((100vw - 40px) / var(--score-width))); } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }

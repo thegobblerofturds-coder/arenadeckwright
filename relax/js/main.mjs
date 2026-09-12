@@ -55,8 +55,6 @@ addEventListener('pageshow',activityChanged);
 
 function updateRewards(reward,event) {
   $('score').setAttribute('aria-label',`${rewards.score} points. Best ${rewards.best}.`);
-  $('combo').textContent=`×${reward.combo}`;$('combo').hidden=reward.combo<2;
-  $('combo').setAttribute('aria-label',`${reward.combo} times combo`);
   $('score').classList.remove('score-bump');void $('score').offsetWidth;$('score').classList.add('score-bump');
   $('score').style.setProperty('--score-width',Math.max(1,format(rewards.score).length*.61));
   try{localStorage.setItem('bubble-mix.best.v2',String(rewards.best));}catch{}
@@ -75,8 +73,11 @@ function handleEvents() {
       if(moments.pop(world.time,event)){feedback.wow();effects.cheer(world.width,world.height);}
     } else if(event.type==='merge')feedback.merge(event.radius);
     else if(event.type==='arrival') {
+      effects.arrival(event);if(event.special==='boss')feedback.bossEntrance();
       effects.encourage(event.special==='boss'?'HERE COMES THE BIG ONE!':'SO MANY LAYERS!');
       $('status').textContent=event.special==='boss'?'Boss bubble! Tap seven times for a cascading explosion.':'Giant squish bubble! Pop its four rainbow layers.';
+    } else if(event.type==='bossCharge') {
+      feedback.bossCharge();$('status').textContent='Boss bubble is about to burst!';
     } else if(event.type==='cascadeWave') {
       effects.cascade(event,world.width,world.height);feedback.cascade(event.wave);
     } else if(event.type==='cascadeFinale') {
@@ -151,7 +152,7 @@ canvas.addEventListener('keydown',e=>{
   unlockFeedback();
   keyboardFocus=true;
   if(e.key===' '||e.key==='Enter') {
-    const event=popBubble(focusedId);focusedId=event?.type==='layer'?focusedId:event?.fragmentIds?.[0]??world.bubbles.find(b=>b.fragment)?.id??world.bubbles[0]?.id;
+    const event=popBubble(focusedId);focusedId=['layer','bossCharge'].includes(event?.type)||world.get(focusedId)?.anticipation?focusedId:event?.fragmentIds?.[0]??world.bubbles.find(b=>b.fragment)?.id??world.bubbles[0]?.id;
   } else {
     const index=Math.max(0,world.bubbles.findIndex(b=>b.id===focusedId));
     const direction=['ArrowLeft','ArrowUp'].includes(e.key)?-1:1;
@@ -160,13 +161,13 @@ canvas.addEventListener('keydown',e=>{
   render();
 });
 function resize() {
-  finishGestures();paint.clear();world.resize(innerWidth,innerHeight);renderer?.resize(innerWidth,innerHeight);updatePlayableArea();render();
+  finishGestures();paint.clear();effects.glass.drops=[];effects.arrivals=[];world.resize(innerWidth,innerHeight);renderer?.resize(innerWidth,innerHeight);updatePlayableArea();render();
 }
 function updatePlayableArea() {effects.safeBottom=innerHeight-60;world.playBottom=innerHeight-24;}
 addEventListener('resize',resize);
 motionQuery.addEventListener('change',()=>{
   world.reducedMotion=motionQuery.matches;effects.reducedMotion=motionQuery.matches;
-  effects.particles=[];effects.bursts=[];effects.snaps=[];effects.peels=[];effects.shake=0;render();
+  effects.particles=[];effects.bursts=[];effects.snaps=[];effects.peels=[];effects.arrivals=[];effects.glass.drops=[];world.shockwaves=[];effects.shake=0;render();
 });
 function frame(now) {
   if(paused||document.hidden){raf=0;return;}
@@ -176,7 +177,7 @@ function frame(now) {
   if(encouragement) {
     effects.encourage(encouragement);$('status').textContent=encouragement;
   }
-  if(!rewards.expire(world.time))$('combo').hidden=true;
+  rewards.expire(world.time);
   if(keyboardFocus&&!world.get(focusedId))focusedId=world.bubbles[0]?.id;
   shownScore+=(rewards.score-shownScore)*(1-Math.exp(-dt*6));
   if(rewards.score-shownScore<1)shownScore=rewards.score;
@@ -191,8 +192,8 @@ const snapshot=()=>({
   haptics:feedback.hapticAvailable&&feedback.haptics,score:rewards.score,best:rewards.best,
   pops:rewards.pops,combo:rewards.combo,voiceReady:!!feedback.wowBuffer,wows:feedback.wowCount,
   encouragement:effects.encouragement?.text??null,
-  paintedRibbons:paint.strokes.length,cascadePending:world.cascades.length,
-  bubbles:world.bubbles.map(b=>({id:b.id,x:Math.round(b.x),y:Math.round(b.y),radius:Math.round(b.r),golden:b.golden,special:b.special??null,layers:b.layers??1,painted:!!b.painted,splittable:world.canSplit(b),fragment:b.fragment,chainId:b.chainId??null,chainIndex:b.chainIndex??null})),
+  paintedRibbons:paint.strokes.length,cascadePending:world.cascades.length,shockwaves:world.shockwaves.length,glassDrops:effects.glass.drops.length,
+  bubbles:world.bubbles.map(b=>({id:b.id,x:Math.round(b.x),y:Math.round(b.y),radius:Math.round(b.r),golden:b.golden,special:b.special??null,entering:!!b.entrance,charging:!!b.anticipation,spawnEdge:b.spawnEdge??null,layers:b.layers??1,painted:!!b.painted,splittable:world.canSplit(b),fragment:b.fragment,chainId:b.chainId??null,chainIndex:b.chainIndex??null})),
 });
 if(document.modelContext?.registerTool) {
   const lifecycle=new AbortController();

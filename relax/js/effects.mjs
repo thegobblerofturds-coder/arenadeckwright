@@ -1,4 +1,5 @@
 import { TAU, clamp } from './physics.mjs';
+import {GlassSplatter} from './glass.mjs';
 export const MAX_PARTICLES=650;
 export const MAX_BURSTS=10;
 export const MAX_SNAPS=40;
@@ -9,8 +10,26 @@ export class PopEffects {
     this.particles=[];this.bursts=[];this.snaps=[];this.shake=0;this.safeBottom=Infinity;
     this.encouragement=null;
     this.peels=[];
+    this.arrivals=[];this.glass=new GlassSplatter({random,reducedMotion});
   }
   encourage(text) {this.encouragement={text,age:0,duration:3.4};}
+  arrival(event) {this.arrivals.push({...event,age:0});if(this.arrivals.length>2)this.arrivals.shift();}
+  drawUnderlay(ctx) {
+    ctx.save();
+    for(const e of this.arrivals) {
+      const t=clamp(e.age/e.duration,0,1),fade=Math.sin(t*Math.PI),r=e.radius*(this.reducedMotion?1.1:1.55-t*.45);
+      const glow=ctx.createRadialGradient(e.x,e.y,r*.55,e.x,e.y,r*1.4);
+      glow.addColorStop(0,'#e691ff00');glow.addColorStop(.5,`rgba(216,148,255,${fade*.13})`);glow.addColorStop(1,'#a5edff00');
+      ctx.fillStyle=glow;ctx.fillRect(e.x-r*1.4,e.y-r*1.4,r*2.8,r*2.8);
+      if(this.reducedMotion)continue;
+      for(let i=0;i<7;i++) {
+        const a=i*TAU/7+t*.9;ctx.globalAlpha=fade*.65;ctx.strokeStyle=this.theme.confetti[i%6];ctx.lineWidth=1.5+(1-t)*2;
+        ctx.beginPath();ctx.arc(e.x,e.y,r,a,a+.3);ctx.stroke();
+        ctx.globalAlpha=fade*.8;ctx.fillStyle='#faffff';ctx.beginPath();ctx.arc(e.x+Math.cos(a)*r,e.y+Math.sin(a)*r,2.2,0,TAU);ctx.fill();
+      }
+    }
+    ctx.restore();
+  }
   cheer(width,height) {
     const count=this.reducedMotion?6:28;
     for(let i=0;i<count;i++) {
@@ -21,6 +40,7 @@ export class PopEffects {
   }
   pop(event, width, height) {
     if(event.type==='layer'){this.layer(event);return;}
+    if(!event.visualOnly)this.glass.add(event,width,height);
     const {x,y,radius}=event, big=radius>=85||event.party||event.chainComplete||event.golden;
     const small=event.fragment&&!big;
     const count=this.reducedMotion?(small?5:12):event.cascade?(event.fragment?18:48):small?20:big?150:Math.round(clamp(radius,55,110));
@@ -64,12 +84,15 @@ export class PopEffects {
   }
   cascade(event,width,height) {
     const {x,y,radius,wave}=event;
-    this.pop({x,y,radius:radius*(1+wave*.2),label:'',party:false},width,height);
+    this.pop({x,y,radius:radius*(1+wave*.2),label:'',party:false,visualOnly:true},width,height);
     this.bursts[this.bursts.length-1].label='';
     this.cheer(width,height);
   }
   step(dt) {
     dt=clamp(dt,0,.05);this.shake*=Math.exp(-dt*12);
+    this.glass.reducedMotion=this.reducedMotion;this.glass.step(dt);
+    for(const e of this.arrivals)e.age+=dt;
+    this.arrivals=this.arrivals.filter(e=>e.age<e.duration);
     if(this.encouragement){this.encouragement.age+=dt;if(this.encouragement.age>=this.encouragement.duration)this.encouragement=null;}
     for(const b of this.bursts)b.age+=dt;
     this.bursts=this.bursts.filter(b=>b.age<b.duration);

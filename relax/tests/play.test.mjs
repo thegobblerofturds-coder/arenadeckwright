@@ -71,18 +71,22 @@ test('WOW accompanies busy play with a cooldown; encouragement remains occasiona
   assert.equal(cheers,1);
   assert.equal(m.pop(13,{chainComplete:true,goldenChain:true}),true);
   m.pop(17);assert.equal(m.encourage(18),'YOU’RE DOING GREAT!');assert.equal(m.encourage(19),null);
-  assert.equal(m.encourage(50),null);m.pop(50);assert.equal(m.encourage(50),'LOOK AT YOU GO!');
+  assert.equal(m.encourage(50),null);m.pop(50);assert.equal(m.encourage(50),'YOU’RE FUCKING CRUSHING IT!');
   assert.equal(m.encourage(51),null);
 });
 
-test('score ticks are quiet, rate limited, and silent when paused or settled',()=>{
-  const f=new Feedback(rainbowSoap),tones=[];
-  f.context={state:'running',currentTime:0};f.enabled=true;f.tone=(...args)=>tones.push(args);
-  for(let frame=0;frame<120;frame++){f.context.currentTime=frame/120;f.scoreTick(2000-frame*5);}
-  assert.ok(tones.length>=9&&tones.length<=12);assert.ok(tones.every(t=>t[2]<=.03&&t[3]<.04));
-  const count=tones.length;f.context.currentTime=2;f.scoreTick(0);
+test('score ratchets slow down near the total, finish once, and respect inactive audio',()=>{
+  const f=new Feedback(rainbowSoap),clicks=[],tones=[];
+  f.context={state:'running',currentTime:0};f.enabled=true;f.ratchetClick=(...args)=>clicks.push(args);f.tone=(...args)=>tones.push(args);
+  for(let frame=0;frame<120;frame++){f.context.currentTime=frame/120;f.scoreTick(10000000);}
+  const quick=clicks.length;assert.ok(quick>=20&&quick<=27);
+  clicks.length=0;f.nextScoreTickTime=0;
+  for(let frame=0;frame<120;frame++){f.context.currentTime=2+frame/120;f.scoreTick(20);}
+  assert.ok(clicks.length<quick*.65);
+  const count=clicks.length;f.context.currentTime=4;f.scoreTick(0);f.scoreTick(0);
+  assert.equal(clicks.length,count+1);assert.equal(tones.length,1);assert.ok(clicks.at(-1)[1]<1);
   f.suspended=true;f.scoreTick(100);f.suspended=false;f.enabled=false;f.scoreTick(100);
-  assert.equal(tones.length,count);
+  assert.equal(clicks.length,count+1);
 });
 
 test('voice playback cannot overlap and all audio stops when the page becomes inactive',async()=>{
