@@ -1,11 +1,12 @@
-# WOW voice
+# Anime WOW reaction
 
-`wow.wav` is an original, locally synthesized “Wow!” using the installed Microsoft Zira Desktop feminine voice. It is a generic synthetic voice, not an imitation of a person. The game loads this small, same-origin PCM file after the first interaction and plays it through the same audio limiter as the pop effects.
+`wow-anime.wav` replaces the speech-synthesis clip with the short, expressive **Anime Wow** reaction requested for the game.
 
-The source was generated with Windows `System.Speech.Synthesis.SpeechSynthesizer`, selecting `Microsoft Zira Desktop` and speaking this SSML to a wave file:
+- Source page: https://tiengdong.com/th/th65519
+- Download: https://tiengdong.com/wp-content/uploads/Anime-wow-sound-effect-www_tiengdong_com.mp3
+- Retrieved: September 11, 2026.
+- The excerpt contains the single-word reaction “Wow!” and its fading reverberation. The source page offers the download but does not identify the original performer or a reuse license; this file is not represented as original or CC0 audio.
 
-```xml
-<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="en-US"><prosody pitch="+18%" rate="+5%" volume="loud"><emphasis level="strong">Wow!</emphasis></prosody></speak>
-```
+Processing: retain the first 2.65 seconds of the 5.25-second source, apply a 130 Hz high-pass filter and a 0.55-second trailing fade, normalize the peak to 76%, and encode as mono 16-bit PCM at 22,050 Hz. The resulting file is 116,910 bytes and plays at its natural pitch and speed. The long quiet tail is removed.
 
-Leading and trailing silence were trimmed with 25 ms and 120 ms padding, the peak normalized to 74%, and short fades applied. The final asset is mono, 16-bit PCM, 22,050 Hz, approximately 0.42 seconds. There is no speech service, microphone access, runtime speech synthesis, or external audio request.
+The game fetches this bundled file from its own origin after the first interaction. A distinct filename prevents reuse of the former synthetic recording from a browser cache. Pop effects soften briefly while the reaction plays. Voice playback cannot overlap; hidden-page handling cancels active or pending playback. No runtime speech synthesis, microphone permission, or third-party audio requests are used.

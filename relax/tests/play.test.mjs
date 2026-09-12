@@ -112,12 +112,12 @@ test('a voice download finishing after pause never starts a stale cheer',async()
 });
 
 test('the bundled WOW is a compact, non-silent PCM clip',()=>{
-  const wav=readFileSync(new URL('../audio/wow.wav',import.meta.url));
+  const wav=readFileSync(new URL('../audio/wow-anime.wav',import.meta.url));
   assert.equal(wav.toString('ascii',0,4),'RIFF');assert.equal(wav.toString('ascii',8,12),'WAVE');
   assert.equal(wav.readUInt16LE(20),1);assert.equal(wav.readUInt16LE(22),1);
-  const seconds=wav.readUInt32LE(40)/wav.readUInt32LE(28);assert.ok(seconds>.2&&seconds<1);
+  const seconds=wav.readUInt32LE(40)/wav.readUInt32LE(28);assert.ok(seconds>1&&seconds<3);
   let peak=0;for(let i=44;i<wav.length;i+=2)peak=Math.max(peak,Math.abs(wav.readInt16LE(i)));
-  assert.ok(peak>12000&&peak<32000);assert.ok(wav.length<50000);
+  assert.ok(peak>12000&&peak<32000);assert.ok(wav.length<140000);
 });
 
 test('new cheers, score sparks, and encouragement expire without building up',()=>{

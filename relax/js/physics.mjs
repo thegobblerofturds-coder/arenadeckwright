@@ -15,10 +15,11 @@ export class BubbleWorld {
     this.reducedMotion = reducedMotion; this.bubbles = []; this.links = new Map();
     this.time = 0; this.spawnClock = 0; this.nextId = 1; this.events = [];
     this.chains=new Map();this.spawnCount=0;this.nextGolden=8+Math.floor(random()*6);
+    this.interactions=0;this.nextGiantTime=15;this.nextBossTime=40;this.cascades=[];
   }
   get maxRadius() { return Math.min(this.width * 0.43, this.height * 0.35, 230); }
   get sizeUnit() { return clamp(Math.min(this.width, this.height) / 390, 0.65, 1.65); }
-  canSplit(b) { return !!b && !b.fragment && (b.golden || b.r>=72*this.sizeUnit); }
+  canSplit(b) { return !!b && !b.fragment && b.special!=='boss' && (!b.special||b.layers===1) && (b.golden || b.r>=72*this.sizeUnit); }
   setSettings({ thickness = this.thickness, generation = this.generation } = {}) {
     if (!Number.isFinite(thickness) || !Number.isFinite(generation)) throw new TypeError('Mix settings must be numbers.');
     this.thickness = clamp(thickness, 0, 1); this.generation = clamp(generation, 0, 1);
@@ -36,6 +37,22 @@ export class BubbleWorld {
       b.points.push({ x: Math.cos(a) * r, y: Math.sin(a) * r, vx: 0, vy: 0 });
     }
     this.bubbles.push(b); return b;
+  }
+  addSpecial(kind='layered') {
+    if(this.bubbles.some(b=>b.special)||this.cascades.length)return null;
+    const boss=kind==='boss',radius=Math.min(this.maxRadius*(boss?1:.9),this.width*(boss?.42:.37));
+    const b=this.addBubble(this.width*.5,this.height*.49,radius);
+    if(!b)return null;
+    b.special=boss?'boss':'layered';b.layers=boss?7:4;b.totalLayers=b.layers;
+    b.baseRadius=b.r;b.hue=boss?.75:3.4;b.hitAge=10;b.hitAngle=-Math.PI/2;
+    b.vx=0;b.vy=0;b.wobble=.8;b.cooldown=2;
+    this.events.push({type:'arrival',special:b.special,x:b.x,y:b.y,radius:b.r});
+    return b;
+  }
+  addPaintBubble(x,y,radius,hue) {
+    const b=this.addBubble(clamp(x,12,this.width-12),clamp(y,80,this.height-12),radius);
+    if(b){b.painted=true;b.hue=hue;b.age=0;b.cooldown=3;b.vy=-5;}
+    return b;
   }
   seed() {
     const layout = [
@@ -69,21 +86,24 @@ export class BubbleWorld {
       b.x *= w / this.width; b.y *= h / this.height;
       const scale = clamp(ratio, .3, 1.5);
       b.r *= scale;
+      if(b.baseRadius)b.baseRadius*=scale;
       for (const p of b.points) { p.x *= scale; p.y *= scale; p.vx = 0; p.vy = 0; }
       b.drag = null;b.held=false;b.arrival=null;
     }
     this.width = w; this.height = h; this.links.clear();
+    for(const item of this.cascades){if(Number.isFinite(item.x))item.x=clamp(item.x,0,w);if(Number.isFinite(item.y))item.y=clamp(item.y,90,h);}
     for (const b of this.bubbles) {
       if (b.r <= this.maxRadius) continue;
       const scale = this.maxRadius / b.r; b.r = this.maxRadius;
+      if(b.baseRadius)b.baseRadius*=scale;
       for (const p of b.points) { p.x *= scale; p.y *= scale; }
     }
   }
   get(id) { return this.bubbles.find(b => b.id === id); }
   hitTest(x, y) {
-    for(const fragment of [true,false]) for (let n = this.bubbles.length - 1; n >= 0; n--) {
+    for(const kind of ['special','fragment','ordinary']) for (let n = this.bubbles.length - 1; n >= 0; n--) {
       const b = this.bubbles[n], px = x-b.x, py = y-b.y;
-      if(b.fragment!==fragment || (b.fragment&&b.age<FRAGMENT_READY_AGE))continue;
+      if((b.special?'special':b.fragment?'fragment':'ordinary')!==kind || (b.fragment&&b.age<FRAGMENT_READY_AGE))continue;
       let inside = false;
       for (let i=0,j=POINTS-1; i<POINTS; j=i++) {
         const a = b.points[i], c = b.points[j];
@@ -118,7 +138,8 @@ export class BubbleWorld {
     const across=(x-b.x)*Math.cos(b.drag.angle)+(y-b.y)*Math.sin(b.drag.angle);
     // Burst before a hard pull or a reversal can fold the membrane through itself.
     if(distance>b.r*1.95||jump>b.r*1.2||(speed>2400&&jump>Math.max(28,b.r*.5))||across<-b.r*.3) {
-      const event=this.pop(id);event.extremeDrag=true;return event;
+      const event=this.pop(id,{x,y});b.drag=null;b.held=false;
+      if(event)event.extremeDrag=true;return event;
     }
     b.drag.x=x;b.drag.y=y;return null;
   }
@@ -129,10 +150,27 @@ export class BubbleWorld {
   clearLinks(id) {
     for (const [key, l] of this.links) if (l.a === id || l.b === id) this.links.delete(key);
   }
-  pop(id) {
+  pop(id,impact={}) {
     const b = this.get(id); if (!b) return null;
-    const event = { type:this.canSplit(b)?'split':'pop', x: b.x, y: b.y, radius: b.r, hue: b.hue, golden:b.golden,fragment:b.fragment,points: b.points.map(p => ({ x: b.x+p.x, y: b.y+p.y })),snaps:[] };
+    const event = { type:this.canSplit(b)?'split':'pop',bubbleId:b.id, x: b.x, y: b.y, radius: b.r, hue: b.hue, golden:b.golden,fragment:b.fragment,special:b.special,points: b.points.map(p => ({ x: b.x+p.x, y: b.y+p.y })),snaps:[] };
+    this.interactions++;
+    if(b.special&&b.layers>1) {
+      b.layers--;b.hitAge=0;b.hitAngle=Math.atan2((impact.y??b.y-b.r*.6)-b.y,(impact.x??b.x)-b.x);
+      b.wobble=1.4;b.hue+=1.2;b.r=b.baseRadius*(.78+.22*b.layers/b.totalLayers);
+      b.drag=null;b.held=false;
+      // A broad dent and a soft rebound preserve the membrane's circular ordering.
+      for(let i=0;i<POINTS;i++) {
+        const a=i*TAU/POINTS,weight=Math.exp(-(angleDistance(a,b.hitAngle)**2)*2.8);
+        b.points[i].vx=clamp(b.points[i].vx-Math.cos(a)*b.r*weight*2.1,-b.r*1.4,b.r*1.4);
+        b.points[i].vy=clamp(b.points[i].vy-Math.sin(a)*b.r*weight*2.1,-b.r*1.4,b.r*1.4);
+      }
+      Object.assign(event,{type:'layer',layers:b.layers,totalLayers:b.totalLayers,hitAngle:b.hitAngle,membrane:event.points});
+      this.events.push(event);return event;
+    }
+    if(b.special==='boss'){event.type='boss';event.bossFinal=true;}
+    else if(b.special)event.layeredFinal=true;
     if(b.fragment) {
+      if(b.cascadePearl)event.chainStep=b.cascadeStep;
       const chain=this.chains.get(b.chainId);
       if(chain) {
         event.chainStep=chain.popped++;event.chainComplete=chain.popped===chain.total;
@@ -150,7 +188,41 @@ export class BubbleWorld {
       other.vx += dx/d*kick; other.vy += dy/d*kick; other.wobble = .9;
     }
     if(event.type==='split')event.fragmentIds=this.split(b);
+    if(event.bossFinal)this.startCascade(b);
     this.events.push(event);this.cleanChains();return event;
+  }
+  startCascade(b) {
+    // Snapshot the existing targets: new paint and future spawns never get swept into an endless loop.
+    const targets=this.bubbles.filter(other=>!other.special).map(other=>({id:other.id,x:other.x,y:other.y,d:Math.hypot(other.x-b.x,other.y-b.y)})).sort((a,c)=>a.d-c.d).slice(0,42);
+    const far=Math.hypot(this.width,this.height);
+    targets.forEach((target,i)=>this.cascades.push({kind:'target',...target,due:this.time+.24+target.d/far*1.35+i*.035}));
+    for(let wave=0;wave<3;wave++)this.cascades.push({kind:'wave',x:b.x,y:b.y,radius:b.r,wave,due:this.time+.15+wave*.55});
+    this.cascades.push({kind:'finale',x:b.x,y:b.y,radius:b.r,due:this.time+4.5});
+  }
+  stepCascade() {
+    const ready=this.cascades.filter(item=>item.due<=this.time);
+    this.cascades=this.cascades.filter(item=>item.due>this.time);
+    for(const item of ready) {
+      if(item.kind==='target') {
+        const event=this.pop(item.id);if(!event)continue;
+        event.cascade=true;
+        for(const [i,id]of (event.fragmentIds??[]).entries()) {
+          if(this.cascades.length<100)this.cascades.push({kind:'target',id,due:this.time+.3+i*.065});
+        }
+      } else if(item.kind==='wave') {
+        this.events.push({type:'cascadeWave',...item});
+        // Actual pearls fly outward and burst in sequence, even on an empty board.
+        for(let i=0;i<8;i++) {
+          const a=i*TAU/8+item.wave*.37,orbit=Math.min(this.width*.34,this.height*.22)*(1+item.wave*.12);
+          const x=clamp(item.x+Math.cos(a)*orbit,25,this.width-25),y=clamp(item.y+Math.sin(a)*orbit,105,this.height-30);
+          const pearl=this.addBubble(this.reducedMotion?x:item.x,this.reducedMotion?y:item.y,(18+i%3*4)*this.sizeUnit);
+          if(!pearl)continue;
+          pearl.fragment=true;pearl.age=0;pearl.hue=a;pearl.cascadePearl=true;pearl.cascadeStep=item.wave*4+i;
+          if(!this.reducedMotion)pearl.arrival={fromX:item.x,fromY:item.y,toX:x,toY:y,elapsed:0,duration:.38};
+          if(this.cascades.length<100)this.cascades.push({kind:'target',id:pearl.id,due:this.time+.45+i*.075});
+        }
+      } else this.events.push({type:'cascadeFinale',x:item.x,y:item.y,radius:item.radius});
+    }
   }
   split(parent) {
     const layout=chainLayout({x:parent.x,y:parent.y,radius:parent.r,width:this.width,height:this.height,unit:this.sizeUnit,golden:parent.golden,playBottom:this.playBottom??this.height-90});
@@ -177,7 +249,7 @@ export class BubbleWorld {
     for(const id of this.chains.keys())if(!live.has(id))this.chains.delete(id);
   }
   merge(a, b) {
-    if (a.drag || b.drag || a.fragment || b.fragment || a.golden || b.golden || Math.hypot(a.r,b.r) > this.maxRadius) return null;
+    if (a.drag || b.drag || a.fragment || b.fragment || a.golden || b.golden || a.special || b.special || Math.hypot(a.r,b.r) > this.maxRadius) return null;
     const aArea = a.r*a.r, bArea = b.r*b.r, area = aArea+bArea;
     const x = (a.x*aArea+b.x*bArea)/area, y = (a.y*aArea+b.y*bArea)/area;
     const dx = b.x-a.x, dy = b.y-a.y, distance = Math.hypot(dx,dy);
@@ -204,12 +276,21 @@ export class BubbleWorld {
   tick(dt) {
     const visc=this.thickness, motion=this.reducedMotion ? .3 : 1;
     this.time += dt;
+    this.stepCascade();
+    if(this.generation>0&&!this.bubbles.some(b=>b.special)&&!this.cascades.length) {
+      if(this.time>=this.nextBossTime&&this.interactions>=10) {
+        if(this.addSpecial('boss')){this.nextBossTime=this.time+70;this.nextGiantTime=this.time+35;}
+      } else if(this.time>=this.nextGiantTime) {
+        if(this.addSpecial('layered'))this.nextGiantTime=this.time+42;
+      }
+    }
     if (this.generation > 0) {
       this.spawnClock += dt * (.12+this.generation*this.generation*2.9) * (this.reducedMotion ? .5 : 1);
       if (this.spawnClock >= 1) { this.spawnClock %= 1; this.spawn(); }
     } else this.spawnClock = 0;
     for (const b of this.bubbles) {
-      b.age+=dt; b.cooldown=Math.max(0,b.cooldown-dt); b.wobble *= Math.exp(-dt*(2-visc));
+      b.age+=dt;if(b.special)b.hitAge+=dt;
+      b.cooldown=Math.max(0,b.cooldown-dt); b.wobble *= Math.exp(-dt*(2-visc));
       if(b.arrival) {
         const arrival=b.arrival;arrival.elapsed+=dt;
         const t=Math.min(1,arrival.elapsed/arrival.duration),ease=1-(1-t)**3;
@@ -218,8 +299,8 @@ export class BubbleWorld {
         if(t===1)b.arrival=null;
         this.deform(b,dt);continue;
       }
-      const targetVx=Math.sin(this.time*.3+b.phase)*lerp(16,6,visc)*motion;
-      const targetVy=-(lerp(32,14,visc)+b.r*.025)*motion;
+      const targetVx=b.special?(this.width*.5-b.x)*.4+Math.sin(this.time*.3+b.phase)*2:Math.sin(this.time*.3+b.phase)*lerp(16,6,visc)*motion;
+      const targetVy=b.special?Math.sin(this.time*.5+b.phase)*4:-(lerp(32,14,visc)+b.r*.025)*motion;
       const damping = 1-Math.exp(-dt*1.6);
       b.vx = lerp(b.vx,targetVx,damping); b.vy=lerp(b.vy,targetVy,damping);
       if (b.drag) {
@@ -230,6 +311,10 @@ export class BubbleWorld {
       if(b.x<b.r*.5) { b.x=b.r*.5; b.vx=Math.abs(b.vx)*.4; }
       if(b.x>this.width-b.r*.5) { b.x=this.width-b.r*.5; b.vx=-Math.abs(b.vx)*.4; }
       b.y=Math.min(b.y,this.height+b.r*2);
+      if(b.special) {
+        b.x=clamp(b.x,b.r*1.08,this.width-b.r*1.08);
+        b.y=clamp(b.y,Math.min(100+b.r,this.height*.5),Math.max(this.height*.5,this.height-b.r-20));
+      }
       this.deform(b,dt);
     }
     this.bubbles=this.bubbles.filter(b=>b.drag || b.y+b.r*2 > -40);this.cleanChains();
@@ -239,7 +324,7 @@ export class BubbleWorld {
   }
   deform(b,dt) {
     const visc=this.thickness, spring=lerp(60,15,visc), damping=Math.exp(-dt*lerp(6,11,visc));
-    const motion=this.reducedMotion?.3:1, newborn=b.fragment?0:Math.max(0,1-b.age/2.8);
+    const motion=this.reducedMotion?.3:1, newborn=b.fragment||b.painted?0:Math.max(0,1-b.age/2.8);
     const dx=b.drag?b.drag.x-b.x-b.drag.restX:0, dy=b.drag?b.drag.y-b.y-b.drag.restY:0;
     const restOffsets=b.points.map((p,i)=>({x:p.x-Math.cos(i*TAU/POINTS)*b.r,y:p.y-Math.sin(i*TAU/POINTS)*b.r}));
     for(let i=0;i<POINTS;i++) {
@@ -247,6 +332,11 @@ export class BubbleWorld {
       const wobble=(Math.sin(a*3+this.time*lerp(1.3,.6,visc)+b.phase)*.035+Math.sin(a*2-this.time*.7+b.phase)*(.035+b.wobble*.075))*motion;
       const oval=.035+visc*.045;
       let tx=Math.cos(a)*b.r*(1+wobble-oval), ty=Math.sin(a)*b.r*(1+wobble+oval), grip=0;
+      if(b.special) {
+        const pressure=b.held&&!b.drag?.18:Math.exp(-b.hitAge*5)*.21;
+        const dent=Math.exp(-(angleDistance(a,b.hitAngle)**2)*2.8)*pressure*b.r;
+        tx-=Math.cos(a)*dent;ty-=Math.sin(a)*dent;
+      }
       // The lower membrane trails into a thick neck during formation.
       if(newborn>0) { const neck=Math.exp(-(angleDistance(a,Math.PI/2)**2)*10); ty+=neck*b.r*.85*newborn; tx*=1-newborn*.14; }
       if(b.drag) {
@@ -274,7 +364,7 @@ export class BubbleWorld {
       let link=this.links.get(key);
       if(a.drag||b.drag||a.held||b.held||a.fragment||b.fragment) {if(link)this.links.delete(key);continue;}
       if(d>sum*1.19) {if(link)this.links.delete(key);continue;}
-      const canMerge=!a.golden&&!b.golden&&Math.hypot(a.r,b.r)<=this.maxRadius;
+      const canMerge=!a.golden&&!b.golden&&!a.special&&!b.special&&Math.hypot(a.r,b.r)<=this.maxRadius;
       if(!link && d<sum*1.01 && canMerge && !a.cooldown && !b.cooldown && !occupied.has(a.id) && !occupied.has(b.id)) {
         link={a:a.id,b:b.id,progress:0};this.links.set(key,link);occupied.add(a.id);occupied.add(b.id);
       }
@@ -287,8 +377,9 @@ export class BubbleWorld {
         if(link.progress>=1)queued.push([a,b]);
       } else if(d<sum*.94) {
         const push=Math.min((sum*.94-d)*dt*2.5,4), nx=d<.01?1:dx/d,ny=d<.01?0:dy/d;
-        a.x-=nx*push;a.y-=ny*push;b.x+=nx*push;b.y+=ny*push;
-        a.vx-=nx*dt*5;b.vx+=nx*dt*5;
+        const massA=a.special?.12:b.special?1.88:1,massB=b.special?.12:a.special?1.88:1;
+        a.x-=nx*push*massA;a.y-=ny*push*massA;b.x+=nx*push*massB;b.y+=ny*push*massB;
+        a.vx-=nx*dt*5*massA;b.vx+=nx*dt*5*massB;
       }
     }
     for(const [a,b] of queued) if(this.get(a.id)&&this.get(b.id))this.merge(a,b);

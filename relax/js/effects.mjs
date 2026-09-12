@@ -8,6 +8,7 @@ export class PopEffects {
     this.theme=theme;this.random=random;this.reducedMotion=reducedMotion;
     this.particles=[];this.bursts=[];this.snaps=[];this.shake=0;this.safeBottom=Infinity;
     this.encouragement=null;
+    this.peels=[];
   }
   encourage(text) {this.encouragement={text,age:0,duration:3.4};}
   cheer(width,height) {
@@ -19,15 +20,16 @@ export class PopEffects {
     if(this.particles.length>MAX_PARTICLES)this.particles.splice(0,this.particles.length-MAX_PARTICLES);
   }
   pop(event, width, height) {
+    if(event.type==='layer'){this.layer(event);return;}
     const {x,y,radius}=event, big=radius>=85||event.party||event.chainComplete||event.golden;
     const small=event.fragment&&!big;
-    const count=this.reducedMotion?(small?5:12):small?20:big?150:Math.round(clamp(radius,55,110));
+    const count=this.reducedMotion?(small?5:12):event.cascade?(event.fragment?18:48):small?20:big?150:Math.round(clamp(radius,55,110));
     const colors=this.theme.confetti;
-    for(const burst of this.bursts)if(event.chainComplete||(burst.small&&Math.hypot(burst.x-x,burst.y-y)<130))burst.label='';
-    this.bursts.push({x,y,radius:big?Math.max(65,radius):radius,age:0,duration:this.reducedMotion?.65:small?.85:1.6,big,small,party:!!event.party,label:event.label||'NICE!',points:event.points||0,seed:this.random()*TAU});
+    for(const burst of this.bursts)if(!burst.boss&&(event.chainComplete||(burst.small&&Math.hypot(burst.x-x,burst.y-y)<130)))burst.label='';
+    this.bursts.push({x,y,radius:big?Math.max(65,radius):radius,age:0,duration:event.bossFinal?4.5:this.reducedMotion?.65:small?.85:1.6,big,small,boss:!!event.bossFinal,party:!!event.party,label:event.cascade?'':event.label||'NICE!',points:event.points||0,seed:this.random()*TAU});
     for(const strand of event.snaps||[])this.snaps.push({...strand,age:0,duration:this.reducedMotion?.2:.36,seed:this.random()*TAU});
     if(this.snaps.length>MAX_SNAPS)this.snaps.splice(0,this.snaps.length-MAX_SNAPS);
-    if(this.bursts.length>MAX_BURSTS)this.bursts.splice(0,this.bursts.length-MAX_BURSTS);
+    while(this.bursts.length>MAX_BURSTS)this.bursts.splice(Math.max(0,this.bursts.findIndex(b=>!b.boss)),1);
     if(!this.reducedMotion)this.shake=Math.min(6,this.shake+(big?4:small?.35:radius/35));
     for(let i=0;i<count;i++) {
       const angle=this.random()*TAU, speed=(75+this.random()*280)*(big?1.3:small?.45:1);
@@ -41,7 +43,7 @@ export class PopEffects {
       });
     }
     // Big pops also send streamers up from both lower corners.
-    if(big && !this.reducedMotion)for(let side=0;side<2;side++)for(let i=0;i<24;i++) {
+    if(big && !event.cascade && !this.reducedMotion)for(let side=0;side<2;side++)for(let i=0;i<24;i++) {
       const angle=side===0?-.95+this.random()*.6:-2.2-this.random()*.6;
       const speed=270+this.random()*240;
       this.particles.push({x:side?width:0,y:height*.92,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed,age:0,life:1.6+this.random(),size:3+this.random()*6,kind:'ribbon',rotation:this.random()*TAU,spin:(this.random()-.5)*12,color:colors[i%colors.length]});
@@ -51,6 +53,21 @@ export class PopEffects {
     }
     if(this.particles.length>MAX_PARTICLES)this.particles.splice(0,this.particles.length-MAX_PARTICLES);
   }
+  layer(event) {
+    for(const burst of this.bursts)if(burst.layer)burst.label='';
+    this.peels.push({x:event.x,y:event.y,radius:event.radius,points:event.membrane,hue:event.hue,age:0,life:this.reducedMotion?.35:.78});
+    if(this.peels.length>6)this.peels.shift();
+    // Keep the center visible so the next shell stays easy to poke.
+    this.bursts.push({x:event.x,y:event.y-event.radius*.63,radius:26,age:0,duration:.7,big:false,small:true,layer:true,party:false,label:event.label,points:event.points,seed:0});
+    if(this.bursts.length>MAX_BURSTS)this.bursts.shift();
+    if(!this.reducedMotion)this.shake=Math.min(3,this.shake+1.5);
+  }
+  cascade(event,width,height) {
+    const {x,y,radius,wave}=event;
+    this.pop({x,y,radius:radius*(1+wave*.2),label:'',party:false},width,height);
+    this.bursts[this.bursts.length-1].label='';
+    this.cheer(width,height);
+  }
   step(dt) {
     dt=clamp(dt,0,.05);this.shake*=Math.exp(-dt*12);
     if(this.encouragement){this.encouragement.age+=dt;if(this.encouragement.age>=this.encouragement.duration)this.encouragement=null;}
@@ -58,6 +75,8 @@ export class PopEffects {
     this.bursts=this.bursts.filter(b=>b.age<b.duration);
     for(const s of this.snaps)s.age+=dt;
     this.snaps=this.snaps.filter(s=>s.age<s.duration);
+    for(const p of this.peels)p.age+=dt;
+    this.peels=this.peels.filter(p=>p.age<p.life);
     for(const p of this.particles) {
       p.age+=dt;p.rotation+=p.spin*dt;
       if(this.reducedMotion)continue;
@@ -72,6 +91,19 @@ export class PopEffects {
   }
   draw(ctx,width,height,time) {
     ctx.save();
+    for(const peel of this.peels) {
+      const t=peel.age/peel.life,points=peel.points;if(!points?.length)continue;
+      for(let petal=0;petal<4;petal++) {
+        const a=petal*Math.PI/2+.6,drift=this.reducedMotion?0:peel.radius*t*.24;
+        ctx.save();ctx.translate(Math.cos(a)*drift,Math.sin(a)*drift+t*t*12);
+        ctx.globalAlpha=(1-t)*.7;ctx.lineWidth=2+4*(1-t);ctx.lineCap='round';
+        ctx.strokeStyle=`hsl(${peel.hue*180/Math.PI+petal*85} 100% 82%)`;
+        const first=petal*8;ctx.beginPath();ctx.moveTo(points[first].x,points[first].y);
+        for(let i=first+1;i<first+7;i++) {const p=points[i],q=points[(i+1)%points.length];ctx.quadraticCurveTo(p.x,p.y,(p.x+q.x)/2,(p.y+q.y)/2);}
+        ctx.stroke();ctx.globalAlpha=(1-t)*.22;ctx.lineWidth=12;ctx.stroke();ctx.restore();
+      }
+    }
+    ctx.globalAlpha=1;
     for(const s of this.snaps) {
       const t=s.age/s.duration,recoil=this.reducedMotion?1:(1-t)**2;
       const dx=s.toX-s.x,dy=s.toY-s.y,d=Math.hypot(dx,dy)||1;

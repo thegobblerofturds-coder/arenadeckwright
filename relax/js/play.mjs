@@ -1,7 +1,7 @@
 export const RECOMMENDED_THICKNESS=.78;
 export const STARTING_FLOW=.4;
 export const flowForPops=pops=>STARTING_FLOW+(1-STARTING_FLOW)*(1-Math.exp(-Math.max(0,pops)/90));
-const ENCOURAGEMENT=["YOU’RE DOING GREAT!","LOOK AT YOU GO!","YOU’VE GOT THIS!","SO GOOD. KEEP GLOWING!","A LITTLE JOY, JUST FOR YOU."];
+const ENCOURAGEMENT=["YOU’RE DOING GREAT!","LOOK AT YOU GO!","YOU’RE FUCKING CRUSHING IT!","YOU’VE GOT THIS!","SO GOOD. KEEP GLOWING!","A LITTLE JOY, JUST FOR YOU."];
 
 export class PlayMoments {
   constructor({random=Math.random}={}) {
@@ -11,7 +11,7 @@ export class PlayMoments {
   pop(time,event={}) {
     this.lastPop=time;
     this.recentPops=this.recentPops.filter(t=>time-t<2.5);this.recentPops.push(time);
-    const busy=this.recentPops.length>=7||(event.chainComplete&&event.goldenChain);
+    const busy=event.bossFinal||event.layeredFinal||this.recentPops.length>=7||(event.chainComplete&&event.goldenChain);
     if(!busy||time-this.lastWow<10)return false;
     this.lastWow=time;return true;
   }

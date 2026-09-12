@@ -50,11 +50,11 @@ export class BubbleRenderer {
   bubble(b,time,focused) {
     const ctx=this.ctx,r=b.r,path=this.outline(b);
     ctx.save();ctx.translate(b.x,b.y);
-    if(b.fragment){const emergence=clamp(b.age/.24,.08,1);ctx.scale(emergence,emergence);}
+    if(b.fragment||b.painted){const emergence=clamp(b.age/(b.painted?.42:.24),.08,1);ctx.scale(emergence,emergence);}
     const spectrum=this.rainbow(0,0,r,b.hue+time*.075,b.golden);
-    if(b.golden) {
+    if(b.golden||b.special) {
       const glow=ctx.createRadialGradient(0,0,r*.7,0,0,r*1.34);
-      glow.addColorStop(0,'#ffe19700');glow.addColorStop(.6,'#ffc55e15');glow.addColorStop(1,'#ffe19700');
+      glow.addColorStop(0,'#ffe19700');glow.addColorStop(.6,b.special==='boss'?'#ff72c82e':b.special?'#9d8bff20':'#ffc55e15');glow.addColorStop(1,'#ffe19700');
       ctx.fillStyle=glow;ctx.fillRect(-r*1.4,-r*1.4,r*2.8,r*2.8);
     }
     // Transparent film, with color concentrated around the curved edge.
@@ -78,6 +78,7 @@ export class BubbleRenderer {
     ctx.strokeStyle=spectrum;ctx.globalAlpha=.08;ctx.lineWidth=17;ctx.stroke(path);
     ctx.globalAlpha=.17;ctx.lineWidth=6;ctx.stroke(path);
     ctx.restore();
+    if(b.special)this.layers(b,time,path);
     ctx.globalAlpha=.9;ctx.strokeStyle=spectrum;ctx.lineWidth=b.fragment?2:b.golden?2.4:this.theme.rimWidth;ctx.stroke(path);
     ctx.globalAlpha=.26;ctx.lineWidth=.6;ctx.stroke(this.outline(b,.963));ctx.globalAlpha=1;
     // Broken highlights follow the actual deforming membrane, including stretched necks.
@@ -97,6 +98,35 @@ export class BubbleRenderer {
       ctx.restore();
     }
     if(focused) {ctx.globalAlpha=.8;ctx.strokeStyle='#f8efff';ctx.lineWidth=1.5;ctx.setLineDash([5,6]);ctx.stroke(this.outline(b,1.09));ctx.setLineDash([]);}
+    ctx.restore();
+  }
+  layers(b,time,path) {
+    const ctx=this.ctx,r=b.r,boss=b.special==='boss';
+    ctx.save();ctx.clip(path);
+    // Nested membranes share the deformed outer surface and drift slightly inside it.
+    for(let i=b.layers-1;i>=1;i--) {
+      const scale=1-i*.11,shift=(1-scale)*r*.09;
+      ctx.save();ctx.translate(Math.sin(time*.7+i)*shift,Math.cos(time*.6+i)*shift);
+      const inner=this.outline(b,scale),color=this.rainbow(0,0,r*scale,b.hue+i*1.05-time*.08);
+      ctx.strokeStyle=color;ctx.globalAlpha=.45+i*.025;ctx.lineWidth=2.4;ctx.stroke(inner);
+      ctx.globalAlpha=.055;ctx.fillStyle=color;ctx.fill(inner);
+      ctx.globalAlpha=.13;ctx.lineWidth=9;ctx.stroke(inner);
+      ctx.globalAlpha=.42;this.highlight(b,18,23,'#fff7ff',1.4,scale*.97);
+      ctx.restore();
+    }
+    const core=ctx.createRadialGradient(-r*.05,-r*.07,0,0,0,r*.38);
+    core.addColorStop(0,boss?'#fff4b89c':'#dcffff70');core.addColorStop(.35,boss?'#ff8bce40':'#c792ff32');core.addColorStop(1,'#c792ff00');
+    ctx.globalAlpha=1;ctx.fillStyle=core;ctx.fillRect(-r,-r,r*2,r*2);
+    ctx.restore();
+    // Progress belongs on the bubble itself, keeping the score-only HUD intact.
+    ctx.save();ctx.textAlign='center';ctx.textBaseline='middle';ctx.shadowColor='#121022';ctx.shadowBlur=9;
+    ctx.font=`800 ${Math.min(18,r*.14)}px system-ui, sans-serif`;ctx.fillStyle=boss?'#fff0ba':'#fbecff';
+    ctx.fillText(boss?'BOSS BUBBLE':'SQUISH ME',0,-r*.09);
+    for(let i=0;i<b.totalLayers;i++) {
+      const x=(i-(b.totalLayers-1)/2)*Math.min(16,r*.105),filled=i<b.layers;
+      ctx.beginPath();ctx.arc(x,r*.12,filled?3.5:2.4,0,TAU);
+      ctx.globalAlpha=filled?1:.24;ctx.fillStyle=filled?(boss?'#ffedac':'#d2fffb'):'#fff';ctx.fill();
+    }
     ctx.restore();
   }
   highlight(b,from,to,color,width,scale) {
@@ -150,7 +180,7 @@ export class BubbleRenderer {
       }
     }
   }
-  draw(world,effects,focusedId=null) {
+  draw(world,effects,focusedId=null,paint=null) {
     const ctx=this.ctx;ctx.setTransform(this.dpr,0,0,this.dpr,0,0);ctx.clearRect(0,0,this.width,this.height);
     ctx.save();
     if(!world.reducedMotion && effects.shake>.1)ctx.translate(Math.sin(world.time*63)*effects.shake,Math.cos(world.time*71)*effects.shake*.65);
@@ -161,13 +191,15 @@ export class BubbleRenderer {
       ctx.beginPath();ctx.arc(x,y,i%3===0?1.5:.8,0,TAU);ctx.fill();
     }
     ctx.globalAlpha=1;
+    paint?.draw(ctx,world.reducedMotion);
     this.threads(world);
     const joined=new Set();
     for(const link of world.links.values()) {
       const a=world.get(link.a),b=world.get(link.b);
       if(a&&b) {this.bubble(this.compound(a,b,link.progress),world.time,a.id===focusedId||b.id===focusedId);joined.add(a.id);joined.add(b.id);}
     }
-    for(const fragment of [false,true])for(const b of world.bubbles)if(b.fragment===fragment&&!joined.has(b.id))this.bubble(b,world.time,b.id===focusedId);
+    for(const fragment of [false,true])for(const b of world.bubbles)if(b.fragment===fragment&&!b.special&&!joined.has(b.id))this.bubble(b,world.time,b.id===focusedId);
+    for(const b of world.bubbles)if(b.special)this.bubble(b,world.time,b.id===focusedId);
     effects.draw(ctx,this.width,this.height,world.time);
     ctx.restore();
   }

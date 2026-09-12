@@ -6,6 +6,7 @@ import {PopRewards,POINT_SCALE} from './rewards.mjs';
 import {beginGesture,moveGesture,isTap} from './gestures.mjs';
 import {rainbowSoap} from './theme.mjs';
 import {PlayMoments,flowForPops} from './play.mjs';
+import {RainbowPaint} from './paint.mjs';
 
 const $=id=>document.getElementById(id);
 const canvas=$('bubbles'),motionQuery=matchMedia('(prefers-reduced-motion: reduce)');
@@ -13,6 +14,7 @@ const world=new BubbleWorld(innerWidth,innerHeight,{reducedMotion:motionQuery.ma
 const effects=new PopEffects(rainbowSoap,{reducedMotion:motionQuery.matches});
 const feedback=new Feedback(rainbowSoap);
 const moments=new PlayMoments();
+const paint=new RainbowPaint();
 let savedBest=0;
 try{savedBest=Number(localStorage.getItem('bubble-mix.best.v2')??Number(localStorage.getItem('bubble-mix.best.v1'))*POINT_SCALE)||0;}catch{}
 const rewards=new PopRewards(savedBest);
@@ -36,8 +38,9 @@ function finishGestures() {
     if(canvas.hasPointerCapture(pointerId))canvas.releasePointerCapture(pointerId);
   }
   gestures.clear();
+  paint.finish();
 }
-function render() {renderer?.draw(world,effects,keyboardFocus?focusedId:null);}
+function render() {renderer?.draw(world,effects,keyboardFocus?focusedId:null,paint);}
 function activityChanged() {
   cancelAnimationFrame(raf);raf=0;lastTime=0;
   if(paused||document.hidden) {finishGestures();shownScore=rewards.score;$('score').textContent=format(shownScore);void feedback.suspend();render();}
@@ -64,18 +67,26 @@ function updateRewards(reward,event) {
 }
 function handleEvents() {
   for(const event of world.drainEvents()) {
-    if(event.type==='pop'||event.type==='split') {
+    if(['pop','split','layer','boss'].includes(event.type)) {
       const reward=rewards.pop(event.radius,world.time,event);
       world.generation=flowForPops(rewards.pops);
       updateRewards(reward,event);effects.pop({...event,...reward},world.width,world.height);
       feedback.pop(event.radius,clamp((event.x/world.width-.5)*1.3,-1,1),reward.party,event);
       if(moments.pop(world.time,event)){feedback.wow();effects.cheer(world.width,world.height);}
     } else if(event.type==='merge')feedback.merge(event.radius);
+    else if(event.type==='arrival') {
+      effects.encourage(event.special==='boss'?'HERE COMES THE BIG ONE!':'SO MANY LAYERS!');
+      $('status').textContent=event.special==='boss'?'Boss bubble! Tap seven times for a cascading explosion.':'Giant squish bubble! Pop its four rainbow layers.';
+    } else if(event.type==='cascadeWave') {
+      effects.cascade(event,world.width,world.height);feedback.cascade(event.wave);
+    } else if(event.type==='cascadeFinale') {
+      effects.encourage('ABSOLUTELY UNREAL!');effects.cheer(world.width,world.height);
+    }
   }
 }
-function popBubble(id) {
+function popBubble(id,impact) {
   if(paused||document.hidden)return false;
-  const event=world.pop(id);if(!event)return false;
+  const event=world.pop(id,impact);if(!event)return false;
   for(const [pointerId,g] of gestures)if(g.bubbleId===id){gestures.delete(pointerId);if(canvas.hasPointerCapture(pointerId))canvas.releasePointerCapture(pointerId);}
   handleEvents();return event;
 }
@@ -98,7 +109,9 @@ canvas.addEventListener('pointerdown',e=>{
   e.preventDefault();focusedId=b?.id??null;canvas.focus({preventScroll:true});keyboardFocus=false;
   const g=beginGesture(e.pointerId,b&&!b.fragment?b.id:null,e.offsetX,e.offsetY,performance.now());
   g.sweeping=!b||b.fragment;
-  if(b&&!b.fragment){b.held=true;world.clearLinks(b.id);}
+  g.painting=!b;
+  if(g.painting)paint.start(e.pointerId,g.x,g.y,world.sizeUnit);
+  if(b&&!b.fragment){b.held=true;world.clearLinks(b.id);if(b.special){b.hitAge=0;b.hitAngle=Math.atan2(g.y-b.y,g.x-b.x);}}
   gestures.set(e.pointerId,g);canvas.setPointerCapture(e.pointerId);
   if(g.sweeping)sweep(g.x,g.y,g.x,g.y);
 });
@@ -106,6 +119,7 @@ canvas.addEventListener('pointermove',e=>{
   const g=gestures.get(e.pointerId);if(!g)return;
   const previousX=g.x,previousY=g.y,now=performance.now(),seconds=(now-g.lastMoveTime)/1000;
   moveGesture(g,e.offsetX,e.offsetY,now);
+  if(g.painting&&g.dragging){paint.move(e.pointerId,clamp(g.x,8,world.width-8),clamp(g.y,84,world.height-12));feedback.stretch(.4);}
   if(g.dragging&&!g.sweeping)dragBubble(g,seconds);
   if(g.sweeping||g.dragging)sweep(previousX,previousY,g.x,g.y);
 });
@@ -118,9 +132,11 @@ function endPointer(e,cancelled=false) {
   if(!cancelled&&g.dragging&&!g.sweeping)dragBubble(g,seconds);
   world.endDrag(g.bubbleId);
   if(!cancelled) {
+    if(g.painting&&g.dragging)paint.move(e.pointerId,clamp(g.x,8,world.width-8),clamp(g.y,84,world.height-12));
     if(g.sweeping||g.dragging)sweep(previousX,previousY,g.x,g.y);
-    if(!g.sweeping&&isTap(g,performance.now()))popBubble(g.bubbleId);
+    if(!g.sweeping&&isTap(g,performance.now()))popBubble(g.bubbleId,{x:g.x,y:g.y});
   }
+  paint.end(e.pointerId);
   if(canvas.hasPointerCapture(e.pointerId))canvas.releasePointerCapture(e.pointerId);
 }
 canvas.addEventListener('pointerup',e=>endPointer(e));
@@ -135,7 +151,7 @@ canvas.addEventListener('keydown',e=>{
   unlockFeedback();
   keyboardFocus=true;
   if(e.key===' '||e.key==='Enter') {
-    const event=popBubble(focusedId);focusedId=event?.fragmentIds?.[0]??world.bubbles.find(b=>b.fragment)?.id??world.bubbles[0]?.id;
+    const event=popBubble(focusedId);focusedId=event?.type==='layer'?focusedId:event?.fragmentIds?.[0]??world.bubbles.find(b=>b.fragment)?.id??world.bubbles[0]?.id;
   } else {
     const index=Math.max(0,world.bubbles.findIndex(b=>b.id===focusedId));
     const direction=['ArrowLeft','ArrowUp'].includes(e.key)?-1:1;
@@ -144,18 +160,18 @@ canvas.addEventListener('keydown',e=>{
   render();
 });
 function resize() {
-  finishGestures();world.resize(innerWidth,innerHeight);renderer?.resize(innerWidth,innerHeight);updatePlayableArea();render();
+  finishGestures();paint.clear();world.resize(innerWidth,innerHeight);renderer?.resize(innerWidth,innerHeight);updatePlayableArea();render();
 }
 function updatePlayableArea() {effects.safeBottom=innerHeight-60;world.playBottom=innerHeight-24;}
 addEventListener('resize',resize);
 motionQuery.addEventListener('change',()=>{
   world.reducedMotion=motionQuery.matches;effects.reducedMotion=motionQuery.matches;
-  effects.particles=[];effects.bursts=[];effects.snaps=[];effects.shake=0;render();
+  effects.particles=[];effects.bursts=[];effects.snaps=[];effects.peels=[];effects.shake=0;render();
 });
 function frame(now) {
   if(paused||document.hidden){raf=0;return;}
   const dt=lastTime?Math.min((now-lastTime)/1000,.05):0;lastTime=now;
-  world.step(dt);handleEvents();effects.step(dt);
+  world.step(dt);paint.step(dt,world);handleEvents();effects.step(dt);
   const encouragement=moments.encourage(world.time);
   if(encouragement) {
     effects.encourage(encouragement);$('status').textContent=encouragement;
@@ -175,7 +191,8 @@ const snapshot=()=>({
   haptics:feedback.hapticAvailable&&feedback.haptics,score:rewards.score,best:rewards.best,
   pops:rewards.pops,combo:rewards.combo,voiceReady:!!feedback.wowBuffer,wows:feedback.wowCount,
   encouragement:effects.encouragement?.text??null,
-  bubbles:world.bubbles.map(b=>({id:b.id,x:Math.round(b.x),y:Math.round(b.y),radius:Math.round(b.r),golden:b.golden,splittable:world.canSplit(b),fragment:b.fragment,chainId:b.chainId??null,chainIndex:b.chainIndex??null})),
+  paintedRibbons:paint.strokes.length,cascadePending:world.cascades.length,
+  bubbles:world.bubbles.map(b=>({id:b.id,x:Math.round(b.x),y:Math.round(b.y),radius:Math.round(b.r),golden:b.golden,special:b.special??null,layers:b.layers??1,painted:!!b.painted,splittable:world.canSplit(b),fragment:b.fragment,chainId:b.chainId??null,chainIndex:b.chainIndex??null})),
 });
 if(document.modelContext?.registerTool) {
   const lifecycle=new AbortController();
@@ -191,7 +208,7 @@ if(document.modelContext?.registerTool) {
     }
     world.setSettings(input);if('paused'in input)setPaused(input.paused);render();return snapshot();
   }});
-  register({name:'pop_bubbles',description:'Burst current bubbles and collect points. Large or golden bubbles split into chains; small fragments pop. Read IDs with get_bubble_mix first.',inputSchema:{type:'object',properties:{ids:{type:'array',items:{type:'integer'},minItems:1,maxItems:30,uniqueItems:true}},required:['ids'],additionalProperties:false},annotations:{readOnlyHint:false},execute:input=>{
+  register({name:'pop_bubbles',description:'Pop a layer or burst current bubbles and collect points. Giants have four layers; bosses take seven hits and trigger a cascade. Large or golden ordinary bubbles split into chains. Read IDs with get_bubble_mix first.',inputSchema:{type:'object',properties:{ids:{type:'array',items:{type:'integer'},minItems:1,maxItems:30,uniqueItems:true}},required:['ids'],additionalProperties:false},annotations:{readOnlyHint:false},execute:input=>{
     if(!input||typeof input!=='object'||Object.keys(input).some(key=>key!=='ids')||!Array.isArray(input.ids)||input.ids.length<1||input.ids.length>30||new Set(input.ids).size!==input.ids.length||!input.ids.every(id=>Number.isInteger(id)&&world.get(id)))throw new TypeError('Choose existing bubble IDs.');
     if(paused||document.hidden)throw new Error('Resume the visible playground before popping.');
     const ids=[...input.ids].sort((a,b)=>Number(world.get(b).fragment)-Number(world.get(a).fragment));

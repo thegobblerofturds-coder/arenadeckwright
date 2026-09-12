@@ -47,7 +47,7 @@ export class Feedback {
   }
   async loadVoice() {
     try {
-      const response=await fetch(new URL('../audio/wow.wav',import.meta.url));
+      const response=await fetch(new URL('../audio/wow-anime.wav',import.meta.url));
       if(!response.ok)return;
       this.wowBuffer=await this.context.decodeAudioData(await response.arrayBuffer());
     }catch{}
@@ -74,7 +74,7 @@ export class Feedback {
   playWow() {
     if(!this.wowBuffer||!this.enabled||this.suspended||this.context?.state!=='running'||this.wowPlaying)return false;
     const ctx=this.context,now=ctx.currentTime,source=ctx.createBufferSource(),gain=ctx.createGain();
-    source.buffer=this.wowBuffer;source.playbackRate.value=1.04;gain.gain.value=.9;
+    source.buffer=this.wowBuffer;source.playbackRate.value=1;gain.gain.value=.95;
     source.connect(gain);gain.connect(this.mixBus);
     this.master.gain.cancelScheduledValues(now);
     this.master.gain.setTargetAtTime(.34,now,.035);
@@ -112,6 +112,7 @@ export class Feedback {
   }
   pop(radius, pan=0, party=false,event={}) {
     if(this.suspended)return;
+    if(event.type==='layer'){this.layer(event,pan);return;}
     this.lastPop=performance.now();
     this.vibrate(event.chainComplete?[45,25,75,30,140]:event.fragment?[16,12,28]:party?[70,25,70,25,100,40,160]:hapticPattern(radius));
     if(!this.enabled || this.context?.state!=='running')return;
@@ -139,6 +140,21 @@ export class Feedback {
       this.tone(note,note*.998,.42+i*.04,.10,i*.052+.065,'sine',clamp(pan+(i%2?.2:-.2),-1,1));
       if(radius>=85)this.tone(note*2,note*2,.18,.025,i*.052+.072,'sine',-pan);
     });
+  }
+  layer(event,pan=0) {
+    this.lastPop=performance.now();this.vibrate(event.layers===1?[45,20,70]:[24,15,38]);
+    if(!this.enabled||this.suspended||this.context?.state!=='running')return;
+    const step=event.totalLayers-event.layers,note=chainFrequency(step);
+    this.tone(140+step*28,65,.24,.55,0,'sine',pan);
+    this.tone(note,note,.36,.19,.035,'sine',pan);
+    if(event.layers===1)this.tone(note*2,note*2,.4,.1,.09,'sine',-pan);
+  }
+  cascade(wave) {
+    if(this.suspended)return;
+    this.vibrate([60,25,90,20,130]);
+    if(!this.enabled||this.context?.state!=='running')return;
+    this.tone(95+wave*20,32,.65,.8,0,'sine',0,true);
+    [523.25,659.25,783.99,1046.5].forEach((note,i)=>this.tone(note*2**(wave*.5),note*2**(wave*.5),.7,.12,i*.065,'sine',(i-1.5)*.4,true));
   }
   stretch(amount) {
     if(this.suspended)return;
