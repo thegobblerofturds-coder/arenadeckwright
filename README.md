@@ -1,17 +1,18 @@
-# TurdGobbler's Deck Name Colourifier
+# TurdGobbler's Beaver Dam
 
-A fan-made, browser-based utility for creating colourful Magic Arena deck names while respecting Arena's 64-character encoded-name limit.
+The Beaver Dam stream homepage and its colour workshop. The browser-based tools create colourful Magic Arena deck names while respecting Arena's 64-character encoded-name limit.
 
 ## Site structure
 
-- `/` is the landing page.
+- `/` is the Beaver Dam lodge homepage.
 - `/colour/` is the standard Version 6 Deck Name Colourifier.
 - `/ultimate/` is the full-featured Ultimate Version, sourced from the internal `version7` development line.
+- `/mega/` is the complete workshop with profiles, diagnostics and portable backups.
 - `/cheugs/` is an intentionally unlisted joke edition whose escape link returns to `/colour/`.
 - `/tim/` is an unlisted, no-index technical digest of SpatialAnalyzer point-cloud and colourization improvements.
 - `/relax/` is Bubble Mix: a rainbow bubble playground with viscous stretching, merging, pop points, combos, and celebrations.
 
-The `/colour/` and `/ultimate/` folders provide the two public editions. No backend or server-side code is required.
+The `/colour/`, `/ultimate/` and `/mega/` folders retain their original engines. Shared lodge presentation lives in `beaver-dam-tools.css`; shared artwork and navigation icons live in `assets/beaver-dam/`. No backend or server-side code is required.
 
 ## Privacy and safety
 
@@ -21,6 +22,8 @@ The project uses ordinary HTML, CSS and JavaScript with no external packages or 
 
 ## Publishing with GitHub Pages
 
-Upload the contents of this folder to the root of the GitHub Pages repository, preserving the `colour`, `ultimate`, and `cheugs` folders. The repository root must contain `index.html`, `site.css`, and `.nojekyll`.
+GitHub Pages publishes `main` from the repository root at `turdgobbler.com`. Preserve all existing route folders and `CNAME`. The lodge also uses `favicon.svg`, `beaver-dam-tools.css`, and `assets/beaver-dam/`.
+
+The September 2026 rebrand was checked at 1440px and 390px, including deck-name editing, clipboard exports, all three tool routes, asset loading and unchanged engine code.
 
 TurdGobbler's Deck Name Colourifier is unofficial Fan Content permitted under the Fan Content Policy. Not approved/endorsed by Wizards. Portions of the materials used are property of Wizards of the Coast. © Wizards of the Coast LLC.
