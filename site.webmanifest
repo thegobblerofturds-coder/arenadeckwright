@@ -1,11 +1,19 @@
 {
-  "name": "TurdGobbler's Digital Toys",
-  "short_name": "TurdGobbler",
+  "name": "TurdGobbler's Beaver Dam",
+  "short_name": "Beaver Dam",
   "icons": [
-    {"src": "favicon-192.png", "sizes": "192x192", "type": "image/png"},
-    {"src": "favicon-512.png", "sizes": "512x512", "type": "image/png"}
+    {
+      "src": "favicon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "favicon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
   ],
-  "theme_color": "#050505",
-  "background_color": "#050505",
+  "theme_color": "#7d1731",
+  "background_color": "#f8efd9",
   "display": "standalone"
 }

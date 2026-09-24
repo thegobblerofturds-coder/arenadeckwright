@@ -2,10 +2,18 @@
   "name": "TurdGobbler's Deck Name Colourifier V6",
   "short_name": "Colourifier V6",
   "icons": [
-    {"src": "favicon-192.png", "sizes": "192x192", "type": "image/png"},
-    {"src": "favicon-512.png", "sizes": "512x512", "type": "image/png"}
+    {
+      "src": "favicon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "favicon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
   ],
-  "theme_color": "#05080c",
-  "background_color": "#020305",
+  "theme_color": "#7d1731",
+  "background_color": "#1d100c",
   "display": "standalone"
 }

@@ -1,11 +1,19 @@
 {
-  "name": "TurdGobbler's Deck Name Colourifier — Ultimate Version",
+  "name": "TurdGobbler's Deck Name Colourifier \u00e2\u20ac\u201d Ultimate Version",
   "short_name": "Colourifier Ultimate",
   "icons": [
-    {"src": "favicon-192.png", "sizes": "192x192", "type": "image/png"},
-    {"src": "favicon-512.png", "sizes": "512x512", "type": "image/png"}
+    {
+      "src": "favicon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "favicon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
   ],
-  "theme_color": "#05080c",
-  "background_color": "#020305",
+  "theme_color": "#7d1731",
+  "background_color": "#1d100c",
   "display": "standalone"
 }
