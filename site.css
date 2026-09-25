@@ -29,3 +29,39 @@
 @media(forced-colors:active){.featured h3,.featured .tool-action>span,.sample-name>span{background:none;color:LinkText}}
 
 .featured h3{width:fit-content;max-width:100%}
+
+/* Two working signs inhabit the empty lodge wall. */
+.site-header{padding-block:19px}
+nav .nav-colour{color:#782d65;text-decoration:underline;text-decoration-color:#b887c4;text-underline-offset:5px}
+@supports(background-clip:text){nav .nav-colour{background:linear-gradient(95deg,#a52b4e,#9c4b0c,#677016,#17764e,#226aac,#804c9e);background-clip:text;-webkit-background-clip:text;color:transparent}}
+.lodge-hero{display:block;min-height:0;background:#4a1425;overflow:visible}
+.lodge-intro{display:flex;align-items:center;justify-content:space-between;gap:30px;padding:25px 46px 29px;max-width:1408px;margin:auto}
+.lodge-intro .eyebrow{font-size:9px;color:#eec7a4;margin-bottom:8px}
+.lodge-intro h1{font-size:clamp(30px,3.2vw,48px);letter-spacing:-.035em;margin:0;line-height:1.1}
+.lodge-intro>p{font-size:13px;line-height:1.7;color:#f2ceb3;margin:0}
+.lodge-hero .hero-room{width:100%;height:auto;aspect-ratio:1672/941;min-height:470px;overflow:hidden;isolation:isolate}
+.lodge-hero .hero-room>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center}
+.room-tools{position:absolute;left:33.5%;top:23%;width:28.5%;display:grid;gap:clamp(13px,1.6vw,25px)}
+.room-sign{position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;text-decoration:none;border:6px solid #754625;border-radius:9px;padding:clamp(12px,1.2vw,20px);color:#fff3d9;box-shadow:0 0 0 2px #2d180f,inset 0 0 0 1px #ca9b58,0 8px 0 #32170dbb,0 13px 22px #19081188;transition:transform .22s,box-shadow .22s;transform:rotate(-1deg);transform-origin:center top}
+.room-sign:before,.room-sign:after{content:'';position:absolute;top:7px;width:7px;height:7px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff1b5,#b78640 65%,#4c2c19 70%);box-shadow:0 1px 2px #0009}
+.room-sign:before{left:7px}.room-sign:after{right:7px}
+.room-sign:hover,.room-sign:focus-visible{transform:rotate(0) translateY(-4px);box-shadow:0 0 0 2px #eac071,inset 0 0 0 1px #ffd88c,0 10px 0 #32170dbb,0 18px 25px #19081188;outline:3px solid #9df3e7;outline-offset:5px}
+.colour-sign{background:radial-gradient(ellipse at top,#352642,#0f1323 80%)}
+.room-sign strong{font:700 clamp(28px,3.2vw,51px)/1.1 Georgia,serif;letter-spacing:-.04em;margin:7px 0 8px}
+.sign-kicker{font-size:clamp(7px,.63vw,10px);font-weight:800;letter-spacing:.12em;line-height:1.5;color:#d5c2ac}
+.sign-sample{font:800 clamp(12px,1.2vw,19px)/1.2 'Segoe UI',sans-serif;letter-spacing:.08em;margin:2px 0 9px}
+.sign-description{font-size:clamp(10px,.86vw,14px);line-height:1.5;color:#e0d7da}
+.sign-action{display:flex;justify-content:space-between;align-items:center;gap:15px;align-self:stretch;border-top:1px solid #ffffff26;margin-top:12px;padding-top:9px;font-size:clamp(10px,.8vw,13px);font-weight:700;color:#dcecea}
+.sign-action b{font-size:20px;line-height:1}
+.ultimate-sign{transform:rotate(.8deg);background:linear-gradient(145deg,#194b48,#143534);border-color:#86603a}
+.ultimate-sign strong{color:#ffe4a2;font-size:clamp(27px,2.8vw,45px)}
+.ultimate-sign .sign-description{color:#d0e6de}
+.bench-light{display:inline-block;width:7px;height:7px;background:#a2f9d2;border-radius:50%;margin-right:5px;box-shadow:0 0 9px #8affc6}
+.ultimate-sign:hover .bench-light,.ultimate-sign:focus-visible .bench-light{box-shadow:0 0 16px 3px #8affc6}
+.lodge-hero .hero-room figcaption{padding:27px 32px 21px;align-items:center;gap:16px}
+.hero-room figcaption a{font-size:12px;letter-spacing:0;text-underline-offset:4px;line-height:1.5}
+@supports(background-clip:text){.colour-sign strong,.sign-sample{background:linear-gradient(105deg,#ff95b2,#ffc08b 20%,#fff197 38%,#9ff3bd 54%,#80ddff 72%,#c3acff 87%,#f8a5ed);background-size:140% 100%;background-clip:text;-webkit-background-clip:text;color:transparent;transition:background-position .4s}.colour-sign:hover strong,.colour-sign:focus-visible strong,.colour-sign:hover .sign-sample{background-position:100% 0}}
+@media(max-width:1050px){.lodge-intro{padding:23px 28px}.room-tools{top:21%;left:32%;width:31%}.room-sign{padding:13px}.sign-action{margin-top:8px;padding-top:7px}.sign-description{font-size:11px}.sign-kicker{font-size:8px}}
+@media(max-width:760px){.site-header{padding:17px 20px;gap:18px}.site-header nav{gap:17px}.site-header nav a:first-child{display:inline}.site-header nav a:last-child{display:none}.lodge-intro{display:block;padding:23px 23px 25px}.lodge-intro h1{font-size:34px}.lodge-intro>p{margin-top:12px;font-size:12px}.lodge-hero .hero-room{height:570px;aspect-ratio:auto;min-height:0}.lodge-hero .hero-room>img{object-position:49% center;opacity:.92}.room-tools{width:min(76%,330px);left:50%;top:115px;transform:translateX(-50%);gap:22px}.room-sign{padding:16px 18px}.room-sign strong{font-size:35px}.ultimate-sign strong{font-size:32px}.sign-sample{font-size:14px}.sign-description{font-size:12px}.sign-action{font-size:12px}.sign-kicker{font-size:8px}.lodge-hero .hero-room figcaption{padding:22px 20px;flex-direction:column;gap:8px;font-size:8px}.hero-room figcaption a{font-size:12px}}
+@media(prefers-reduced-motion:reduce){.room-sign,.colour-sign strong,.sign-sample{transition:none}.room-sign:hover,.room-sign:focus-visible{transform:none}}
+@media(forced-colors:active){.colour-sign strong,.sign-sample{background:none;color:LinkText}.room-sign{border-color:LinkText}}
