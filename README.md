@@ -5,14 +5,17 @@ The Beaver Dam stream homepage and its colour workshop. The browser-based tools 
 ## Site structure
 
 - `/` is the Beaver Dam lodge homepage.
-- `/colour/` is the standard Version 6 Deck Name Colourifier.
+- `/colour/` is the standard Version 6 Deck Name Colourifier, with its original prismatic appearance.
 - `/ultimate/` is the full-featured Ultimate Version, sourced from the internal `version7` development line.
-- `/mega/` is the complete workshop with profiles, diagnostics and portable backups.
-- `/cheugs/` is an intentionally unlisted joke edition whose escape link returns to `/colour/`.
-- `/tim/` is an unlisted, no-index technical digest of SpatialAnalyzer point-cloud and colourization improvements.
+- `/mega/` is the complete workshop with profiles, diagnostics and portable backups, discoverable through the quiet footer directory rather than the homepage cards.
+- `/tools/` is the complete directory, linked only from a small homepage footer link and marked noindex/nofollow.
+- `/metal/` and `/goblin/` are alternate deck-name workshops.
+- `/thou/` is the Thousandths Trainer; `/thou/certificate/` is its companion certificate page.
+- `/cheugs/` is a tucked-away joke edition whose escape link returns to `/colour/`.
+- `/tim/` is a no-index technical digest in the quiet directory of SpatialAnalyzer point-cloud and colourization improvements.
 - `/relax/` is Bubble Mix: a rainbow bubble playground with viscous stretching, merging, pop points, combos, and celebrations.
 
-The `/colour/`, `/ultimate/` and `/mega/` folders retain their original engines. Shared lodge presentation lives in `beaver-dam-tools.css`; shared artwork and navigation icons live in `assets/beaver-dam/`. No backend or server-side code is required.
+The `/colour/`, `/ultimate/` and `/mega/` folders retain their original engines. Ultimate and MEGA use the lodge presentation in `beaver-dam-tools.css`; Colourifier retains its original `styles.css` with only a navigation link styled in `colour/home-link.css`; shared artwork and navigation icons live in `assets/beaver-dam/`. No backend or server-side code is required.
 
 ## Privacy and safety
 
